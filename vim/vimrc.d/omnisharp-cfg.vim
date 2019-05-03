@@ -84,9 +84,6 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 " Enable snippet completion
 let g:OmniSharp_want_snippet=1
 
-" Enable mono
-let g:OmniSharp_server_use_mono = 1
-
 " Omnisharp Code Actions Flag
 set updatetime=500
 
