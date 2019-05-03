@@ -86,3 +86,22 @@ let g:OmniSharp_want_snippet=1
 
 " Enable mono
 let g:OmniSharp_server_use_mono = 1
+
+" Omnisharp Code Actions Flag
+set updatetime=500
+
+sign define OmniSharpCodeActions text=💡
+
+augroup OSCountCodeActions
+  autocmd!
+  autocmd FileType cs set signcolumn=yes
+  autocmd CursorHold *.cs call OSCountCodeActions()
+augroup END
+
+function! OSCountCodeActions() abort
+  if OmniSharp#CountCodeActions({-> execute('sign unplace 99')})
+    let l = getpos('.')[1]
+    let f = expand('%:p')
+    execute ':sign place 99 line='.l.' name=OmniSharpCodeActions file='.f
+  endif
+endfunction
