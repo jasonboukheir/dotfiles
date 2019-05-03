@@ -8,3 +8,6 @@ map <C-p> :NERDTreeToggle<CR>
 " Close NERDTree automatically if it's the only window left open:
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
+" NERDTree ignore wildcards:
+let NERDTreeRespectWildIgnore = 1
+
