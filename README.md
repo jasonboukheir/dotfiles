@@ -1,6 +1,6 @@
 # dotfiles
 Clone this repository:
-`$ git clone https://gitlab.com/jasonboukheir/dotfiles.git ~/dotfiles`
+`$ git clone --recurse-submodules https://gitlab.com/jasonboukheir/dotfiles.git ~/dotfiles`
 
 Install zsh:
 ```
