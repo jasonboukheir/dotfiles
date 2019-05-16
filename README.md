@@ -1,6 +1,12 @@
 # dotfiles
 Clone this repository:
-`$ git clone https://gitlab.com/jasonboukheir/dotfiles.git`
+`$ git clone https://gitlab.com/jasonboukheir/dotfiles.git ~/dotfiles`
+
+Install zsh:
+```
+$ sudo apt install zsh
+$ chsh -s $(which zsh)
+```
 
 Install bashdot:
 ```
