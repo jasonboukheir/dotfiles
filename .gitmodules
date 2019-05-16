@@ -16,3 +16,6 @@
 [submodule "vim/pack/interface/start/VimCompletesMe"]
 	path = vim/pack/interface/start/VimCompletesMe
 	url = git://github.com/ajh17/VimCompletesMe.git
+[submodule "zsh_custom/themes/powerlevel10k"]
+	path = zsh_custom/themes/powerlevel10k
+	url = https://github.com/romkatv/powerlevel10k.git
