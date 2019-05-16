@@ -15,9 +15,6 @@ set backupdir=/tmp//
 set directory=/tmp//
 set undodir=/tmp//
 
-" Remove preview window
-set completeopt-=preview
-
 " Source all files in rc directory:
 for f in split(glob('~/.vim/vimrc.d/*.vim'), '\n')
 	exe 'source' f
