@@ -6,6 +6,6 @@ set autoindent
 
 :if !exists("autocommands_loaded")
 :  let autocommands_loaded = 1
-:  au BufWriteCmd *.cs :OmniSharpCodeFormat
+:  au BufWritePre *.cs :OmniSharpCodeFormat
 :endif
 
