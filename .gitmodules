@@ -19,3 +19,6 @@
 [submodule "zsh_custom/themes/powerlevel10k"]
 	path = zsh_custom/themes/powerlevel10k
 	url = https://github.com/romkatv/powerlevel10k.git
+[submodule "vim/pack/kotlin/start/kotlin-vim"]
+	path = vim/pack/kotlin/start/kotlin-vim
+	url = https://github.com/udalov/kotlin-vim.git
