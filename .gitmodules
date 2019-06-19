@@ -22,3 +22,12 @@
 [submodule "vim/pack/kotlin/start/kotlin-vim"]
 	path = vim/pack/kotlin/start/kotlin-vim
 	url = https://github.com/udalov/kotlin-vim.git
+[submodule "vim/pack/interface/start/ctrlp"]
+	path = vim/pack/interface/start/ctrlp
+	url = https://github.com/ctrlpvim/ctrlp.vim.git
+[submodule "vim/pack/python/start/vim-virtualenv"]
+	path = vim/pack/python/start/vim-virtualenv
+	url = https://github.com/plytophogy/vim-virtualenv.git
+[submodule "vim/pack/interface/start/vim-airline"]
+	path = vim/pack/interface/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
