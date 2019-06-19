@@ -31,3 +31,6 @@
 [submodule "vim/pack/interface/start/vim-airline"]
 	path = vim/pack/interface/start/vim-airline
 	url = https://github.com/vim-airline/vim-airline.git
+[submodule "vim/pack/interface/start/vim-multiple-cursors"]
+	path = vim/pack/interface/start/vim-multiple-cursors
+	url = https://github.com/terryma/vim-multiple-cursors.git
