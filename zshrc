@@ -94,3 +94,8 @@ source $ZSH/oh-my-zsh.sh
 
 # virtual env enabled in powerlevel10k
 export POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history time virtualenv)
+
+# fix terminal in tilix
+if [[ $TILIX_ID ]]; then
+        source /etc/profile.d/vte.sh
+fi
