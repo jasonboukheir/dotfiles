@@ -4,8 +4,10 @@ filetype plugin on
 " Set the type lookup function to use the preview window instead of echoing it
 "let g:OmniSharp_typeLookupInPreview = 1
 
+" Installs the stdio async server instead of http
 let g:OmniSharp_server_stdio = 1
 
+" Use mono for omnisharp instead of default install
 let g:OmniSharp_server_use_mono = 1
 
 " Timeout in seconds to wait for a response from the server
