@@ -99,3 +99,6 @@ export POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history time virtualenv)
 if [[ $TILIX_ID ]]; then
         source /etc/profile.d/vte.sh
 fi
+
+# set vim as default git editor
+export GIT_EDITOR=vim

@@ -25,6 +25,3 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
-
-# Set vim as default git editor
-export GIT_EDITOR=vim
