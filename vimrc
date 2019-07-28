@@ -1,6 +1,9 @@
 " Enable syntax highlighting
 syntax enable
 
+" Enable ftplugin
+filetype plugin on
+
 " Set encoding
 set encoding=utf8
 
