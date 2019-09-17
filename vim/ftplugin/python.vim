@@ -7,4 +7,5 @@ setlocal autoindent
 setlocal fileformat=unix
 
 let b:ale_fixers = ['yapf']
-let b:ale_linters = ['pyls']
+let b:ale_linters = ['pyls', 'pylint']
+let b:ale_python_pylint_options = '--load-plugins pylint_django'

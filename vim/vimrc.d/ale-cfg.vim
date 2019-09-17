@@ -1,5 +1,6 @@
 let g:ale_python_pyls_use_global = 1
 let g:ale_python_yapf_use_global = 1
+let g:ale_python_pylint_executable = 'python $(which pylint)'
 
 let g:ale_completion_enabled = 1
 let g:ale_completion_delay = 100
