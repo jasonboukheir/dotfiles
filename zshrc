@@ -102,3 +102,9 @@ fi
 
 # set vim as default git editor
 export GIT_EDITOR=vim
+
+# if running wsl and wslrc
+if [ -f "$HOME/.wslrc" ] ; then
+    . "$HOME/.wslrc"
+    . "$HOME/.profile"
+fi
