@@ -25,3 +25,8 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+# if running wsl and wslrc
+if [ -f "$HOME/.wslrc" ] ; then
+    . "$HOME/.wslrc"
+fi
