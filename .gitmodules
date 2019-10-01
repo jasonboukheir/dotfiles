@@ -34,3 +34,6 @@
 [submodule "vim/pack/interface/start/vim-multiple-cursors"]
 	path = vim/pack/interface/start/vim-multiple-cursors
 	url = https://github.com/terryma/vim-multiple-cursors.git
+[submodule "vim/pack/elm/start/elm-vim"]
+	path = vim/pack/elm/start/elm-vim
+	url = https://github.com/ElmCast/elm-vim.git
