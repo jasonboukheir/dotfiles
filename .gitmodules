@@ -37,3 +37,6 @@
 [submodule "vim/pack/elm/start/elm-vim"]
 	path = vim/pack/elm/start/elm-vim
 	url = https://github.com/ElmCast/elm-vim.git
+[submodule "emacs.d"]
+	path = emacs.d
+	url = https://github.com/hlissner/doom-emacs
