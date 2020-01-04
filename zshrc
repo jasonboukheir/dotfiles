@@ -94,6 +94,9 @@ source $ZSH/oh-my-zsh.sh
 
 # virtual env enabled in powerlevel10k
 export POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history time virtualenv)
+export POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+export POWERLEVEL9K_SHORTEN_DELIMITER=""
+export POWERLEVEL9K_SHORTEN_STRATEGY="truncate_from_right"
 
 # fix terminal in tilix
 if [[ $TILIX_ID ]]; then
