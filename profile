@@ -30,6 +30,6 @@ fi
 export GIT_EDITOR=vim
 
 # fix terminal in tilix
-if [[ $TILIX_ID ]]; then
+if ! [ -z ${TILIX_ID+x} ]; then
     source /etc/profile.d/vte.sh
 fi
