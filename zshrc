@@ -1,3 +1,9 @@
+# if running wsl and wslrc
+if [ -f "$HOME/.wslrc" ] ; then
+    . "$HOME/.wslrc"
+    . "$HOME/.profile"
+fi
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -97,17 +103,3 @@ export POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history time virtualenv)
 export POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
 export POWERLEVEL9K_SHORTEN_DELIMITER=""
 export POWERLEVEL9K_SHORTEN_STRATEGY="truncate_from_right"
-
-# fix terminal in tilix
-if [[ $TILIX_ID ]]; then
-        source /etc/profile.d/vte.sh
-fi
-
-# set vim as default git editor
-export GIT_EDITOR=vim
-
-# if running wsl and wslrc
-if [ -f "$HOME/.wslrc" ] ; then
-    . "$HOME/.wslrc"
-    . "$HOME/.profile"
-fi

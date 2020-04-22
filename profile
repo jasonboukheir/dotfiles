@@ -26,3 +26,10 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# set vim as default git editor
+export GIT_EDITOR=vim
+
+# fix terminal in tilix
+if [[ $TILIX_ID ]]; then
+    source /etc/profile.d/vte.sh
+fi
