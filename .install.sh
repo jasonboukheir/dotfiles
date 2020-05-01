@@ -9,6 +9,3 @@ if [ ! -f /usr/local/bin/bashdot ]; then
 	sudo mv bashdot /usr/local/bin
 	sudo chmod a+x /usr/local/bin/bashdot
 fi
-
-# powerlevel 10k
-git clone https://github.com/romkatv/powerlevel10k.git oh-my-zsh/custom/themes/powerlevel10k
