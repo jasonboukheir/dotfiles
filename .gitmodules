@@ -43,3 +43,6 @@
 [submodule "asdf"]
 	path = asdf
 	url = https://github.com/asdf-vm/asdf.git
+[submodule "themes/materia-theme"]
+	path = themes/materia-theme
+	url = https://github.com/nana-4/materia-theme.git
