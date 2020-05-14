@@ -26,5 +26,5 @@ export GIT_EDITOR=vim
 
 # fix terminal in tilix
 if ! [ -z ${TILIX_ID+x} ]; then
-    source /etc/profile.d/vte.sh
+    source /etc/profile.d/vte.csh
 fi
