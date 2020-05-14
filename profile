@@ -32,4 +32,4 @@ export GIT_EDITOR=vim
 if ! [ -z ${TILIX_ID+x} ]; then
     source /etc/profile.d/vte.csh
 fi
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+

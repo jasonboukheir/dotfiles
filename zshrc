@@ -109,3 +109,4 @@ source $ZSH/oh-my-zsh.sh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 export PIPENV_VENV_IN_PROJECT=1
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
