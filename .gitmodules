@@ -46,3 +46,6 @@
 [submodule "themes/materia-theme"]
 	path = themes/materia-theme
 	url = https://github.com/nana-4/materia-theme.git
+[submodule "vim/pack/interface/start/vim-toml"]
+	path = vim/pack/interface/start/vim-toml
+	url = https://github.com/cespare/vim-toml
