@@ -5,8 +5,6 @@ let g:ale_python_pylint_executable = 'python $(which pylint)'
 let g:ale_rust_cargo_check_tests = 1
 let g:ale_rust_cargo_check_examples = 1
 
-let g:ale_completion_enabled = 1
-let g:ale_completion_delay = 100
 let g:ale_completion_max_suggestions = 50
 
 let g:ale_fixers = {
