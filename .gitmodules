@@ -55,3 +55,6 @@
 [submodule "vim/pack/control/start/quickfix-reflector"]
 	path = vim/pack/control/start/quickfix-reflector
 	url = https://github.com/stefandtw/quickfix-reflector.vim.git
+[submodule "vim/pack/interface/start/coc"]
+	path = vim/pack/interface/start/coc
+	url = https://github.com/neoclide/coc.nvim.git
