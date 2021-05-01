@@ -49,3 +49,6 @@
 [submodule "vim/pack/interface/start/vim-toml"]
 	path = vim/pack/interface/start/vim-toml
 	url = https://github.com/cespare/vim-toml
+[submodule "vim/pack/control/start/vim-ripgrep"]
+	path = vim/pack/control/start/vim-ripgrep
+	url = https://github.com/jremmen/vim-ripgrep.git
