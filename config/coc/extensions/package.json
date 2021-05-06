@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "coc-elixir": ">=0.6.4"
+  }
+}

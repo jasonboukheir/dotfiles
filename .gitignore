@@ -1,0 +1,5 @@
+config/*
+
+!config/coc
+
+**/node_modules/*
