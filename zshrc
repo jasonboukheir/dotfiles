@@ -5,9 +5,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# if running wsl and wslrc
-if [ -f "$HOME/.wslrc" ] ; then
-    . "$HOME/.wslrc"
+if [ -n ${WSL_DISTRO_NAME+x} ]; then
     . "$HOME/.profile"
 fi
 
