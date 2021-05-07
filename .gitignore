@@ -3,4 +3,6 @@ config/*
 !config/coc
 config/coc/list-extensions-history.json
 
+!config/nvim
+
 **/node_modules/*
