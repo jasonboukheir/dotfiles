@@ -8,4 +8,4 @@ cd "$HOME"
 
 echo "Init submodules"
 yadm submodule update --recursive --init
-cd -
+cd - > /dev/null
