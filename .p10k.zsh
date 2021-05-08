@@ -1,1 +1,0 @@
-/home/jasonbk/dotfiles/p10k.zsh
