@@ -34,3 +34,6 @@
 [submodule ".vim/pack/interface/start/coc"]
 	path = .vim/pack/interface/start/coc
 	url = https://github.com/neoclide/coc.nvim.git
+[submodule ".vim/pack/interface/start/lightline"]
+	path = .vim/pack/interface/start/lightline
+	url = https://github.com/itchyny/lightline.vim.git
