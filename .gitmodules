@@ -1,0 +1,36 @@
+[submodule ".oh-my-zsh"]
+	path = .oh-my-zsh
+	url = https://github.com/robbyrussell/oh-my-zsh.git
+[submodule ".vim/pack/interface/start/nord-vim"]
+	path = .vim/pack/interface/start/nord-vim
+	url = https://github.com/arcticicestudio/nord-vim.git
+[submodule ".vim/pack/interface/start/ale"]
+	path = .vim/pack/interface/start/ale
+	url = https://github.com/dense-analysis/ale.git
+[submodule ".vim/pack/interface/start/nerdtree"]
+	path = .vim/pack/interface/start/nerdtree
+	url = https://github.com/scrooloose/nerdtree.git
+[submodule ".zsh_custom/themes/powerlevel10k"]
+	path = .zsh_custom/themes/powerlevel10k
+	url = https://github.com/romkatv/powerlevel10k.git
+[submodule ".vim/pack/interface/start/vim-airline"]
+	path = .vim/pack/interface/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule ".asdf"]
+	path = .asdf
+	url = https://github.com/asdf-vm/asdf.git
+[submodule ".themes/materia-theme"]
+	path = .themes/materia-theme
+	url = https://github.com/nana-4/materia-theme.git
+[submodule ".vim/pack/toml/start/vim-toml"]
+	path = .vim/pack/toml/start/vim-toml
+	url = https://github.com/cespare/vim-toml
+[submodule ".vim/pack/control/start/vim-ripgrep"]
+	path = .vim/pack/control/start/vim-ripgrep
+	url = https://github.com/jremmen/vim-ripgrep.git
+[submodule ".vim/pack/control/start/quickfix-reflector"]
+	path = .vim/pack/control/start/quickfix-reflector
+	url = https://github.com/stefandtw/quickfix-reflector.vim.git
+[submodule ".vim/pack/interface/start/coc"]
+	path = .vim/pack/interface/start/coc
+	url = https://github.com/neoclide/coc.nvim.git
