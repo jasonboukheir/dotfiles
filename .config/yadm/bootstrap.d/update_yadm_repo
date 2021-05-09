@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Setting remote to git@github.com:jasonboukheir/dotfiles.git"
+yadm remote set-url origin "git@github.com:jasonboukheir/dotfiles.git"

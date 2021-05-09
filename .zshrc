@@ -106,8 +106,3 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-export PIPENV_VENV_IN_PROJECT=1
-
-if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] ; then
-  eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-fi

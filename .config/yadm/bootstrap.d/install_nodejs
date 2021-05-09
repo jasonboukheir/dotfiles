@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "-----------------"
+    echo "Installing nodejs"
+    echo "-----------------"
+    if [ "$(uname -s)" == "Darwin" ]; then
+        brew install gpg
+        brew install gawk
+    fi
+    if command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get install dirmngr gpg curl gawk
+    fi
+    . $HOME/.asdf/asdf.sh
+    asdf plugin-add nodejs
+    asdf install nodejs lts
+fi

@@ -33,3 +33,11 @@ if ! [ -z ${TILIX_ID+x} ]; then
     source /etc/profile.d/vte.csh
 fi
 
+# Settings for pipenv
+export PIPENV_VENV_IN_PROJECT=1
+
+# Set linuxbrew on path
+if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] ; then
+  eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+fi
+
