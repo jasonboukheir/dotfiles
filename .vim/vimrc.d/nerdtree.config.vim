@@ -17,4 +17,3 @@ let NERDTreeDirArrows = 1
 
 " Automatically delete buffer when deleting file
 let NERDTreeAutoDeleteBuffer = 1
-
