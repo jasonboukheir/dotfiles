@@ -106,3 +106,11 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Make sure windows terminal can duplicate tabs
+__wt_osc9_9 () {
+  _win_path=$(wslpath -m "$(pwd)")
+  printf "\033]9;9;\"%s\"\033\\" "$_win_path"
+}
+
+[ -n "$BASH_VERSION" ] && [ -n "$WT_SESSION" ] && PROMPT_COMMAND="__wt_osc9_9"
+[ -n "$ZSH_VERSION"  ] && [ -n "$WT_SESSION" ] && precmd_functions+=(__wt_osc9_9)
