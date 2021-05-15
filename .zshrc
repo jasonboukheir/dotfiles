@@ -73,7 +73,17 @@ ZSH_CUSTOM=~/.zsh_custom
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git virtualenv asdf)
+plugins=(
+    asdf
+    cargo
+    docker
+    gh
+    git
+    mix
+    npm
+    rustup
+    virtualenv
+)
 
 source $ZSH/oh-my-zsh.sh
 
