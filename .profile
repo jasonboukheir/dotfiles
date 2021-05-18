@@ -40,3 +40,6 @@ export PIPENV_VENV_IN_PROJECT=1
 if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] ; then
   eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 fi
+
+# Fix GPG
+export GPG_TTY=$(tty)
