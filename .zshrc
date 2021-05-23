@@ -124,3 +124,6 @@ __wt_osc9_9 () {
 
 [ -n "$BASH_VERSION" ] && [ -n "$WT_SESSION" ] && PROMPT_COMMAND="__wt_osc9_9"
 [ -n "$ZSH_VERSION"  ] && [ -n "$WT_SESSION" ] && precmd_functions+=(__wt_osc9_9)
+
+# Fix GPG
+export GPG_TTY=$(tty)
