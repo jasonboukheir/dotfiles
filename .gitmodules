@@ -43,3 +43,6 @@
 [submodule ".vim/pack/interface/start/ctrlp"]
 	path = .vim/pack/interface/start/ctrlp
 	url = https://github.com/ctrlpvim/ctrlp.vim.git
+[submodule ".vim/pack/interface/start/nvim-lspconfig"]
+	path = .vim/pack/interface/start/nvim-lspconfig
+	url = https://github.com/neovim/nvim-lspconfig.git

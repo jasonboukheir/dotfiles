@@ -1,5 +1,6 @@
 {
     "diagnostic.displayByAle": true,
+    "elixirLS.dialyzerEnabled": false,
     "languageserver": {
         "haskell": {
             "command": "haskell-language-server-wrapper",
