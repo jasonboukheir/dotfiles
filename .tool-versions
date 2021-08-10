@@ -2,6 +2,5 @@ haskell 8.10-latest
 nodejs lts
 elixir 1.12.1-otp-24
 erlang 24.0
-
 rust stable
 python 3.9.6

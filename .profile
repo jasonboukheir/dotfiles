@@ -30,7 +30,7 @@ do
 done
 
 # set vim as default git editor
-export GIT_EDITOR=vim
+export GIT_EDITOR=nvim
 
 # fix terminal in tilix
 if ! [ -z ${TILIX_ID+x} ]; then
