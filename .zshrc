@@ -5,7 +5,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-if [ -n ${WSL_DISTRO_NAME+x} ]; then
+if [ -n ${WSL_DISTRO_NAME+x} ] || [ "$(uname)" == "Darwin" ]; then
     . "$HOME/.profile"
 fi
 

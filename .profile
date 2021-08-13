@@ -22,10 +22,10 @@ optional_paths="${optional_paths} $HOME/.bin"
 optional_paths="${optional_paths} $HOME/.local/bin"
 optional_paths="${optional_paths} $HOME/.dotnet/tools"
 
-for optional_path in "${optional_paths[@]}"
+for optional_path in ${=optional_paths}
 do
     if [ -d "$optional_path" ] ; then
-        PATH="$optional_path:$PATH"
+        export PATH="$optional_path:$PATH"
     fi
 done
 
