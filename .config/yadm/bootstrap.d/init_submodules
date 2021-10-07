@@ -7,7 +7,7 @@
 cd "$HOME"
 
 echo "-----------------------"
-echo "Initializing submodules"
+echo "Initializing Submodules"
 echo "-----------------------"
 yadm submodule update --recursive --init
 cd - > /dev/null
