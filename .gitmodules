@@ -22,10 +22,6 @@
 [submodule ".themes/materia-theme"]
     path = .themes/materia-theme
     url = https://github.com/nana-4/materia-theme.git
-[submodule ".vim/pack/control/start/vim-ripgrep"]
-    path = .vim/pack/control/start/vim-ripgrep
-    url = https://github.com/jremmen/vim-ripgrep.git
-    branch = master
 [submodule ".vim/pack/control/start/quickfix-reflector"]
     path = .vim/pack/control/start/quickfix-reflector
     url = https://github.com/stefandtw/quickfix-reflector.vim.git
