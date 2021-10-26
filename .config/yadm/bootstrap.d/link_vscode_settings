@@ -16,9 +16,9 @@ fi
 
 mkdir -p "$vscode_dir"
 
-if [ ! -L "$vscode_dir/settings.json" ]; then
+if [ ! -f "$vscode_dir/settings.json" ]; then
     echo "Linking '$settings_loc' to '$vscode_dir'"
-    ln -s "$settings_loc" "$vscode_dir"
+    ln -sf "$settings_loc" "$vscode_dir"
 else
     echo "settings file is already linked at '$vscode_dir', skipping..."
 fi

@@ -22,10 +22,6 @@
 [submodule ".themes/materia-theme"]
     path = .themes/materia-theme
     url = https://github.com/nana-4/materia-theme.git
-[submodule ".vim/pack/toml/start/vim-toml"]
-    path = .vim/pack/toml/start/vim-toml
-    url = https://github.com/cespare/vim-toml
-    branch = master
 [submodule ".vim/pack/control/start/vim-ripgrep"]
     path = .vim/pack/control/start/vim-ripgrep
     url = https://github.com/jremmen/vim-ripgrep.git
