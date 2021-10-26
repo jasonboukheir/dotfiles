@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+echo "----------------"
+echo "Update YADM Repo"
+echo "----------------"
+
+echo "Setting remote to git@github.com:jasonboukheir/dotfiles.git"
+yadm remote set-url origin "git@github.com:jasonboukheir/dotfiles.git"
