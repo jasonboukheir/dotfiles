@@ -9,9 +9,9 @@ settings_loc="$HOME/.config/vscode/settings.json"
 vscode_dir=""
 
 if [ "$system_type" = "Darwin" ]; then
-    vscode_dir="$HOME/Library/Application Support/Code/User"
+    vscode_dir="$HOME/Library/Application Support/Codium/User"
 elif [ "$system_type" = "Linux" ]; then
-    vscode_dir="$HOME/.config/Code/User"
+    vscode_dir="$HOME/.config/Codium/User"
 fi
 
 mkdir -p "$vscode_dir"

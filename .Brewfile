@@ -3,7 +3,7 @@ brew "neovim"
 brew "gh"
 brew "zsh"
 
-brew "kitty"
+cask "kitty"
 
 tap "homebrew/cask-fonts"
-brew "font-fira-code-nerd-font"
+cask "font-fira-code-nerd-font"
