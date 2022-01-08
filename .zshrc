@@ -75,7 +75,7 @@ ZSH_CUSTOM=~/.zsh_custom
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
     asdf
-    cargo
+    rust
     docker
     gh
     git
@@ -137,4 +137,3 @@ fix_wsl2_interop() {
 }
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
-
