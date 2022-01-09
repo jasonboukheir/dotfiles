@@ -81,7 +81,6 @@ plugins=(
     git
     mix
     npm
-    rustup
     virtualenv
 )
 
