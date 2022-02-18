@@ -136,3 +136,5 @@ fix_wsl2_interop() {
 }
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
+
+export XDG_CONFIG_HOME="$HOME/.config"
