@@ -1,6 +1,4 @@
 {
-  /*+--- Core ---+*/
-  "breadcrumbs.enabled": false,
   "editor.acceptSuggestionOnCommitCharacter": false,
   "editor.acceptSuggestionOnEnter": "off",
   "editor.accessibilitySupport": "off",
@@ -56,7 +54,6 @@
   "window.enableMenuBarMnemonics": false,
   "window.menuBarVisibility": "hidden",
   "window.titleBarStyle": "native",
-  "window.zoomLevel": 0,
   "workbench.activityBar.visible": true,
   "workbench.colorTheme": "Nord",
   "workbench.commandPalette.preserveInput": true,
@@ -81,9 +78,11 @@
   "markdown.preview.fontSize": 20,
   "omnisharp.useGlobalMono": "always",
   "omnisharp.monoPath": "/Library/Frameworks/Mono.framework/Versions/Current",
+  "omnisharp.organizeImportsOnFormat": true,
   "prettier.printWidth": 120,
   "typescript.preferences.quoteStyle": "double",
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
+  "ttProcessor.TTPath": "\"/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono\" \"/Applications/Visual Studio.app/Contents/Resources/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe\"",
 
   /*+--- Color Theme ---+*/
   "editor.tokenColorCustomizations": {
@@ -118,5 +117,8 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.formatOnType": true
+  "editor.formatOnType": true,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
