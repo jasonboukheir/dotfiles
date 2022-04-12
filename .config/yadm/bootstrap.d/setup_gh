@@ -5,7 +5,9 @@ echo "Setup GitHub"
 echo "------------"
 
 if ! gh auth status >/dev/null 2>&1; then
-    gh auth login -h github.com -s user:email
+    gh auth login -h github.com \
+        --git-protocol ssh \
+        --web
 fi
 
 name="$(gh api -q .name user)"
