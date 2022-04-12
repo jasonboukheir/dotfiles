@@ -9,7 +9,9 @@ if ! gh auth status >/dev/null 2>&1; then
 fi
 
 name="$(gh api -q .name user)"
-email="$(gh api user/emails -t '{{ range . }}{{ if .visibility }}{{ else }}{{ .email }}{{ end }}{{ end }}')"
+username="$(gh api -q .login user)"
+id="$(gh api -q .id user)"
+email="${id}+${username}@users.noreply.github.com"
 echo "Setting git config user.name to '${name}'"
 git config --global user.name "${name}"
 echo "Setting git config user.email to '${email}'"
@@ -17,3 +19,5 @@ git config --global user.email "${email}"
 git config --global merge.tool "nvim"
 git config --global diff.tool "nvim"
 git config --global core.editor "nvim"
+git config --global commit.gpgsign "true"
+git config --global init.defaultbranch "main"
