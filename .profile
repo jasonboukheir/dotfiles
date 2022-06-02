@@ -17,14 +17,16 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # set PATH so it includes user's private bin if it exists
-optional_paths=""
-optional_paths="${optional_paths} $HOME/.bin"
-optional_paths="${optional_paths} $HOME/.local/bin"
-optional_paths="${optional_paths} $HOME/.dotnet/tools"
+optional_paths=(
+    "$HOME/.bin"
+    "$HOME/.local/bin"
+    "$HOME/.dotnet/tools"
+)
 
 for optional_path in ${optional_paths}
 do
-    if [ -d "$optional_path" ] ; then
+    if [ -d "$optional_path" ]
+    then
         export PATH="$optional_path:$PATH"
     fi
 done
