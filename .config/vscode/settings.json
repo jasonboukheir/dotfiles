@@ -120,5 +120,6 @@
   "editor.formatOnType": true,
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "zigLanguageClient.path": "/Users/jason/zls/zig-out/bin/zls"
 }
