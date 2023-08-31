@@ -16,7 +16,6 @@
   "editor.lightbulb.enabled": false,
   "editor.minimap.enabled": false,
   "editor.multiCursorModifier": "alt",
-  "editor.renderIndentGuides": false,
   "editor.renderWhitespace": "selection",
   "editor.smoothScrolling": true,
   "editor.snippetSuggestions": "top",
@@ -49,7 +48,7 @@
   "terminal.external.osxExec": "kitty",
   "terminal.integrated.cursorStyle": "underline",
   "terminal.integrated.fontSize": 12,
-  "update.mode": "none",
+  "update.mode": "manual",
   "update.enableWindowsBackgroundUpdates": false,
   "window.enableMenuBarMnemonics": false,
   "window.menuBarVisibility": "hidden",
@@ -104,11 +103,19 @@
     "editor.defaultFormatter": "ms-dotnettools.csharp"
   },
   "[markdown]": {
-    "editor.quickSuggestions": false,
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
     "editor.wordWrap": "on"
   },
   "[mdx]": {
-    "editor.quickSuggestions": false,
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
     "editor.wordWrap": "on"
   },
   "[javascript]": {
@@ -121,5 +128,51 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "zigLanguageClient.path": "/Users/jason/zls/zig-out/bin/zls"
+  "zigLanguageClient.path": "/Users/jason/zls/zig-out/bin/zls",
+  "editor.guides.indentation": false,
+  "git.enableCommitSigning": true,
+  "gitSemanticCommit.types": [
+    {
+      "type": "chore",
+      "description": "Development changes related to the build system or auxiliary tools and libraries such as documentation generation"
+    },
+
+    {
+      "type": "build",
+      "description": "Development changes related to the build system"
+    },
+    {
+      "type": "ci",
+      "description": "Development changes related to the continuous integration and deployment system"
+    },
+    {
+      "type": "docs",
+      "description": "Documentation changes related to the project"
+    },
+    {
+      "type": "feat",
+      "description": "Production changes related to new backward-compatible abilities or functionality"
+    },
+    {
+      "type": "fix",
+      "description": "Production changes related to backward-compatible bug fixes"
+    },
+    {
+      "type": "perf",
+      "description": "Production changes related to backward-compatible performance improvements"
+    },
+    {
+      "type": "refactor",
+      "description": "Development changes related to modifying the codebase"
+    },
+    {
+      "type": "style",
+      "description": "Development changes related to styling the codebase"
+    },
+    {
+      "type": "test",
+      "description": "Development changes related to tests"
+    }
+  ],
+  "git.confirmSync": false
 }
