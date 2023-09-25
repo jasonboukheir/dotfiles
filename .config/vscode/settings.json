@@ -174,5 +174,9 @@
       "description": "Development changes related to tests"
     }
   ],
-  "git.confirmSync": false
+  "git.confirmSync": false,
+  "githubPullRequests.pullBranch": "never",
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  }
 }
