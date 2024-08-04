@@ -108,15 +108,7 @@
       };
 
       nix = {
-        enableLanguageServer = true;
         formatterPath = "nixfmt";
-        serverPath = "nixd";
-        serverSettings.nixd = {
-          formatting.command = [ "nixfmt" ];
-          options = {
-            nix-darwin.expr = "(builtins.getFlake \"\${workspaceFolder}/flake.nix\").darwinConfigurations.\"Jasons-MacBook-Pro\".options";
-          };
-        };
       };
     };
   };

@@ -10,6 +10,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
   };
 
   outputs =
@@ -19,13 +20,19 @@
       nixpkgs,
       home-manager,
       nix-homebrew,
+      nixpkgs-zed-fix,
     }:
+    let
+      system = "aarch64-darwin";
+      pkgs-zed-fix = import nixpkgs-zed-fix { inherit system; };
+    in
     {
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Jasons-MacBook-Pro
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = {
           inherit inputs;
+          inherit pkgs-zed-fix;
         };
         modules = [
           ./darwin.nix

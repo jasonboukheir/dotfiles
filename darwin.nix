@@ -1,4 +1,9 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  pkgs-zed-fix,
+  ...
+}:
 {
   imports = [
     ./darwin/homebrew.nix
@@ -10,6 +15,7 @@
     pkgs.neovim
     pkgs.nixd
     pkgs.nixfmt-rfc-style
+    pkgs-zed-fix.zed-editor
   ];
 
   services.nix-daemon.enable = true;
