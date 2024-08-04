@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   imports = [ ./home/programs.nix ];
   # This value determines the Home Manager release that your configuration is

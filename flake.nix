@@ -25,13 +25,14 @@
     let
       system = "aarch64-darwin";
       pkgs-zed-fix = import nixpkgs-zed-fix { inherit system; };
+      rev = self.rev or self.dirtyRev or null;
     in
     {
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#Jasons-MacBook-Pro
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = {
-          inherit inputs;
+          inherit rev;
           inherit pkgs-zed-fix;
         };
         modules = [
