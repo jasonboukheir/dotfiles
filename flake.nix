@@ -12,12 +12,20 @@
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, nix-homebrew }:
+  outputs = inputs@{
+    self,
+    nix-darwin,
+    nixpkgs,
+    home-manager,
+    nix-homebrew
+  }:
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#Jasons-MacBook-Pro
     darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-      specialArgs = { inherit inputs; };
+      specialArgs = {
+        inherit inputs;
+      };
       modules = [
         ./darwin.nix
         home-manager.darwinModules.home-manager
