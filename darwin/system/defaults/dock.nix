@@ -16,6 +16,7 @@ in
     persistent-apps = [
       "/System/Cryptexes/App/System/Applications/Safari.app"
       "${pkgs.kitty}/Applications/kitty.app"
+      "${pkgs.vscodium}/Applications/VSCodium.app"
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Music.app"
