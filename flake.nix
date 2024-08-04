@@ -52,6 +52,7 @@
           }
         ];
       };
+      nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
 
       # Expose the package set, including overlays, for convenience.
       darwinPackages = self.darwinConfigurations."Jasons-MacBook-Pro".pkgs;
