@@ -16,10 +16,11 @@ in
         user.signingKey = signingKey;
       };
     };
-    ssh = { enable = true;
+    ssh = {
+      enable = true;
       extraConfig = ''
         Host *
-            IdentityAgent ${onePassPath}
+            IdentityAgent "${onePassPath}"
       '';
     };
   };
