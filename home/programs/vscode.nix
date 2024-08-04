@@ -8,8 +8,8 @@
     extensions = with pkgs.vscode-extensions; [
       jnoortheen.nix-ide
       arcticicestudio.nord-visual-studio-code
-      PKief.material-icon-theme
-      GitHub.copilot
+      pkief.material-icon-theme
+      github.copilot
     ];
 
     userSettings = {
@@ -36,7 +36,7 @@
         snippetSuggestions = "top";
         tabCompletion = "onlySnippets";
         tabSize = 4;
-        tokenColorCustomizations."[Nord]".textMateRules = [];
+        tokenColorCustomizations."[Nord]".textMateRules = [ ];
         wordWrapColumn = 120;
       };
       explorer = {
@@ -78,7 +78,7 @@
       };
       workbench = {
         activityBar.visible = true;
-        colorCustomizations."[Nord]" = {};
+        colorCustomizations."[Nord]" = { };
         colorTheme = "Nord";
         commandPalette.preserveInput = true;
         editor = {
@@ -105,6 +105,18 @@
         };
         hideExplorerArrows = true;
         saturation = 0.6;
+      };
+
+      nix = {
+        enableLanguageServer = true;
+        formatterPath = "nixfmt";
+        serverPath = "nixd";
+        serverSettings.nixd = {
+          formatting.command = [ "nixfmt" ];
+          options = {
+            nix-darwin.expr = "(builtins.getFlake \"\${workspaceFolder}/flake.nix\").darwinConfigurations.\"Jasons-MacBook-Pro\".options";
+          };
+        };
       };
     };
   };
