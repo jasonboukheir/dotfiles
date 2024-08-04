@@ -6,13 +6,10 @@
   ];
 
   environment.systemPackages = [
-    pkgs.iina
     pkgs.kitty
     pkgs.neovim
-    pkgs.nushell
-  ];
-  environment.shells = [
-    pkgs.nushell
+    pkgs.nixd
+    pkgs.nixfmt
   ];
 
   services.nix-daemon.enable = true;
@@ -25,7 +22,7 @@
 
   users.users.jasonbk = {
     home = "/Users/jasonbk";
-    shell = pkgs.nushell;
+    shell = pkgs.zsh;
   };
 
   security.pam.enableSudoTouchIdAuth = true;
