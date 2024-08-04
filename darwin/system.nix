@@ -1,8 +1,6 @@
 { pkgs, inputs, ... }:
 {
-  imports = [
-    ./system/defaults.nix
-  ];
+  imports = [ ./system/defaults.nix ];
 
   system = {
     stateVersion = 4;
