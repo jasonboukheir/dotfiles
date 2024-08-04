@@ -4,12 +4,10 @@
     enable = true;
     oh-my-zsh = {
       enable = true;
-      plugins = [
-        "git"
-      ];
+      plugins = [ "git" ];
     };
     initExtra = ''
-    eval "$(starship init zsh)"
+      eval "$(starship init zsh)"
     '';
   };
 }

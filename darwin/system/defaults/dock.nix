@@ -4,7 +4,7 @@ let
   modifiers = {
     none = 0;
     option = 524288;
-    cmd = 1048576; 
+    cmd = 1048576;
     "option+cmd" = 1573864;
   };
 in
@@ -27,10 +27,10 @@ in
   };
   system.defaults.CustomUserPreferences = {
     "com.apple.Dock" = {
-        wvous-tl-modifier = modifiers.cmd;
-        wvous-bl-modifier = modifiers.cmd;
-        wvous-tr-modifier = modifiers.cmd;
-        wvous-br-modifier = modifiers.cmd;
+      wvous-tl-modifier = modifiers.cmd;
+      wvous-bl-modifier = modifiers.cmd;
+      wvous-tr-modifier = modifiers.cmd;
+      wvous-br-modifier = modifiers.cmd;
     };
   };
 }

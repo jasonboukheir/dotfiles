@@ -1,8 +1,6 @@
 { config, pkgs, ... }:
 {
-  imports = [
-    ./home/programs.nix
-  ];
+  imports = [ ./home/programs.nix ];
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
   # introduces backwards incompatible changes.
@@ -12,13 +10,9 @@
   # release notes.
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
-  home.packages = [
-    (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; })
-  ];
+  home.packages = [ (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
 
-  home.file = {
-  };
+  home.file = { };
 
-  home.sessionVariables = {
-  };
+  home.sessionVariables = { };
 }
