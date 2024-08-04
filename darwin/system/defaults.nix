@@ -2,6 +2,7 @@
 {
   imports = [
     ./defaults/AdLib.nix
+    ./defaults/darkmode.nix
     ./defaults/desktopservices.nix
     ./defaults/dock.nix
     ./defaults/finder.nix
