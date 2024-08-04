@@ -9,7 +9,7 @@
     pkgs.kitty
     pkgs.neovim
     pkgs.nixd
-    pkgs.nixfmt
+    pkgs.nixfmt-rfc-style
   ];
 
   services.nix-daemon.enable = true;
@@ -19,6 +19,7 @@
   programs.zsh.enable = true;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfree = true;
 
   users.users.jasonbk = {
     home = "/Users/jasonbk";
