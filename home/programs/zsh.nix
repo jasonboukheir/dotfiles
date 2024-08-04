@@ -5,5 +5,5 @@
     initExtra = ''
     eval "$(starship init zsh)"
     '';
-  }
+  };
 }
