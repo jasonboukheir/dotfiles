@@ -17,6 +17,7 @@ in
       "/System/Cryptexes/App/System/Applications/Safari.app"
       "${pkgs.kitty}/Applications/kitty.app"
       "${pkgs-zed-fix.zed-editor}/Applications/Zed.app"
+      "/Applications/Godot.app"
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Music.app"
