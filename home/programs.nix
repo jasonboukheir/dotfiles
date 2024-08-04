@@ -6,6 +6,7 @@
     ./programs/kitty.nix
     ./programs/starship.nix
     ./programs/vscode.nix
+    ./programs/zed.nix
     ./programs/zsh.nix
   ];
 
