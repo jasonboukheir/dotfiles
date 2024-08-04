@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-zed-fix, ... }:
 let
   # for modifier support, check https://github.com/LnL7/nix-darwin/issues/998
   modifiers = {
@@ -16,7 +16,7 @@ in
     persistent-apps = [
       "/System/Cryptexes/App/System/Applications/Safari.app"
       "${pkgs.kitty}/Applications/kitty.app"
-      "${pkgs.vscodium}/Applications/VSCodium.app"
+      "${pkgs-zed-fix.zed-editor}/Applications/Zed.app"
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Music.app"
