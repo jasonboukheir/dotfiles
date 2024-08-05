@@ -14,6 +14,7 @@
     exercism
     (nerdfonts.override { fonts = [ "FiraCode" ]; })
     zig
+    zls
   ];
 
   home.file = { };
