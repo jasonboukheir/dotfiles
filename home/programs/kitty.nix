@@ -10,6 +10,7 @@
     settings = {
       cursor_shape = "underline";
     };
+
     shellIntegration.mode = "no-cursor";
   };
 }

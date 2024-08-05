@@ -18,5 +18,15 @@
     "mode": "system",
     "light": "Nord Light",
     "dark": "Nord"
+  },
+  "languages": {
+    "Nix": {
+      "formatter": {
+        "external": {
+          "arguments": [],
+          "command": "nixfmt"
+        }
+      }
+    }
   }
 }
