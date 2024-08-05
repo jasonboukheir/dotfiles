@@ -10,9 +10,10 @@
   # release notes.
   home.stateVersion = "24.05"; # Please read the comment before changing.
 
-  home.packages = [
-    pkgs.zig
-    (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; })
+  home.packages = with pkgs; [
+    exercism
+    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    zig
   ];
 
   home.file = { };
