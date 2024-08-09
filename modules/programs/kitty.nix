@@ -1,5 +1,6 @@
 { ... }:
 {
+    home-manager.users.jasonbk = {
   programs.kitty = {
     enable = true;
     theme = "Nord";
@@ -13,4 +14,5 @@
 
     shellIntegration.mode = "no-cursor";
   };
+    };
 }

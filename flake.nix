@@ -9,8 +9,20 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    homebrew-bundle = {
+      url = "github:homebrew/homebrew-bundle";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
   };
 
   outputs =
@@ -18,9 +30,12 @@
       self,
       nix-darwin,
       nixpkgs,
+      nixpkgs-zed-fix,
       home-manager,
       nix-homebrew,
-      nixpkgs-zed-fix,
+      homebrew-bundle,
+      homebrew-cask,
+      homebrew-core,
     }:
     {
       # Build darwin flake using:

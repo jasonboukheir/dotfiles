@@ -5,6 +5,8 @@ let
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
 in
 {
+
+    home-manager.users.jasonbk = {
   programs = {
     git = {
       extraConfig = {
@@ -24,6 +26,7 @@ in
       '';
     };
   };
+    };
 homebrew.casks = [
         "1password"
         "1password-cli"

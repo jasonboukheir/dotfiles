@@ -1,5 +1,6 @@
 { ... }:
 {
+    home-manager.users.jasonbk = {
   programs.git = {
     enable = true;
     userName = "Jason Elie Bou Kheir";
@@ -9,4 +10,5 @@
     };
     ignores = [ ".DS_Store" ];
   };
+    };
 }
