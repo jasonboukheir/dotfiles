@@ -1,5 +1,6 @@
 { ... }:
 {
+    home-manager.users.jasonbk = {
   programs.zsh = {
     enable = true;
     oh-my-zsh = {
@@ -10,4 +11,5 @@
       eval "$(starship init zsh)"
     '';
   };
+    };
 }

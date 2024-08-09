@@ -1,5 +1,6 @@
 { ... }:
 {
+    home-manager.users.jasonbk = {
   programs.starship = {
     enable = true;
     settings = {
@@ -10,4 +11,5 @@
       };
     };
   };
+    };
 }
