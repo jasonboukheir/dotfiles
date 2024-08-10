@@ -41,7 +41,9 @@
       # Build darwin flake using:
       # $ darwin-rebuild switch --flake .
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs;
+        };
         modules = [
           home-manager.darwinModules.home-manager
           nix-homebrew.darwinModules.nix-homebrew
@@ -49,7 +51,9 @@
         ];
       };
       darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs;
+        };
         modules = [
           home-manager.darwinModules.home-manager
           nix-homebrew.darwinModules.nix-homebrew

@@ -1,22 +1,22 @@
 { inputs, config, ... }:
 {
-    nix-homebrew = {
-        user = "jasonbk";
-        enable = true;
-        taps = {
+  nix-homebrew = {
+    user = "jasonbk";
+    enable = true;
+    taps = {
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
-            "homebrew/homebrew-cask" = inputs.homebrew-cask;
-            "homebrew/homebrew-core" = inputs.homebrew-core;
-        };
-        mutableTaps = false;
+      "homebrew/homebrew-cask" = inputs.homebrew-cask;
+      "homebrew/homebrew-core" = inputs.homebrew-core;
     };
-    homebrew = {
-        enable = true;
-        taps = builtins.attrNames config.nix-homebrew.taps;
-        onActivation = {
-            autoUpdate = true;
-            cleanup = "zap";
-            upgrade = true;
-        };
+    mutableTaps = false;
+  };
+  homebrew = {
+    enable = true;
+    taps = builtins.attrNames config.nix-homebrew.taps;
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "zap";
+      upgrade = true;
     };
+  };
 }

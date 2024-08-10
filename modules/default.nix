@@ -1,7 +1,7 @@
 { ... }:
 {
-    imports = [
-        ./programs
-        ./system
-    ];
+  imports = [
+    ./programs
+    ./system
+  ];
 }

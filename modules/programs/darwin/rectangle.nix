@@ -1,6 +1,4 @@
 { ... }:
 {
-    homebrew.casks = [
-        "rectangle"
-    ];
+  homebrew.casks = [ "rectangle" ];
 }

@@ -1,8 +1,8 @@
 { ... }:
 {
-    imports = [
-        ./1password.nix
-        ./homebrew.nix
-        ./rectangle.nix
-    ];
+  imports = [
+    ./1password.nix
+    ./homebrew.nix
+    ./rectangle.nix
+  ];
 }
