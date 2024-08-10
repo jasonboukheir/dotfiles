@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./../programs/darwin
-    ./../system/darwin
+    ./programs
+    ./system
   ];
 }
