@@ -16,6 +16,5 @@ This is an experimental setup for using nix on my macbook (for now)!
 ## (Experimental) Updating
 
 ```sh
-darwin-rebuild build --flake .#{{ your special setup here }}
+darwin-rebuild switch --flake .
 ```
-Specifically, run the command in the [`flake.nix`](https://github.com/jasonboukheir/dotfiles/blob/725d475a6b5980e2a1787a2aea77e1e8f65b1609/flake.nix#L32) file.
