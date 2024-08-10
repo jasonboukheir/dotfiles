@@ -1,8 +1,4 @@
-{
-  pkgs,
-  pkgs-zed-fix,
-  ...
-}:
+{ pkgs, pkgs-zed-fix, ... }:
 {
   imports = [
     ./darwin/homebrew.nix

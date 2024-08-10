@@ -6,32 +6,32 @@ let
 in
 {
 
-    home-manager.users.jasonbk = {
-  programs = {
-    git = {
-      extraConfig = {
-        gpg.format = "ssh";
-        "gpg \"ssh\"" = {
-          program = onePassSshProgram;
+  home-manager.users.jasonbk = {
+    programs = {
+      git = {
+        extraConfig = {
+          gpg.format = "ssh";
+          "gpg \"ssh\"" = {
+            program = onePassSshProgram;
+          };
+          commit.gpgsign = true;
+          user.signingKey = signingKey;
         };
-        commit.gpgsign = true;
-        user.signingKey = signingKey;
+      };
+      ssh = {
+        enable = true;
+        extraConfig = ''
+          Host *
+              IdentityAgent "${onePassPath}"
+        '';
       };
     };
-    ssh = {
-      enable = true;
-      extraConfig = ''
-        Host *
-            IdentityAgent "${onePassPath}"
-      '';
-    };
   };
-    };
-homebrew.casks = [
-        "1password"
-        "1password-cli"
-];
-homebrew.masApps = {
+  homebrew.casks = [
+    "1password"
+    "1password-cli"
+  ];
+  homebrew.masApps = {
     "1Password for Safari" = 1569813296;
-    };
+  };
 }
