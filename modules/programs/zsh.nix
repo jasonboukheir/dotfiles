@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   home-manager.users.jasonbk = {
     programs.zsh = {
@@ -7,9 +7,9 @@
         enable = true;
         plugins = [ "git" ];
       };
-      initExtra = ''
-        eval "$(starship init zsh)"
-      '';
+      shellAliases = {
+        git = "${pkgs.git}/bin/git";
+      };
     };
   };
 }

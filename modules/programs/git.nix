@@ -1,5 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  environment.systemPackages = [
+    pkgs.git
+  ];
   home-manager.users.jasonbk = {
     programs.git = {
       enable = true;

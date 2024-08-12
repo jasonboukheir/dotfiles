@@ -1,6 +1,9 @@
-{ ... }:
+{ pkgs, ... }:
 {
   home-manager.users.jasonbk = {
+    home.packages = [
+      pkgs.starship
+    ];
     programs.starship = {
       enable = true;
       settings = {
