@@ -1,6 +1,9 @@
-{ ... }:
+{ pkgs, ... }:
 {
   home-manager.users.jasonbk = {
+    home.packages = [
+      pkgs.kitty
+    ];
     programs.kitty = {
       enable = true;
       theme = "Nord";
