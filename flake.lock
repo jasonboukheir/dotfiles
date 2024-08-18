@@ -177,16 +177,16 @@
     },
     "nixpkgs-zed-fix": {
       "locked": {
-        "lastModified": 1723834920,
-        "narHash": "sha256-JGJ0MPKqEAfCNdxwDSecggw8i2gM6hpmkJP9jf47pJU=",
+        "lastModified": 1721917338,
+        "narHash": "sha256-RWf5lelih+H06l1UIBf1HAmlttCW5HRuEwa6L3xcHDc=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "97fdc73da383412cff4118b30afa8bd7f51e5acb",
+        "rev": "1bdad05edc5e154935176aab4a3412e29b351d3f",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "pull/329653/head",
+        "ref": "1bdad05edc5e154935176aab4a3412e29b351d3f",
         "repo": "nixpkgs",
         "type": "github"
       }
