@@ -1,6 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
+    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -10,7 +12,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
   };
 
   outputs =
@@ -18,12 +19,14 @@
       self,
       nix-darwin,
       nixpkgs,
+      nixpkgs-stable,
+      nixpkgs-zed-fix,
       home-manager,
       nix-homebrew,
-      nixpkgs-zed-fix,
     }:
     let
       system = "aarch64-darwin";
+      pkgs-stable = import nixpkgs-stable { inherit system; };
       pkgs-zed-fix = import nixpkgs-zed-fix { inherit system; };
       rev = self.rev or self.dirtyRev or null;
     in
@@ -33,6 +36,7 @@
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = {
           inherit rev;
+          inherit pkgs-stable;
           inherit pkgs-zed-fix;
         };
         modules = [

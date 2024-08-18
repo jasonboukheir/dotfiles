@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-stable,
   pkgs-zed-fix,
   ...
 }:
