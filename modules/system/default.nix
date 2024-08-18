@@ -3,6 +3,7 @@
   imports = [ ./home-manager.nix ];
 
   environment.systemPackages = with pkgs; [
+    devbox
     nixd
     nixfmt-rfc-style
   ];
