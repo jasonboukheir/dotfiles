@@ -12,6 +12,7 @@ in
   system.defaults.dock = {
     autohide = true;
     autohide-delay = 0.0;
+    persistent-others = [ ];
     orientation = "right";
     show-recents = false;
     wvous-tr-corner = 13;
