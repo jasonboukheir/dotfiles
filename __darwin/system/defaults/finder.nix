@@ -11,9 +11,9 @@
   };
   system.defaults.CustomUserPreferences = {
     "com.apple.finder" = {
-        _FXSortFoldersFirst = true;
-        # When performing a search, search the current folder by default
-        FXDefaultSearchScope = "SCcf";
+      _FXSortFoldersFirst = true;
+      # When performing a search, search the current folder by default
+      FXDefaultSearchScope = "SCcf";
     };
   };
 }
