@@ -1,4 +1,4 @@
 { ... }:
 {
-  imports = [ ];
+  imports = [ ./unity-hub.nix ];
 }

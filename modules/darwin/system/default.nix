@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   imports = [
     ./AdLib.nix
@@ -13,4 +13,5 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   security.pam.enableSudoTouchIdAuth = true;
+  home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
 }
