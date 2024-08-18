@@ -1,6 +1,6 @@
 { inputs, pkgs, ... }:
 let
-  pkgs-zed-fix = inputs.nixpkgs-zed-fix.legacyPackages.${pkgs.system}
+  pkgs-zed-fix = inputs.nixpkgs-zed-fix.legacyPackages.${pkgs.system};
 in
 {
   system.defaults.dock = {
