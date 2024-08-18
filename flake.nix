@@ -1,8 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
-    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -11,7 +9,20 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=pull/329653/head";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    homebrew-bundle = {
+      url = "github:homebrew/homebrew-bundle";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
   };
 
   outputs =
@@ -19,46 +30,36 @@
       self,
       nix-darwin,
       nixpkgs,
-      nixpkgs-stable,
       nixpkgs-zed-fix,
       home-manager,
       nix-homebrew,
+      homebrew-bundle,
+      homebrew-cask,
+      homebrew-core,
     }:
-    let
-      system = "aarch64-darwin";
-      pkgs-stable = import nixpkgs-stable { inherit system; };
-      pkgs-zed-fix = import nixpkgs-zed-fix { inherit system; };
-      rev = self.rev or self.dirtyRev or null;
-    in
     {
       # Build darwin flake using:
-      # $ darwin-rebuild build --flake .#Jasons-MacBook-Pro
+      # $ darwin-rebuild switch --flake .
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = {
-          inherit rev;
-          inherit pkgs-stable;
-          inherit pkgs-zed-fix;
+          inherit inputs;
         };
         modules = [
-          ./darwin.nix
           home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.jasonbk = import ./home.nix;
-          }
           nix-homebrew.darwinModules.nix-homebrew
-          {
-            nix-homebrew = {
-              enable = true;
-              user = "jasonbk";
-            };
-          }
+          ./hosts/m1
+        ];
+      };
+      darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          home-manager.darwinModules.home-manager
+          nix-homebrew.darwinModules.nix-homebrew
+          ./hosts/m3
         ];
       };
       nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
-
-      # Expose the package set, including overlays, for convenience.
-      darwinPackages = self.darwinConfigurations."Jasons-MacBook-Pro".pkgs;
     };
 }
