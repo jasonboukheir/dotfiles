@@ -1,4 +1,7 @@
 { ... }:
 {
-  imports = [ ./unity-hub.nix ];
+  imports = [
+    ./unity-hub.nix
+    ./zed.nix
+  ];
 }
