@@ -6,7 +6,7 @@
       enable = true;
       theme = "Nord";
       font = {
-        name = "FiraCode";
+        name = "FiraCode Nerd Font Mono";
         size = 12.0;
       };
       settings = {
