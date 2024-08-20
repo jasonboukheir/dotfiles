@@ -1,6 +1,7 @@
 { inputs, pkgs, ... }:
 let
-  vscode-extensions = inputs.nix-vscode-extensions.extensions.${pkgs.system};
+  nix-vscode-extensions = inputs.nix-vscode-extensions.extensions.${pkgs.system};
+  marketplace-extensions = nix-vscode-extensions.vscode-marketplace;
 in
 {
   home-manager.users.jasonbk = {
@@ -20,7 +21,7 @@ in
           ms-dotnettools.csharp
           ms-dotnettools.csdevkit
         ]
-        ++ (with vscode-extensions.vscode-marketplace; [ visualstudiotoolsforunity.vstuc ]);
+        ++ (with marketplace-extensions; [ visualstudiotoolsforunity.vstuc ]);
 
       userSettings = {
         editor = {
