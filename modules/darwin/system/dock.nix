@@ -13,7 +13,7 @@ in
     autohide = true;
     autohide-delay = 0.0;
     persistent-others = [ ];
-    orientation = "right";
+    orientation = "bottom";
     show-recents = false;
     wvous-tr-corner = 13;
     wvous-br-corner = 14;
