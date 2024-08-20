@@ -9,12 +9,14 @@ in
       package = pkgs.vscodium;
       enableUpdateCheck = false;
       enableExtensionUpdateCheck = false;
-      extensions = with vscode-extensions; [
-        vscode-marketplace.jnoortheen.nix-ide
-        vscode-marketplace.arcticicestudio.nord-visual-studio-code
-        vscode-marketplace.pkief.material-icon-theme
-        vscode-marketplace.github.copilot
-        vscode-marketplace.visualstudiotoolsforunity.vstuc
+      extensions = with vscode-extensions.vscode-marketplace; [
+        jnoortheen.nix-ide
+        arcticicestudio.nord-visual-studio-code
+        pkief.material-icon-theme
+        github.copilot
+        visualstudiotoolsforunity.vstuc
+        ms-dotnettools.csdevkit
+        ms-dotnettools.csharp
       ];
 
       userSettings = {
