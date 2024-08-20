@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
+let
+  vscode-extensions = inputs.nix-vscode-extensions.extensions.${pkgs.system};
+in
 {
   home-manager.users.jasonbk = {
     programs.vscode = {
@@ -6,11 +9,12 @@
       package = pkgs.vscodium;
       enableUpdateCheck = false;
       enableExtensionUpdateCheck = false;
-      extensions = with pkgs.vscode-extensions; [
-        jnoortheen.nix-ide
-        arcticicestudio.nord-visual-studio-code
-        pkief.material-icon-theme
-        github.copilot
+      extensions = with vscode-extensions; [
+        vscode-marketplace.jnoortheen.nix-ide
+        vscode-marketplace.arcticicestudio.nord-visual-studio-code
+        vscode-marketplace.pkief.material-icon-theme
+        vscode-marketplace.github.copilot
+        vscode-marketplace.visualstudiotoolsforunity.vstuc
       ];
 
       userSettings = {

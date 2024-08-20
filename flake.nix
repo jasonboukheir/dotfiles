@@ -25,20 +25,17 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
   };
 
   outputs =
     inputs@{
-      self,
       nix-darwin,
       nixpkgs,
-      nixpkgs-zed-fix,
       home-manager,
       nix-homebrew,
-      homebrew-bundle,
-      homebrew-cask,
-      homebrew-core,
       mac-app-util,
+      ...
     }:
     {
       # Build darwin flake using:
