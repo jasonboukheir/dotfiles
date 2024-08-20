@@ -6,18 +6,21 @@ in
   home-manager.users.jasonbk = {
     programs.vscode = {
       enable = true;
-      package = pkgs.vscodium;
+      package = pkgs.vscode;
       enableUpdateCheck = false;
       enableExtensionUpdateCheck = false;
-      extensions = with vscode-extensions.vscode-marketplace; [
-        jnoortheen.nix-ide
-        arcticicestudio.nord-visual-studio-code
-        pkief.material-icon-theme
-        github.copilot
-        visualstudiotoolsforunity.vstuc
-        ms-dotnettools.csdevkit
-        ms-dotnettools.csharp
-      ];
+      extensions =
+        with pkgs.vscode-extensions;
+        [
+          jnoortheen.nix-ide
+          arcticicestudio.nord-visual-studio-code
+          pkief.material-icon-theme
+          github.copilot
+          ms-dotnettools.vscode-dotnet-runtime
+          ms-dotnettools.csharp
+          ms-dotnettools.csdevkit
+        ]
+        ++ (with vscode-extensions.vscode-marketplace; [ visualstudiotoolsforunity.vstuc ]);
 
       userSettings = {
         editor = {
