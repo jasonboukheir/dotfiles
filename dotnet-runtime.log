@@ -1,9 +1,0 @@
-@nix { "action": "setPhase", "phase": "unpackPhase" }
-Running phase: unpackPhase
-unpacking source archive /nix/store/4m7qdn387qajmb1cb8f7qwnvgihzh8v1-vscode-dotnet-runtime-2.1.2.zip
-source root is extension
-setting SOURCE_DATE_EPOCH to timestamp 1723839902 of file extension/README.md
-@nix { "action": "setPhase", "phase": "patchPhase" }
-Running phase: patchPhase
-chmod: cannot access '/private/tmp/nix-build-vscode-extension-ms-dotnettools-vscode-dotnet-runtime-2.1.2.drv-0/extension/dist/install scripts/dotnet-install.sh': No such file or directory
-/nix/store/h3f3f6z54p6rkkvs104mbsqz7izp1ips-stdenv-darwin/setup: line 140: pop_var_context: head of shell_variables not a function context
