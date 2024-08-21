@@ -39,7 +39,7 @@ in
           fontWeight = "500";
           formatOnPaste = true;
           formatOnSave = true;
-          lightbulb.enabled = false;
+          lightbulb.enabled = "off";
           minimap.enabled = false;
           multiCursorModifier = "alt";
           renderWhitespace = "selection";
