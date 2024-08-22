@@ -1,4 +1,4 @@
-{ pkgs, pkgs-zed-fix, ... }:
+{ ... }:
 let
   # for modifier support, check https://github.com/LnL7/nix-darwin/issues/998
   modifiers = {
@@ -13,7 +13,7 @@ in
     autohide = true;
     autohide-delay = 0.0;
     persistent-others = [ ];
-    orientation = "bottom";
+    orientation = "left";
     show-recents = false;
     wvous-tr-corner = 13;
     wvous-br-corner = 14;
