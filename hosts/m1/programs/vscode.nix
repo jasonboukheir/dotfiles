@@ -16,10 +16,10 @@ in
           jnoortheen.nix-ide
           arcticicestudio.nord-visual-studio-code
           pkief.material-icon-theme
-          github.copilot
           ms-dotnettools.vscode-dotnet-runtime
           ms-dotnettools.csharp
           ms-dotnettools.csdevkit
+          ms-python.python
         ]
         ++ (with marketplace-extensions; [ visualstudiotoolsforunity.vstuc ]);
 
