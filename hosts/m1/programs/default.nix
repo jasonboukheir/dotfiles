@@ -5,5 +5,6 @@
     ./zed.nix
     ./vscode.nix
     ./proton-drive.nix
+    ./iina.nix
   ];
 }
