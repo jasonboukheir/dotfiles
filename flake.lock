@@ -320,22 +320,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-zed-fix": {
-      "locked": {
-        "lastModified": 1721917338,
-        "narHash": "sha256-RWf5lelih+H06l1UIBf1HAmlttCW5HRuEwa6L3xcHDc=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "1bdad05edc5e154935176aab4a3412e29b351d3f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "1bdad05edc5e154935176aab4a3412e29b351d3f",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1687274257,
@@ -408,7 +392,6 @@
         "nix-homebrew": "nix-homebrew",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_4",
-        "nixpkgs-zed-fix": "nixpkgs-zed-fix",
         "sops-nix": "sops-nix"
       }
     },

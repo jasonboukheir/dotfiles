@@ -1,4 +1,7 @@
 { ... }:
 {
-  imports = [ ./dock.nix ];
+  imports = [
+    ./dock.nix
+    ./ipfs.nix
+  ];
 }
