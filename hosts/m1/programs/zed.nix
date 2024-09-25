@@ -1,10 +1,7 @@
-{ inputs, pkgs, ... }:
-let
-  pkgs-zed-fix = inputs.nixpkgs-zed-fix.legacyPackages.${pkgs.system};
-in
+{ ... }:
 {
+  homebrew.casks = [ "zed" ];
   home-manager.users.jasonbk = {
-    home.packages = [ pkgs-zed-fix.zed-editor ];
     home.file = {
       ".config/zed" = {
         source = ./zed;

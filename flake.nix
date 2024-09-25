@@ -11,8 +11,6 @@
     };
     mac-app-util.url = "github:hraban/mac-app-util";
     sops-nix.url = "github:Mic92/sops-nix";
-    # Won't be fixed until this PR is merged https://github.com/NixOS/nixpkgs/pull/329653
-    nixpkgs-zed-fix.url = "github:nixos/nixpkgs?ref=1bdad05edc5e154935176aab4a3412e29b351d3f";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
