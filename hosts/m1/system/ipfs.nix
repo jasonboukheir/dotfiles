@@ -1,7 +1,7 @@
 { ... }:
 {
   services.ipfs = {
-    enable = true;
-    enableGarbageCollection = true;
+    enable = false;
+    enableGarbageCollection = false;
   };
 }
