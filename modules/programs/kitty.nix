@@ -4,7 +4,7 @@
     home.packages = [ pkgs.kitty ];
     programs.kitty = {
       enable = true;
-      theme = "Nord";
+      themeFile = "Nord";
       font = {
         name = "FiraCode Nerd Font Mono";
         size = 12.0;
