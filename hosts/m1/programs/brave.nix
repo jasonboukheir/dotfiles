@@ -24,3 +24,8 @@
 #     };
 #   };
 # }
+#
+{ ... }:
+{
+  homebrew.casks = [ "brave-browser" ];
+}

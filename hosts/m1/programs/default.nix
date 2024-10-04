@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    # ./brave.nix # not working in darwin yet...
+    ./brave.nix
     ./unity-hub.nix
     ./zed.nix
     ./vscode.nix
