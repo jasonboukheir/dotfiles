@@ -9,6 +9,7 @@
     ./Safari.nix
     ./screencapture.nix
     ./SoftwareUpdate.nix
+    ./WindowManager.nix
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
