@@ -14,15 +14,17 @@ in
         with pkgs.vscode-extensions;
         [
           jnoortheen.nix-ide
-          marlosirapuan.nord-deep
-          huytd.nord-light
           pkief.material-icon-theme
           ms-dotnettools.vscode-dotnet-runtime
           ms-dotnettools.csharp
           ms-dotnettools.csdevkit
           ms-python.python
         ]
-        ++ (with marketplace-extensions; [ visualstudiotoolsforunity.vstuc ]);
+        ++ (with marketplace-extensions; [
+          visualstudiotoolsforunity.vstuc
+          marlosirapuan.nord-deep
+          huytd.nord-light
+        ]);
 
       userSettings = {
         editor = {
