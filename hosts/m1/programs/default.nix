@@ -2,7 +2,6 @@
 {
   imports = [
     ./brave.nix
-    ./unity-hub.nix
     ./zed.nix
     ./vscode.nix
     ./proton-drive.nix
