@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-stable-darwin.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,6 +35,7 @@
     inputs@{
       nix-darwin,
       nixpkgs,
+      nixpkgs-stable-darwin,
       home-manager,
       nix-homebrew,
       mac-app-util,
@@ -45,6 +47,10 @@
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = {
           inherit inputs;
+          pkgs-stable = import nixpkgs-stable-darwin {
+            system = "aarch64-darwin";
+            config.allowUnfree = true;
+          };
         };
         modules = [
           mac-app-util.darwinModules.default
@@ -56,6 +62,10 @@
       darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
         specialArgs = {
           inherit inputs;
+          pkgs-stable = import nixpkgs-stable-darwin {
+            system = "aarch64-darwin";
+            config.allowUnfree = true;
+          };
         };
         modules = [
           mac-app-util.darwinModules.default
