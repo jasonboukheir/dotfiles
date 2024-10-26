@@ -2,6 +2,7 @@
 {
   imports = [
     ./brave.nix
+    ./discord.nix
     ./dotnet.nix
     ./zed.nix
     ./vscode.nix
