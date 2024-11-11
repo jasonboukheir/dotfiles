@@ -23,7 +23,11 @@ in
           ms-dotnettools.csdevkit
           ms-python.python
         ]
-        ++ (with marketplace-extensions; [ visualstudiotoolsforunity.vstuc ]);
+        ++ (with marketplace-extensions; [
+          visualstudiotoolsforunity.vstuc
+          marlosirapuan.nord-deep
+          huytd.nord-light
+        ]);
 
       userSettings = {
         editor = {
