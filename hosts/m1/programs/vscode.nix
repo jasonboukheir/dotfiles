@@ -14,8 +14,9 @@ in
         with pkgs.vscode-extensions;
         [
           jnoortheen.nix-ide
-          marlosirapuan.nord-deep
+          arcticicestudio.nord-visual-studio-code
           huytd.nord-light
+          adorabilis.nord-midnight
           pkief.material-icon-theme
           ms-dotnettools.vscode-dotnet-runtime
           ms-dotnettools.csharp
@@ -85,17 +86,18 @@ in
         };
         window = {
           autoDetectColorScheme = true;
-          autoDetectHighContrast = false;
+          autoDetectHighContrast = true;
           enableMenuBarMnemonics = false;
           menuBarVisibility = "hidden";
           titleBarStyle = "native";
         };
         workbench = {
           activityBar.visible = true;
-          colorCustomizations."[Nord]" = { };
-          colorTheme = "Nord Deep";
-          preferredDarkColorTheme = "Nord Deep";
+          colorTheme = "Nord";
+          preferredDarkColorTheme = "Nord";
           preferredLightColorTheme = "Nord Light";
+          preferredHighContrastColorTheme = "Nord Midnight";
+          preferredHighContrastLightColorTheme = "Nord Light Brighter";
           commandPalette.preserveInput = true;
           editor = {
             enablePreview = false;
