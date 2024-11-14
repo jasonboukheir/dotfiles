@@ -5,6 +5,7 @@ let
 in
 {
   home-manager.users.jasonbk = {
+    home.packages = [ pkgs.dotnet-sdk_8 ];
     programs.vscode = {
       enable = true;
       package = pkgs.vscode;
@@ -132,6 +133,7 @@ in
         nix = {
           formatterPath = "nixfmt";
         };
+        "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "${pkgs.dotnet-sdk_8}";
       };
     };
   };
