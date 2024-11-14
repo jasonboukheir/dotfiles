@@ -16,8 +16,6 @@ in
         [
           jnoortheen.nix-ide
           arcticicestudio.nord-visual-studio-code
-          huytd.nord-light
-          adorabilis.nord-midnight
           pkief.material-icon-theme
           ms-dotnettools.vscode-dotnet-runtime
           ms-dotnettools.csharp
