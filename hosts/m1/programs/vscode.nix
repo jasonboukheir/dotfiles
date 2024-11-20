@@ -11,11 +11,13 @@ in
       package = pkgs.vscode;
       enableUpdateCheck = false;
       enableExtensionUpdateCheck = false;
+      mutableExtensionsDir = false;
       extensions =
         with pkgs.vscode-extensions;
         [
           jnoortheen.nix-ide
           arcticicestudio.nord-visual-studio-code
+          huytd.nord-light
           pkief.material-icon-theme
           ms-dotnettools.vscode-dotnet-runtime
           ms-dotnettools.csharp
@@ -23,9 +25,8 @@ in
           ms-python.python
         ]
         ++ (with marketplace-extensions; [
-          visualstudiotoolsforunity.vstuc
           marlosirapuan.nord-deep
-          huytd.nord-light
+          visualstudiotoolsforunity.vstuc
         ]);
 
       userSettings = {
