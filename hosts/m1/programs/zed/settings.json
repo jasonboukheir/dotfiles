@@ -8,8 +8,9 @@
 // from the command palette or from `Zed` application menu.
 {
   "auto_install_extensions": {
+    "git-firefly": true,
     "nix": true,
-    "zed": true
+    "zig": true
   },
   "auto_update": false,
   "ui_font_size": 14,
