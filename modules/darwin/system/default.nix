@@ -6,7 +6,6 @@
     ./desktopservices.nix
     ./dock.nix
     ./finder.nix
-    ./Safari.nix
     ./screencapture.nix
     ./SoftwareUpdate.nix
     ./WindowManager.nix
