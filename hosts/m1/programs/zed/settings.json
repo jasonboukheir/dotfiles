@@ -10,7 +10,8 @@
   "auto_install_extensions": {
     "git-firefly": true,
     "nix": true,
-    "zig": true
+    "zig": true,
+    "ruff": true
   },
   "auto_update": false,
   "ui_font_size": 14,
@@ -29,6 +30,23 @@
           "command": "nixfmt"
         }
       }
+    },
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      "format_on_save": "on",
+      "formatter": [
+        {
+          "code_actions": {
+            "source.organizeImports.ruff": true,
+            "source.fixAll.ruff": true
+          }
+        },
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ]
     }
   }
 }
