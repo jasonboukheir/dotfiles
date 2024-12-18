@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
   home-manager.users.jasonbk.home = {
-    packages = with pkgs; [ nerdfonts.fira_code ];
+    packages = with pkgs; [ nerd-fonts.fira-code ];
   };
 }

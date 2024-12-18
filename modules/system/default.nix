@@ -1,6 +1,6 @@
 { inputs, pkgs, ... }:
 {
-  imports = [ ./home-manager.nix ];
+  imports = [ ./home-manager.nix ./fonts.nix ];
 
   environment.systemPackages = with pkgs; [
     devbox
