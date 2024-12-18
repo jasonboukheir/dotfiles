@@ -1,5 +1,6 @@
 { pkgs, ... }:
 {
+  programs.zsh.enable = true;
   home-manager.users.jasonbk = {
     programs.zsh = {
       enable = true;
