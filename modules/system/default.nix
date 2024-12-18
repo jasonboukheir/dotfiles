@@ -1,22 +1,14 @@
 { inputs, pkgs, ... }:
 {
-  imports = [ ./home-manager.nix ./fonts.nix ];
-
-  environment.systemPackages = with pkgs; [
-    devbox
-    nixd
-    nixfmt-rfc-style
+  imports = [
+    ./home-manager.nix
+    ./fonts.nix
+    ./users.nix
   ];
 
   services.nix-daemon.enable = true;
   nix.settings.experimental-features = "nix-command flakes";
-  programs.zsh.enable = true;
   nixpkgs.config.allowUnfree = true;
-
-  users.users.jasonbk = {
-    home = "/Users/jasonbk";
-    shell = pkgs.zsh;
-  };
 
   system = {
     stateVersion = 4;
