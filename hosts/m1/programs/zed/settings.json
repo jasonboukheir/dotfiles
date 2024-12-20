@@ -48,5 +48,6 @@
         }
       ]
     }
-  }
+  },
+  "load_direnv": "shell_hook"
 }
