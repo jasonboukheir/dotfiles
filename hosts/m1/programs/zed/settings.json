@@ -8,6 +8,7 @@
 // from the command palette or from `Zed` application menu.
 {
   "auto_install_extensions": {
+    "csharp": true,
     "git-firefly": true,
     "nix": true,
     "zig": true,
