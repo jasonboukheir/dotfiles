@@ -2,6 +2,7 @@
 {
   imports = [
     ./devbox.nix
+    ./direnv.nix
     ./git.nix
     ./kitty.nix
     ./starship.nix
