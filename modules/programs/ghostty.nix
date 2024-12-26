@@ -10,7 +10,7 @@
       package = null;
       shellIntegration.enable = true;
       settings = {
-        font-size = 12;
+        font-size = 13;
         font-family = "FiraCode Nerd Font";
         theme = "dark:nord,light:nord-light";
         window-theme = "system";
