@@ -1,6 +1,9 @@
-{ ... }:
+{ ghostty, ... }:
 {
   home-manager = {
+    sharedModules = [
+
+    ];
     useGlobalPkgs = true;
     useUserPackages = true;
     users.jasonbk.home = {

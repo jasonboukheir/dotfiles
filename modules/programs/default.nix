@@ -3,8 +3,8 @@
   imports = [
     ./devbox.nix
     ./direnv.nix
+    ./ghostty.nix
     ./git.nix
-    ./kitty.nix
     ./starship.nix
     ./zsh.nix
     ./neovim.nix
