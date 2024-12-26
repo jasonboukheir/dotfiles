@@ -29,6 +29,8 @@
       url = "github:nix-community/nix-vscode-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ghostty.url = "github:ghostty-org/ghostty";
+    ghostty-hm.url = "github:clo4/ghostty-hm-module";
   };
 
   outputs =
@@ -39,38 +41,37 @@
       home-manager,
       nix-homebrew,
       mac-app-util,
+      ghostty,
+      ghostty-hm,
       ...
     }:
+    let
+      darwinSpecialArgs = {
+        inherit inputs;
+        system = "aarch64-darwin";
+        pkgs-stable = import nixpkgs-stable-darwin {
+          system = "aarch64-darwin";
+          config.allowUnfree = true;
+        };
+      };
+      darwinModules = [
+        mac-app-util.darwinModules.default
+        home-manager.darwinModules.home-manager
+        nix-homebrew.darwinModules.nix-homebrew
+      ];
+    in
     {
       # Build darwin flake using:
       # $ darwin-rebuild switch --flake .
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-        specialArgs = {
-          inherit inputs;
-          pkgs-stable = import nixpkgs-stable-darwin {
-            system = "aarch64-darwin";
-            config.allowUnfree = true;
-          };
-        };
-        modules = [
-          mac-app-util.darwinModules.default
-          home-manager.darwinModules.home-manager
-          nix-homebrew.darwinModules.nix-homebrew
+        specialArgs = darwinSpecialArgs;
+        modules = darwinModules ++ [
           ./hosts/m1
         ];
       };
       darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
-        specialArgs = {
-          inherit inputs;
-          pkgs-stable = import nixpkgs-stable-darwin {
-            system = "aarch64-darwin";
-            config.allowUnfree = true;
-          };
-        };
-        modules = [
-          mac-app-util.darwinModules.default
-          home-manager.darwinModules.home-manager
-          nix-homebrew.darwinModules.nix-homebrew
+        specialArgs = darwinSpecialArgs;
+        modules = darwinModules ++ [
           ./hosts/m3
         ];
       };
