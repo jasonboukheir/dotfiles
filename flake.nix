@@ -1,7 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-stable-darwin.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -11,7 +10,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     mac-app-util.url = "github:hraban/mac-app-util";
-    sops-nix.url = "github:Mic92/sops-nix";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
@@ -37,22 +35,15 @@
     inputs@{
       nix-darwin,
       nixpkgs,
-      nixpkgs-stable-darwin,
       home-manager,
       nix-homebrew,
       mac-app-util,
-      ghostty,
-      ghostty-hm,
       ...
     }:
     let
       darwinSpecialArgs = {
         inherit inputs;
         system = "aarch64-darwin";
-        pkgs-stable = import nixpkgs-stable-darwin {
-          system = "aarch64-darwin";
-          config.allowUnfree = true;
-        };
       };
       darwinModules = [
         mac-app-util.darwinModules.default
