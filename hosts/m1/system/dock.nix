@@ -2,7 +2,7 @@
 {
   system.defaults.dock = {
     persistent-apps = [
-      "/System/Cryptexes/App/System/Applications/Safari.app"
+      "${pkgs.brave}/Applications/Brave Browser.app"
       "/Applications/Ghostty.app"
       "${pkgs.zed-editor}/Applications/Zed.app"
       "/System/Applications/Messages.app"
