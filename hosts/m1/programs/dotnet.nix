@@ -1,4 +1,4 @@
 { pkgs, ... }:
 {
-  environment.systemPackages = with pkgs; [ dotnet-sdk_8 ];
+  environment.systemPackages = with pkgs; [ dotnetCorePackages.dotnet_8.sdk ];
 }
