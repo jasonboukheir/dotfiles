@@ -1,5 +1,8 @@
-{ inputs, system, ... }:
+{ inputs, ... }:
 {
+  homebrew.casks = [
+    "ghostty"
+  ];
   home-manager.users.jasonbk = {
     imports = [
       inputs.ghostty-hm.homeModules.default
