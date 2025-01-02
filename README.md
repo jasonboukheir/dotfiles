@@ -1,8 +1,6 @@
-# Experimental Nix Setup!
+# Nix Setup
 
-This is an experimental setup for using nix on my macbook (for now)!
-
-## (Experimental) Installation
+## Macos Installation
 
 1. Install nix
   ```sh
@@ -13,7 +11,7 @@ This is an experimental setup for using nix on my macbook (for now)!
   nix run nix-darwin -- switch --flake .
   ```
 
-## (Experimental) Updating
+## Updating
 
 ```sh
 darwin-rebuild switch --flake .
