@@ -1,16 +1,11 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    ghostty.url = "github:ghostty-org/ghostty";
+    ghostty-hm.url = "github:clo4/ghostty-hm-module";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    mac-app-util.url = "github:hraban/mac-app-util";
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -23,21 +18,30 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
+    mac-app-util.url = "github:hraban/mac-app-util";
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    ghostty.url = "github:ghostty-org/ghostty";
-    ghostty-hm.url = "github:clo4/ghostty-hm-module";
+    nixpkgs.url = "github:NixOS/nixpkgs";
+    nvf = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:notashelf/nvf";
+    };
   };
 
   outputs =
     inputs@{
-      nix-darwin,
-      nixpkgs,
       home-manager,
-      nix-homebrew,
       mac-app-util,
+      nix-darwin,
+      nix-homebrew,
+      nixpkgs,
       ...
     }:
     let
