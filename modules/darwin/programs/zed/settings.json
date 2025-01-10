@@ -50,5 +50,6 @@
       ]
     }
   },
-  "load_direnv": "shell_hook"
+  "load_direnv": "shell_hook",
+  "vim_mode": true
 }
