@@ -1,9 +1,19 @@
-{ ... }:
+{ inputs, ... }:
 {
   home-manager.users.jasonbk = {
-    programs.neovim = {
+    imports = [ inputs.nvf.homeManagerModules.default ];
+    programs.nvf = {
       enable = true;
-      vimAlias = true;
+      settings = {
+        vim.viAlias = true;
+        vim.vimAlias = true;
+        vim.lsp = {
+          enable = true;
+        };
+        vim.treesitter = {
+          enable = true;
+        };
+      };
     };
   };
 }
