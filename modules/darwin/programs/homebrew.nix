@@ -14,7 +14,6 @@
     enable = true;
     taps = builtins.attrNames config.nix-homebrew.taps;
     onActivation = {
-      autoUpdate = true;
       cleanup = "zap";
       upgrade = true;
     };
