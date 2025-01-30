@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ inputs, ... }:
 {
   imports = [
     ./home-manager.nix
@@ -7,7 +7,10 @@
   ];
 
   services.nix-daemon.enable = true;
-  nix.settings.experimental-features = "nix-command flakes";
+  nix.settings = {
+    access-tokens = "!include ./.secrets/github.pat";
+    experimental-features = "nix-command flakes";
+  };
   nixpkgs.config.allowUnfree = true;
 
   system = {

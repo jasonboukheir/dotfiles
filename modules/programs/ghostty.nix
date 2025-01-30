@@ -1,17 +1,13 @@
-{ inputs, ... }:
+{ ... }:
 {
   homebrew.casks = [
     "ghostty"
   ];
   home-manager.users.jasonbk = {
-    imports = [
-      inputs.ghostty-hm.homeModules.default
-    ];
     programs.ghostty = {
       enable = true;
-      # flake not supported in darwin... yet
       package = null;
-      shellIntegration.enable = true;
+      enableZshIntegration = true;
       settings = {
         font-size = 13;
         font-family = "FiraCode Nerd Font";
