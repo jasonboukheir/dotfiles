@@ -27,7 +27,7 @@
       url = "github:nix-community/nix-vscode-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
@@ -46,7 +46,6 @@
     let
       darwinSpecialArgs = {
         inherit inputs;
-        system = "aarch64-darwin";
       };
       darwinModules = [
         mac-app-util.darwinModules.default
