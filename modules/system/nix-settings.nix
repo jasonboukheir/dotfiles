@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  services.nix-daemon.enable = true;
+  nix.enable = true;
   nix.settings = {
     access-tokens = "!include ./.secrets/github.pat";
     experimental-features = "nix-command flakes";
