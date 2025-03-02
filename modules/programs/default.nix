@@ -5,11 +5,12 @@
     ./direnv.nix
     ./ghostty.nix
     ./git.nix
-    ./starship.nix
-    ./zsh.nix
     ./neovim.nix
     ./nix.nix
     ./ripgrep.nix
+    ./starship.nix
+    ./telegram.nix
+    ./zsh.nix
   ];
   home-manager.users.jasonbk = {
     programs.home-manager.enable = true;
