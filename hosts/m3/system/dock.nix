@@ -6,7 +6,6 @@
       "/Applications/Ghostty.app"
       "${pkgs.zed-editor}/Applications/Zed.app"
       "/Applications/VS Code @ FB.app"
-      "/Applications/Cisco/Cisco Secure Client.app"
     ];
   };
 }
