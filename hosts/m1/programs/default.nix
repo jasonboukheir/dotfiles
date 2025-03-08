@@ -4,8 +4,9 @@
     ./brave.nix
     ./discord.nix
     ./dotnet.nix
-    ./vscode.nix
-    ./proton-drive.nix
     ./iina.nix
+    ./proton-drive.nix
+    ./vscode.nix
+    ./xcode.nix
   ];
 }
