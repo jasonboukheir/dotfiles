@@ -8,7 +8,6 @@
       "/System/Applications/Messages.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Music.app"
-      "${pkgs.darwin.xcode_16_2}"
     ];
   };
 }

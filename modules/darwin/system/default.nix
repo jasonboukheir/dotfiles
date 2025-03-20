@@ -12,7 +12,7 @@
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
   home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
   system = {
     # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.

@@ -2,11 +2,11 @@
 {
   imports = [
     ./brave.nix
-    ./discord.nix
+    # ./discord.nix
     ./dotnet.nix
     ./iina.nix
     ./proton-drive.nix
-    ./vscode.nix
+    # ./vscode.nix
     ./xcode.nix
   ];
 }
