@@ -6,6 +6,7 @@
     ./desktopservices.nix
     ./dock.nix
     ./finder.nix
+    ./mouse.nix
     ./screencapture.nix
     ./SoftwareUpdate.nix
     ./WindowManager.nix
@@ -15,13 +16,6 @@
   security.pam.services.sudo_local.touchIdAuth = true;
   home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
   system = {
-    # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.
-    activationScripts.postActivation.text = ''
-      # activateSettings -u will reload the settings from the database and apply them to the current session,
-      # so we do not need to logout and login again to make the changes take effect.
-      /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
-    '';
-
     defaults.NSGlobalDomain = {
       # `defaults read NSGlobalDomain "xxx"`
       "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)
