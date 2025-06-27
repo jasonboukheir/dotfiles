@@ -5,11 +5,10 @@ let
 in
 {
   home-manager.users.jasonbk = {
-    home.packages = [ pkgs.dotnet-sdk_8 ];
     programs.vscode = {
       enable = true;
       package = pkgs.vscode;
-      mutableExtensionsDir = false;
+      mutableExtensionsDir = true;
       profiles.default = {
         enableUpdateCheck = false;
         enableExtensionUpdateCheck = false;
