@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   imports = [
     ./AdLib.nix
@@ -6,7 +6,9 @@
     ./desktopservices.nix
     ./dock.nix
     ./finder.nix
+    ./home-manager.nix
     ./mouse.nix
+    ./nix-darwin-settings.nix
     ./screencapture.nix
     ./SoftwareUpdate.nix
     ./WindowManager.nix
@@ -14,7 +16,6 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   security.pam.services.sudo_local.touchIdAuth = true;
-  home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
   system = {
     defaults.NSGlobalDomain = {
       # `defaults read NSGlobalDomain "xxx"`
