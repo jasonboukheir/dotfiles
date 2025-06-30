@@ -59,13 +59,13 @@
       darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         specialArgs = darwinSpecialArgs;
         modules = darwinModules ++ [
-          ./hosts/m1
+          ./hosts/home-macbook
         ];
       };
       darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
         specialArgs = darwinSpecialArgs;
         modules = darwinModules ++ [
-          ./hosts/m3
+          ./hosts/work-macbook
         ];
       };
       nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
