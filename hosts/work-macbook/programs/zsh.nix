@@ -6,7 +6,7 @@ let
 in
 {
   home-manager.users.jasonbk.programs.zsh = {
-    initExtra = ''
+    initContent = ''
       ${RC_MARKER}
       export ANDROID_SDK=${SDK_DIR}
       export ANDROID_NDK_REPOSITORY=${NDK_DIR}
