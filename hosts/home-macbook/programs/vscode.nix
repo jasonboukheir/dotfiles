@@ -75,8 +75,8 @@ in
           terminal = {
             explorerKind = "external";
             external = {
-              linuxExec = "tilix";
-              osxExex = "kitty";
+              linuxExec = "ghostty";
+              osxExex = "ghostty";
             };
             integrated = {
               cursorStyle = "underline";
