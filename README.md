@@ -2,7 +2,7 @@
 
 ## Macos Installation
 
-1. Install nix
+1. Install nix (via lix)
   ```sh
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
   ```
