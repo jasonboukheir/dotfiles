@@ -8,16 +8,6 @@
         recursive = true;
       };
     };
-    # home.activation.symlinkZedCli = ''
-    #   if [ -f "${pkgs.zed-editor}/bin/zeditor" ]; then
-    #     echo '===='
-    #     echo 'Link Zed Editor to usr bin to install CLI'
-    #     echo 'sudo ln -sf "$(which zeditor)" /usr/local/bin/zed'
-    #     echo '===='
-    #   else
-    #     echo "Zed editor not installed, skipping symlink creation"
-    #   fi
-    # '';
   };
 
   system.activationScripts.postActivation.text = ''

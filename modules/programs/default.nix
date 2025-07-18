@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./1password.nix
     ./devbox.nix
     ./direnv.nix
     ./ghostty.nix
