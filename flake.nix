@@ -42,30 +42,42 @@
       nixpkgs,
       ...
     }:
-    let
-      darwinSpecialArgs = {
-        inherit inputs;
-      };
-      darwinModules = [
-        mac-app-util.darwinModules.default
-        home-manager.darwinModules.home-manager
-        nix-homebrew.darwinModules.nix-homebrew
-      ];
-    in
     {
       # Build darwin flake using:
       # $ darwin-rebuild switch --flake .
-      darwinConfigurations."Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-        specialArgs = darwinSpecialArgs;
-        modules = darwinModules ++ [
-          ./hosts/home-macbook
-        ];
-      };
-      darwinConfigurations."jasonbk-mac" = nix-darwin.lib.darwinSystem {
-        specialArgs = darwinSpecialArgs;
-        modules = darwinModules ++ [
-          ./hosts/work-macbook
-        ];
+      darwinConfigurations =
+        let
+          darwinSpecialArgs = {
+            inherit inputs;
+          };
+          darwinModules = [
+            mac-app-util.darwinModules.default
+            home-manager.darwinModules.home-manager
+            nix-homebrew.darwinModules.nix-homebrew
+          ];
+        in
+        {
+          "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+            specialArgs = darwinSpecialArgs;
+            modules = darwinModules ++ [
+              ./hosts/home-macbook
+            ];
+          };
+          "jasonbk-mac" = nix-darwin.lib.darwinSystem {
+            specialArgs = darwinSpecialArgs;
+            modules = darwinModules ++ [
+              ./hosts/work-macbook
+            ];
+          };
+        };
+
+      nixosConfigurations = {
+        brutus = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./hosts/brutus
+          ];
+        };
       };
       nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
     };
