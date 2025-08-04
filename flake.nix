@@ -75,6 +75,7 @@
         brutus = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+	    home-manager.nixosModules.home-manager
             ./hosts/brutus
           ];
         };
