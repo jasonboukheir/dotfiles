@@ -13,14 +13,6 @@
       ../../modules/programs/neovim.nix
     ];
 
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "1password-gui"
-    "1password-cli"
-    "1password"
-    ];
-
-  programs._1password.enable = true;
-
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
