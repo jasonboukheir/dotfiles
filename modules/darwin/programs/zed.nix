@@ -27,9 +27,11 @@
         vim_mode = true;
         languages = {
           "Nix" = {
-            formatter.external = {
-              arguments = [ ];
-              command = "nixfmt";
+            formatter = {
+              external = {
+                arguments = [ ];
+                command = "nixfmt";
+              };
             };
           };
           "Python" = {
@@ -41,8 +43,8 @@
             formatter = [
               {
                 code_actions = {
-                  source.organizeImports.ruff = true;
-                  source.fixAll.ruff = true;
+                  "source.organizeImports.ruff" = true;
+                  "source.fixAll.ruff" = true;
                 };
               }
               {
