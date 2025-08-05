@@ -18,7 +18,10 @@ in
       };
       ssh = {
         enable = true;
-        matchBlocks."*".identityAgent = "${onePassPath}";
+        extraConfig = ''
+          Host *
+              IdentityAgent "${onePassPath}"
+        '';
         matchBlocks.brutus.forwardAgent = true;
       };
     };
