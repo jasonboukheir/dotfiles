@@ -10,7 +10,7 @@ in
         extraConfig = {
           gpg.format = "ssh";
           "gpg \"ssh\"" = {
-            program = "${pkgs._1password-gui}/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+            program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
           };
           commit.gpgsign = true;
           user.signingKey = signingKey;
