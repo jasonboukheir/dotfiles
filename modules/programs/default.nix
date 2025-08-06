@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./1password.nix
+    # ./1password.nix
     ./devbox.nix
     ./direnv.nix
     ./ghostty.nix
@@ -12,6 +12,9 @@
     ./starship.nix
     ./telegram.nix
     ./zsh.nix
+  ];
+  home-manager.sharedModules = [
+    ./1password.nix
   ];
   home-manager.users.jasonbk = {
     programs.home-manager.enable = true;
