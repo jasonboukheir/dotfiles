@@ -49,6 +49,7 @@
         let
           darwinSpecialArgs = {
             inherit inputs;
+            system = "aarch64-darwin";
           };
           darwinModules = [
             mac-app-util.darwinModules.default
@@ -75,7 +76,7 @@
         brutus = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
-	    home-manager.nixosModules.home-manager
+            home-manager.nixosModules.home-manager
             ./hosts/brutus
           ];
         };

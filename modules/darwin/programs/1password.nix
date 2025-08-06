@@ -1,29 +1,8 @@
-{ pkgs, ... }:
-let
-  onePassPath = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
-  signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
-in
+{ ... }:
 {
   home-manager.users.jasonbk = {
-    programs = {
-      git = {
-        extraConfig = {
-          gpg.format = "ssh";
-          "gpg \"ssh\"" = {
-            program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-          };
-          commit.gpgsign = true;
-          user.signingKey = signingKey;
-        };
-      };
-      ssh = {
-        enable = true;
-        extraConfig = ''
-          Host *
-              IdentityAgent "${onePassPath}"
-        '';
-        matchBlocks.brutus.forwardAgent = true;
-      };
-    };
+    programs._1password.enable = true;
+    programs.git.enable = true;
+    programs.ssh.enable = true;
   };
 }
