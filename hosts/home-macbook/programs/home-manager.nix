@@ -5,5 +5,7 @@
     _1password.enable = true;
     git.enable = true;
     ssh.enable = true;
+    zed-editor.enable = true;
+    devbox.enable = true;
   };
 }

@@ -1,6 +1,8 @@
 { ... }:
 {
   imports = [
-    ./1password.nix
+    ./zed-editor
+    ./_1password.nix
+    ./devbox.nix
   ];
 }

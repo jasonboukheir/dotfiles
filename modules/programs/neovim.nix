@@ -13,10 +13,6 @@
         vim.treesitter = {
           enable = true;
         };
-        vim.theme = {
-          enable = true;
-          name = "nord";
-        };
         vim.luaConfigRC.myConfig = # lua
           ''
             vim.opt.tabstop = 2
