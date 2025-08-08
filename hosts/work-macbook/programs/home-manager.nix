@@ -6,5 +6,6 @@
     git.enable = true;
     ssh.enable = true;
     zed-editor.enable = true;
+    ghostty.enable = true;
   };
 }

@@ -1,9 +1,6 @@
 { ... }:
 {
   imports = [
-    ./devbox.nix
-    ./direnv.nix
-    ./ghostty.nix
     ./git.nix
     ./neovim.nix
     ./nix.nix
