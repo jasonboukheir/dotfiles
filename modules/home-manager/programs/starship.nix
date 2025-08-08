@@ -1,9 +1,7 @@
-{ pkgs, ... }:
+{ config, lib, ... }:
 {
-  home-manager.users.jasonbk = {
-    home.packages = [ pkgs.starship ];
+  config = lib.mkIf config.programs.starship.enable {
     programs.starship = {
-      enable = true;
       settings = {
         add_newline = false;
         character = {
