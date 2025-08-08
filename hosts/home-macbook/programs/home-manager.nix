@@ -8,5 +8,6 @@
     zed-editor.enable = true;
     devbox.enable = true;
     ghostty.enable = true;
+    starship.enable = true;
   };
 }

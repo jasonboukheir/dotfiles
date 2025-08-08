@@ -5,5 +5,6 @@
     ./_1password.nix
     ./devbox.nix
     ./ghostty.nix
+    ./starship.nix
   ];
 }
