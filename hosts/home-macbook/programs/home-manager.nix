@@ -7,5 +7,6 @@
     ssh.enable = true;
     zed-editor.enable = true;
     devbox.enable = true;
+    ghostty.enable = true;
   };
 }

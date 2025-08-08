@@ -1,13 +1,13 @@
-{ ... }:
 {
-  homebrew.casks = [
-    "ghostty"
-  ];
-  home-manager.users.jasonbk = {
+  lib,
+  config,
+  pkgs,
+  ...
+}:
+{
+  config = lib.mkIf config.programs.ghostty.enable {
     programs.ghostty = {
-      enable = true;
-      package = null;
-      enableZshIntegration = true;
+      package = lib.mkIf pkgs.stdenv.isDarwin null;
       settings = {
         font-size = 13;
         font-family = "FiraCode Nerd Font";
