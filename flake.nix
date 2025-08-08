@@ -49,7 +49,6 @@
         let
           darwinSpecialArgs = {
             inherit inputs;
-            system = "aarch64-darwin";
           };
           darwinModules = [
             mac-app-util.darwinModules.default
