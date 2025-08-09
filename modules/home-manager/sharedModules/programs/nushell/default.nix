@@ -4,6 +4,10 @@
     programs.nushell = {
       configFile.source = ./config.nu;
     };
+    programs.carapace = {
+      enable = true;
+      enableNushellIntegration = true;
+    };
     home.shell.enableNushellIntegration = true;
   };
 }
