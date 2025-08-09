@@ -11,6 +11,7 @@
         "csharp"
         "git-firefly"
         "nix"
+        "nu"
         "zig"
         "ruff"
       ];
