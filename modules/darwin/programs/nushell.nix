@@ -98,5 +98,16 @@ in
       # This file is sourced for all Nushell instances.
       ${cfg.interactiveShellInit}
     '';
+
+    home-manager.users.jasonbk = {
+      programs.nushell = {
+        extraEnv = ''
+          source /etc/nushell/system-env.nu
+        '';
+        extraConfig = ''
+          source /etc/nushell/system-config.nu
+        '';
+      };
+    };
   };
 }
