@@ -12,7 +12,7 @@ in
   options = {
     programs.nushell.enable = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Whether to configure Nushell as an interactive shell.";
     };
     programs.nushell.variables = mkOption {
