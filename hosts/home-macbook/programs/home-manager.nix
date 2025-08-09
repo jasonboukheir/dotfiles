@@ -9,5 +9,7 @@
     devbox.enable = true;
     ghostty.enable = true;
     starship.enable = true;
+    nushell.enable = true;
+    zsh.enable = true;
   };
 }

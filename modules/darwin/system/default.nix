@@ -13,6 +13,7 @@
     ./screencapture.nix
     ./security.nix
     ./SoftwareUpdate.nix
+    ./users.nix
     ./WindowManager.nix
   ];
 

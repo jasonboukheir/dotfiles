@@ -4,6 +4,6 @@
     ./git.nix
     ./neovim.nix
     ./nix.nix
-    ./zsh.nix
+    ./nushell.nix
   ];
 }
