@@ -1,4 +1,0 @@
-{ ... }:
-{
-  nerd-fonts.enable = false;
-}
