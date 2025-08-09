@@ -1,6 +1,6 @@
-{ ... }:
+{ pkgs, lib, ... }:
 {
-  imports = [
+  imports = lib.mkIf pkgs.stdenv.isDarwin [
     ./programs
     ./system
   ];

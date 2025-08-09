@@ -1,7 +1,8 @@
 { ... }:
 {
   imports = [
+    ./darwin
+    ./home-manager
     ./programs
-    ./system
   ];
 }
