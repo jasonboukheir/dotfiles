@@ -1,6 +1,12 @@
 { ... }:
 {
-  home-manager.sharedModules = [
-    ./programs
+  imports = [
+    ./jasonbk
+    ./sharedModules
   ];
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+  };
 }

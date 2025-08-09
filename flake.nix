@@ -47,7 +47,7 @@
       # $ darwin-rebuild switch --flake .
       darwinConfigurations =
         let
-          darwinSpecialArgs = {
+          specialArgs = {
             inherit inputs;
           };
           darwinModules = [
@@ -58,13 +58,13 @@
         in
         {
           "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-            specialArgs = darwinSpecialArgs;
+            specialArgs = specialArgs;
             modules = darwinModules ++ [
               ./hosts/home-macbook
             ];
           };
           "jasonbk-mac" = nix-darwin.lib.darwinSystem {
-            specialArgs = darwinSpecialArgs;
+            specialArgs = specialArgs;
             modules = darwinModules ++ [
               ./hosts/work-macbook
             ];

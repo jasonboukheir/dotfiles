@@ -5,6 +5,7 @@
 }:
 {
   config = lib.mkIf config.programs.zed-editor.enable {
+    programs.nix.formatters.enable = true;
     programs.zed-editor = {
       extensions = [
         "csharp"

@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ./git.nix
-    ./nushell.nix
+    ./openssh.nix
   ];
 }

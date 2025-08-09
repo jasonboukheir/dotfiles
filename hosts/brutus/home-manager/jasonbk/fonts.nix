@@ -1,0 +1,4 @@
+{ ... }:
+{
+  fonts.enable = false;
+}
