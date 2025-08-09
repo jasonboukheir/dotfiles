@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ lib, ... }:
 {
-  config.programs.nvf.enable = lib.mkDefault true;
+  programs.nvf.enable = lib.mkDefault true;
 }

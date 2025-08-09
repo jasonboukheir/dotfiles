@@ -1,6 +1,5 @@
-{ config, lib, inputs, ... }:
+{ config, lib, ... }:
 {
-  imports = [ inputs.nvf.homeManagerModules.default ];
   config = lib.mkIf config.programs.nvf.enable {
     programs.nvf.settings = {
       vim.viAlias = true;
@@ -19,5 +18,5 @@
           vim.opt.expandtab = true
         '';
     };
-  }
+  };
 }

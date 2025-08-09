@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ lib, ... }:
 {
-  config.programs.home-manager.enable = lib.mkDefault true;
+  programs.home-manager.enable = lib.mkDefault true;
 }

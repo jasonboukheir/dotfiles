@@ -1,4 +1,4 @@
-{ config, ... }:
+{ lib, ... }:
 {
-  config.programs.nushell = lib.mkDefault true;
+  programs.nushell.enable = lib.mkDefault true;
 }
