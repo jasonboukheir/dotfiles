@@ -38,11 +38,9 @@ in
     ];
     programs.git = lib.mkIf (config.programs.git.enable && config.programs.ssh.enable) {
       extraConfig = {
-        gpg.format = "ssh";
         "gpg \"ssh\"" = {
           program = onePassSshSignPath;
         };
-        commit.gpgsign = true;
         user.signingKey = signingKey;
       };
     };

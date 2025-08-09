@@ -1,7 +1,7 @@
 { ... }:
 {
-  home-manager.users.jasonbk.home.stateVersion = "25.05";
-  home-manager.users.jasonbk.imports = [
-    ./fonts.nix
+  home.stateVersion = "25.05";
+  imports = [
+    ./disable-nerd-fonts.nix
   ];
 }
