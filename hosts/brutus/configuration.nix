@@ -6,12 +6,6 @@
 
 {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ../../modules/system/home-manager.nix
-      ../../modules/programs/neovim.nix
-    ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -56,9 +50,6 @@
     isNormalUser = true;
     description = "Jason Bou Kheir";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      git
-    ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOBXQLA93+Bth7CcvuDjlu10Z03GmFg3CSLH4z+inadP"
     ];
@@ -71,29 +62,5 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
-
-  home-manager.users.jasonbk.home.stateVersion = "25.05";
-  home-manager.users.jasonbk = {
-	  programs.ssh = {
-	    enable = true;
-	  };
-    programs.git = {
-      enable = true;
-      extraConfig = {
-        gpg.format = "ssh";
-        commit.gpgsign = true;
-        user.signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
-      };
-      lfs.enable = true;
-      userName = "Jason Elie Bou Kheir";
-      userEmail = "5115126+jasonboukheir@users.noreply.github.com";
-      extraConfig = {
-        init.defaultBranch = "main";
-        merge.tool = "nvim";
-        diff.tool = "nvim";
-        core.editor = "nvim";
-      };
-    };
-  };
 
 }
