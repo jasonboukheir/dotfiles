@@ -45,15 +45,6 @@
     variant = "";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.jasonbk = {
-    isNormalUser = true;
-    description = "Jason Bou Kheir";
-    extraGroups = [ "networkmanager" "wheel" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOBXQLA93+Bth7CcvuDjlu10Z03GmFg3CSLH4z+inadP"
-    ];
-  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
