@@ -1,3 +1,6 @@
 {lib, ...}: {
-  programs.direnv.enable = lib.mkDefault true;
+  programs.direnv = {
+    enable = lib.mkDefault true;
+    nix-direnv.enable = true;
+  };
 }
