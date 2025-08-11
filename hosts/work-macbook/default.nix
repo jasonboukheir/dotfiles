@@ -3,7 +3,7 @@
   imports = [
     ./../../modules
     ./../../modules/darwin
-    ./programs
+    ./home-manager
     ./system
   ];
 }
