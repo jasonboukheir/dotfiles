@@ -1,5 +1,8 @@
-{ config, lib, ... }:
 {
+  config,
+  lib,
+  ...
+}: {
   config = lib.mkIf config.programs.starship.enable {
     programs.starship = {
       settings = {

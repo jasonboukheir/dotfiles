@@ -1,7 +1,6 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home-manager.users.jasonbk = {
-    home.packages = [ pkgs.discord ];
+    home.packages = [pkgs.discord];
     home.file = {
       ".config/discord" = {
         source = ./discord;

@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   system.defaults.CustomUserPreferences = {
     "com.apple.SoftwareUpdate" = {
       AutomaticCheckEnabled = true;

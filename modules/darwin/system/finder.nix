@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   system.defaults.finder = {
     _FXShowPosixPathInTitle = true;
     AppleShowAllFiles = true;

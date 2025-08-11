@@ -4,11 +4,9 @@
   pkgs,
   ...
 }:
-with lib;
-let
+with lib; let
   cfg = config.programs.nushell;
-in
-{
+in {
   options = {
     programs.nushell.enable = mkOption {
       type = types.bool;
@@ -17,7 +15,7 @@ in
     };
     programs.nushell.variables = mkOption {
       type = types.attrsOf types.str;
-      default = { };
+      default = {};
       description = ''
         A set of environment variables used in the global environment.
         These variables will be set on shell initialisation via system-env.nu.
@@ -35,8 +33,8 @@ in
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.nushell ];
-    environment.shells = [ pkgs.nushell ];
+    environment.systemPackages = [pkgs.nushell];
+    environment.shells = [pkgs.nushell];
     environment.etc."nushell/system-env.nu".text = ''
       # /etc/nushell/system-env.nu: DO NOT EDIT -- this file has been generated automatically.
       # This file is sourced for all Nushell instances.

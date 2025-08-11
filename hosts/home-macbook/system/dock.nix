@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   system.defaults.dock = {
     persistent-apps = [
       "${pkgs.brave}/Applications/Brave Browser.app"

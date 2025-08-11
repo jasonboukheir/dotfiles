@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   system.defaults.dock = {
     persistent-apps = [
       "/Applications/Google Chrome.app"

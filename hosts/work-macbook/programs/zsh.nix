@@ -1,10 +1,8 @@
-{ ... }:
-let
+{...}: let
   RC_MARKER = "# added by setup_fb4a.sh";
   SDK_DIR = "/opt/android_sdk";
   NDK_DIR = "/opt/android_ndk";
-in
-{
+in {
   home-manager.users.jasonbk.programs.zsh = {
     initContent = ''
       ${RC_MARKER}
