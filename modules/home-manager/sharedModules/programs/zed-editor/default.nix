@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }: {
   config = lib.mkIf config.programs.zed-editor.enable {
