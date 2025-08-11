@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./ghostty.nix
     ./git.nix

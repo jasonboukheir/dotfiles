@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./dock.nix
     ./home-manager.nix

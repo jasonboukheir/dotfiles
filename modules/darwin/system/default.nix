@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./AdLib.nix
     ./darkmode.nix

@@ -1,5 +1,4 @@
-{ config, ... }:
-{
+{config, ...}: {
   services.traefik = {
     enable = true;
     environmentFiles = [
@@ -42,7 +41,7 @@
           dashboard = {
             rule = ''Host(`traefik.sunnycareboo.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))'';
             service = "api@internal";
-            entryPoints = [ "websecure" ];
+            entryPoints = ["websecure"];
           };
         };
       };

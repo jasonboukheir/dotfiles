@@ -2,8 +2,7 @@
   inputs,
   config,
   ...
-}:
-{
+}: {
   nix-homebrew = {
     user = "jasonbk";
     enable = true;

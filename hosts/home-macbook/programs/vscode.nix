@@ -1,9 +1,11 @@
-{ inputs, pkgs, ... }:
-let
+{
+  inputs,
+  pkgs,
+  ...
+}: let
   nix-vscode-extensions = inputs.nix-vscode-extensions.extensions.${pkgs.system};
   marketplace-extensions = nix-vscode-extensions.vscode-marketplace;
-in
-{
+in {
   home-manager.users.jasonbk = {
     programs.vscode = {
       enable = true;
@@ -12,8 +14,7 @@ in
       profiles.default = {
         enableUpdateCheck = false;
         enableExtensionUpdateCheck = false;
-        extensions =
-          with pkgs.vscode-extensions;
+        extensions = with pkgs.vscode-extensions;
           [
             jnoortheen.nix-ide
             arcticicestudio.nord-visual-studio-code
@@ -48,7 +49,7 @@ in
             snippetSuggestions = "top";
             tabCompletion = "onlySnippets";
             tabSize = 4;
-            tokenColorCustomizations."[Nord]".textMateRules = [ ];
+            tokenColorCustomizations."[Nord]".textMateRules = [];
             wordWrapColumn = 120;
           };
           explorer = {

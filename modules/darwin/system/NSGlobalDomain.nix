@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   system.defaults.NSGlobalDomain = {
     # `defaults read NSGlobalDomain "xxx"`
     "com.apple.swipescrolldirection" = false; # enable natural scrolling(default to true)

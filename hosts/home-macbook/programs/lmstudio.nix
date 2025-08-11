@@ -1,4 +1,3 @@
-{ ... }:
-{
-  homebrew.casks = [ "lm-studio" ];
+{...}: {
+  homebrew.casks = ["lm-studio"];
 }

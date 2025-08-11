@@ -1,5 +1,4 @@
-{ inputs, ... }:
-{
+{inputs, ...}: {
   nix.enable = true;
   nix.settings = {
     access-tokens = "!include ./.secrets/github.pat";

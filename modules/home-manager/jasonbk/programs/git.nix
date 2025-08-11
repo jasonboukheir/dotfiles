@@ -1,5 +1,8 @@
-{ config, lib, ... }:
 {
+  config,
+  lib,
+  ...
+}: {
   programs.git = {
     enable = lib.mkDefault true;
     lfs.enable = true;
@@ -17,6 +20,6 @@
         commit.gpgsign = true;
       })
     ];
-    ignores = [ ".DS_Store" ];
+    ignores = [".DS_Store"];
   };
 }

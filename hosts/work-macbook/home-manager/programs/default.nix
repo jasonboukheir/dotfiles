@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./nushell
     ./_1password.nix

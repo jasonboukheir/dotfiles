@@ -3,8 +3,7 @@
   config,
   pkgs,
   ...
-}:
-{
+}: {
   config = lib.mkIf config.programs.ghostty.enable {
     programs.ghostty = {
       package = lib.mkIf pkgs.stdenv.isDarwin null;

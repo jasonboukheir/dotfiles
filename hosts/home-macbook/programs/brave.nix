@@ -1,5 +1,4 @@
-{ ... }:
-let
+{...}: let
   ext = {
     "1password" = {
       id = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
@@ -11,8 +10,7 @@ let
       id = "dhlnjfhjjbminbjbegeiijdakdkamjoi";
     };
   };
-in
-{
+in {
   home-manager.users.jasonbk = {
     programs.brave = {
       enable = true;

@@ -1,4 +1,3 @@
-{ ... }:
-{
-  homebrew.casks = [ "proton-drive" ];
+{...}: {
+  homebrew.casks = ["proton-drive"];
 }

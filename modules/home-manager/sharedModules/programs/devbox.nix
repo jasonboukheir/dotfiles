@@ -3,8 +3,7 @@
   config,
   pkgs,
   ...
-}:
-{
+}: {
   options = {
     programs.devbox = {
       enable = lib.mkEnableOption "Enable Devbox";

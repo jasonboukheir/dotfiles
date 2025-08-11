@@ -1,5 +1,4 @@
-{ ... }:
-let
+{...}: let
   # for modifier support, check https://github.com/LnL7/nix-darwin/issues/998
   modifiers = {
     none = 0;
@@ -7,12 +6,11 @@ let
     cmd = 1048576;
     "option+cmd" = 1573864;
   };
-in
-{
+in {
   system.defaults.dock = {
     autohide = true;
     autohide-delay = 0.0;
-    persistent-others = [ ];
+    persistent-others = [];
     orientation = "left";
     show-recents = false;
     wvous-tr-corner = 13;

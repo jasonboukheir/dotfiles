@@ -1,6 +1,5 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home-manager.users.jasonbk = {
-    home.packages = [ pkgs.iina ];
+    home.packages = [pkgs.iina];
   };
 }
