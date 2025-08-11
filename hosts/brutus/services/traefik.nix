@@ -1,10 +1,10 @@
-{ ... }:
+{ config, ... }:
 {
   services.traefik = {
       enable = true;
 
       environmentFiles = [
-        "/var/lib/secrets/sunnycareboo.com.cloudflare.token",
+        "/var/lib/secrets/sunnycareboo.com.cloudflare.token"
       ];
 
       staticConfigOptions = {
@@ -36,7 +36,7 @@
           storage = "${config.services.traefik.dataDir}/acme.json";
           dnsChallenge = {
             provider = "cloudflare";
-            resolvers = ["8.8.8.8:53", "8.8.4.4:53"];
+            resolvers = ["8.8.8.8:53" "8.8.4.4:53"];
           };
         };
 
