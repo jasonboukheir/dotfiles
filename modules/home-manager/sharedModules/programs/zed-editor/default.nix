@@ -5,9 +5,6 @@
   ...
 }: {
   config = lib.mkIf config.programs.zed-editor.enable {
-    # home.packages = with pkgs; [
-    #   nixd alejandra nushell
-    # ];
     programs.zed-editor = {
       extensions = [
         "csharp"
@@ -17,7 +14,6 @@
         "zig"
         "ruff"
       ];
-      # extraPackages = with pkgs; [ nixd alejandra nushell ];
       installRemoteServer = true;
       themes = {
         "Nord" = ./themes/nord.json;
