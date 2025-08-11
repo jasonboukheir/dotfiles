@@ -33,53 +33,61 @@
     };
   };
 
-  outputs =
-    inputs@{
-      home-manager,
-      mac-app-util,
-      nix-darwin,
-      nix-homebrew,
-      nixpkgs,
-      ...
-    }:
-    {
-      # Build darwin flake using:
-      # $ darwin-rebuild switch --flake .
-      darwinConfigurations =
-        let
-          specialArgs = {
-            inherit inputs;
-          };
-          darwinModules = [
-            mac-app-util.darwinModules.default
-            home-manager.darwinModules.home-manager
-            nix-homebrew.darwinModules.nix-homebrew
-          ];
-        in
-        {
-          "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-            specialArgs = specialArgs;
-            modules = darwinModules ++ [
-              ./hosts/home-macbook
-            ];
-          };
-          "jasonbk-mac" = nix-darwin.lib.darwinSystem {
-            specialArgs = specialArgs;
-            modules = darwinModules ++ [
-              ./hosts/work-macbook
-            ];
-          };
-        };
-
-      nixosConfigurations = {
-        brutus = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
-          modules = [
-            home-manager.nixosModules.home-manager
-            ./hosts/brutus
-          ];
-        };
+  outputs = inputs @ {
+    home-manager,
+    mac-app-util,
+    nix-darwin,
+    nix-homebrew,
+    nixpkgs,
+    ...
+  }: let
+    forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+  in {
+    # Build darwin flake using:
+    # $ darwin-rebuild switch --flake .
+    darwinConfigurations = let
+      specialArgs = {
+        inherit inputs;
       };
-      nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
+      darwinModules = [
+        mac-app-util.darwinModules.default
+        home-manager.darwinModules.home-manager
+        nix-homebrew.darwinModules.nix-homebrew
+      ];
+    in {
+      "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+        specialArgs = specialArgs;
+        modules =
+          darwinModules
+          ++ [
+            ./hosts/home-macbook
+          ];
+      };
+      "jasonbk-mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = specialArgs;
+        modules =
+          darwinModules
+          ++ [
+            ./hosts/work-macbook
+          ];
+      };
     };
+
+    nixosConfigurations = {
+      brutus = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          home-manager.nixosModules.home-manager
+          ./hosts/brutus
+        ];
+      };
+    };
+    nix.nixPath = ["nixpkgs=${nixpkgs}"];
+
+    devShells = forAllSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+    in {
+      default = import ./shell.nix {inherit pkgs;};
+    });
+  };
 }

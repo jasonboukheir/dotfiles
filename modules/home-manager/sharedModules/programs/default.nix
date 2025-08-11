@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ./nix
     ./nushell
     ./zed-editor
     ./_1password.nix
