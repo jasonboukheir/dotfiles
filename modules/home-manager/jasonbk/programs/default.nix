@@ -1,6 +1,6 @@
-{ ... }:
-{
+{...}: {
   imports = [
+    ./direnv.nix
     ./git.nix
     ./home-manager.nix
     ./nushell.nix

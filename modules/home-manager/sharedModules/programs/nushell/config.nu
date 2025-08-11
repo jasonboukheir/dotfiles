@@ -262,4 +262,5 @@ $env.config = {
         completer: $carapace_completer # check 'carapace_completer'
         }
     }
+    show_banner: false
 }

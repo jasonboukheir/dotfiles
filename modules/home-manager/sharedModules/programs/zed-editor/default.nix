@@ -1,11 +1,13 @@
 {
   lib,
   config,
+  pkgs,
   ...
-}:
-{
+}: {
   config = lib.mkIf config.programs.zed-editor.enable {
-    programs.nix.formatters.enable = true;
+    # home.packages = with pkgs; [
+    #   nixd alejandra nushell
+    # ];
     programs.zed-editor = {
       extensions = [
         "csharp"
@@ -15,6 +17,7 @@
         "zig"
         "ruff"
       ];
+      # extraPackages = with pkgs; [ nixd alejandra nushell ];
       installRemoteServer = true;
       themes = {
         "Nord" = ./themes/nord.json;
@@ -32,10 +35,11 @@
           vim_mode = true;
           languages = {
             "Nix" = {
+              language_servers = ["nixd" "!nil"];
               formatter = {
                 external = {
-                  arguments = [ ];
-                  command = "nixfmt";
+                  arguments = ["--quiet" "--"];
+                  command = "alejandra";
                 };
               };
             };
