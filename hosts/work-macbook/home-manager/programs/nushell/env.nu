@@ -1,5 +1,25 @@
-# BEGIN added by setup_fb4a.sh
+if (ls /usr/libexec/path_helper | where type == 'file' | is-not-empty) {
+    let path_helper_output = (/usr/libexec/path_helper -s | lines)
+    for line in $path_helper_output {
+        let parts = ($line | split row ";")
+        let assignment = ($parts | get 0 | str trim)
+        if ($assignment | str contains "=") {
+            let var = ($assignment | split row "=" | get 0 | str trim)
+            let val = ($assignment | split row "=" | get 1 | str trim | str replace -a --regex '^"|"$' '')
+            if $var == "PATH" or $var == "MANPATH" {
+                # Split colon-separated string into a list
+                let paths = ($val | split row ":")
+                $env.$var = $paths
+                print $"setting ($var) to ($paths)"
+            } else {
+                $env.$var = $val
+                print $"setting ($var) to ($val)"
+            }
+        }
+    }
+}
 
+# BEGIN added by setup_fb4a.sh
 $env.ANDROID_SDK = "/opt/android_sdk"
 $env.ANDROID_NDK_REPOSITORY = "/opt/android_ndk"
 $env.ANDROID_HOME = $env.ANDROID_SDK
