@@ -40,12 +40,5 @@ in {
         user.signingKey = signingKey;
       };
     };
-    programs.ssh = lib.mkIf config.programs.ssh.enable {
-      extraConfig = ''
-        Host *
-            IdentityAgent "${onePassAgentPath}"
-      '';
-      matchBlocks.brutus.forwardAgent = true;
-    };
   };
 }
