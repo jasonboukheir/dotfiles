@@ -1,3 +1,5 @@
+mut new_path: list<string> = []
+mut new_manpath: list<string> = []
 if (ls /usr/libexec/path_helper | where type == 'file' | is-not-empty) {
     let path_helper_output = (/usr/libexec/path_helper -s | lines)
     for line in $path_helper_output {
@@ -7,12 +9,19 @@ if (ls /usr/libexec/path_helper | where type == 'file' | is-not-empty) {
             let var = ($assignment | split row "=" | get 0 | str trim)
             let val = ($assignment | split row "=" | get 1 | str trim | str replace -a --regex '^"|"$' '')
             if $var == "PATH" {
-                $env.PATH = ($val | split row ":")
+                $new_path = ($val | split row ":")
             } else if $var == "MANPATH" {
-                $env.MANPATH = ($val | split row ":")
+                $new_manpath = ($val | split row ":")
             }
         }
     }
+}
+
+if ($new_path | is-not-empty)  {
+    $env.PATH = $new_path
+}
+if ($new_manpath | is-not-empty) {
+    $env.MANPATH = $new_manpath
 }
 
 # BEGIN added by setup_fb4a.sh
