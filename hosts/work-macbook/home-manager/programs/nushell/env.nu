@@ -6,14 +6,10 @@ if (ls /usr/libexec/path_helper | where type == 'file' | is-not-empty) {
         if ($assignment | str contains "=") {
             let var = ($assignment | split row "=" | get 0 | str trim)
             let val = ($assignment | split row "=" | get 1 | str trim | str replace -a --regex '^"|"$' '')
-            if $var == "PATH" or $var == "MANPATH" {
-                # Split colon-separated string into a list
-                let paths = ($val | split row ":")
-                $env.$var = $paths
-                print $"setting ($var) to ($paths)"
-            } else {
-                $env.$var = $val
-                print $"setting ($var) to ($val)"
+            if $var == "PATH" {
+                $env.PATH = ($val | split row ":")
+            } else if $var == "MANPATH" {
+                $env.MANPATH = ($val | split row ":")
             }
         }
     }
