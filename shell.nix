@@ -4,6 +4,5 @@ with pkgs;
     buildInputs = [
       nixd
       alejandra
-      nushell
     ];
   }
