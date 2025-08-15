@@ -49,10 +49,12 @@
         middlewares = {
           oidc-auth = {
             plugin.traefik-oidc-auth = {
+              "LogLevel" = "DEBUG";
+              "Secret" = ''''${OIDC_SECRET}'';
               "Provider" = {
                 "Url" = "https://pocket-id.sunnycareboo.com";
-                "ClientId" = "";
-                "ClientSecret" = "";
+                "ClientId" = ''''${OIDC_CLIENT_ID}'';
+                "ClientSecret" = ''''${OIDC_CLIENT_SECRET}'';
               };
             };
           };
