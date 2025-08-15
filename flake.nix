@@ -31,6 +31,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -39,6 +43,7 @@
     nix-darwin,
     nix-homebrew,
     nixpkgs,
+    sops-nix,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -78,6 +83,7 @@
         specialArgs = {inherit inputs;};
         modules = [
           home-manager.nixosModules.home-manager
+          sops-nix.nixosModules.sops
           ./hosts/brutus
         ];
       };
