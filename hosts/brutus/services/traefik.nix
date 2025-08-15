@@ -2,7 +2,7 @@
   services.traefik = {
     enable = true;
     environmentFiles = [
-      "/var/lib/secrets/sunnycareboo.com.cloudflare.token"
+      config.sops.secrets."traefik/env".path
     ];
     staticConfigOptions = {
       experimental = {
@@ -49,9 +49,11 @@
         middlewares = {
           oidc-auth = {
             plugin.traefik-oidc-auth = {
-              "Provider" = "https://pocket-id.sunnycareboo.com";
-              "ClientId" = "";
-              "ClientSecret" = "";
+              "Provider" = {
+                "Url" = "https://pocket-id.sunnycareboo.com";
+                "ClientId" = "";
+                "ClientSecret" = "";
+              };
             };
           };
         };
@@ -60,21 +62,28 @@
           pocket-id = {
             loadBalancer.servers = [
               {
-                url = "https://localhost:1411";
+                url = "http://localhost:1411";
               }
             ];
           };
         };
         routers = {
           to-pocket-id = {
-            rule = "Host(`pocket-id.sunnycareboo.com`)";
+            rule = ''Host(`pocket-id.sunnycareboo.com`)'';
             service = "pocket-id";
             entryPoints = ["websecure"];
           };
           dashboard = {
-            rule = ''Host(`traefik.sunnycareboo.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))'';
+            rule = ''Host(`traefik.sunnycareboo.com`)'';
+            service = "dashboard@internal";
+            entryPoints = ["websecure"];
+            middlewares = ["oidc-auth"];
+          };
+          dashboard-api = {
+            rule = ''Host(`traefik.sunnycareboo.com`) && PathPrefix(`/api`) || PathPrefix(`/oidc/callback`)'';
             service = "api@internal";
             entryPoints = ["websecure"];
+            middlewares = ["oidc-auth"];
           };
         };
       };
