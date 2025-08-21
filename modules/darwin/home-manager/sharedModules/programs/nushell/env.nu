@@ -1,6 +1,6 @@
 $env.__NIX_DARWIN_SET_ENVIRONMENT_DONE = 1
 
-$env.PATH = [
+$env.PATH ++= [
     $"($env.HOME)/.nix-profile/bin"
     $"/etc/profiles/per-user/($env.USER)/bin"
     "/run/current-system/sw/bin"

@@ -7,6 +7,6 @@ with lib; let
   cfg = config.programs.nushell;
 in {
   config = mkIf cfg.enable {
-    envFile.source = ./env.nu;
+    programs.nushell.extraEnv = builtins.readFile ./env.nu;
   };
 }
