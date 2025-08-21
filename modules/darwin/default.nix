@@ -1,9 +1,6 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{...}: {
   imports = [
+    ./home-manager
     ./programs
     ./system
   ];

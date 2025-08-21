@@ -7,33 +7,7 @@
 with lib; let
   cfg = config.programs.nushell;
 in {
-  options = {
-    programs.nushell.enable = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Whether to configure Nushell as an interactive shell.";
-    };
-    programs.nushell.variables = mkOption {
-      type = types.attrsOf types.str;
-      default = {};
-      description = ''
-        A set of environment variables used in the global environment.
-        These variables will be set on shell initialisation via system-env.nu.
-      '';
-    };
-    programs.nushell.shellInit = mkOption {
-      type = types.lines;
-      default = "";
-      description = "Script code called during Nushell shell initialisation (added to system-env.nu).";
-    };
-    programs.nushell.interactiveShellInit = mkOption {
-      type = types.lines;
-      default = "";
-      description = "Script code called during interactive Nushell shell initialisation (added to system-config.nu).";
-    };
-  };
   config = mkIf cfg.enable {
-    environment.systemPackages = [pkgs.nushell];
     environment.shells = [pkgs.nushell];
     environment.etc."nushell/system-env.nu".text = ''
       # /etc/nushell/system-env.nu: DO NOT EDIT -- this file has been generated automatically.
