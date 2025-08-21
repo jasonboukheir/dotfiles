@@ -1,6 +1,6 @@
 {...}: {
   programs.nushell = {
     enable = true;
-    envFile.source = ./env.nu;
+    extraEnv = builtins.readFile ./env.nu;
   };
 }
