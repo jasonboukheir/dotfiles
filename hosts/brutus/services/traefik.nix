@@ -47,7 +47,7 @@
     dynamicConfigOptions = {
       http = {
         middlewares = {
-          oidc-auth = {
+          oidc-unrestricted = {
             plugin.traefik-oidc-auth = {
               "LogLevel" = "DEBUG";
               "Secret" = ''''${OIDC_SECRET}'';
@@ -55,6 +55,28 @@
                 "Url" = "https://pocket-id.sunnycareboo.com";
                 "ClientId" = ''''${OIDC_CLIENT_ID}'';
                 "ClientSecret" = ''''${OIDC_CLIENT_SECRET}'';
+              };
+              "Scopes" = ["openid" "profile" "email" "groups"];
+            };
+          };
+          oidc-admin = {
+            plugin.traefik-oidc-auth = {
+              "LogLevel" = "DEBUG";
+              "Secret" = ''''${OIDC_SECRET}'';
+              "Provider" = {
+                "Url" = "https://pocket-id.sunnycareboo.com";
+                "ClientId" = ''''${OIDC_CLIENT_ID}'';
+                "ClientSecret" = ''''${OIDC_CLIENT_SECRET}'';
+              };
+              "Scopes" = ["openid" "profile" "email" "groups"];
+              "Authorization" = {
+                "AssertClaims" = [
+                  {
+                    "Name" = "groups";
+                    "AnyOf" = ["admin"];
+                  }
+                ];
+                "CheckOnEveryRequest" = true;
               };
             };
           };
@@ -79,13 +101,13 @@
             rule = ''Host(`traefik.sunnycareboo.com`)'';
             service = "dashboard@internal";
             entryPoints = ["websecure"];
-            middlewares = ["oidc-auth"];
+            middlewares = ["oidc-admin"];
           };
           dashboard-api = {
-            rule = ''Host(`traefik.sunnycareboo.com`) && PathPrefix(`/api`) || PathPrefix(`/oidc/callback`)'';
+            rule = ''Host(`traefik.sunnycareboo.com`) && PathPrefix(`/api`) || PathPrefix(`/oidc/callback`) || PathPrefix(`/logout`)'';
             service = "api@internal";
             entryPoints = ["websecure"];
-            middlewares = ["oidc-auth"];
+            middlewares = ["oidc-unrestricted"];
           };
         };
       };
