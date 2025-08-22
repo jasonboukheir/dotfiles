@@ -1,5 +1,8 @@
 {...}: {
-  home-manager.users.jasonbk.imports = [
-    ./programs
+  home-manager.sharedModules.imports = [
+    ./sharedModules
+  ];
+  imports = [
+    ./users
   ];
 }

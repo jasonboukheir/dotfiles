@@ -1,7 +1,7 @@
-if "_SOURCED_BASH" not-in $env {
+if "_SOURCED_ZSH" not-in $env {
     # Run bash -l -i to source login profiles, get its env output, parse into a record
-    let bash_env_lines = (bash -l -i -c "env" | lines)
-    let bash_env = ($bash_env_lines | each { |line|
+    let zsh_env_lines = (zsh -l -i -c "env" | lines)
+    let zsh_env = ($zsh_env_lines | each { |line|
     let split = ($line | split row -n 1 "=")
     { ($split.0): ($split.1? | default "") }
     } | reduce --fold {} { |it, acc| $acc | merge $it })
@@ -17,8 +17,8 @@ if "_SOURCED_BASH" not-in $env {
     ]
 
     # Filter and load
-    let filtered_env = ($bash_env | reject -i ...$excludes)
+    let filtered_env = ($zsh_env | reject -o ...$excludes)
     load-env $filtered_env
 
-    $env._SOURCED_BASH = true
+    $env._SOURCED_ZSH = true
 }
