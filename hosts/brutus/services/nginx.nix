@@ -4,16 +4,16 @@
     recommendedProxySettings = true; # Optional but good for reverse proxies
     recommendedTlsSettings = true; # Optional for better TLS defaults
 
-    virtualHosts = {
-      "pocket-id.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true; # Enables Let's Encrypt cert provisioning
-        locations."/" = {
-          proxyPass = "http://localhost:1411"; # Proxies to your pocket-id instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-    };
+    # virtualHosts = {
+    #   "pocket-id.sunnycareboo.com" = {
+    #     forceSSL = true; # Redirects HTTP to HTTPS
+    #     enableACME = true; # Enables Let's Encrypt cert provisioning
+    #     locations."/" = {
+    #       proxyPass = "http://localhost:1411"; # Proxies to your pocket-id instance
+    #       proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
+    #     };
+    #   };
+    # };
   };
 
   security.acme = {
