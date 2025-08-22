@@ -1,6 +1,7 @@
 {...}: {
   system.defaults.finder = {
     _FXShowPosixPathInTitle = true;
+    _FXSortFoldersFirst = true;
     AppleShowAllFiles = true;
     AppleShowAllExtensions = true;
     CreateDesktop = false;
@@ -10,10 +11,5 @@
     ShowStatusBar = true;
     FXDefaultSearchScope = "SCcf";
     FXPreferredViewStyle = "Nlsv";
-  };
-  system.defaults.CustomUserPreferences = {
-    "com.apple.finder" = {
-      _FXSortFoldersFirst = true;
-    };
   };
 }

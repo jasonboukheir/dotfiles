@@ -5,7 +5,6 @@
     ./desktopservices.nix
     ./dock.nix
     ./finder.nix
-    ./home-manager.nix
     ./mouse.nix
     ./nix-darwin-settings.nix
     ./NSGlobalDomain.nix
