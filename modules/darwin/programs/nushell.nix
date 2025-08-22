@@ -9,6 +9,6 @@ with lib; let
 in {
   config = mkIf cfg.enable {
     programs.zsh.enable = true;
-    environment.shells = [pkgs.nushell];
+    environment.shells = with pkgs; [ nushell zsh ];
   };
 }

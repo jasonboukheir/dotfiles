@@ -1,5 +1,5 @@
 {...}: {
-  home-manager.sharedModules.imports = [
+  home-manager.sharedModules = [
     ./sharedModules
   ];
   imports = [
