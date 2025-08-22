@@ -1,12 +1,12 @@
-{ config, pkgs, lib, ... }:
-
-with lib;
-
-let
-  cfg = config.programs.nushell.vivid;
-in
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib; let
+  cfg = config.programs.nushell.vivid;
+in {
   options = {
     programs.nushell.vivid = {
       enable = mkEnableOption "Enable vivid integration for nushell";

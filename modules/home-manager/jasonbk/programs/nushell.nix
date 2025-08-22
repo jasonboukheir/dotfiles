@@ -1,4 +1,5 @@
-{lib, ...}: with lib; {
+{lib, ...}:
+with lib; {
   programs.nushell = {
     enable = mkDefault true;
     vivid = {
