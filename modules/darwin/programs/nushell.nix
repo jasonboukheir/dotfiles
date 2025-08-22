@@ -8,6 +8,6 @@ with lib; let
   cfg = config.programs.nushell;
 in {
   config = mkIf cfg.enable {
-    environment.shells = [ pkgs.nushell ];
+    environment.shells = [pkgs.nushell];
   };
 }
