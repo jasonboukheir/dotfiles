@@ -3,7 +3,7 @@
   SDK_DIR = "/opt/android_sdk";
   NDK_DIR = "/opt/android_ndk";
 in {
-  home-manager.users.jasonbk.programs.zsh = {
+  programs.zsh = {
     initContent = ''
       ${RC_MARKER}
       export ANDROID_SDK=${SDK_DIR}
