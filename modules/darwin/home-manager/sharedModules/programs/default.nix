@@ -1,5 +1,5 @@
 {...}: {
   imports = [
-    ./nushell
+    ./nushell.nix
   ];
 }
