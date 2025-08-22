@@ -13,7 +13,7 @@ in {
       extraLogin = /* nu */ ''
         if "_SOURCED_BASH" not-in $env {
           # Run zsh -l -i to source login profiles, get its env output, parse into a record
-          let bash_env_lines = (${pkgs.bash} -l -i -c "env" | lines)
+          let bash_env_lines = (${pkgs.bash}/bin/bash -l -i -c "env" | lines)
           let bash_env = ($bash_env_lines | each { |line|
             let split = ($line | split row -n 2 "=")
             let key = $split.0
@@ -25,7 +25,7 @@ in {
           # Exclude conflicting/unnecessary vars (customize this list as needed)
           let excludes = [
             "config" "_" "FILE_PWD" "PWD" "SHLVL" "CURRENT_FILE"
-            "STARSHIP_SESSION_KEY"
+            "STARSHIP_SESSION_KEY" "STARSHIP_SHELL" "STARSHIP_CONFIG"
             "PROMPT_COMMAND" "PROMPT_COMMAND_RIGHT" "PROMPT_INDICATOR"
             "PROMPT_INDICATOR_VI_INSERT" "PROMPT_INDICATOR_VI_NORMAL"
             "PROMPT_MULTILINE_INDICATOR"
