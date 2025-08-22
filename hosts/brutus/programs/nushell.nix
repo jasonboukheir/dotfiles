@@ -1,5 +1,3 @@
-{pkgs, ...}: {
-  environment.systemPackages = with pkgs; [
-    nushell
-  ];
+{...}: {
+  programs.nushell.enable = true;
 }
