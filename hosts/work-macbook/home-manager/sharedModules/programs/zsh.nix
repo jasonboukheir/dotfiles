@@ -1,4 +1,8 @@
-{ config, lib, ... }: let
+{
+  config,
+  lib,
+  ...
+}: let
   RC_MARKER = "# added by setup_fb4a.sh";
   SDK_DIR = "/opt/android_sdk";
   NDK_DIR = "/opt/android_ndk";
