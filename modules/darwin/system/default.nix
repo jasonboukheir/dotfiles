@@ -6,12 +6,10 @@
     ./dock.nix
     ./finder.nix
     ./mouse.nix
-    ./nix-darwin-settings.nix
     ./NSGlobalDomain.nix
     ./screencapture.nix
     ./security.nix
     ./SoftwareUpdate.nix
-    ./users.nix
     ./WindowManager.nix
   ];
 

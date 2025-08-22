@@ -1,7 +1,6 @@
 {inputs, ...}: {
   nix.enable = true;
   nix.settings = {
-    access-tokens = "!include ./.secrets/github.pat";
     experimental-features = "nix-command flakes";
   };
   nixpkgs.config.allowUnfree = true;
