@@ -4,8 +4,8 @@
   sops.age.keyFile = "/var/lib/sops-nix/keys.txt";
   sops.secrets = {
     "traefik/env" = {
-      owner = "traefik";
-      group = "traefik";
+      owner = "nginx";
+      group = "nginx";
       mode = "0400";
     };
     "pocket-id/env" = {
