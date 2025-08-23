@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./containers
     ./home-manager
     ./programs
     ./services

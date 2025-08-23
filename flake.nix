@@ -17,29 +17,29 @@
       flake = false;
     };
     mac-app-util.url = "github:hraban/mac-app-util";
+    nix-bitcoin = {
+      url = "github:fort-nix/nix-bitcoin/release";
+    };
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-    nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
     };
     sops-nix = {
-      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:Mic92/sops-nix";
     };
   };
 
   outputs = inputs @ {
     home-manager,
     mac-app-util,
+    nix-bitcoin,
     nix-darwin,
     nix-homebrew,
     nixpkgs,
