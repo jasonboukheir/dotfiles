@@ -16,10 +16,16 @@
         generateSecrets = true;
         operator = {
           enable = true;
-          name = "jasonbk";
+          name = "main";
         };
         # Using system nixpkgs version
-        useVersionLockedPkgs = true;
+        # useVersionLockedPkgs = true;
+      };
+      users.users.main = {
+        isNormalUser = true;
+        # FIXME: This is unsafe. Use `hashedpassword` or `passwordFile` instead in a real
+        # deployment: https://search.nixos.org/options?show=users.users.%3Cname%3E.hashedPassword
+        password = "a";
       };
 
       services.bitcoind = {
