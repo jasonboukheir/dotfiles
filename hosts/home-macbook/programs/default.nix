@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./brave.nix
-    ./electrum.nix
     ./home-manager.nix
     ./iina.nix
     ./ledger-live.nix
