@@ -31,7 +31,7 @@
         # legacyInstallDirs = true;
 
         config = {
-          containers.mynode = {
+          containers.bitcoin = {
             # Always start container along with the container host
             autoStart = true;
 
@@ -45,13 +45,14 @@
 
             # Map `/my/host/dir` to `/my/mount` in the container
             # bindMounts."/my/mount" = { hostPath = "/my/host/dir"; isReadOnly = false; };
-
+            bindMounts."/var/lib/bitcoind" = { hostPath = "/var/lib/bitcoind"; isReadOnly = false; };
             # Setup port forwarding
             # forwardPorts = [ { containerPort = 80; hostPort = 8080; protocol = "tcp";} ];
 
             config = { config, pkgs, ... }: {
               imports = [
                 nix-bitcoin.nixosModules.default
+                (nix-bitcoin + "/modules/presets/secure-node.nix")
               ];
 
               # Automatically generate all secrets required by services.
@@ -61,6 +62,7 @@
               # Enable some services.
               # See ../configuration.nix for all available features.
               services.bitcoind.enable = true;
+              services.bitcoind.package = config.nix-bitcoin.pkgs.bitcoind-knots;
               services.electrs.enable = true;
             };
           };
