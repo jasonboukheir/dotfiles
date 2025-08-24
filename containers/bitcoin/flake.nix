@@ -34,20 +34,21 @@
           containers.bitcoin = {
             # Always start container along with the container host
             autoStart = true;
+            extra = {
+              # Sets
+              # privateNetwork = true
+              # hostAddress = "${addressPrefix}.1"
+              # localAddress = "${addressPrefix}.2"
+              # addressPrefix = "10.250.0";
 
-            # This assigns the following addresses:
-            # Host IP:      10.250.0.1
-            # Container IP: 10.250.0.2
-            extra.addressPrefix = "10.250.0";
-
-            # Enable internet access for the container
-            extra.enableWAN = true;
-
-            # Map `/my/host/dir` to `/my/mount` in the container
-            # bindMounts."/my/mount" = { hostPath = "/my/host/dir"; isReadOnly = false; };
+              # Enable internet access for the container
+              enableWAN = true;
+              # Always allow connections from hostAddress
+              firewallAllowHost = true;
+              # Make the container's localhost reachable via localAddress
+              exposeLocalhost = true;
+            };
             bindMounts."/var/lib/bitcoind" = { hostPath = "/var/lib/bitcoind"; isReadOnly = false; };
-            # Setup port forwarding
-            # forwardPorts = [ { containerPort = 80; hostPort = 8080; protocol = "tcp";} ];
 
             config = { config, pkgs, ... }: {
               imports = [
