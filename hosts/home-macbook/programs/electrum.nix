@@ -1,3 +1,3 @@
-{pkgs,...}: {
-  environment.systemPackages = with pkgs; [ electrum ];
+{pkgs, ...}: {
+  environment.systemPackages = with pkgs; [electrum];
 }
