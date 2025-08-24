@@ -64,7 +64,11 @@
               # See ../configuration.nix for all available features.
               services.bitcoind.enable = true;
               services.bitcoind.package = config.nix-bitcoin.pkgs.bitcoind-knots;
-              services.electrs.enable = true;
+              services.clightning.enable = true;
+              services.rtl = {
+                enable = true;
+                nodes.clightning.enable = true;
+              };
             };
           };
         };
