@@ -69,6 +69,7 @@
                 enable = true;
                 nodes.clightning.enable = true;
               };
+              services.mempool.enable = true;
             };
           };
         };
