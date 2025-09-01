@@ -6,6 +6,7 @@
 }: {
   config = lib.mkIf config.programs.ssh.enable {
     programs.ssh = {
+      enableDefaultConfig = false;
       matchBlocks = {
         "brutus" = {
           forwardAgent = true;
