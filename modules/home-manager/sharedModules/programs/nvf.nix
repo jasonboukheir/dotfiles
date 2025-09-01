@@ -29,13 +29,13 @@
         treesitter.enable = true;
         theme = {
           enable = true;
+          name = "nord";
         };
         options = {
           tabstop = 2;
           shiftwidth = 2;
           softtabstop = 2;
           expandtab = true;
-          termguicolors = false;
         };
         utility.oil-nvim.enable = true;
         languages = {
