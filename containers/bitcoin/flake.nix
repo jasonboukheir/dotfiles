@@ -1,11 +1,9 @@
 # See how this flake is used in ./usage.sh
-
 # See also:
 # https://github.com/erikarvstedt/extra-container
 # https://github.com/erikarvstedt/extra-container/blob/master/examples/flake
 # Container-related NixOS options
 # https://search.nixos.org/options?channel=unstable&query=containers.%3Cname%3E
-
 {
   description = "A basic nix-bitcoin container node";
 
@@ -19,7 +17,12 @@
     extra-container.follows = "nix-bitcoin/extra-container";
   };
 
-  outputs = { nixpkgs, nix-bitcoin, extra-container, ... }:
+  outputs = {
+    nixpkgs,
+    nix-bitcoin,
+    extra-container,
+    ...
+  }:
     extra-container.lib.eachSupportedSystem (system: {
       packages.default = extra-container.lib.buildContainers {
         inherit system;
@@ -48,9 +51,16 @@
               # Make the container's localhost reachable via localAddress
               exposeLocalhost = true;
             };
-            bindMounts."/var/lib/bitcoind" = { hostPath = "/var/lib/bitcoind"; isReadOnly = false; };
+            bindMounts."/var/lib/bitcoind" = {
+              hostPath = "/var/lib/bitcoind";
+              isReadOnly = false;
+            };
 
-            config = { config, pkgs, ... }: {
+            config = {
+              config,
+              pkgs,
+              ...
+            }: {
               imports = [
                 nix-bitcoin.nixosModules.default
                 (nix-bitcoin + "/modules/presets/secure-node.nix")
