@@ -4,10 +4,13 @@
     autoStart = true;
     privateNetwork = false;
     bindMounts = {
-      "/var/lib/bitcoin" = { hostPath = "/mnt/bitcoin-data"; isReadOnly = false; };
+      "/var/lib/bitcoin" = {
+        hostPath = "/mnt/bitcoin-data";
+        isReadOnly = false;
+      };
     };
 
-    config = { config, ... }: {
+    config = {config, ...}: {
       imports = [
         inputs.nix-bitcoin.nixosModules.default
         (inputs.nix-bitcoin + "/modules/presets/secure-node.nix")
@@ -34,7 +37,7 @@
       };
       services.clightning.enable = true;
 
-      system.stateVersion = "25.05";  # Match your NixOS version
+      system.stateVersion = "25.05"; # Match your NixOS version
     };
   };
 }

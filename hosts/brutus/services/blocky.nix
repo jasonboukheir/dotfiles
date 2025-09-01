@@ -8,7 +8,7 @@
       ];
       bootstrapDns = {
         upstream = "https://one.one.one.one/dns-query";
-        ips = [ "1.1.1.1" "1.0.0.1" ];
+        ips = ["1.1.1.1" "1.0.0.1"];
       };
       blocking = {
         blackLists = {
@@ -16,7 +16,7 @@
           adult = ["https://blocklistproject.github.io/Lists/porn.txt"];
         };
         clientGroupsBlock = {
-          default = [ "ads" "adult" ];
+          default = ["ads" "adult"];
         };
       };
     };
