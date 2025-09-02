@@ -16,6 +16,9 @@
           enable = true;
           formatOnSave = true;
         };
+        mini = {
+          icons.enable = true;
+        };
         telescope = {
           enable = true;
           extensions = [
