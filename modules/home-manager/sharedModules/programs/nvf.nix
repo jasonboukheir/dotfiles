@@ -12,6 +12,14 @@
         };
         viAlias = true;
         vimAlias = true;
+        keymaps = [
+          {
+            key = "-";
+            mode = "n";
+            action = "<cmd>Oil<CR>";
+            desc = "Open parent directory";
+          }
+        ];
         lsp = {
           enable = true;
           formatOnSave = true;
