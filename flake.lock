@@ -428,6 +428,10 @@
         "homebrew-core": "homebrew-core",
         "mac-app-util": "mac-app-util",
         "nix-bitcoin": "nix-bitcoin",
+        "nix-bitcoin-pkgs": [
+          "nix-bitcoin",
+          "nixpkgs"
+        ],
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4",
