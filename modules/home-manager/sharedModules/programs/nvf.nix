@@ -52,7 +52,14 @@
         languages = {
           enableFormat = true;
           enableTreesitter = true;
-          nix.enable = true;
+          nix = {
+            enable = true;
+            lsp.options = {
+              nil = {
+                nix.flake.autoArchive = true;
+              };
+            };
+          };
           nu.enable = true;
           python.enable = true;
           zig.enable = true;
