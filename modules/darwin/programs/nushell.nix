@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 with lib; let
@@ -9,6 +8,5 @@ with lib; let
 in {
   config = mkIf cfg.enable {
     programs.bash.enable = true;
-    environment.shells = with pkgs; [nushell bash];
   };
 }
