@@ -5,5 +5,6 @@
     zed-editor.enable = true;
     ghostty.enable = true;
     nushell.enable = true;
+    fish.enable = true;
   };
 }
