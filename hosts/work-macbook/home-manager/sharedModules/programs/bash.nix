@@ -9,10 +9,6 @@
 in {
   config = lib.mkIf config.programs.bash.enable {
     programs.bash = {
-      profileExtra = ''
-        # include /etc/profile if it exists
-        [[ -f /etc/profile ]] && . /etc/profile
-      '';
       initExtra = ''
         ${RC_MARKER}
         export ANDROID_SDK=${SDK_DIR}

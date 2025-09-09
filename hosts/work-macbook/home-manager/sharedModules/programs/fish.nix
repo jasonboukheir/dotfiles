@@ -9,12 +9,12 @@
 in {
   config = lib.mkIf config.programs.fish.enable {
     programs.fish = {
-      initExtra = ''
+      shellInit = ''
         ${RC_MARKER}
-        export ANDROID_SDK=${SDK_DIR}
-        export ANDROID_NDK_REPOSITORY=${NDK_DIR}
-        export ANDROID_HOME=''${ANDROID_SDK}
-        export PATH=''${PATH}:''${ANDROID_SDK}/emulator:''${ANDROID_SDK}/tools:''${ANDROID_SDK}/tools/bin:''${ANDROID_SDK}/platform-tools
+        set -gx ANDROID_SDK ${SDK_DIR}
+        set -gx ANDROID_NDK_REPOSITORY ${NDK_DIR}
+        set -gx ANDROID_HOME "''$ANDROID_SDK"
+        set -gx PATH "''$PATH"':'"''$ANDROID_SDK"'/emulator:'"''$ANDROID_SDK"'/tools:'"''$ANDROID_SDK"'/tools/bin:'"''$ANDROID_SDK"'/platform-tools'
       '';
     };
   };

@@ -5,5 +5,6 @@
     ./home-manager
     ./programs
     ./system
+    ./environment.nix
   ];
 }
