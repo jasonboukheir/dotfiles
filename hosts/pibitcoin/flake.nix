@@ -20,7 +20,7 @@
     nixpkgs,
     ...
   }: {
-    nixosConfigurations.pibitcoin = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.pibitcoin = nixos-raspberrypi.lib.nixosSystem {
       system = "aarch64-linux";
       specialArgs = {inherit inputs;};
       modules = [
