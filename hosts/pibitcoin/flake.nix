@@ -12,12 +12,12 @@
     ...
   }: {
     nixosConfigurations.pibitcoin = nixos-raspberrypi.lib.nixosInstaller {
+      system = "aarch64-linux";
       specialArgs = inputs;
       modules = [
         nixos-raspberrypi.nixosModules.raspberry-pi-5.base
         ./configuration.nix
       ];
     };
-    nix.nixPath = ["nixpkgs=${nixpkgs}"];
   };
 }
