@@ -28,6 +28,10 @@
       ];
     };
   };
+  programs = {
+    git.enable = true;
+    extra-container.enable = true;
+  };
   fileSystems = {
     "/boot/firmware" = {
       device = "/dev/disk/by-uuid/2178-694E";
