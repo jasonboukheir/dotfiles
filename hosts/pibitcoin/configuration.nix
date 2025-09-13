@@ -11,20 +11,7 @@
     networkmanager.enable = true;
     hostName = "pibitcoin";
   };
-  nix-bitcoin = {
-    generateSecrets = true;
-    operator = {
-      enable = true;
-      name = "jasonbk";
-    };
-  };
   services = {
-    bitcoind = {
-      enable = true;
-      package = config.nix-bitcoin.pkgs.bitcoind-knots;
-    };
-    clightning.enable = true;
-    mempool.enable = true;
     openssh = {
       enable = true;
       ports = [22];
@@ -33,10 +20,6 @@
         PasswordAuthentication = false;
         PermitRootLogin = "no";
       };
-    };
-    rtl = {
-      enable = true;
-      nodes.clightning.enable = true;
     };
   };
   users = {
