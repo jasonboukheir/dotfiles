@@ -6,7 +6,7 @@
     nixpkgs.follows = "nix-bitcoin/nixpkgs";
     nixpkgs-unstable.follows = "nix-bitcoin/nixpkgs-unstable";
     nixos-raspberrypi = {
-      url = "github:nvmd/nixos-raspberrypi";
+      url = "github:nvmd/nixos-raspberrypi/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
