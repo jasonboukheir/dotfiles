@@ -9,10 +9,6 @@
       url = "github:nvmd/nixos-raspberrypi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nvf = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:notashelf/nvf";
-    };
   };
 
   outputs = inputs @ {
