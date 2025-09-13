@@ -1,18 +1,21 @@
 {
   inputs = {
-    nix-bitcoin = {
-      url = "github:fort-nix/nix-bitcoin/release";
-    };
-    nixpkgs.follows = "nix-bitcoin/nixpkgs";
-    nixpkgs-unstable.follows = "nix-bitcoin/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixos-raspberrypi = {
       url = "github:nvmd/nixos-raspberrypi/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
+  nixConfig = {
+    extra-substituters = [
+      "https://nixos-raspberrypi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+    ];
+  };
 
   outputs = inputs @ {
-    nix-bitcoin,
     nixos-raspberrypi,
     nixpkgs,
     ...
@@ -22,9 +25,7 @@
       specialArgs = {inherit inputs;};
       modules = [
         nixos-raspberrypi.nixosModules.raspberry-pi-5.base
-        nix-bitcoin.nixosModules.default
-        (nix-bitcoin + "/modules/presets/secure-node.nix")
-        ./default.nix
+        ./configuration.nix
       ];
     };
     nix.nixPath = ["nixpkgs=${nixpkgs}"];
