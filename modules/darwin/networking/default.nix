@@ -1,0 +1,3 @@
+{...}: {
+  imports = [./wg-quick.nix];
+}

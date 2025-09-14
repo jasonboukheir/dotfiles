@@ -4,5 +4,6 @@
     ./../../modules/darwin
     ./programs
     ./system
+    ./networking.nix
   ];
 }

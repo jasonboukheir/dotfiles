@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./home-manager
+    ./networking
     ./programs
     ./system
     ./environment.nix
