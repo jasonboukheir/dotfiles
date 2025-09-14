@@ -7,7 +7,7 @@
     interfaces.wg0 = {
       ips = ["10.100.0.1/24"];
       listenPort = 51820;
-      privateKeyFile = "/var/lib/wireguard/wg0.sk";
+      privateKeyFile = "/var/lib/wireguard/wg0.key";
       generatePrivateKeyFile = true;
 
       peers = [
