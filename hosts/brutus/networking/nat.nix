@@ -1,7 +1,7 @@
 {...}: {
   networking.nat = {
     enable = true;
-    externalInterface = "eth0";
+    externalInterface = "enp5s0";
     internalInterfaces = ["wg0"];
   };
 }
