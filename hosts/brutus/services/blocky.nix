@@ -15,7 +15,10 @@
       };
       blocking = {
         blackLists = {
-          ads = ["https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"];
+          ads = [
+            "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+            "https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/hosts/pro.txt"
+          ];
           adult = ["https://blocklistproject.github.io/Lists/porn.txt"];
         };
         clientGroupsBlock = {
