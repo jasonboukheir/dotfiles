@@ -19,6 +19,11 @@
         #   # List of IPs assigned to this peer within the tunnel subnet. Used to configure routing.
         #   allowedIPs = ["10.100.0.2/32"];
         # }
+        {
+          name = "jasonbk-iphone";
+          publicKey = "NTmAtjChVmjZH5FIOKMKVGj7TNzPchrSW3zO/+buYUQ=";
+          allowedIPs = ["10.100.0.2/32"];
+        }
       ];
     };
   };
