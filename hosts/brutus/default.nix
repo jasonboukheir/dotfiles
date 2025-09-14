@@ -7,7 +7,7 @@
     ./systemd
     ./configuration.nix
     ./hardware-configuration.nix
-    ./networking.nix
+    ./networking
     ./sops.nix
     ./users.nix
     ./../../modules
