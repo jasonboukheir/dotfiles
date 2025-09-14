@@ -12,6 +12,15 @@
         };
         viAlias = true;
         vimAlias = true;
+        extraPlugins = with pkgs; {
+          nord-nvim = {
+            package = vimPlugins.nord-nvim;
+            setup = ''
+              vim.cmd.colorscheme("nord")
+            '';
+          };
+        };
+
         keymaps = [
           {
             key = "-";
@@ -38,10 +47,6 @@
           ];
         };
         treesitter.enable = true;
-        theme = {
-          enable = true;
-          name = "nord";
-        };
         options = {
           tabstop = 2;
           shiftwidth = 2;
