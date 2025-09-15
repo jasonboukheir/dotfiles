@@ -23,6 +23,15 @@
           proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
         };
       };
+      "ai.sunnycareboo.com" = {
+        forceSSL = true; # Redirects HTTP to HTTPS
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:3100"; # Proxies to your blocky instance
+          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
+        };
+      };
       "pocket-id.sunnycareboo.com" = {
         forceSSL = true; # Redirects HTTP to HTTPS
         enableACME = true;

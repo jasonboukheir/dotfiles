@@ -7,6 +7,7 @@
     ./systemd
     ./configuration.nix
     ./hardware-configuration.nix
+    ./nixpkgs.nix
     ./networking
     ./sops.nix
     ./users.nix
