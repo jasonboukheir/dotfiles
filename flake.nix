@@ -1,5 +1,9 @@
 {
   inputs = {
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,6 +43,7 @@
   };
 
   outputs = inputs @ {
+    disko,
     home-manager,
     mac-app-util,
     nix-bitcoin,
@@ -85,6 +90,7 @@
       brutus = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs;};
         modules = [
+          disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           sops-nix.nixosModules.sops
           ./hosts/brutus
