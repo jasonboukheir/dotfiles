@@ -1,9 +1,5 @@
 {pkgs, ...}: {
-  # Enable Disko to manage the USB drives and generate fileSystems
-  disko.enableConfig = true;
-
   # Enable ZFS support
-  environment.systemPackages = with pkgs; [zfs];
   boot.supportedFilesystems = ["zfs"];
   services.zfs.autoScrub.enable = true; # Optional: Periodic data integrity checks
   services.zfs.autoSnapshot.enable = true; # Optional: Automatic snapshots
@@ -14,7 +10,7 @@
       type = "disk";
       content = {
         type = "zfs";
-        pool = "tank";
+        pool = "zroot";
       };
     };
 
@@ -23,23 +19,17 @@
       type = "disk";
       content = {
         type = "zfs";
-        pool = "tank";
+        pool = "zroot";
       };
     };
 
-    zpool.tank = {
+    zpool.zroot = {
       type = "zpool";
       mode = "stripe";
-      rootFsType = "zfs";
-      datasets = {
-        "root" = {
-          type = "zfs_fs";
-          mountpoint = "/mnt/stripe";
-          options = {
-            atime = "off"; # Improve performance for USB drives
-            compression = "lz4"; # Enable compression
-          };
-        };
+      mountpoint = "/mnt/zroot";
+      rootFsOptions = {
+        atime = "off"; # Improve performance for USB drives
+        compression = "lz4"; # Enable compression
       };
     };
   };
