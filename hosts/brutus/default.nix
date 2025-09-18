@@ -6,7 +6,7 @@
     ./services
     ./systemd
     ./configuration.nix
-    #    ./disko-configuration.nix
+    ./disko-configuration.nix
     ./hardware-configuration.nix
     ./nixpkgs.nix
     ./networking
