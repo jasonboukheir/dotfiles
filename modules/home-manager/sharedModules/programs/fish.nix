@@ -8,9 +8,9 @@
     home.shell.enableFishIntegration = lib.mkDefault true;
     programs = {
       fish = {
-        shellInit = ''
-          fish_config theme choose Nord
-        '';
+        #        shellInit = ''
+        #          fish_config theme choose Nord
+        #        '';
         plugins = [
           {
             name = "plugin-git";
