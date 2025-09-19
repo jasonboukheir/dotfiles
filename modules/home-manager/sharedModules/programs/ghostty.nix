@@ -10,7 +10,7 @@
       settings = {
         font-size = 13;
         font-family = "FiraCode Nerd Font";
-        theme = "dark:nord,light:nord-light";
+        theme = "dark:Nord,light:Nord Light";
         window-theme = "system";
         macos-option-as-alt = true;
       };
