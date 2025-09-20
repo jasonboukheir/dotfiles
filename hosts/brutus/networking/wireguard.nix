@@ -21,6 +21,11 @@
           publicKey = "KIB87EA/FPfZYsAhiieI9SL7fvrvbmU6lvBcrS44GiU=";
           allowedIPs = ["10.100.0.3/32"];
         }
+        {
+          name = "izmabk-iphone";
+          publicKey = "p8B75IsSMLq9wGhfHFwPAZQjAHXWIdJqV0pfLeADpgk=";
+          allowedIPs = ["10.100.0.4/32"];
+        }
       ];
     };
   };
