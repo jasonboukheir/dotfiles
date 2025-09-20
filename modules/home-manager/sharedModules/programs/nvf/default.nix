@@ -12,14 +12,6 @@
         };
         viAlias = true;
         vimAlias = true;
-        extraPlugins = with pkgs; {
-          nord-nvim = {
-            package = vimPlugins.nord-nvim;
-            setup = ''
-              vim.cmd.colorscheme("nord")
-            '';
-          };
-        };
 
         keymaps = [
           {
