@@ -16,8 +16,6 @@
       installRemoteServer = true;
       userSettings = lib.mkMerge [
         {
-          ui_font_size = 14;
-          buffer_font_size = 14;
           vim_mode = true;
           languages = {
             "Nix" = {
