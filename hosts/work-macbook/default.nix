@@ -6,5 +6,6 @@
     ./programs
     ./system
     ./environment.nix
+    ./stylix.nix
   ];
 }

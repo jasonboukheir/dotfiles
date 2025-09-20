@@ -14,19 +14,10 @@
         "ruff"
       ];
       installRemoteServer = true;
-      themes = {
-        "Nord" = ./themes/nord.json;
-      };
       userSettings = lib.mkMerge [
         {
           ui_font_size = 14;
-          buffer_font_family = "FiraCode Nerd Font";
           buffer_font_size = 14;
-          theme = {
-            mode = "system";
-            light = "Nord Light";
-            dark = "Nord";
-          };
           vim_mode = true;
           languages = {
             "Nix" = {

@@ -40,6 +40,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:Mic92/sops-nix";
     };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -52,6 +56,7 @@
     nix-homebrew,
     nixpkgs,
     sops-nix,
+    stylix,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -66,6 +71,7 @@
         mac-app-util.darwinModules.default
         home-manager.darwinModules.home-manager
         nix-homebrew.darwinModules.nix-homebrew
+        stylix.darwinModules.stylix
       ];
     in {
       "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
