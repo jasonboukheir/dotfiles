@@ -59,6 +59,71 @@
           proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
         };
       };
+
+      # nixarr
+      "bazarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:6767";
+          proxyWebsockets = true;
+        };
+      };
+      "lidarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:8686";
+          proxyWebsockets = true;
+        };
+      };
+      "prowlarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:9696";
+          proxyWebsockets = true;
+        };
+      };
+      "radarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:7878";
+          proxyWebsockets = true;
+        };
+      };
+      "readarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:8787";
+          proxyWebsockets = true;
+        };
+      };
+      "sonarr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:8989";
+          proxyWebsockets = true;
+        };
+      };
+      "jellyseerr.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:5055";
+          proxyWebsockets = true;
+        };
+      };
     };
   };
 

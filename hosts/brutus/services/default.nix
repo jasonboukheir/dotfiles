@@ -2,7 +2,6 @@
   imports = [
     ./actual.nix
     ./blocky.nix
-    ./jellyfin.nix
     ./litellm.nix
     ./nginx.nix
     ./open-webui.nix

@@ -1,10 +1,6 @@
 {pkgs, ...}: {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
-    groups.media = {};
-    users.jellyfin = {
-      extraGroups = ["media"];
-    };
     users.jasonbk = {
       isNormalUser = true;
       description = "Jason Bou Kheir";
