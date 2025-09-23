@@ -30,8 +30,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nixarr.url = "github:rasmus-kirk/nixarr";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
