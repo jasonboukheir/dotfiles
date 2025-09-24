@@ -61,6 +61,15 @@
       };
 
       # nixarr
+      "transmission.sunnycareboo.com" = {
+        forceSSL = true;
+        enableACME = true;
+        acmeRoot = null;
+        locations."/" = {
+          proxyPass = "http://localhost:9091";
+          proxyWebsockets = true;
+        };
+      };
       "bazarr.sunnycareboo.com" = {
         forceSSL = true;
         enableACME = true;
