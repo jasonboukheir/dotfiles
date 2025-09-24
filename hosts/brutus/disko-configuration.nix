@@ -37,6 +37,7 @@
       rootFsOptions = {
         compression = "zstd"; # Enable compression
         "com.sun:auto-snapshot" = "false";
+        mountpoint = "legacy";
       };
       postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
     };
