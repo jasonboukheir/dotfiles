@@ -24,7 +24,7 @@
 
         vpn = {
           enable = true;
-          wgConf = "/var/lib/secrets/protonvpn-wg.conf";
+          wgConf = "/var/lib/secrets/protonvpn/wg.conf";
         };
 
         jellyfin.enable = true;
