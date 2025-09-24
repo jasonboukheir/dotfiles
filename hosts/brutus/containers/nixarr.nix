@@ -1,4 +1,8 @@
-{inputs, ...}: {
+{
+  inputs,
+  lib,
+  ...
+}: {
   boot.enableContainers = true;
   containers.nixarr = {
     autoStart = true;
@@ -22,17 +26,20 @@
       nixarr = {
         enable = true;
 
-        vpn = {
+        # vpn = {
+        #   enable = true;
+        #   wgConf = "/var/lib/secrets/protonvpn/wg.conf";
+        # };
+
+        transmission = {
           enable = true;
-          wgConf = "/var/lib/secrets/protonvpn/wg.conf";
+          #  vpn.enable = true;
+          # peerPort = 51820;
+          extraSettings = {
+          };
         };
 
         jellyfin.enable = true;
-        transmission = {
-          enable = true;
-          vpn.enable = true;
-          peerPort = 51820;
-        };
 
         bazarr.enable = true;
         lidarr.enable = true;
@@ -41,6 +48,10 @@
         readarr.enable = true;
         sonarr.enable = true;
         jellyseerr.enable = true;
+      };
+
+      services.transmission.settings = {
+        rpc-host-whitelist = lib.strings.concatStringsSep "," ["transmission.sunnycareboo.com"];
       };
     };
   };
