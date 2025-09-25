@@ -33,9 +33,11 @@
 
         transmission = {
           enable = true;
+          flood.enable = true;
           #  vpn.enable = true;
           # peerPort = 51820;
           extraSettings = {
+            rpc-host-whitelist = "transmission.sunnycareboo.com";
           };
         };
 
@@ -48,10 +50,6 @@
         readarr.enable = true;
         sonarr.enable = true;
         jellyseerr.enable = true;
-      };
-
-      services.transmission.settings = {
-        rpc-host-whitelist = lib.strings.concatStringsSep "," ["transmission.sunnycareboo.com"];
       };
     };
   };
