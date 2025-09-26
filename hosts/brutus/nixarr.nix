@@ -1,6 +1,11 @@
-{...}: {
+{...}: let
+  dataDir = "/usb1/nixarr";
+in {
   nixarr = {
     enable = true;
+
+    mediaDir = "${dataDir}";
+    stateDir = "${dataDir}/.state/nixarr";
 
     vpn = {
       enable = true;
