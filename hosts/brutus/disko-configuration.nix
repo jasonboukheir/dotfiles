@@ -33,13 +33,17 @@
     zpool.zroot = {
       type = "zpool";
       mode = "mirror";
-      mountpoint = "/mnt/zroot";
-      rootFsOptions = {
-        compression = "zstd"; # Enable compression
-        "com.sun:auto-snapshot" = "false";
-        mountpoint = "legacy";
+      datasets = {
+        "root" = {
+          type = "zfs_fs";
+          options.mountpoint = "none";
+        };
+        "root/zfs_fs" = {
+          type = "zfs_fs";
+          mountpoint = "/zroot";
+          options."com.sun:auto-snapshot" = "true";
+        };
       };
-      postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
     };
   };
 }
