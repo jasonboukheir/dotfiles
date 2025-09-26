@@ -66,7 +66,7 @@
         enableACME = true;
         acmeRoot = null;
         locations."/" = {
-          proxyPass = "http://localhost:9091";
+          proxyPass = "http://0.0.0.0:9091";
           proxyWebsockets = true;
         };
       };

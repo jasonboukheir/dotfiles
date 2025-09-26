@@ -5,11 +5,12 @@
       type = "disk";
       content = {
         type = "gpt";
-        partitions.zfs = {
+        partitions.root = {
           size = "100%";
           content = {
-            type = "zfs";
-            pool = "zroot";
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/usb1";
           };
         };
       };
@@ -20,28 +21,13 @@
       type = "disk";
       content = {
         type = "gpt";
-        partitions.zfs = {
+        partitions.root = {
           size = "100%";
           content = {
-            type = "zfs";
-            pool = "zroot";
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/usb2";
           };
-        };
-      };
-    };
-
-    zpool.zroot = {
-      type = "zpool";
-      mode = "mirror";
-      datasets = {
-        "root" = {
-          type = "zfs_fs";
-          options.mountpoint = "none";
-        };
-        "root/zfs_fs" = {
-          type = "zfs_fs";
-          mountpoint = "/zroot";
-          options."com.sun:auto-snapshot" = "true";
         };
       };
     };

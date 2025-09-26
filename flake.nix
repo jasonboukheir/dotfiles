@@ -50,6 +50,7 @@
     nix-bitcoin-pkgs,
     nix-darwin,
     nix-homebrew,
+    nixarr,
     nixpkgs,
     sops-nix,
     ...
@@ -92,6 +93,7 @@
         modules = [
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
+          nixarr.nixosModules.default
           sops-nix.nixosModules.sops
           ./hosts/brutus
         ];
