@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   services.open-webui = {
-    enable = true;
+    enable = false;
     port = 3100;
     package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
       dependencies =
