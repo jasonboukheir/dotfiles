@@ -1,12 +1,12 @@
 {...}: {
   imports = [
     ./home-manager
+    ./nixarr
     ./programs
     ./services
     ./configuration.nix
     ./disko-configuration.nix
     ./hardware-configuration.nix
-    ./nixarr.nix
     ./nixpkgs.nix
     ./networking
     ./sops.nix
