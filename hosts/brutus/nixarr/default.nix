@@ -1,6 +1,9 @@
 {...}: let
   dataDir = "/usb1/nixarr";
 in {
+  imports = [
+    ./transmissionPortForwarding.nix
+  ];
   nixarr = {
     enable = true;
 
@@ -16,7 +19,6 @@ in {
       enable = true;
       flood.enable = true;
       vpn.enable = true;
-      peerPort = 51820;
       extraSettings = {
         rpc-host-whitelist = "transmission.sunnycareboo.com";
       };
