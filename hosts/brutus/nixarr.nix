@@ -17,6 +17,9 @@ in {
       flood.enable = true;
       vpn.enable = true;
       peerPort = 51820;
+      extraSettings = {
+        rpc-host-whitelist = "transmission.sunnycareboo.com";
+      };
     };
 
     jellyfin.enable = true;
