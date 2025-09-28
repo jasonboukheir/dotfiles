@@ -33,6 +33,7 @@
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
     nixcord.url = "github:kaylorben/nixcord";
+    nixos-raspberrypi = "github:nvmd/nixos-raspberrypi/main";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
@@ -54,6 +55,7 @@
     nix-darwin,
     nix-homebrew,
     nixarr,
+    nixos-raspberrypi,
     nixpkgs,
     sops-nix,
     ...
@@ -100,6 +102,16 @@
           nixarr.nixosModules.default
           sops-nix.nixosModules.sops
           ./hosts/brutus
+        ];
+      };
+      pibitcoin = nixos-raspberrypi.lib.nixosSystem {
+        system = "aarch64-linux";
+        specialArgs = inputs;
+        modules = [
+          determinate.nixosModules.default
+          home-manager.nixosModules.home-manager
+          nixos-raspberrypi.nixosModules.raspberry-pi-5.base
+          ./hosts/pibitcoin
         ];
       };
     };
