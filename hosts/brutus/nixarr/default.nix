@@ -18,6 +18,7 @@ in {
     transmission = {
       enable = true;
       flood.enable = true;
+      peerPort = 44176;
       vpn.enable = true;
       extraSettings = {
         rpc-host-whitelist = "transmission.sunnycareboo.com";

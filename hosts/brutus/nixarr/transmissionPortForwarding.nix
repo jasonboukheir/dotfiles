@@ -3,13 +3,14 @@
   pkgs,
   lib,
   ...
-}: {
-  config = lib.mkIf (config.nixarr.transmission.enable && config.nixarr.transmission.vpn.enable) {
+}: let
+  cfg = config.nixarr;
+in {
+  config = lib.mkIf (cfg.transmission.enable && cfg.transmission.vpn.enable) {
     environment.systemPackages = with pkgs; [
       libnatpmp
       ripgrep
       iptables
-      transmission
     ];
 
     systemd.timers."transmission-port-forwarding" = {
@@ -37,10 +38,10 @@
         ''
           set -u
 
-          port_file="${config.nixarr.stateDir}/transmission-port"
+          port_file="${cfg.stateDir}/transmission-port"
 
           # Renew TCP first to get a port
-          result_tcp="$(${pkgs.libnatpmp}/bin/natpmpc -a 0 0 tcp 60 -g 10.2.0.1)"
+          result_tcp="$(${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g 10.2.0.1)"
           if [ $? -ne 0 ]; then
             echo "ERROR: natpmpc failed for TCP" >&2
             exit 1
@@ -54,10 +55,6 @@
           old_port="$(cat "$port_file" 2>/dev/null || echo ''')"
           echo "Mapped new TCP port $new_port, old was $old_port."
           echo "$new_port" >"$port_file"
-
-          # Set Transmission to new port
-          echo "Telling transmission to listen on peer port $new_port."
-          ${pkgs.transmission}/bin/transmission-remote --port "$new_port"
 
           # Renew UDP using the same port
           result_udp="$(${pkgs.libnatpmp}/bin/natpmpc -a "$new_port" 0 udp 60 -g 10.2.0.1)"
