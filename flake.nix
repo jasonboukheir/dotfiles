@@ -102,14 +102,6 @@
           ./hosts/brutus
         ];
       };
-      pibitcoin = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
-        modules = [
-          nix-bitcoin.nixosModules.default
-          (nix-bitcoin + "/modules/presets/secure-node.nix")
-          ./hosts/pibitcoin
-        ];
-      };
     };
     nix.nixPath = ["nixpkgs=${nixpkgs}"];
 
