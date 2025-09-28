@@ -94,7 +94,9 @@
 
     nixosConfigurations = {
       brutus = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
+        specialArgs = {
+          inherit inputs;
+        };
         modules = [
           determinate.nixosModules.default
           disko.nixosModules.disko
@@ -106,7 +108,9 @@
       };
       pibitcoin = nixos-raspberrypi.lib.nixosSystem {
         system = "aarch64-linux";
-        specialArgs = inputs;
+        specialArgs = {
+          inherit inputs;
+        };
         modules = [
           determinate.nixosModules.default
           home-manager.nixosModules.home-manager
