@@ -31,6 +31,7 @@
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
+    nixcord.url = "github:kaylorben/nixcord";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
