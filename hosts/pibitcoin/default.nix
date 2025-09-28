@@ -34,7 +34,7 @@
       fsType = "ext4";
       options = ["defaults"];
     };
-    "/var/lib/bitcoind" = {
+    "/nvme" = {
       device = "/dev/disk/by-uuid/c26b49bd-a64b-4ad5-b762-b613730d7931";
       fsType = "ext4";
       options = ["noatime"];
