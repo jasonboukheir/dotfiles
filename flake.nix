@@ -110,6 +110,7 @@
         system = "aarch64-linux";
         specialArgs = {
           inherit inputs;
+          inherit nixos-raspberrypi;
         };
         modules = [
           determinate.nixosModules.default
