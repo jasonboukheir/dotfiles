@@ -1,6 +1,9 @@
 {...}: {
   imports = [
     ../../modules
+    ./home-manager
+    ./programs
+    ./users.nix
   ];
   system = {
     stateVersion = "25.05";
@@ -19,16 +22,6 @@
         PasswordAuthentication = false;
         PermitRootLogin = "no";
       };
-    };
-  };
-  users = {
-    users.jasonbk = {
-      isNormalUser = true;
-      description = "Jason Bou Kheir";
-      extraGroups = ["wheel"];
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfZvYFG59uHZI+qyuVEyeL6A7GWanxbRbQkQG7q9SWy"
-      ];
     };
   };
   programs = {
