@@ -11,6 +11,9 @@
         "brutus" = {
           forwardAgent = true;
         };
+        "pibitcoin" = {
+          forwardAgent = true;
+        };
         "* !*.od*" = lib.mkIf (config.programs._1password.enable && config.programs._1password.agentPath != null) {
           identityAgent = config.programs._1password.agentPath;
         };
