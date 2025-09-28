@@ -29,6 +29,11 @@
     extra-container.enable = true;
   };
   fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/44444444-4444-4444-8888-888888888888";
+      fsType = "ext4";
+      options = ["defaults"];
+    };
     "/var/lib/bitcoind" = {
       device = "/dev/disk/by-uuid/c26b49bd-a64b-4ad5-b762-b613730d7931";
       fsType = "ext4";
