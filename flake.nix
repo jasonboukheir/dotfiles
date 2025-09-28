@@ -33,7 +33,7 @@
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
     nixcord.url = "github:kaylorben/nixcord";
-    nixos-raspberrypi = "github:nvmd/nixos-raspberrypi/main";
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
