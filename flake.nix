@@ -75,6 +75,7 @@
       ];
     in {
       "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
         specialArgs = specialArgs;
         modules =
           darwinModules
@@ -83,6 +84,7 @@
           ];
       };
       "jasonbk-mac" = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
         specialArgs = specialArgs;
         modules =
           darwinModules
