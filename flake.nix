@@ -1,5 +1,6 @@
 {
   inputs = {
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -44,6 +45,7 @@
   };
 
   outputs = inputs @ {
+    determinate,
     disko,
     home-manager,
     mac-app-util,
@@ -92,6 +94,7 @@
       brutus = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs;};
         modules = [
+          determinate.nixosModules.default
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           nixarr.nixosModules.default
