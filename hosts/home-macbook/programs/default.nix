@@ -7,5 +7,6 @@
     ./nushell.nix
     ./proton-drive.nix
     ./sparrow.nix
+    ./utm.nix
   ];
 }
