@@ -11,6 +11,7 @@
     ./networking
     ./sops.nix
     ./users.nix
+    ./virtualization.nix
     ./../../modules
   ];
 }
