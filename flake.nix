@@ -1,13 +1,4 @@
 {
-  nixConfig = {
-    extra-substituters = [
-      "https://nixos-raspberrypi.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
-    ];
-  };
-
   inputs = {
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     disko = {
@@ -31,10 +22,6 @@
       flake = false;
     };
     mac-app-util.url = "github:hraban/mac-app-util";
-    nix-bitcoin = {
-      url = "github:fort-nix/nix-bitcoin/release";
-    };
-    nix-bitcoin-pkgs.follows = "nix-bitcoin/nixpkgs";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,7 +29,6 @@
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
     nixcord.url = "github:kaylorben/nixcord";
-    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
@@ -59,12 +45,9 @@
     disko,
     home-manager,
     mac-app-util,
-    nix-bitcoin,
-    nix-bitcoin-pkgs,
     nix-darwin,
     nix-homebrew,
     nixarr,
-    nixos-raspberrypi,
     nixpkgs,
     sops-nix,
     ...
@@ -115,19 +98,6 @@
           nixarr.nixosModules.default
           sops-nix.nixosModules.sops
           ./hosts/brutus
-        ];
-      };
-      pibitcoin = nixos-raspberrypi.lib.nixosSystem {
-        system = "aarch64-linux";
-        specialArgs = {
-          inherit inputs;
-          inherit nixos-raspberrypi;
-        };
-        modules = [
-          determinate.nixosModules.default
-          home-manager.nixosModules.home-manager
-          nixos-raspberrypi.nixosModules.raspberry-pi-5.base
-          ./hosts/pibitcoin
         ];
       };
     };
