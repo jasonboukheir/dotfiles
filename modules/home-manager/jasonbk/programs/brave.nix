@@ -1,4 +1,8 @@
-{...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   ext = {
     "1password" = {
       id = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
@@ -11,9 +15,8 @@
     };
   };
 in {
-  home-manager.users.jasonbk = {
+  config = lib.mkIf config.programs.brave.enable {
     programs.brave = {
-      enable = true;
       extensions = [
         ext."1password"
         ext.simplelogin

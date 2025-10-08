@@ -1,6 +1,7 @@
 {...}: {
   imports = [
-    ./_1password.nix
+    ./1password.nix
+    ./brave.nix
     ./ghostty.nix
     ./ssh.nix
     ./zed-editor.nix
