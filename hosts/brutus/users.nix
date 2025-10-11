@@ -4,7 +4,7 @@
     users.jasonbk = {
       isNormalUser = true;
       description = "Jason Bou Kheir";
-      extraGroups = ["networkmanager" "wheel" "podMan"];
+      extraGroups = ["networkmanager" "wheel" "podman"];
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOBXQLA93+Bth7CcvuDjlu10Z03GmFg3CSLH4z+inadP"
       ];
