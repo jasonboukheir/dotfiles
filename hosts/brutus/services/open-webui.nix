@@ -1,14 +1,14 @@
 {pkgs, ...}: {
   services.open-webui = {
-    enable = false;
+    enable = true;
     port = 3100;
-    package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
-      dependencies =
-        oldAttrs.dependencies
-        ++ [
-          pkgs.python3Packages.itsdangerous
-        ];
-    });
+    # package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
+    #   dependencies =
+    #     oldAttrs.dependencies
+    #     ++ [
+    #       pkgs.python3Packages.itsdangerous
+    #     ];
+    # });
     environment = {
       WEBUI_URL = "https://ai.sunnycareboo.com";
 
