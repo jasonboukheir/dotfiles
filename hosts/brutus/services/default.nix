@@ -7,5 +7,6 @@
     ./open-webui.nix
     ./openssh.nix
     ./pocket-id.nix
+    ./postgresql.nix
   ];
 }
