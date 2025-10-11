@@ -9,6 +9,7 @@
       ];
       environment = {
         "DATABASE_URL" = "postgresql://litellm@localhost:5432/litellm";
+        "STORE_MODEL_IN_DB" = "True";
       };
       environmentFiles = [
         "/var/lib/secrets/liteLlmSecrets"
