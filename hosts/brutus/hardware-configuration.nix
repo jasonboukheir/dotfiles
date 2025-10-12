@@ -28,6 +28,16 @@
     options = ["fmask=0077" "dmask=0077"];
   };
 
+  fileSystems."/var/lib/nextcloud" = {
+    depends = [
+      "/"
+      "/usb2"
+    ];
+    device = "/usb2/nextcloud";
+    fsType = "none";
+    options = ["bind"];
+  };
+
   swapDevices = [];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
