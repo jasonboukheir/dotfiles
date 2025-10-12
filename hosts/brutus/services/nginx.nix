@@ -38,7 +38,14 @@ in {
     recommendedTlsSettings = true; # Optional for better TLS defaults
 
     virtualHosts =
-      lib.mapAttrs' mkVirtualHost services;
+      (lib.mapAttrs' mkVirtualHost services)
+      // {
+        "cloud.sunnycareboo.com" = {
+          forceSSL = true;
+          enableACME = true;
+          acmeRoot = null;
+        };
+      };
   };
 
   security.acme = {
