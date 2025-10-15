@@ -11,6 +11,5 @@
     ./openssh.nix
     ./pocket-id.nix
     ./postgresql.nix
-    ./seafile.nix
   ];
 }
