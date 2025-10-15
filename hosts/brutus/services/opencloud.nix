@@ -6,6 +6,7 @@
   cfg = config.services.opencloud;
   domain = "cloud.sunnycareboo.com";
 in {
+  # TODO: setup pocket-id as idp
   services.opencloud = {
     enable = false;
     url = "https://${domain}";
