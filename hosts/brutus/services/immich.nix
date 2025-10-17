@@ -7,7 +7,7 @@
   domain = "photos.sunnycareboo.com";
 in {
   services.immich = {
-    enable = true;
+    enable = false;
     port = 2283;
     database = {
       user = "immich";
