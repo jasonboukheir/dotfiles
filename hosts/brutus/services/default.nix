@@ -3,6 +3,7 @@
     ./opencloud
     ./actual.nix
     ./blocky.nix
+    ./immich.nix
     ./litellm.nix
     ./mealie.nix
     ./nextcloud.nix
