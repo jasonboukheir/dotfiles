@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.immich;
-  domain = "immich.sunnycareboo.com";
+  domain = "photos.sunnycareboo.com";
 in {
   services.immich = {
     enable = true;
@@ -16,7 +16,7 @@ in {
     enableACME = true;
     acmeRoot = null;
     locations."/" = {
-      proxyPass = "http://localhost:${cfg.port}";
+      proxyPass = "http://localhost:${toString cfg.port}";
       proxyWebsockets = true;
       recommendedProxySettings = true;
       extraConfig = ''
@@ -35,6 +35,6 @@ in {
     ];
     device = "usb2/immich";
     fsType = "none";
-    fsOptions = ["bind"];
+    options = ["bind"];
   };
 }
