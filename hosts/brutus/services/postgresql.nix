@@ -12,8 +12,9 @@
          superuser_map      /^(.*)$   \1
     '';
     authentication = pkgs.lib.mkOverride 10 ''
-      #type database  DBuser  auth-method optional_ident_map
-      local sameuser  all     peer        map=superuser_map
+      #type database  DBuser    auth-method optional_ident_map
+      local all       postgres  peer        map=superuser_map
+      local sameuser  all       peer        map=superuser_map
 
       # ipv4
       host  sameuser  all  127.0.0.1/32  trust
