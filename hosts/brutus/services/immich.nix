@@ -7,13 +7,12 @@
   domain = "photos.sunnycareboo.com";
 in {
   services.immich = {
-    enable = false;
+    enable = true;
     port = 2283;
     database = {
       user = "immich";
       port = 5432;
       name = "immich";
-      host = "127.0.0.1";
       createDB = true;
     };
   };
