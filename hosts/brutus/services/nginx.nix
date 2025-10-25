@@ -6,7 +6,6 @@
   services = {
     ai = {port = 3100;};
     blocky = {port = 1501;};
-    budget = {port = 3000;};
     "litellm.ai" = {port = 3200;};
     "pocket-id" = {port = 1411;};
     jellyfin = {port = 8096;};
