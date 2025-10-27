@@ -5,6 +5,8 @@
 }: let
   cfg = config.services.firefly-iii;
   host = "budget.sunnycareboo.com";
+  importerCfg = config.services.firefly-iii-data-importer;
+  importerHost = "importer.budget.sunnycareboo.com";
 in {
   services.firefly-iii = {
     enable = true;
@@ -18,7 +20,23 @@ in {
     };
   };
 
+  services.firefly-iii-data-importer = lib.mkIf cfg.enable {
+    enable = true;
+    enableNginx = true;
+    virtualHost = importerHost;
+    settings = {
+      FIREFLY_III_URL = "https://${host}";
+      FIREFLY_III_ACCESS_TOKEN = "/var/lib/secrets/firefly-iii-data-importer.pat";
+    };
+  };
+
   services.nginx.virtualHosts."${host}" = lib.mkIf (cfg.enable && cfg.enableNginx) {
+    forceSSL = true;
+    enableACME = true;
+    acmeRoot = null;
+  };
+
+  services.nginx.virtualHosts."${importerHost}" = lib.mkIf (importerCfg.enable && importerCfg.enableNginx) {
     forceSSL = true;
     enableACME = true;
     acmeRoot = null;
