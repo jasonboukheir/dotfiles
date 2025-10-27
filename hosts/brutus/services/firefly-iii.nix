@@ -26,7 +26,7 @@ in {
     virtualHost = importerHost;
     settings = {
       FIREFLY_III_URL = "https://${host}";
-      FIREFLY_III_ACCESS_TOKEN = "/var/lib/secrets/firefly-iii-data-importer.pat";
+      FIREFLY_III_ACCESS_TOKEN_FILE = "/var/lib/secrets/firefly-iii-data-importer.pat";
     };
   };
 
