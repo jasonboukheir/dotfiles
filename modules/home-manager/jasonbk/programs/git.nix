@@ -6,9 +6,13 @@
   programs.git = {
     enable = lib.mkDefault true;
     lfs.enable = true;
-    userName = "Jason Elie Bou Kheir";
-    userEmail = "5115126+jasonboukheir@users.noreply.github.com";
-    extraConfig = lib.mkMerge [
+    settings = lib.mkMerge [
+      {
+        user = {
+          name = "Jason Elie Bou Kheir";
+          email = "5115126+jasonboukheir@users.noreply.github.com";
+        };
+      }
       {
         init.defaultBranch = "main";
         merge.tool = "nvim";
