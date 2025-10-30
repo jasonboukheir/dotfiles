@@ -3,6 +3,7 @@
     ./opencloud
     ./actual.nix
     ./blocky.nix
+    ./ddclient.nix
     ./firefly-iii.nix
     ./immich.nix
     ./litellm.nix
