@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.services.immich;
@@ -43,4 +44,8 @@ in {
     fsType = "none";
     options = ["bind"];
   };
+
+  services.restic.backups.daily.paths = lib.optionals cfg.enable [
+    cfg.mediaLocation
+  ];
 }
