@@ -13,6 +13,9 @@
         "zig"
         "ruff"
       ];
+      extraPackages = with pkgs; [
+        nixd alejandra
+      ];
       installRemoteServer = true;
       themes = {
         "Nord" = ./themes/nord.json;
