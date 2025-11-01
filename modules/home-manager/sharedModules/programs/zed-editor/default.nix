@@ -13,15 +13,16 @@
         "zig"
         "ruff"
       ];
-      extraPackages = with pkgs; [
-        nixd alejandra
-      ];
+      mutableUserKeymaps = false;
+      mutableUserSettings = false;
+      mutableUserTasks = false;
       installRemoteServer = true;
       themes = {
         "Nord" = ./themes/nord.json;
       };
       userSettings = lib.mkMerge [
         {
+          load_direnv = "shell_hook";
           ui_font_size = 14;
           buffer_font_family = "FiraCode Nerd Font";
           buffer_font_size = 14;
