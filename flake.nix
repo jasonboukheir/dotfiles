@@ -1,5 +1,6 @@
 {
   inputs = {
+    agenix.url = "github:ryantm/agenix";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     disko = {
       url = "github:nix-community/disko";
@@ -41,6 +42,7 @@
   };
 
   outputs = inputs @ {
+    agenix,
     determinate,
     disko,
     home-manager,
@@ -92,12 +94,13 @@
           inherit inputs;
         };
         modules = [
+          ./hosts/brutus
+          agenix.nixosModules.default
           determinate.nixosModules.default
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           nixarr.nixosModules.default
           sops-nix.nixosModules.sops
-          ./hosts/brutus
         ];
       };
     };
@@ -106,7 +109,10 @@
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
-      default = import ./shell.nix {inherit pkgs;};
+      default = import ./shell.nix {
+        inherit pkgs;
+        inherit agenix;
+      };
     });
   };
 }
