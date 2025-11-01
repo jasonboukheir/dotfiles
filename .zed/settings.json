@@ -1,0 +1,13 @@
+{
+  "languages": {
+    "Nix": {
+      "formatter": {
+        "external": {
+          "arguments": ["--quiet", "--"],
+          "command": "alejandra"
+        }
+      },
+      "language_servers": ["nixd", "!nil"]
+    }
+  }
+}
