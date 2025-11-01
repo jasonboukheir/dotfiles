@@ -1,4 +1,7 @@
-{...}: {
+{config, ...}: {
+  age.secrets.litellmEnv = {
+    file = ../secrets/liteLlmSecrets.age;
+  };
   virtualisation.oci-containers.containers = {
     litellm = {
       autoStart = true;
@@ -12,7 +15,7 @@
         "STORE_MODEL_IN_DB" = "True";
       };
       environmentFiles = [
-        "/var/lib/secrets/liteLlmSecrets"
+        config.age.secrets.litellmEnv.path
       ];
       extraOptions = [
         "--network=host"

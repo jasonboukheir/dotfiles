@@ -14,7 +14,6 @@ in {
       createLocally = true;
     };
     config = {
-      adminpassFile = "/var/lib/secrets/nextcloud-admin-pass";
       dbtype = "pgsql";
     };
   };

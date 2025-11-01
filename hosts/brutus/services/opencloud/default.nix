@@ -79,7 +79,6 @@ in {
       # csp settings
       "PROXY_CSP_CONFIG_FILE_LOCATION" = "${cspConfigFile}";
     };
-    environmentFile = "/var/lib/secrets/opencloud.env";
   };
 
   services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {

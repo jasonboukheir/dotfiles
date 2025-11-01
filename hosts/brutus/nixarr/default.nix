@@ -1,9 +1,15 @@
-{...}: let
+{config, ...}: let
   dataDir = "/usb1/nixarr";
+  globals = config.util-nixarr.globals;
 in {
   imports = [
     ./transmissionPortForwarding.nix
   ];
+  age.secrets.nixarr-wgconf = {
+    file = ../secrets/nixarr-wgconf.age;
+    owner = globals.libraryOwner.user;
+    group = globals.libraryOwner.group;
+  };
   nixarr = {
     enable = true;
 
@@ -12,7 +18,7 @@ in {
 
     vpn = {
       enable = true;
-      wgConf = "/var/lib/secrets/nixarr/wg.conf";
+      wgConf = config.age.secrets.nixarr-wgconf.path;
     };
 
     transmission = {

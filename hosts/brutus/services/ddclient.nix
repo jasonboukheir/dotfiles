@@ -1,4 +1,7 @@
-{...}: {
+{config, ...}: {
+  age.secrets.ddclient-token = {
+    file = ../secrets/sunnycareboo-dot-com-zone-token.age;
+  };
   services.ddclient = {
     enable = true;
     domains = ["vpn.sunnycareboo.com"];
@@ -6,7 +9,7 @@
     zone = "sunnycareboo.com";
 
     username = "token"; # This gets mapped to login option: https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/ddclient.nix#L20
-    passwordFile = "/var/lib/secrets/ddclient-token";
+    passwordFile = config.age.secrets.ddclient-token.path;
 
     # Other options (defaults are fine for basic setup)
     ssl = true; # Use HTTPS (required for Cloudflare API)

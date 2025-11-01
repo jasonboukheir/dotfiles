@@ -8,12 +8,19 @@
   importerCfg = config.services.firefly-iii-data-importer;
   importerHost = "importer.budget.sunnycareboo.com";
 in {
+  age.secrets = {
+    firefly-iii-appkey = {
+      file = ../secrets/firefly-iii-appkey.age;
+      owner = cfg.user;
+      group = cfg.group;
+    };
+  };
   services.firefly-iii = {
     enable = true;
     enableNginx = true;
     virtualHost = host;
     settings = {
-      APP_KEY_FILE = "/var/lib/secrets/firefly-iii.appkey";
+      APP_KEY_FILE = config.age.secrets.firefly-iii-appkey.path;
       DB_CONNECTION = "pgsql";
       DB_USERNAME = cfg.user;
       DB_DATABASE = cfg.user;
@@ -26,7 +33,6 @@ in {
     virtualHost = importerHost;
     settings = {
       FIREFLY_III_URL = "https://${host}";
-      FIREFLY_III_ACCESS_TOKEN_FILE = "/var/lib/secrets/firefly-iii-data-importer.pat";
     };
   };
 
