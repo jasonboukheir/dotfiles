@@ -35,10 +35,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
     };
-    sops-nix = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:Mic92/sops-nix";
-    };
   };
 
   outputs = inputs @ {
@@ -51,7 +47,6 @@
     nix-homebrew,
     nixarr,
     nixpkgs,
-    sops-nix,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -100,7 +95,6 @@
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           nixarr.nixosModules.default
-          sops-nix.nixosModules.sops
         ];
       };
     };

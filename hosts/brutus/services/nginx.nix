@@ -40,15 +40,16 @@ in {
       lib.mapAttrs' mkVirtualHost services;
   };
 
+  age.secrets.acme-env = {
+    file = ../secrets/acme-env.age;
+  };
+
   security.acme = {
     acceptTerms = true;
     defaults = {
       email = "postmaster@sunnycareboo.com";
       dnsProvider = "cloudflare";
-      # Assumes your sops secret contains the necessary Cloudflare credentials,
-      # e.g., CF_API_EMAIL=... and CF_API_KEY=..., or CF_DNS_API_TOKEN=...
-      # Adjust the secret path if you use a different one.
-      environmentFile = config.sops.secrets."traefik/env".path;
+      environmentFile = config.age.secrets.acme-env.path;
     };
   };
 }

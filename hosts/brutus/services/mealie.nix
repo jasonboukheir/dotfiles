@@ -19,8 +19,12 @@ in {
     };
     database.createLocally = true;
     extraOptions = [];
-    credentialsFile = "/var/lib/secrets/mealie.env";
+    credentialsFile = config.age.secrets.mealieEnv.path;
     listenAddress = "0.0.0.0";
+  };
+
+  age.secrets.mealieEnv = lib.mkIf cfg.enable {
+    file = ../secrets/mealie-env.age;
   };
 
   services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {

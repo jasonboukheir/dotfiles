@@ -9,7 +9,6 @@
     ./hardware-configuration.nix
     ./nixpkgs.nix
     ./networking
-    ./sops.nix
     ./users.nix
     ./virtualization.nix
     ./../../modules
