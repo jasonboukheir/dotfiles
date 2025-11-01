@@ -41,4 +41,16 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "restic/env.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "restic/repo.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "restic/password.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
 }

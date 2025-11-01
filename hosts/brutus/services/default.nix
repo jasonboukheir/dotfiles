@@ -14,5 +14,6 @@
     ./openssh.nix
     ./pocket-id.nix
     ./postgresql.nix
+    ./restic.nix
   ];
 }
