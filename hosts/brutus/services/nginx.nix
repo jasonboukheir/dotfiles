@@ -1,56 +1,47 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  services = {
+    ai = {port = 3100;};
+    blocky = {port = 1501;};
+    "litellm.ai" = {port = 3200;};
+    "pocket-id" = {port = 1411;};
+    jellyfin = {port = 8096;};
+
+    # nixarr
+    transmission = {port = 9091;};
+    bazarr = {port = 6767;};
+    lidarr = {port = 8686;};
+    prowlarr = {port = 9696;};
+    radarr = {port = 7878;};
+    readarr = {port = 8787;};
+    sonarr = {port = 8989;};
+    jellyseerr = {port = 5055;};
+  };
+  mkVirtualHost = subdomain: config:
+    lib.nameValuePair "${subdomain}.sunnycareboo.com" {
+      forceSSL = true;
+      enableACME = true;
+      acmeRoot = null;
+      locations."/" = {
+        proxyPass = "http://localhost:${toString config.port}";
+        proxyWebsockets = true;
+      };
+    };
+in {
   services.nginx = {
     enable = true;
     recommendedProxySettings = true; # Optional but good for reverse proxies
     recommendedTlsSettings = true; # Optional for better TLS defaults
 
-    virtualHosts = {
-      "blocky.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true;
-        acmeRoot = null;
-        locations."/" = {
-          proxyPass = "http://localhost:1501"; # Proxies to your blocky instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-      "budget.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true;
-        acmeRoot = null;
-        locations."/" = {
-          proxyPass = "http://localhost:3000"; # Proxies to your blocky instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-      "ai.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true;
-        acmeRoot = null;
-        locations."/" = {
-          proxyPass = "http://localhost:3100"; # Proxies to your blocky instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-      "pocket-id.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true;
-        acmeRoot = null;
-        locations."/" = {
-          proxyPass = "http://localhost:1411"; # Proxies to your pocket-id instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-      "jellyfin.sunnycareboo.com" = {
-        forceSSL = true; # Redirects HTTP to HTTPS
-        enableACME = true;
-        acmeRoot = null;
-        locations."/" = {
-          proxyPass = "http://localhost:8096"; # Proxies to your jellyfin instance
-          proxyWebsockets = true; # If needed for WebSocket support; adjust as necessary
-        };
-      };
-    };
+    virtualHosts =
+      lib.mapAttrs' mkVirtualHost services;
+  };
+
+  age.secrets.acme-env = {
+    file = ../secrets/acme-env.age;
   };
 
   security.acme = {
@@ -58,10 +49,7 @@
     defaults = {
       email = "postmaster@sunnycareboo.com";
       dnsProvider = "cloudflare";
-      # Assumes your sops secret contains the necessary Cloudflare credentials,
-      # e.g., CF_API_EMAIL=... and CF_API_KEY=..., or CF_DNS_API_TOKEN=...
-      # Adjust the secret path if you use a different one.
-      environmentFile = config.sops.secrets."traefik/env".path;
+      environmentFile = config.age.secrets.acme-env.path;
     };
   };
 }

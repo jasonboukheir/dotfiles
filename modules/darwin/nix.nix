@@ -1,8 +1,10 @@
 {inputs, ...}: {
-  nix.enable = true;
-  nix.settings = {
-    experimental-features = "nix-command flakes";
-  };
+  nix.enable = false;
+  #  nix.linux-builder = {
+  #    enable = true;
+  #    systems = ["x86_64-linux" "aarch64-linux"];
+  #    config.boot.binfmt.emulatedSystems = ["x86_64-linux"];
+  #  };
   nixpkgs.config.allowUnfree = true;
 
   system = {

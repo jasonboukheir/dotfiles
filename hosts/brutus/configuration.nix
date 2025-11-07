@@ -8,11 +8,14 @@
   ...
 }: {
   nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.trusted-users = ["jasonbk"];
 
   # Bootloader.
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+  ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.supportedFilesystems = ["zfs"];
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -45,4 +48,6 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
+
+  environment.variables.EDITOR = "nvim";
 }

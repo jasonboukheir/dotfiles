@@ -13,9 +13,13 @@
         "zig"
         "ruff"
       ];
+      mutableUserKeymaps = false;
+      mutableUserSettings = false;
+      mutableUserTasks = false;
       installRemoteServer = true;
       userSettings = lib.mkMerge [
         {
+          load_direnv = "shell_hook";
           vim_mode = true;
           languages = {
             "Nix" = {

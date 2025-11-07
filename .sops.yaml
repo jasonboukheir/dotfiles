@@ -1,7 +1,0 @@
-keys:
-  - &brutus age1axcv7w765ja3fcg8syu43a8xeq2kzaumnst9sslhgulx4h8dfvfq5xp9np
-creation_rules:
-  - path_regex: hosts/brutus/[^/]+\.(yaml|json|env|ini)$
-    key_groups:
-    - age:
-      - *brutus

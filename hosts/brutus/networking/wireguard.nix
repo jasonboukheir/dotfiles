@@ -4,7 +4,7 @@
     # generatePrivateKeyFile cannot be used with useNetworkd...
     # so we need to use privateKey / privateKeyFile with sops
     # useNetworkd = true;
-    interfaces.wg0 = {
+    interfaces.wg-homeRelay = {
       ips = ["10.100.0.1/24"];
       listenPort = 51820;
       privateKeyFile = "/var/lib/wireguard/wg0.key";
