@@ -19,7 +19,7 @@
         {
           publicKey = "VxT8i+moMUcUbLtmHcdyb5l/t6G+KI57k+2IoKhoMjU=";
           allowedIPs = ["10.100.0.0/24" "192.168.50.0/24"]; # VPN subnet + home LAN subnet for relay access
-          endpoint = "50.47.248.79:51820";
+          endpoint = "vpn.sunnycareboo.com:51820";
           persistentKeepalive = 25; # Optional for NAT traversal
         }
       ];

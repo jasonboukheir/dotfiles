@@ -43,7 +43,7 @@ in {
       pkgs._1password-cli
     ];
     programs.git = lib.mkIf (config.programs.git.enable && config.programs.ssh.enable) {
-      extraConfig = {
+      settings = {
         "gpg \"ssh\"" = {
           program = onePassSshSignPath;
         };

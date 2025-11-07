@@ -5,11 +5,12 @@
       type = "disk";
       content = {
         type = "gpt";
-        partitions.zfs = {
+        partitions.root = {
           size = "100%";
           content = {
-            type = "zfs";
-            pool = "zroot";
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/usb1";
           };
         };
       };
@@ -20,25 +21,15 @@
       type = "disk";
       content = {
         type = "gpt";
-        partitions.zfs = {
+        partitions.root = {
           size = "100%";
           content = {
-            type = "zfs";
-            pool = "zroot";
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/usb2";
           };
         };
       };
-    };
-
-    zpool.zroot = {
-      type = "zpool";
-      mode = "mirror";
-      mountpoint = "/mnt/zroot";
-      rootFsOptions = {
-        compression = "zstd"; # Enable compression
-        "com.sun:auto-snapshot" = "false";
-      };
-      postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
     };
   };
 }

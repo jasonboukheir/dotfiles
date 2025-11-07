@@ -1,5 +1,7 @@
 {
   inputs = {
+    agenix.url = "github:ryantm/agenix";
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,24 +23,17 @@
       flake = false;
     };
     mac-app-util.url = "github:hraban/mac-app-util";
-    nix-bitcoin = {
-      url = "github:fort-nix/nix-bitcoin/release";
-    };
-    nix-bitcoin-pkgs.follows = "nix-bitcoin/nixpkgs";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nixarr.url = "github:rasmus-kirk/nixarr";
+    nixcord.url = "github:kaylorben/nixcord";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
-    };
-    sops-nix = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:Mic92/sops-nix";
     };
     stylix = {
       url = "github:nix-community/stylix";
@@ -47,15 +42,15 @@
   };
 
   outputs = inputs @ {
+    agenix,
+    determinate,
     disko,
     home-manager,
     mac-app-util,
-    nix-bitcoin,
-    nix-bitcoin-pkgs,
     nix-darwin,
     nix-homebrew,
+    nixarr,
     nixpkgs,
-    sops-nix,
     stylix,
     ...
   }: let
@@ -75,6 +70,7 @@
       ];
     in {
       "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
         specialArgs = specialArgs;
         modules =
           darwinModules
@@ -83,6 +79,7 @@
           ];
       };
       "jasonbk-mac" = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
         specialArgs = specialArgs;
         modules =
           darwinModules
@@ -94,20 +91,16 @@
 
     nixosConfigurations = {
       brutus = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
+        specialArgs = {
+          inherit inputs;
+        };
         modules = [
+          ./hosts/brutus
+          agenix.nixosModules.default
+          determinate.nixosModules.default
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
-          sops-nix.nixosModules.sops
-          ./hosts/brutus
-        ];
-      };
-      pibitcoin = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
-        modules = [
-          nix-bitcoin.nixosModules.default
-          (nix-bitcoin + "/modules/presets/secure-node.nix")
-          ./hosts/pibitcoin
+          nixarr.nixosModules.default
         ];
       };
     };
@@ -116,7 +109,10 @@
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
-      default = import ./shell.nix {inherit pkgs;};
+      default = import ./shell.nix {
+        inherit pkgs;
+        inherit agenix;
+      };
     });
   };
 }

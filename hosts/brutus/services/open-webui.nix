@@ -1,4 +1,7 @@
-{...}: {
+{config, ...}: {
+  age.secrets.openWebuiEnv = {
+    file = ../secrets/openWebui-env.age;
+  };
   services.open-webui = {
     enable = true;
     port = 3100;
@@ -17,7 +20,7 @@
       OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
       ENABLE_OAUTH_SIGNUP = "True";
     };
-    environmentFile = "/var/lib/secrets/openWebuiSecrets";
+    environmentFile = config.age.secrets.openWebuiEnv.path;
   };
   allowUnfreePackageNames = ["open-webui"];
 }
