@@ -101,6 +101,7 @@
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           nixarr.nixosModules.default
+          stylix.nixosModules.stylix
         ];
       };
     };
