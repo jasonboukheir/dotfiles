@@ -20,6 +20,7 @@
       userSettings = lib.mkMerge [
         {
           load_direnv = "shell_hook";
+          lsp_document_colors = true;
           vim_mode = true;
           languages = {
             "Nix" = {
