@@ -4,7 +4,6 @@
   ...
 }: let
   services = {
-    ai = {port = 3100;};
     blocky = {port = 1501;};
     "litellm.ai" = {port = 3200;};
     "pocket-id" = {port = 1411;};
