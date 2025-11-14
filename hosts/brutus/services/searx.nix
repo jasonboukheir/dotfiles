@@ -19,6 +19,9 @@ in {
     environmentFile = config.age.secrets."searx/env.age".path;
     settings = {
       server.secret_key = "$SEARX_SECRET_KEY";
+      search = {
+        formats = ["html" "json"];
+      };
     };
   };
 
