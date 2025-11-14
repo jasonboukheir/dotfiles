@@ -15,5 +15,6 @@
     ./pocket-id.nix
     ./postgresql.nix
     ./restic.nix
+    ./searx.nix
   ];
 }

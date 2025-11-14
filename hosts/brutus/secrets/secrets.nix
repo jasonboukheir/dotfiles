@@ -53,4 +53,8 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "searx/env.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
 }
