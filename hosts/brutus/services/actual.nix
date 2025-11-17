@@ -1,9 +1,25 @@
-{...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.services.actual;
+  host = "budget.sunnycareboo.com";
+  port = 5007;
+in {
   services.actual = {
-    enable = false;
+    enable = true;
     settings = {
-      port = 3000;
-      # hostname = "budget.sunnycareboo.com";
+      port = port;
+    };
+  };
+  services.nginx.virtualHosts."${host}" = lib.mkIf cfg.enable {
+    forceSSL = true;
+    enableACME = true;
+    acmeRoot = null;
+    locations."/" = {
+      proxyPass = "http://localhost:${toString port}";
+      proxyWebsockets = true;
     };
   };
 }
