@@ -8,7 +8,7 @@
   importerCfg = config.services.firefly-iii-data-importer;
   importerHost = "importer.budget.sunnycareboo.com";
 in {
-  age.secrets = {
+  age.secrets = lib.mkIf cfg.enable {
     firefly-iii-appkey = {
       file = ../secrets/firefly-iii-appkey.age;
       owner = cfg.user;
@@ -16,8 +16,8 @@ in {
     };
   };
   services.firefly-iii = {
-    enable = true;
-    enableNginx = true;
+    enable = false;
+    enableNginx = cfg.enable;
     virtualHost = host;
     settings = {
       APP_KEY_FILE = config.age.secrets.firefly-iii-appkey.path;
