@@ -18,6 +18,8 @@
       mutableUserTasks = false;
       installRemoteServer = true;
       userSettings = lib.mkMerge [
+        (import
+          ./ssh_connections.nix)
         {
           load_direnv = "shell_hook";
           vim_mode = true;
