@@ -21,6 +21,9 @@
         "brutus" = {
           forwardAgent = true;
         };
+        "litus" = {
+          forwardAgent = true;
+        };
         "pibitcoin" = {
           forwardAgent = true;
         };
