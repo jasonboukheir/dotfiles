@@ -1,5 +1,5 @@
 let
-  root = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPjx7uRpFx9S/K1rjIuoCFUuXnN+99oMtSah8KBjHBRq";
+  root = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA3QeouGnA3F+Rry67iZRWvd+CpOp+NcEnt2VZ03PVGH";
 in {
   "acme/env.age" = {
     armor = true;
