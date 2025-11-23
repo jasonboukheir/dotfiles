@@ -39,8 +39,8 @@ in {
       lib.mapAttrs' mkVirtualHost services;
   };
 
-  age.secrets.acme-env = {
-    file = ../secrets/acme-env.age;
+  age.secrets."acme/env" = {
+    file = ../secrets/acme/env.age;
   };
 
   security.acme = {
@@ -48,7 +48,7 @@ in {
     defaults = {
       email = "postmaster@sunnycareboo.com";
       dnsProvider = "cloudflare";
-      environmentFile = config.age.secrets.acme-env.path;
+      environmentFile = config.age.secrets."acme/env".path;
     };
   };
 }
