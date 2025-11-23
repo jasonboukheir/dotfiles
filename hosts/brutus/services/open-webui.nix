@@ -42,8 +42,6 @@ in {
     file = ../secrets/openWebui-env.age;
   };
 
-  allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
-
   # NGINX
   services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
     forceSSL = true;

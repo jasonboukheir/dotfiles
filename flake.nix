@@ -55,6 +55,32 @@
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    nixpkgsFor = system: let
+      pkgs = import nixpkgs {
+        inherit system;
+      };
+      patchedPkgs = pkgs.applyPatches {
+        name = "nixpkgs-patched-${nixpkgs.shortRev}";
+        src = nixpkgs;
+        patches = [
+          # fix for open-webui
+          (pkgs.fetchpatch {
+            url = "https://github.com/NixOS/nixpkgs/commit/913f7247e73349be04b2badb80f1b2d1730fe4f9.patch";
+            sha256 = "sha256-XH6mbixskcZ90KQaFkkRw6CpzRqjkkzBpVWTPZmp03A=";
+          })
+          (pkgs.fetchpatch {
+            url = "https://github.com/NixOS/nixpkgs/commit/218c32dbc8a4109d4687b898a6386588ee30601d.patch";
+            sha256 = "sha256-llch1jaqkCMasDOJAjF/sM465S33ZwNDK/N0/SaJYbE=";
+          })
+        ];
+      };
+    in
+      import patchedPkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
   in {
     # Build darwin flake using:
     # $ darwin-rebuild switch --flake .
@@ -89,12 +115,15 @@
       };
     };
 
-    nixosConfigurations = {
+    nixosConfigurations = let
+      pkgs = nixpkgsFor "x86_64-linux";
+    in {
       brutus = nixpkgs.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
         };
         modules = [
+          ({...}: {nixpkgs.pkgs = pkgs;})
           ./hosts/brutus
           agenix.nixosModules.default
           determinate.nixosModules.default
@@ -108,7 +137,7 @@
     nix.nixPath = ["nixpkgs=${nixpkgs}"];
 
     devShells = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
+      pkgs = nixpkgsFor system;
     in {
       default = import ./shell.nix {
         inherit pkgs;
