@@ -41,10 +41,10 @@
               format_on_save = "on";
               formatter = [
                 {
-                  code_actions = {
-                    "source.organizeImports.ruff" = true;
-                    "source.fixAll.ruff" = true;
-                  };
+                  code_action = "source.fixAll.ruff";
+                }
+                {
+                  code_action = "source.organizeImports.ruff";
                 }
                 {
                   language_server.name = "ruff";
