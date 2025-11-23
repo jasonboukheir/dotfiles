@@ -133,6 +133,20 @@
           stylix.nixosModules.stylix
         ];
       };
+
+      litus = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ({...}: {nixpkgs.pkgs = pkgs;})
+          ./hosts/litus
+          agenix.nixosModules.default
+          determinate.nixosModules.default
+          home-manager.nixosModules.home-manager
+          stylix.nixosModules.stylix
+        ];
+      };
     };
     nix.nixPath = ["nixpkgs=${nixpkgs}"];
 
