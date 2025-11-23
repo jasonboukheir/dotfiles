@@ -13,9 +13,9 @@
         "zig"
         "ruff"
       ];
-      mutableUserKeymaps = false;
-      mutableUserSettings = false;
-      mutableUserTasks = false;
+      # mutableUserKeymaps = false;
+      # mutableUserSettings = false;
+      # mutableUserTasks = false;
       installRemoteServer = true;
       userSettings = lib.mkMerge [
         (import
