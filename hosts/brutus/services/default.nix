@@ -11,7 +11,6 @@
     ./nextcloud.nix
     ./nginx.nix
     ./open-webui.nix
-    ./openssh.nix
     ./pocket-id.nix
     ./postgresql.nix
     ./restic.nix
