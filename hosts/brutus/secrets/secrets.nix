@@ -37,7 +37,7 @@ in {
     armor = true;
     publicKeys = [root];
   };
-  "acme-env.age" = {
+  "acme/env.age" = {
     armor = true;
     publicKeys = [root];
   };
