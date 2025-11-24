@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.opencloud;
-  domain = "cloud.sunnycareboo.com";
+  domain = config.sunnycareboo.services.cloud.domain;
   url = "https://${domain}";
   oidc_domain = "pocket-id.sunnycareboo.com";
   oidc_url = "https://${oidc_domain}";
@@ -13,7 +13,6 @@
     pkgs.writeText "opencloud-csp-config"
     (builtins.readFile ./csp.yaml);
 in {
-  # TODO: setup pocket-id as idp
   services.opencloud = {
     enable = true;
     url = url;
@@ -81,14 +80,9 @@ in {
     };
   };
 
-  services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
-    forceSSL = true;
-    enableACME = true;
-    acmeRoot = null;
-    locations."/" = {
-      proxyPass = "https://localhost:${toString cfg.port}";
-      proxyWebsockets = true;
-    };
+  sunnycareboo.services.cloud = lib.mkIf cfg.enable {
+    enable = true;
+    proxyPass = "https://localhost:${toString cfg.port}";
   };
 
   fileSystems."${cfg.stateDir}" = lib.mkIf cfg.enable {

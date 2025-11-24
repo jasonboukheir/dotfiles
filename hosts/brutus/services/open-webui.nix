@@ -5,14 +5,15 @@
   ...
 }: let
   cfg = config.services.open-webui;
-  domain = "ai.sunnycareboo.com";
+  domain = config.sunnycareboo.services.ai.domain;
+  port = 3100;
 in {
   services.open-webui = {
     enable = true;
     package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
       dependencies = oldAttrs.dependencies ++ oldAttrs.optional-dependencies.postgres;
     });
-    port = 3100;
+    port = port;
     environment = {
       WEBUI_URL = "https://${domain}";
       ENV = "prod";
@@ -43,14 +44,9 @@ in {
   };
 
   # NGINX
-  services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
-    forceSSL = true;
-    enableACME = true;
-    acmeRoot = null;
-    locations."/" = {
-      proxyPass = "http://localhost:${toString cfg.port}";
-      proxyWebsockets = true;
-    };
+  sunnycareboo.services.ai = lib.mkIf cfg.enable {
+    enable = true;
+    proxyPass = "http://localhost:${toString cfg.port}";
   };
 
   # PostgreSQL

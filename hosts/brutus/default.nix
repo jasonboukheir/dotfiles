@@ -10,5 +10,6 @@
     ./virtualization.nix
     ./../../modules
     ./../../modules/nixos
+    ./../../modules/sunnycareboo.nix
   ];
 }

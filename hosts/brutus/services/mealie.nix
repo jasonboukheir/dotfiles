@@ -4,7 +4,6 @@
   ...
 }: let
   cfg = config.services.mealie;
-  domain = "meals.sunnycareboo.com";
 in {
   services.mealie = {
     enable = true;
@@ -27,13 +26,8 @@ in {
     file = ../secrets/mealie-env.age;
   };
 
-  services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
-    forceSSL = true;
-    enableACME = true;
-    acmeRoot = null;
-    locations."/" = {
-      proxyWebsockets = true;
-      proxyPass = "http://localhost:${toString cfg.port}";
-    };
+  sunnycareboo.services.meals = lib.mkIf cfg.enable {
+    enable = true;
+    proxyPass = "http://localhost:${toString cfg.port}";
   };
 }
