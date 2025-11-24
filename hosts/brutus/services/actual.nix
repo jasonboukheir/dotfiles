@@ -4,7 +4,6 @@
   ...
 }: let
   cfg = config.services.actual;
-  host = "budget.sunnycareboo.com";
   port = 5007;
 in {
   services.actual = {
@@ -13,13 +12,8 @@ in {
       port = port;
     };
   };
-  services.nginx.virtualHosts."${host}" = lib.mkIf cfg.enable {
-    forceSSL = true;
-    enableACME = true;
-    acmeRoot = null;
-    locations."/" = {
-      proxyPass = "http://localhost:${toString port}";
-      proxyWebsockets = true;
-    };
+  sunnycareboo.services.budget = lib.mkIf cfg.enable {
+    enable = true;
+    proxyPass = "http://localhost:${toString port}";
   };
 }

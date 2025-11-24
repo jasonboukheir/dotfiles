@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  port = 3200;
+in {
   age.secrets.litellmEnv = {
     file = ../secrets/liteLlmSecrets.age;
   };
@@ -32,5 +34,9 @@
     ensureDatabases = [
       "litellm"
     ];
+  };
+  sunnycareboo.services."litellm.ai" = {
+    enable = true;
+    proxyPass = "http://localhost:${toString port}";
   };
 }

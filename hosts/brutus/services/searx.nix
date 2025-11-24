@@ -4,8 +4,16 @@
   ...
 }: let
   cfg = config.services.searx;
-  domain = "search.sunnycareboo.com";
+  domain = config.sunnycareboo.services.search.domain;
 in {
+  sunnycareboo = lib.mkIf cfg.enable {
+    enable = true;
+    services.search = {
+      enable = true;
+      manageVirtualHost = false;
+    };
+  };
+
   age.secrets = {
     "searx/env.age" = {file = ../secrets/searx/env.age;};
   };
@@ -23,11 +31,5 @@ in {
         formats = ["html" "json"];
       };
     };
-  };
-
-  services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
-    forceSSL = true;
-    enableACME = true;
-    acmeRoot = null;
   };
 }
