@@ -14,7 +14,7 @@ in {
       dependencies = oldAttrs.dependencies ++ oldAttrs.optional-dependencies.postgres;
     });
     port = port;
-    environment = {
+    environment = lib.mkMerge ([{
       ENABLE_PERSISTENT_CONFIG = "False";
       WEBUI_URL = "https://${domain}";
       ENV = "prod";
@@ -37,9 +37,10 @@ in {
       OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
       ENABLE_OAUTH_SIGNUP = "True";
 
+    }] ++ (lib.optional config.services.litellm-container.enable {
       # OPENAI API
       OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
-    };
+    }));
     environmentFile = config.age.secrets."open-webui/env".path;
   };
 
