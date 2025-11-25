@@ -1,15 +1,15 @@
 {config, ...}: let
   port = 3200;
 in {
-  age.secrets.litellmEnv = {
-    file = ../secrets/liteLlmSecrets.age;
+  age.secrets."litellm/env" = {
+    file = ../secrets/litellm/env.age;
   };
   virtualisation.oci-containers.containers = {
     litellm = {
       autoStart = true;
       image = "berriai/litellm:main-stable";
       cmd = [
-        "--port=3200"
+        "--port=${toString port}"
         "--host=localhost"
       ];
       environment = {
@@ -17,7 +17,7 @@ in {
         "STORE_MODEL_IN_DB" = "True";
       };
       environmentFiles = [
-        config.age.secrets.litellmEnv.path
+        config.age.secrets."litellm/env".path
       ];
       extraOptions = [
         "--network=host"
@@ -35,7 +35,7 @@ in {
       "litellm"
     ];
   };
-  sunnycareboo.services."litellm.ai" = {
+  sunnycareboo.services.litellm = {
     enable = true;
     proxyPass = "http://localhost:${toString port}";
   };

@@ -5,13 +5,10 @@
 }: let
   cfg = config.services.searx;
   domain = config.sunnycareboo.services.search.domain;
+  port = 3300;
 in {
-  sunnycareboo = lib.mkIf cfg.enable {
+  sunnycareboo.services.search = lib.mkIf cfg.enable {
     enable = true;
-    services.search = {
-      enable = true;
-      manageVirtualHost = false;
-    };
   };
 
   age.secrets = {
@@ -30,6 +27,9 @@ in {
       search = {
         formats = ["html" "json"];
       };
+    };
+    uwsgiConfig = {
+      http = ":${toString port}";
     };
   };
 }

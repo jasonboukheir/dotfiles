@@ -11,12 +11,12 @@ in {
     proxyPass = "http://localhost:${toString port}";
     isExternal = true;
   };
-  age.secrets.pocket-id-env = {
-    file = ../secrets/pocket-id-env.age;
+  age.secrets."pocket-id/env" = {
+    file = ../secrets/pocket-id/env.age;
   };
   services.pocket-id = {
     enable = true;
-    environmentFile = config.age.secrets.pocket-id-env.path;
+    environmentFile = config.age.secrets."pocket-id/env".path;
     settings = {
       "APP_URL" = "https://${domain}";
       "TRUST_PROXY" = true;
