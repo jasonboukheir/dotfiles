@@ -24,37 +24,10 @@ with lib; let
         example = "http://localhost:3000";
       };
 
-      enableSSL = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable SSL/TLS";
-      };
-
-      forceSSL = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Force redirect HTTP to HTTPS";
-      };
-
-      enableACME = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable ACME/Let's Encrypt certificates";
-      };
-
       proxyWebsockets = mkOption {
         type = types.bool;
         default = true;
         description = "Enable WebSocket proxying";
-      };
-
-      manageVirtualHost = mkOption {
-        type = types.bool;
-        default = true;
-        description = ''
-          Whether to manage the nginx virtualHost configuration.
-          Set to false if the service configures nginx itself (e.g. searx with configureNginx).
-        '';
       };
 
       locations = mkOption {
@@ -133,60 +106,54 @@ in {
               domain = svcCfg.domain;
 
               # Base listeners (80 and 443)
-              baseListen =
-                [
-                  {
-                    addr = "0.0.0.0";
-                    port = 80;
-                    ssl = false;
-                  }
-                  {
-                    addr = "[::]";
-                    port = 80;
-                    ssl = false;
-                  }
-                ]
-                ++ optionals svcCfg.enableSSL [
-                  {
-                    addr = "0.0.0.0";
-                    port = 443;
-                    ssl = true;
-                  }
-                  {
-                    addr = "[::]";
-                    port = 443;
-                    ssl = true;
-                  }
-                ];
+              baseListen = [
+                {
+                  addr = "0.0.0.0";
+                  port = 80;
+                  ssl = false;
+                }
+                {
+                  addr = "[::]";
+                  port = 80;
+                  ssl = false;
+                }
+                {
+                  addr = "0.0.0.0";
+                  port = 443;
+                  ssl = true;
+                }
+                {
+                  addr = "[::]";
+                  port = 443;
+                  ssl = true;
+                }
+              ];
 
               # Extra listeners for external services (8080 and 8443)
               extraListen =
                 if svcCfg.isExternal
-                then
-                  [
-                    {
-                      addr = "0.0.0.0";
-                      port = 8080;
-                      ssl = false;
-                    }
-                    {
-                      addr = "[::]";
-                      port = 8080;
-                      ssl = false;
-                    }
-                  ]
-                  ++ optionals svcCfg.enableSSL [
-                    {
-                      addr = "0.0.0.0";
-                      port = 8443;
-                      ssl = true;
-                    }
-                    {
-                      addr = "[::]";
-                      port = 8443;
-                      ssl = true;
-                    }
-                  ]
+                then [
+                  {
+                    addr = "0.0.0.0";
+                    port = 8080;
+                    ssl = false;
+                  }
+                  {
+                    addr = "[::]";
+                    port = 8080;
+                    ssl = false;
+                  }
+                  {
+                    addr = "0.0.0.0";
+                    port = 8443;
+                    ssl = true;
+                  }
+                  {
+                    addr = "[::]";
+                    port = 8443;
+                    ssl = true;
+                  }
+                ]
                 else [];
 
               # Build locations (only if proxyPass is set)
@@ -205,70 +172,65 @@ in {
                   svcCfg.locations);
             in
               nameValuePair domain {
-                inherit (svcCfg) forceSSL extraConfig;
-
+                inherit (svcCfg) extraConfig;
+                forceSSL = true;
+                useACMEHost = cfg.baseDomain;
                 listen = baseListen ++ extraListen;
-
-                enableACME = svcCfg.enableACME && svcCfg.enableSSL;
-                acmeRoot = null; # Use DNS-based ACME verification
-
                 locations = allLocations;
               }
           ) (filterAttrs (
               name: svcCfg:
-                svcCfg.enable && svcCfg.manageVirtualHost
+                svcCfg.enable
             )
             cfg.services)))
-
-        # Services that manage their own virtualHost - we just add SSL/ACME config
-        (listToAttrs (mapAttrsToList (
-            name: svcCfg: let
-              domain = svcCfg.domain;
-
-              # Extra listeners for external services
-              extraListen =
-                if svcCfg.isExternal
-                then
-                  [
-                    {
-                      addr = "0.0.0.0";
-                      port = 8080;
-                      ssl = false;
-                    }
-                    {
-                      addr = "[::]";
-                      port = 8080;
-                      ssl = false;
-                    }
-                  ]
-                  ++ optionals svcCfg.enableSSL [
-                    {
-                      addr = "0.0.0.0";
-                      port = 8443;
-                      ssl = true;
-                    }
-                    {
-                      addr = "[::]";
-                      port = 8443;
-                      ssl = true;
-                    }
-                  ]
-                else [];
-            in
-              nameValuePair domain {
-                inherit (svcCfg) forceSSL;
-
-                # Only add extra listeners if it's an external service
-                listen = mkIf (svcCfg.isExternal) extraListen;
-
-                enableACME = svcCfg.enableACME && svcCfg.enableSSL;
-                acmeRoot = null;
-              }
-          ) (filterAttrs (
-              name: svcCfg:
-                svcCfg.enable && !svcCfg.manageVirtualHost
-            )
-            cfg.services)))
+        # {
+        #   default = {
+        #     default = true;
+        #     listen = [
+        #       {
+        #         addr = "0.0.0.0";
+        #         port = 80;
+        #         ssl = false;
+        #       }
+        #       {
+        #         addr = "[::]";
+        #         port = 80;
+        #         ssl = false;
+        #       }
+        #       {
+        #         addr = "0.0.0.0";
+        #         port = 443;
+        #         ssl = true;
+        #       }
+        #       {
+        #         addr = "[::]";
+        #         port = 443;
+        #         ssl = true;
+        #       }
+        #       {
+        #         addr = "0.0.0.0";
+        #         port = 8080;
+        #         ssl = false;
+        #       }
+        #       {
+        #         addr = "[::]";
+        #         port = 8080;
+        #         ssl = false;
+        #       }
+        #       {
+        #         addr = "0.0.0.0";
+        #         port = 8443;
+        #         ssl = true;
+        #       }
+        #       {
+        #         addr = "[::]";
+        #         port = 8443;
+        #         ssl = true;
+        #       }
+        #     ];
+        #     locations."/".return = "404";
+        #   };
+        # }
       ];
     };
 
@@ -278,5 +240,18 @@ in {
     in
       lib.optionals (hasExternal || hasInternal) [80 443]
       ++ lib.optionals hasExternal [8080 8443];
+
+    security.acme = lib.mkIf cfg.enable {
+      acceptTerms = true;
+      certs."${cfg.baseDomain}" = {
+        domain = cfg.baseDomain;
+        extraDomainNames = map (svc: svc.domain) (attrValues cfg.services);
+        email = "postmaster@${cfg.baseDomain}";
+        dnsProvider = "cloudflare";
+        environmentFile = config.age.secrets."acme/env".path;
+      };
+    };
+
+    users.users.nginx.extraGroups = lib.optionals cfg.enable ["acme"];
   };
 }

@@ -9,15 +9,7 @@ in {
     armor = true;
     publicKeys = [root];
   };
-  "firefly-iii-appkey.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "firefly-iii-data-importer-pat.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "liteLlmSecrets.age" = {
+  "litellm/env.age" = {
     armor = true;
     publicKeys = [root];
   };
@@ -33,7 +25,7 @@ in {
     armor = true;
     publicKeys = [root];
   };
-  "openWebui-env.age" = {
+  "open-webui/env.age" = {
     armor = true;
     publicKeys = [root];
   };

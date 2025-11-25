@@ -15,8 +15,10 @@ in {
     });
     port = port;
     environment = {
+      ENABLE_PERSISTENT_CONFIG = "False";
       WEBUI_URL = "https://${domain}";
       ENV = "prod";
+      CORS_ALLOW_ORIGIN = "https://${domain}";
 
       # database settings
       DATABASE_URL = "postgresql://open-webui/open-webui?host=/run/postgresql";
@@ -34,13 +36,16 @@ in {
       OPENID_REDIRECT_URL = "https://${domain}/oauth/oidc/callback";
       OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
       ENABLE_OAUTH_SIGNUP = "True";
+
+      # OPENAI API
+      OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
     };
-    environmentFile = config.age.secrets.openWebuiEnv.path;
+    environmentFile = config.age.secrets."open-webui/env".path;
   };
 
   # Secrets
-  age.secrets.openWebuiEnv = lib.mkIf cfg.enable {
-    file = ../secrets/openWebui-env.age;
+  age.secrets."open-webui/env" = lib.mkIf cfg.enable {
+    file = ../secrets/open-webui/env.age;
   };
 
   # NGINX

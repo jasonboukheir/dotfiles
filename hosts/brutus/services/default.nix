@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./opencloud
-    ./acme.nix
     ./actual.nix
     ./blocky.nix
     ./ddclient.nix
@@ -13,5 +12,6 @@
     ./postgresql.nix
     ./restic.nix
     ./searx.nix
+    ./sunnycareboo.nix
   ];
 }
