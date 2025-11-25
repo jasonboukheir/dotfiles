@@ -18,7 +18,7 @@ in {
         ips = ["1.1.1.1" "1.0.0.1"];
       };
       blocking = {
-        denyLists = {
+        denylists = {
           ads = [
             "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
             "https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/hosts/pro.txt"
