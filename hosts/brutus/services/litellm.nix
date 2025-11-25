@@ -1,42 +1,54 @@
-{config, ...}: let
+{
+  lib,
+  config,
+  ...
+}: let
   port = 3200;
+  cfg = config.services.litellm-container;
 in {
-  age.secrets."litellm/env" = {
-    file = ../secrets/litellm/env.age;
+  options = {
+    services.litellm-container.enable = lib.mkEnableOption "litellm-container";
   };
-  virtualisation.oci-containers.containers = {
-    litellm = {
-      autoStart = true;
-      image = "berriai/litellm:main-stable";
-      cmd = [
-        "--port=${toString port}"
-        "--host=localhost"
-      ];
-      environment = {
-        "DATABASE_URL" = "postgresql://litellm@localhost:5432/litellm";
-        "STORE_MODEL_IN_DB" = "True";
+
+  config = {
+    services.litellm-container.enable = true;
+    age.secrets."litellm/env" = lib.mkIf cfg.enable {
+      file = ../secrets/litellm/env.age;
+    };
+    virtualisation.oci-containers.containers = lib.mkIf cfg.enable {
+      litellm = {
+        autoStart = true;
+        image = "berriai/litellm:main-stable";
+        cmd = [
+          "--port=${toString port}"
+          "--host=localhost"
+        ];
+        environment = {
+          "DATABASE_URL" = "postgresql://litellm@localhost:5432/litellm";
+          "STORE_MODEL_IN_DB" = "True";
+        };
+        environmentFiles = [
+          config.age.secrets."litellm/env".path
+        ];
+        extraOptions = [
+          "--network=host"
+        ];
       };
-      environmentFiles = [
-        config.age.secrets."litellm/env".path
+    };
+    services.postgresql = lib.mkIf cfg.enable {
+      ensureUsers = [
+        {
+          name = "litellm";
+          ensureDBOwnership = true;
+        }
       ];
-      extraOptions = [
-        "--network=host"
+      ensureDatabases = [
+        "litellm"
       ];
     };
-  };
-  services.postgresql = {
-    ensureUsers = [
-      {
-        name = "litellm";
-        ensureDBOwnership = true;
-      }
-    ];
-    ensureDatabases = [
-      "litellm"
-    ];
-  };
-  sunnycareboo.services.litellm = {
-    enable = true;
-    proxyPass = "http://localhost:${toString port}";
+    sunnycareboo.services.litellm = lib.mkIf cfg.enable {
+      enable = true;
+      proxyPass = "http://localhost:${toString port}";
+    };
   };
 }
