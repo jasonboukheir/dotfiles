@@ -4,7 +4,7 @@
   };
   services.ddclient = {
     enable = true;
-    domains = ["vpn.sunnycareboo.com"];
+    domains = ["sunnycareboo.com"];
     protocol = "cloudflare";
     zone = "sunnycareboo.com";
 
