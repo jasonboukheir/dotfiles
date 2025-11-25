@@ -7,11 +7,6 @@
 in {
   services.blocky = {
     enable = true;
-    settings = {
-      ports = {
-        http = 1501;
-      };
-    };
   };
 
   sunnycareboo.services.blocky = lib.mkIf cfg.enable {
