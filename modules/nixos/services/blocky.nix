@@ -9,6 +9,7 @@ in {
     settings = {
       ports = {
         dns = 53;
+        http = 1501;
       };
       upstreams.groups.default = [
         "https://one.one.one.one/dns-query"
