@@ -27,23 +27,6 @@ in {
     '';
   };
 
-  # services.nginx.virtualHosts."${domain}" = lib.mkIf cfg.enable {
-  #   forceSSL = true;
-  #   enableACME = true;
-  #   acmeRoot = null;
-  #   locations."/" = {
-  #     proxyPass = "http://localhost:${toString cfg.port}";
-  #     proxyWebsockets = true;
-  #     recommendedProxySettings = true;
-  #     extraConfig = ''
-  #       client_max_body_size 5000M;
-  #       proxy_read_timeout   600s;
-  #       proxy_send_timeout   600s;
-  #       send_timeout         600s;
-  #     '';
-  #   };
-  # };
-
   fileSystems."${cfg.mediaLocation}" = lib.mkIf cfg.enable {
     depends = [
       "/"
