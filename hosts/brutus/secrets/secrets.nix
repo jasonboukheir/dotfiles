@@ -1,7 +1,7 @@
 let
   root = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPjx7uRpFx9S/K1rjIuoCFUuXnN+99oMtSah8KBjHBRq";
 in {
-  "sunnycareboo-dot-com-zone-token.age" = {
+  "cloudflare/token.age" = {
     armor = true;
     publicKeys = [root];
   };
@@ -26,10 +26,6 @@ in {
     publicKeys = [root];
   };
   "open-webui/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "acme/env.age" = {
     armor = true;
     publicKeys = [root];
   };

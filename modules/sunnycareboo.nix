@@ -184,7 +184,8 @@ in {
             )
             cfg.services)))
          {
-           default = {
+           "_" = {
+             serverName = "_";
              default = true;
              listen = [
                {
@@ -236,19 +237,20 @@ in {
 
     networking.firewall.allowedTCPPorts = let
       hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
-      hasInternal = any (svc: svc.enable && !svc.isExternal) (attrValues cfg.services);
     in
-      lib.optionals (hasExternal || hasInternal) [80 443]
+      lib.optionals (any (svc: svc.enable) (attrValues cfg.services)) [80 443]
       ++ lib.optionals hasExternal [8080 8443];
 
     security.acme = lib.mkIf cfg.enable {
       acceptTerms = true;
       certs."${cfg.baseDomain}" = {
-        domain = cfg.baseDomain;
-        extraDomainNames = map (svc: svc.domain) (attrValues cfg.services);
+        extraDomainNames = map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services));
         email = "postmaster@${cfg.baseDomain}";
         dnsProvider = "cloudflare";
-        environmentFile = config.age.secrets."acme/env".path;
+        credentialFiles = {
+          "CF_DNS_API_TOKEN_FILE" = config.age.secrets."cloudflare/token".path;
+          "CF_ZONE_API_TOKEN_FILE" = config.age.secrets."cloudflare/token".path;
+        };
       };
     };
 

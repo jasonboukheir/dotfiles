@@ -1,6 +1,6 @@
 {config, ...}: {
   age.secrets.ddclient-token = {
-    file = ../secrets/sunnycareboo-dot-com-zone-token.age;
+    file = ../secrets/cloudflare/token.age;
   };
   services.ddclient = {
     enable = true;
