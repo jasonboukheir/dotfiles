@@ -14,33 +14,35 @@ in {
       dependencies = oldAttrs.dependencies ++ oldAttrs.optional-dependencies.postgres;
     });
     port = port;
-    environment = lib.mkMerge ([{
-      ENABLE_PERSISTENT_CONFIG = "False";
-      WEBUI_URL = "https://${domain}";
-      ENV = "prod";
-      CORS_ALLOW_ORIGIN = "https://${domain}";
+    environment = lib.mkMerge ([
+        {
+          ENABLE_PERSISTENT_CONFIG = "False";
+          WEBUI_URL = "https://${domain}";
+          ENV = "prod";
+          CORS_ALLOW_ORIGIN = "https://${domain}";
 
-      # database settings
-      DATABASE_URL = "postgresql://open-webui/open-webui?host=/run/postgresql";
+          # database settings
+          DATABASE_URL = "postgresql://open-webui/open-webui?host=/run/postgresql";
 
-      # privacy settings
-      ANONYMIZED_TELEMETRY = "False";
-      DO_NOT_TRACK = "True";
-      SCARF_NO_ANALYTICS = "True";
-      ENABLE_VERSION_UPDATE_CHECK = "False";
-      OFFLINE_MODE = "True";
+          # privacy settings
+          ANONYMIZED_TELEMETRY = "False";
+          DO_NOT_TRACK = "True";
+          SCARF_NO_ANALYTICS = "True";
+          ENABLE_VERSION_UPDATE_CHECK = "False";
+          OFFLINE_MODE = "True";
 
-      # pocket id oidc setup
-      OPENID_PROVIDER_URL = "https://pocket-id.sunnycareboo.com/.well-known/openid-configuration";
-      OAUTH_PROVIDER_NAME = "Pocket ID";
-      OPENID_REDIRECT_URL = "https://${domain}/oauth/oidc/callback";
-      OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
-      ENABLE_OAUTH_SIGNUP = "True";
-
-    }] ++ (lib.optional config.services.litellm-container.enable {
-      # OPENAI API
-      OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
-    }));
+          # pocket id oidc setup
+          OPENID_PROVIDER_URL = "https://pocket-id.sunnycareboo.com/.well-known/openid-configuration";
+          OAUTH_PROVIDER_NAME = "Pocket ID";
+          OPENID_REDIRECT_URL = "https://${domain}/oauth/oidc/callback";
+          OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
+          ENABLE_OAUTH_SIGNUP = "True";
+        }
+      ]
+      ++ (lib.optional config.services.litellm-container.enable {
+        # OPENAI API
+        OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
+      }));
     environmentFile = config.age.secrets."open-webui/env".path;
   };
 

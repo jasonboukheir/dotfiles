@@ -183,35 +183,35 @@ in {
                 svcCfg.enable
             )
             cfg.services)))
-         {
-           "_" = {
-             serverName = "_";
-             default = true;
-             listen = [
-               {
-                 addr = "0.0.0.0";
-                 port = 80;
-                 ssl = false;
-               }
-               {
-                 addr = "[::]";
-                 port = 80;
-                 ssl = false;
-               }
-               {
-                 addr = "0.0.0.0";
-                 port = 8080;
-                 ssl = false;
-               }
-               {
-                 addr = "[::]";
-                 port = 8080;
-                 ssl = false;
-               }
-             ];
-             locations."/".return = "404";
-           };
-         }
+        {
+          "_" = {
+            serverName = "_";
+            default = true;
+            listen = [
+              {
+                addr = "0.0.0.0";
+                port = 80;
+                ssl = false;
+              }
+              {
+                addr = "[::]";
+                port = 80;
+                ssl = false;
+              }
+              {
+                addr = "0.0.0.0";
+                port = 8080;
+                ssl = false;
+              }
+              {
+                addr = "[::]";
+                port = 8080;
+                ssl = false;
+              }
+            ];
+            locations."/".return = "404";
+          };
+        }
       ];
     };
 
@@ -224,13 +224,9 @@ in {
     security.acme = lib.mkIf cfg.enable {
       acceptTerms = true;
       certs."${cfg.baseDomain}" = {
+        domain = cfg.baseDomain;
         extraDomainNames = map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services));
         email = "postmaster@${cfg.baseDomain}";
-        dnsProvider = "cloudflare";
-        credentialFiles = {
-          "CF_DNS_API_TOKEN_FILE" = config.age.secrets."cloudflare/token".path;
-          "CF_ZONE_API_TOKEN_FILE" = config.age.secrets."cloudflare/token".path;
-        };
       };
     };
 
