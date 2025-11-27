@@ -8,6 +8,7 @@
   domain = config.sunnycareboo.services.ai.domain;
   port = 3100;
 in {
+  allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
   services.open-webui = {
     enable = true;
     package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
