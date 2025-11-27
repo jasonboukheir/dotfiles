@@ -10,11 +10,11 @@ in {
     enable = true;
     settings = {
       port = port;
-        # discoveryURL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
-        # client_id._secret = config.age.secrets."actual/client_id".path;
-        # client_secret._secret = config.age.secrets."actual/client_secret".path;
-        # server_hostname = "https://${config.sunnycareboo.services.budget.domain}";
-        # authMethod = "openId";
+      # discoveryURL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+      # client_id._secret = config.age.secrets."actual/client_id".path;
+      # client_secret._secret = config.age.secrets."actual/client_secret".path;
+      # server_hostname = "https://${config.sunnycareboo.services.budget.domain}";
+      # authMethod = "openId";
     };
   };
   age.secrets."actual/env".file = ../secrets/actual/env.age;
