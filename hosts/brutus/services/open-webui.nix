@@ -41,7 +41,7 @@ in {
           # search settings
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
-          SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>"
+          SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
         }
       ]
       ++ (lib.optional config.services.litellm-container.enable {
