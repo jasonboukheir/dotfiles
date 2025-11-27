@@ -1,14 +1,21 @@
 {
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
+    nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
     agenix.url = "github:ryantm/agenix";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     disko = {
       url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixos";
     };
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+    home-manager-nixos = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixos";
+    };
+    home-manager-darwin = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
@@ -25,21 +32,26 @@
     mac-app-util.url = "github:hraban/mac-app-util";
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
     nixcord.url = "github:kaylorben/nixcord";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
-    nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nvf = {
-      inputs.nixpkgs.follows = "nixpkgs";
+    nvf-nixos = {
+      inputs.nixpkgs.follows = "nixos";
       url = "github:notashelf/nvf";
     };
-    stylix = {
+    nvf-darwin = {
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+      url = "github:notashelf/nvf";
+    };
+    stylix-nixos = {
       url = "github:nix-community/stylix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixos";
+    };
+    stylix-darwin = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
   };
 
@@ -47,13 +59,17 @@
     agenix,
     determinate,
     disko,
-    home-manager,
+    home-manager-nixos,
+    home-manager-darwin,
     mac-app-util,
     nix-darwin,
     nix-homebrew,
     nixarr,
+    nixos,
+    nixpkgs-darwin,
     nixpkgs,
-    stylix,
+    stylix-nixos,
+    stylix-darwin,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -66,9 +82,9 @@
       };
       darwinModules = [
         mac-app-util.darwinModules.default
-        home-manager.darwinModules.home-manager
+        home-manager-darwin.darwinModules.home-manager
         nix-homebrew.darwinModules.nix-homebrew
-        stylix.darwinModules.stylix
+        stylix-darwin.darwinModules.stylix
       ];
     in {
       "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
@@ -91,9 +107,8 @@
       };
     };
 
-    nixosConfigurations =
-   {
-      brutus = nixpkgs.lib.nixosSystem {
+    nixosConfigurations = {
+      brutus = nixos.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
         };
@@ -102,13 +117,13 @@
           agenix.nixosModules.default
           determinate.nixosModules.default
           disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
+          home-manager-nixos.nixosModules.home-manager
           nixarr.nixosModules.default
-          stylix.nixosModules.stylix
+          stylix-nixos.nixosModules.stylix
         ];
       };
 
-      litus = nixpkgs.lib.nixosSystem {
+      litus = nixos.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
         };
@@ -116,15 +131,14 @@
           ./hosts/litus
           agenix.nixosModules.default
           determinate.nixosModules.default
-          home-manager.nixosModules.home-manager
-          stylix.nixosModules.stylix
+          home-manager-nixos.nixosModules.home-manager
+          stylix-nixos.nixosModules.stylix
         ];
       };
     };
-    nix.nixPath = ["nixpkgs=${nixpkgs}"];
 
     devShells = forAllSystems (system: let
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs {inherit system;};
     in {
       default = import ./shell.nix {
         inherit pkgs;
