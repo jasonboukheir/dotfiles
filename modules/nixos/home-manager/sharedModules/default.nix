@@ -1,6 +1,5 @@
 {inputs, ...}: {
   home-manager.sharedModules = [
-    ./programs
-    inputs.nixcord.homeModules.nixcord
+    inputs.nvf-nixos.homeManagerModules.default
   ];
 }
