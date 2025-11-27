@@ -7,7 +7,7 @@
   cfg = config.services.opencloud;
   domain = config.sunnycareboo.services.cloud.domain;
   url = "https://${domain}";
-  oidc_domain = "pocket-id.sunnycareboo.com";
+  oidc_domain = config.sunnycareboo.services.id.domain;
   oidc_url = "https://${oidc_domain}";
   cspConfigFile =
     pkgs.writeText "opencloud-csp-config"

@@ -4,12 +4,15 @@
   ...
 }: let
   port = 1411;
-  domain = config.sunnycareboo.services.pocket-id.domain;
+  domain = config.sunnycareboo.services.id.domain;
 in {
-  sunnycareboo.services.pocket-id = lib.mkIf config.services.pocket-id.enable {
+  sunnycareboo.services.id = lib.mkIf config.services.pocket-id.enable {
     enable = true;
     proxyPass = "http://localhost:${toString port}";
     isExternal = true;
+  };
+  services.nginx.virtualHosts."${domain}" = {
+    default = true;
   };
   age.secrets."pocket-id/env" = {
     file = ../secrets/pocket-id/env.age;

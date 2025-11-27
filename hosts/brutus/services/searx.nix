@@ -27,6 +27,12 @@ in {
       search = {
         formats = ["html" "json"];
       };
+      engines = [
+        {
+          name = "wikidata";
+          disabled = "True";
+        }
+      ];
     };
     uwsgiConfig = {
       http = ":${toString port}";

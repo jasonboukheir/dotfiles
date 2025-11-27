@@ -32,11 +32,16 @@ in {
           OFFLINE_MODE = "True";
 
           # pocket id oidc setup
-          OPENID_PROVIDER_URL = "https://pocket-id.sunnycareboo.com/.well-known/openid-configuration";
+          OPENID_PROVIDER_URL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
           OAUTH_PROVIDER_NAME = "Pocket ID";
           OPENID_REDIRECT_URL = "https://${domain}/oauth/oidc/callback";
           OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
           ENABLE_OAUTH_SIGNUP = "True";
+
+          # search settings
+          ENABLE_WEB_SEARCH = "True";
+          WEB_SEARCH_ENGINE = "searxng";
+          SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>"
         }
       ]
       ++ (lib.optional config.services.litellm-container.enable {

@@ -1,6 +1,10 @@
-{lib, config, ...}:
-let cfg = config.sunnycareboo;
-  in{
+{
+  lib,
+  config,
+  ...
+}: let
+  cfg = config.sunnycareboo;
+in {
   age.secrets."acme/env" = lib.mkIf cfg.enable {
     file = ../secrets/acme/env.age;
   };
