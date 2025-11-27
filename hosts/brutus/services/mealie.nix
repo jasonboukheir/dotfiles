@@ -11,7 +11,7 @@ in {
     settings = {
       "OIDC_AUTH_ENABLED" = "True";
       "OIDC_SIGNUP_ENABLED" = "True";
-      "OIDC_CONFIGURATION_URL" = "https://pocket-id.sunnycareboo.com/.well-known/openid-configuration";
+      "OIDC_CONFIGURATION_URL" = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
       "OIDC_CLIENT_ID" = "32cb542a-a0b1-4278-8cfa-0dd5d9a2020d";
       "OIDC_ADMIN_GROUP" = "admin";
       "OIDC_PROVIDER_NAME" = "Pocket ID";

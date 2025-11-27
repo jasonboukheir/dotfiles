@@ -5,6 +5,14 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "actual/client_id.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "actual/client_secret.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
   "cloudflare/token.age" = {
     armor = true;
     publicKeys = [root];
