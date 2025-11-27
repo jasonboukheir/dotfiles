@@ -5,14 +5,6 @@ in {
     armor = true;
     publicKeys = [root];
   };
-  "actual/client_id.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "actual/client_secret.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
   "actual/env.age" = {
     armor = true;
     publicKeys = [root];
@@ -42,6 +34,14 @@ in {
     publicKeys = [root];
   };
   "open-webui/env.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "photos/clientId.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "photos/clientSecret.age" = {
     armor = true;
     publicKeys = [root];
   };
