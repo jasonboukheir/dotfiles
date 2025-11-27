@@ -13,6 +13,10 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "actual/env.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
   "cloudflare/token.age" = {
     armor = true;
     publicKeys = [root];
