@@ -39,11 +39,11 @@
     nixcord.url = "github:kaylorben/nixcord";
     nvf-nixos = {
       inputs.nixpkgs.follows = "nixos";
-      url = "github:notashelf/nvf";
+      url = "github:notashelf/nvf/v0.8";
     };
     nvf-darwin = {
       inputs.nixpkgs.follows = "nixpkgs-darwin";
-      url = "github:notashelf/nvf";
+      url = "github:notashelf/nvf/v0.8";
     };
     stylix-nixos = {
       url = "github:nix-community/stylix";

@@ -24,6 +24,11 @@
         lsp = {
           enable = true;
           formatOnSave = true;
+          servers = {
+            nil.init_options = {
+              nix.flake.autoArchive = true;
+            };
+          };
         };
         mini = {
           icons.enable = true;
@@ -51,11 +56,6 @@
           enableTreesitter = true;
           nix = {
             enable = true;
-            lsp.options = {
-              nil = {
-                nix.flake.autoArchive = true;
-              };
-            };
           };
           nu.enable = true;
           python.enable = true;
