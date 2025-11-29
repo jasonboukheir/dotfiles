@@ -4,6 +4,7 @@
     ./actual.nix
     ./blocky.nix
     ./ddclient.nix
+    ./headscale.nix
     ./immich.nix
     ./litellm.nix
     ./mealie.nix
