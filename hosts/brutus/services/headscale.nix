@@ -17,13 +17,22 @@ in {
     settings = {
       tls_letsencrypt_listen = null;
       server_url = "https://${domain}";
+      log.level = "verbose";
       dns = {
-        nameservers.global = ["100.64.0.1"];
+        override_local_dns = true;
+        nameservers.global = ["100.64.0.1" "100.64.0.2"];
         base_domain = magicDomain;
         search_domains = [
           magicDomain
           baseDomain
           internalDomain
+        ];
+        extra_records = [
+          {
+            name = "sunnycareboo.com";
+            type = "A";
+            value = "100.64.0.1";
+          }
         ];
       };
       oidc = {
@@ -31,11 +40,16 @@ in {
         pkce.enabled = true;
         issuer = "https://${issuerDomain}";
         client_id = "42a92e0e-0cb3-4545-bcae-a77115d8db5b";
-        client_secret_file = config.age.secrets."headscale/clientSecret".path;
+        client_secret_path = config.age.secrets."headscale/clientSecret".path;
       };
+      prefixes.v4 = "100.64.0.0/10";
     };
   };
-  age.secrets."headscale/clientSecret".file = ../secrets/headscale/clientSecret.age;
+  age.secrets."headscale/clientSecret" = {
+    file = ../secrets/headscale/clientSecret.age;
+    owner = cfg.user;
+    group = cfg.group;
+  };
   sunnycareboo.services.headscale = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;

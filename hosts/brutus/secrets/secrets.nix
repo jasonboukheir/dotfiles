@@ -65,4 +65,8 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "tailscale/authkey.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
 }

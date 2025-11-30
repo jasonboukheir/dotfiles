@@ -14,5 +14,6 @@
     ./restic.nix
     ./searx.nix
     ./sunnycareboo.nix
+    ./tailscale.nix
   ];
 }
