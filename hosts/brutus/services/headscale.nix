@@ -33,6 +33,16 @@ in {
             type = "A";
             value = "100.64.0.1";
           }
+          {
+            name = "*.sunnycareboo.com";
+            type = "A";
+            value = "100.64.0.1";
+          }
+          {
+            name = "*.internal.sunnycareboo.com";
+            type = "A";
+            value = "100.64.0.1";
+          }
         ];
       };
       oidc = {
