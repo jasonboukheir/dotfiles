@@ -27,23 +27,11 @@ in {
           baseDomain
           internalDomain
         ];
-        extra_records = [
-          {
-            name = "sunnycareboo.com";
-            type = "A";
-            value = "100.64.0.1";
-          }
-          {
-            name = "*.sunnycareboo.com";
-            type = "A";
-            value = "100.64.0.1";
-          }
-          {
-            name = "*.internal.sunnycareboo.com";
-            type = "A";
-            value = "100.64.0.1";
-          }
-        ];
+        extra_records = map (svc: {
+          name = svc.domain;
+          type = "A";
+          value = "100.64.0.1";
+        }) (lib.attrValues (lib.filterAttrs (_: svc: svc.enable) config.sunnycareboo.services));
       };
       oidc = {
         allowed_domains = [config.sunnycareboo.baseDomain];
