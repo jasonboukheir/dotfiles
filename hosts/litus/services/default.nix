@@ -1,6 +1,6 @@
 {...}: {
   imports = [
     ./blocky.nix
-    ./nginx.nix
+    ./tailscale.nix
   ];
 }

@@ -13,4 +13,10 @@ in {
     enable = true;
     proxyPass = "http://localhost:${toString cfg.settings.ports.http}";
   };
+
+  networking.firewall = lib.mkIf cfg.enable {
+    enable = true;
+    allowedTCPPorts = [53];
+    allowedUDPPorts = [53];
+  };
 }
