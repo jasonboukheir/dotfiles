@@ -53,6 +53,10 @@
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS/development";
+      inputs.nixpkgs.follows = "nixos";
+    };
   };
 
   outputs = inputs @ {
@@ -70,6 +74,7 @@
     nixpkgs,
     stylix-nixos,
     stylix-darwin,
+    jovian,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -108,6 +113,21 @@
     };
 
     nixosConfigurations = {
+      thebeast = nixos.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/thebeast
+          agenix.nixosModules.default
+          determinate.nixosModules.default
+          disko.nixosModules.disko
+          home-manager-nixos.nixosModules.home-manager
+          stylix-nixos.nixosModules.stylix
+          jovian.nixosModules.default
+        ];
+      };
+
       brutus = nixos.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
