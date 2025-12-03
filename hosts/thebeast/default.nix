@@ -6,6 +6,7 @@
     ./hardware-configuration.nix
     ./nixpkgs.nix
     ./nvidia.nix
+    ./omarchy.nix
     ./steam.nix
     ./../../modules
     ./../../modules/nixos
