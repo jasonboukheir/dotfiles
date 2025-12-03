@@ -1,14 +1,14 @@
-{...}:{
-  boot.initrd.kernelModules = [ "amdgpu" ];
+{pkgs, ...}: {
+  boot.initrd.kernelModules = ["amdgpu"];
 
   services.xserver = {
     enable = true;
-    videoDrivers = [ "amdgpu" ];
+    videoDrivers = ["amdgpu"];
   };
 
   systemd.tmpfiles.rules = [
-      "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
-    ];
+    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+  ];
 
   hardware.graphics = {
     enable = true;
