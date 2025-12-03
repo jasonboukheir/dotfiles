@@ -12,6 +12,7 @@
   };
   jovian.steamos = {
     enableZram = false;
+    enableEarlyOOM = false;
   };
   jovian.devices.steamdeck.enable = false;
   jovian.hardware.has.amd.gpu = true;
