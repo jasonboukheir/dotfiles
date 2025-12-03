@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   jovian.steam = {
     enable = true;
     autoStart = true;
@@ -10,6 +15,7 @@
     enablePerfControlUdevRules = false;
   };
   jovian.hardware.has.amd.gpu = false;
+  services.greetd.settings.default_session.command = lib.mkForce "${pkgs.jovian-greeter}/bin/jovian-greeter ${config.jovian.steam.user}";
   environment.systemPackages = with pkgs; [
     gamescope
     mangohud

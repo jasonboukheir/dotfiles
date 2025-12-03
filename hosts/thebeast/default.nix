@@ -7,7 +7,8 @@
     ./nixpkgs.nix
     ./nvidia.nix
     ./omarchy.nix
-    ./steam.nix
+    ./jovian.nix
+    ./stylix.nix
     ./../../modules
     ./../../modules/nixos
   ];
