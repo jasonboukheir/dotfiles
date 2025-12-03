@@ -2,12 +2,11 @@
   imports = [
     ./home-manager
     ./configuration.nix
-    ./desktop.nix
+    ./graphics.nix
     ./hardware-configuration.nix
-    ./nixpkgs.nix
-    ./nvidia.nix
-    ./omarchy.nix
     ./jovian.nix
+    ./nixpkgs.nix
+    ./omarchy.nix
     ./stylix.nix
     ./../../modules
     ./../../modules/nixos
