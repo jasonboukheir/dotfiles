@@ -57,6 +57,11 @@
       url = "github:Jovian-Experiments/Jovian-NixOS/development";
       inputs.nixpkgs.follows = "nixos";
     };
+    omarchy-nix = {
+      url = "github:henrysipp/omarchy-nix";
+      inputs.nixpkgs.follows = "nixos";
+      inputs.home-manager.follows = "home-manager-nixos";
+    };
   };
 
   outputs = inputs @ {
@@ -70,11 +75,11 @@
     nix-homebrew,
     nixarr,
     nixos,
-    nixpkgs-darwin,
     nixpkgs,
     stylix-nixos,
     stylix-darwin,
     jovian,
+    omarchy-nix,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
@@ -125,6 +130,7 @@
           home-manager-nixos.nixosModules.home-manager
           stylix-nixos.nixosModules.stylix
           jovian.nixosModules.default
+          omarchy-nix.nixosModules.default
         ];
       };
 

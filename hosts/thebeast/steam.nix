@@ -3,7 +3,7 @@
     enable = true;
     autoStart = true;
     user = "jasonbk";
-    desktopSession = "plasma";
+    desktopSession = "hyprland";
   };
   jovian.devices.steamdeck = {
     enable = false;
