@@ -1,0 +1,30 @@
+{pkgs, ...}: {
+  environment.systemPackages = with pkgs; [
+    hyprshot
+    hyprpicker
+    hyprsunset
+    brightnessctl
+    pamixer
+    playerctl
+    pavucontrol
+    git
+    vim
+    libnotify
+    nautilus
+    alejandra
+    blueberry
+    clipse
+    fzf
+    zoxide
+    ripgrep
+    eza
+    fd
+    curl
+    unzip
+    wget
+    gnumake
+    ffmpeg
+    vlc
+    signal-desktop
+  ];
+}
