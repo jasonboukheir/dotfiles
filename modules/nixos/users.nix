@@ -24,5 +24,7 @@
         shell = pkgs.fish;
       };
     };
+
+    programs._1password-gui.polkitPolicyOwners = ["jasonbk"];
   };
 }
