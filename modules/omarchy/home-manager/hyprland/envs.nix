@@ -5,14 +5,6 @@ in {
     env = [
       "GDK_SCALE,1"
 
-      # Cursor size
-      "XCURSOR_SIZE,24"
-      "HYPRCURSOR_SIZE,24"
-
-      # Cursor theme
-      "XCURSOR_THEME,Adwaita"
-      "HYPRCURSOR_THEME,Adwaita"
-
       # Force all apps to use Wayland
       "GDK_BACKEND,wayland"
       "QT_QPA_PLATFORM,wayland"
