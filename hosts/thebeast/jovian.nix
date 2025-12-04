@@ -4,6 +4,7 @@
   pkgs,
   ...
 }: {
+  hardware.xone.enable = true;
   jovian.steam = {
     enable = true;
     autoStart = true;
