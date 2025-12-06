@@ -3,7 +3,7 @@ in {
   wayland.windowManager.hyprland.settings = {
     # Environment variables
     env = [
-      "GDK_SCALE,1"
+      "GDK_SCALE,2"
 
       # Force all apps to use Wayland
       "GDK_BACKEND,wayland"
