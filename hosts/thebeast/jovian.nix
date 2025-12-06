@@ -3,11 +3,13 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  gameUser = "jasonbk";
+in {
   jovian.steam = {
     enable = true;
     autoStart = true;
-    user = "jasonbk";
+    user = gameUser;
     desktopSession = "hyprland";
   };
   jovian.steamos = {
@@ -22,4 +24,5 @@
     mangohud
     protonup-qt
   ];
+  users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager"];
 }
