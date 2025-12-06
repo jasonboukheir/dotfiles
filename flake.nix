@@ -46,11 +46,11 @@
       url = "github:notashelf/nvf/v0.8";
     };
     stylix-nixos = {
-      url = "github:nix-community/stylix";
+      url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixos";
     };
     stylix-darwin = {
-      url = "github:nix-community/stylix";
+      url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
     jovian = {
