@@ -18,7 +18,6 @@ in {
   };
   jovian.devices.steamdeck.enable = false;
   jovian.hardware.has.amd.gpu = true;
-  services.greetd.settings.default_session.command = lib.mkForce "${pkgs.jovian-greeter}/bin/jovian-greeter ${config.jovian.steam.user}";
   environment.systemPackages = with pkgs; [
     gamescope
     mangohud
