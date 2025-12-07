@@ -8,8 +8,7 @@ in {
     desktopSession = "hyprland";
   };
   jovian.steamos = {
-    enableZram = false;
-    enableEarlyOOM = false;
+    useSteamOSConfig = false;
   };
   jovian.devices.steamdeck.enable = false;
   jovian.hardware.has.amd.gpu = true;
