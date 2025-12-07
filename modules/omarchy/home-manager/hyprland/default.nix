@@ -1,6 +1,7 @@
 {...}: {
   wayland.windowManager.hyprland = {
     enable = true;
+    systemd.enable = false;
   };
   services.hyprpolkitagent.enable = true;
   imports = [
