@@ -7,6 +7,7 @@
       "hyprsunset"
       "systemctl --user start hyprpolkitagent"
       "wl-clip-persist --clipboard regular & clipse -listen"
+      "sleep 3 && 1password --silent"
 
       # "dropbox-cli start"  # Uncomment to run Dropbox
     ];
