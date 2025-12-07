@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   gameUser = "jasonbk";
 in {
   jovian.steam = {

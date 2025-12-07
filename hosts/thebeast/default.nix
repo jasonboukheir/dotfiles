@@ -7,7 +7,6 @@
     ./jovian.nix
     ./nixpkgs.nix
     ./omarchy.nix
-    ./rgb.nix
     ./stylix.nix
     ./../../modules
     ./../../modules/nixos
