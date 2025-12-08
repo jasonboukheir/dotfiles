@@ -5,7 +5,7 @@ in {
     enable = true;
     autoStart = true;
     user = gameUser;
-    desktopSession = "hyprland";
+    desktopSession = "plasma";
   };
   jovian.steamos = {
     useSteamOSConfig = false;
