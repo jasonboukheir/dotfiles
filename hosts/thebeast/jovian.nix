@@ -17,5 +17,5 @@ in {
     mangohud
     protonup-qt
   ];
-  users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager"];
+  users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager" "input"];
 }
