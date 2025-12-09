@@ -3,9 +3,9 @@
     image = ./wallpapers/nord.jpg;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
     cursor = {
-      name = "Bibata-Modern-Classic";
-      package = pkgs.bibata-cursors;
-      size = 16;
+      name = "Capitaine Cursors (Nord)";
+      package = pkgs.capitaine-cursors-themed;
+      size = 18;
     };
     fonts = {
       monospace = {
