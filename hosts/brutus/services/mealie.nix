@@ -15,15 +15,18 @@ in {
       "OIDC_CLIENT_ID" = "32cb542a-a0b1-4278-8cfa-0dd5d9a2020d";
       "OIDC_ADMIN_GROUP" = "admin";
       "OIDC_PROVIDER_NAME" = "Pocket ID";
+
+      "OPENAI_BASE_URL" = "https://${config.sunnycareboo.services.litellm.domain}";
+      "OPENAI_MODEL" = "xai/grok-4-fast-non-reasoning";
     };
     database.createLocally = true;
     extraOptions = [];
-    credentialsFile = config.age.secrets.mealieEnv.path;
+    credentialsFile = config.age.secrets."mealie/env".path;
     listenAddress = "0.0.0.0";
   };
 
-  age.secrets.mealieEnv = lib.mkIf cfg.enable {
-    file = ../secrets/mealie-env.age;
+  age.secrets."mealie/env" = lib.mkIf cfg.enable {
+    file = ../secrets/mealie/env.age;
   };
 
   sunnycareboo.services.meals = lib.mkIf cfg.enable {
