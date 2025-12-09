@@ -1,8 +1,8 @@
 {...}: {
   imports = [
-    ./bin
     ./home-manager
-    ./nixos
+    ./config.nix
     ./packages.nix
+    ./programs.nix
   ];
 }

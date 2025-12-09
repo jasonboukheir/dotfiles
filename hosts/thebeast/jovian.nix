@@ -1,11 +1,23 @@
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   gameUser = "jasonbk";
+  plasma = config.services.desktopManager.plasma6;
+  hyprland = config.programs.hyprland;
+  session =
+    if plasma.enable
+    then "plasma"
+    else if hyprland.enable
+    then "hyprland"
+    else null;
 in {
   jovian.steam = {
     enable = true;
     autoStart = true;
     user = gameUser;
-    desktopSession = "plasma";
+    desktopSession = session;
   };
   jovian.steamos = {
     useSteamOSConfig = false;
