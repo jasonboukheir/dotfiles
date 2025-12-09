@@ -21,7 +21,7 @@ in {
     armor = true;
     publicKeys = [root];
   };
-  "mealie-env.age" = {
+  "mealie/env.age" = {
     armor = true;
     publicKeys = [root];
   };
