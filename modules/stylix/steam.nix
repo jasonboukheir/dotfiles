@@ -9,10 +9,11 @@
   config = lib.mkIf config.programs.steam.stylix.enable {
     home-manager.sharedModules = lib.singleton (attrs: {
       home.activation = let
-        winControlSettings =
-          if
-            attrs.config.dconf.settings."org/gnome/desktop/wm/preferences".button-layout
-            == "close,minimize,maximize:"
+        winControlSettings = let
+          wmPrefs = attrs.config.dconf.settings."org/gnome/desktop/wm/preferences" or {};
+          buttonLayout = wmPrefs.button-layout or ":minimize,maximize,close"; # default GNOME layout
+        in
+          if buttonLayout == "close,minimize,maximize:"
           then "macos"
           else "windows";
         applySteamTheme = pkgs.writeShellScript "applySteamTheme" ''
