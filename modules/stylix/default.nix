@@ -3,8 +3,8 @@
     image = ./wallpapers/nord.jpg;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
     cursor = {
-      name = "Nordzy-cursors";
-      package = pkgs.nordzy-cursor-theme;
+      name = "Capitaine Cursors (Nord)";
+      package = pkgs.capitaine-cursors-themed;
       size = 18;
     };
     fonts = {
