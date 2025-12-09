@@ -5,9 +5,9 @@
   };
   services.hyprpolkitagent.enable = true;
   imports = [
-    ./apps.nix
     ./autostart.nix
     ./bindings.nix
+    ./defaultApps.nix
     ./envs.nix
     ./input.nix
     ./looknfeel.nix

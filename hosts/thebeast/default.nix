@@ -14,5 +14,6 @@
     ./stylix.nix
     ./../../modules
     ./../../modules/nixos
+    ./../../modules/omarchy
   ];
 }
