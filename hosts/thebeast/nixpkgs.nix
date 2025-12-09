@@ -7,7 +7,5 @@
     "steam-run"
     "steamdeck-hw-theme"
     "steam-jupiter-unwrapped"
-    "nvidia-settings"
-    "nvidia-x11"
   ];
 }

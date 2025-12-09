@@ -2,8 +2,8 @@
   stylix = {
     base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
     cursor = {
-      name = "BreezeX-RosePine-Linux";
-      package = pkgs.rose-pine-cursor;
+      name = "Bibata-Modern-Classic";
+      package = pkgs.bibata-cursors;
       size = 16;
     };
     fonts = {
