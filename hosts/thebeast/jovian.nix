@@ -30,5 +30,6 @@ in {
     protonup-qt
   ];
   users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager" "input"];
-  programs.steam.stylix.enable = config.stylix.enable;
+  # it's breaking right now
+  programs.steam.stylix.enable = false;
 }
