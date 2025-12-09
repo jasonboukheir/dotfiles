@@ -1,8 +1,5 @@
 {...}: {
-  wayland.windowManager.hyprland = {
-    enable = true;
-    systemd.enable = false;
-  };
+  wayland.windowManager.hyprland.enable = true;
   services.hyprpolkitagent.enable = true;
   imports = [
     ./autostart.nix

@@ -17,5 +17,9 @@
       nautilus
       blueberry
       clipse
+      (writeShellScriptBin "hyprexit" ''
+        ${hyprland}/bin/hyprctl dispatch exit
+        ${systemd}/bin/loginctl terminate-user "''$USER"
+      '')
     ];
 }
