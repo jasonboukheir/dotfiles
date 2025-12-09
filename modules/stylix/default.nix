@@ -14,4 +14,7 @@
       };
     };
   };
+  imports = [
+    ./steam.nix
+  ];
 }
