@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }: let
   cfg = config.services.opencloud;
@@ -9,12 +8,10 @@
   url = "https://${domain}";
   oidc_domain = config.sunnycareboo.services.id.domain;
   oidc_url = "https://${oidc_domain}";
-  cspConfigFile =
-    pkgs.writeText "opencloud-csp-config"
-    (builtins.readFile ./csp.yaml);
 in {
   services.opencloud = {
     enable = true;
+
     url = url;
     address = "127.0.0.1";
     port = 9200;
@@ -61,6 +58,13 @@ in {
         };
       };
     };
+    csp = {
+      enable = true;
+      directives = {
+        additionalConnectSrc = [oidc_url];
+        additionalScriptSrc = [oidc_url];
+      };
+    };
     environment = {
       "OC_INSECURE" = "true";
       "INSECURE" = "true";
@@ -74,9 +78,6 @@ in {
       "OC_EXCLUDE_RUN_SERVICES" = "idp";
       "GRAPH_USERNAME_MATCH" = "none";
       "GRAPH_ASSIGN_DEFAULT_USER_ROLE" = "false";
-
-      # csp settings
-      "PROXY_CSP_CONFIG_FILE_LOCATION" = "${cspConfigFile}";
     };
   };
 
