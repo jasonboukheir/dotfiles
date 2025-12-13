@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs-unstable,
   ...
 }: let
   cfg = config.services.opencloud;
@@ -16,6 +17,10 @@ in {
     address = "127.0.0.1";
     port = 9200;
     stateDir = "/var/lib/opencloud";
+
+    package = pkgs-unstable.opencloud;
+    webPackage = pkgs-unstable.opencloud.web;
+    idpWebPackage = pkgs-unstable.opencloud.idp-web;
 
     settings = {
       proxy = {
@@ -65,6 +70,7 @@ in {
         additionalScriptSrc = [oidc_url];
       };
     };
+    radicale.enable = true;
     environment = {
       "OC_INSECURE" = "true";
       "INSECURE" = "true";

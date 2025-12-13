@@ -13,6 +13,14 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "davis/appSecret" = {
+    armor = true;
+    publicKeys = [root];
+  };
+  "davis/clientSecret" = {
+    armor = true;
+    publicKeys = [root];
+  };
   "pocket-id-env.age" = {
     armor = true;
     publicKeys = [root];
