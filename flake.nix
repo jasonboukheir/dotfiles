@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
     agenix.url = "github:ryantm/agenix";
@@ -70,13 +70,13 @@
     nix-homebrew,
     nixarr,
     nixos,
-    nixpkgs,
+    nixpkgs-unstable,
     stylix-nixos,
     stylix-darwin,
     jovian,
     ...
   }: let
-    forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    forAllSystems = nixpkgs-unstable.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
   in {
     # Build darwin flake using:
     # $ darwin-rebuild switch --flake .
@@ -115,6 +115,7 @@
       thebeast = nixos.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
+          pkgs-unstable = import nixpkgs-unstable {system = "x86_64-linux";};
         };
         modules = [
           ./hosts/thebeast
@@ -130,6 +131,7 @@
       brutus = nixos.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
+          pkgs-unstable = import nixpkgs-unstable {system = "x86_64-linux";};
         };
         modules = [
           ./hosts/brutus
@@ -157,7 +159,7 @@
     };
 
     devShells = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
+      pkgs = import nixpkgs-unstable {inherit system;};
     in {
       default = import ./shell.nix {
         inherit pkgs;
