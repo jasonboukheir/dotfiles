@@ -1,23 +1,11 @@
 {...}: let
   quickAppBindings = [
-    "SUPER, A, exec, $webapp=https://chatgpt.com"
-    "SUPER SHIFT, A, exec, $webapp=https://grok.com"
-    "SUPER, C, exec, $webapp=https://app.hey.com/calendar/weeks/"
-    "SUPER, E, exec, $webapp=https://app.hey.com"
-    "SUPER, Y, exec, $webapp=https://youtube.com/"
-    "SUPER SHIFT, G, exec, $webapp=https://web.whatsapp.com/"
-    "SUPER, X, exec, $webapp=https://x.com/"
-    "SUPER SHIFT, X, exec, $webapp=https://x.com/compose/post"
-
     "SUPER, return, exec, $terminal"
     "SUPER, F, exec, $fileManager"
     "SUPER, B, exec, $browser"
     "SUPER, M, exec, $music"
-    "SUPER, N, exec, $terminal -e nvim"
-    "SUPER, T, exec, $terminal -e btop"
-    "SUPER, D, exec, $terminal -e lazydocker"
+    "SUPER, Z, exec, $editor"
     "SUPER, G, exec, $messenger"
-    "SUPER, O, exec, obsidian -disable-gpu"
     "SUPER, slash, exec, $passwordManager"
   ];
 in {
@@ -27,24 +15,21 @@ in {
       ++ [
         "SUPER, space, exec, wofi --show drun --sort-order=alphabetical"
         "SUPER SHIFT, SPACE, exec, pkill -SIGUSR1 waybar"
-        # "SUPER CTRL, SPACE, exec, ~/.local/share/omarchy/bin/swaybg-next"
-        # "SUPER SHIFT CTRL, SPACE, exec, ~/.local/share/omarchy/bin/omarchy-theme-next"
 
-        "SUPER, W, killactive,"
         "SUPER, Backspace, killactive,"
+
+        "SUPER, C, sendshortcut, CTRL, Insert"
+        "SUPER, V, sendshortcut, SHIFT, Insert"
+        "SUPER, X, sendshortcut, CTRL, X"
 
         # End active session
         "SUPER, ESCAPE, exec, hyprlock"
         "SUPER SHIFT, ESCAPE, exec, hyprexit"
         "SUPER CTRL, ESCAPE, exec, reboot"
         "SUPER SHIFT CTRL, ESCAPE, exec, systemctl poweroff"
-        "SUPER, K, exec, ~/.local/share/omarchy/bin/omarchy-show-keybindings"
 
         # Control tiling
         "SUPER, J, togglesplit, # dwindle"
-        "SUPER, P, pseudo, # dwindle"
-        "SUPER, V, togglefloating,"
-        "SUPER SHIFT, Plus, fullscreen,"
 
         # Move focus with mainMod + arrow keys
         "SUPER, left, movefocus, l"

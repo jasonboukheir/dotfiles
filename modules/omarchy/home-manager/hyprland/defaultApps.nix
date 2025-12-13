@@ -12,6 +12,11 @@ in {
         type = lib.types.str;
         description = "Command to use when launching terminal";
       };
+      editor = lib.mkOption {
+        default = "zeditor";
+        type = lib.types.str;
+        description = "Command to use when launching code editor";
+      };
       fileManager = lib.mkOption {
         default = "nautilus --new-window";
         type = lib.types.str;
@@ -47,6 +52,7 @@ in {
   config = {
     wayland.windowManager.hyprland.settings = {
       "$terminal" = cfg.defaultApps.terminal;
+      "$editor" = cfg.defaultApps.editor;
       "$fileManager" = cfg.defaultApps.fileManager;
       "$browser" = cfg.defaultApps.browser;
       "$music" = cfg.defaultApps.music;
