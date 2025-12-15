@@ -5,6 +5,7 @@
   ...
 }: let
   cfg = config.nixarr;
+  vpnNamespace = "wg";
 in {
   config = lib.mkIf (cfg.transmission.enable && cfg.transmission.vpn.enable) {
     environment.systemPackages = with pkgs; [
@@ -27,10 +28,6 @@ in {
         Type = "oneshot";
         User = "root";
       };
-      vpnConfinement = {
-        enable = true;
-        vpnNamespace = "wg";
-      };
       script =
         /*
         bash
@@ -41,7 +38,7 @@ in {
           port_file="${cfg.stateDir}/transmission-port"
 
           # Renew TCP first to get a port
-          result_tcp="$(${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g 10.2.0.1)"
+          result_tcp="$(${pkgs.iproute2}/bin/ip netns exec ${vpnNamespace} ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g 10.2.0.1)"
           if [ $? -ne 0 ]; then
             echo "ERROR: natpmpc failed for TCP" >&2
             exit 1
@@ -56,8 +53,16 @@ in {
           echo "Mapped new TCP port $new_port, old was $old_port."
           echo "$new_port" >"$port_file"
 
+          # NEW: Update Transmission's peer port via RPC
+          echo "Updating Transmission peer port to $new_port..."
+          if ${cfg.transmission.package}/bin/transmission-remote --port "$new_port"; then
+            echo "Successfully updated Transmission port to $new_port."
+          else
+            echo "WARNING: Failed to update Transmission port (check RPC auth/connectivity)." >&2
+          fi
+
           # Renew UDP using the same port
-          result_udp="$(${pkgs.libnatpmp}/bin/natpmpc -a "$new_port" 0 udp 60 -g 10.2.0.1)"
+          result_udp="$(${pkgs.iproute2}/bin/ip netns exec ${vpnNamespace} ${pkgs.libnatpmp}/bin/natpmpc -a "$new_port" 0 udp 60 -g 10.2.0.1)"
           if [ $? -ne 0 ]; then
             echo "ERROR: natpmpc failed for UDP" >&2
             exit 1
