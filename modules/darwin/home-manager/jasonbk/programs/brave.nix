@@ -12,7 +12,7 @@ in {
   config = lib.mkIf config.programs.brave.enable {
     programs.brave = {
       extensions = [
-        ext."1password"
+        ext.nord-theme
       ];
     };
   };

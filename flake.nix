@@ -31,7 +31,7 @@
     };
     mac-app-util.url = "github:hraban/mac-app-util";
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:LnL7/nix-darwin/nix-darwin-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
