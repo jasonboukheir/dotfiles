@@ -36,7 +36,10 @@
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     nixarr.url = "github:rasmus-kirk/nixarr";
-    nixcord.url = "github:kaylorben/nixcord";
+    nixcord = {
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+      url = "github:FlameFlag/nixcord";
+    };
     nvf-nixos = {
       inputs.nixpkgs.follows = "nixos";
       url = "github:notashelf/nvf/v0.8";
