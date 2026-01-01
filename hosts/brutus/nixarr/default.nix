@@ -37,21 +37,53 @@ in {
       };
     };
 
-    jellyfin.enable = true;
+    audiobookshelf = {
+      enable = true;
+      openFirewall = false;
+    };
+    jellyfin = {
+      enable = true;
+      openFirewall = false;
+    };
 
-    bazarr.enable = true;
-    lidarr.enable = true;
-    prowlarr.enable = true;
-    radarr.enable = true;
-    readarr.enable = true;
-    sonarr.enable = true;
-    jellyseerr.enable = true;
+    bazarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    lidarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    prowlarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    radarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    readarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    sonarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    jellyseerr = {
+      enable = true;
+      openFirewall = false;
+    };
   };
 
   sunnycareboo.services = lib.mkIf config.nixarr.enable {
     transmission = lib.mkIf config.nixarr.transmission.enable {
       enable = true;
       proxyPass = "http://localhost:${toString transmissionPort}";
+    };
+    audiobookshelf = lib.mkIf config.nixarr.audiobookshelf.enable {
+      enable = true;
+      proxyPass = "http://localhost:${toString config.nixarr.audiobookshelf.port}";
     };
     jellyfin = lib.mkIf config.nixarr.jellyfin.enable {
       enable = true;
