@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   age.secrets."power/ups/user/pw".file = ../secrets/power/ups/user/pw.age;
   power.ups = {
     enable = true;
