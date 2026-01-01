@@ -34,17 +34,5 @@
       passwordFile = config.age.secrets."power/ups/user/pw".path;
       type = "primary";
     };
-
-    # 4. Shutdown Configuration
-    # This command runs when the UPS reaches "Critical" (Low Battery) status.
-    # NixOS defaults usually handle this well, but being explicit is good.
-    upsmon.settings = {
-      # The command to shut down the system
-      SHUTDOWNCMD = "${pkgs.systemd}/bin/shutdown -h now";
-
-      # How long to wait for the UPS to react to the kill-power command
-      # before the system gives up and halts anyway.
-      FINALDELAY = 5;
-    };
   };
 }
