@@ -16,6 +16,7 @@
       description = "Tripp Lite OMNI1500LCDT";
       # If you have USB connection issues, you can uncomment the pollinterval
       # directives = [ "pollinterval = 2" ];
+      maxStartDelay = null;
     };
 
     # 2. Define the User (The Software Access)
