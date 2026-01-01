@@ -77,4 +77,8 @@ in {
     armor = true;
     publicKeys = [root];
   };
+  "power/ups/user/pw.age" = {
+    armor = true;
+    publicKeys = [root];
+  };
 }
