@@ -2,6 +2,7 @@
   imports = [
     ./home-manager
     ./nixarr
+    ./power
     ./services
     ./configuration.nix
     ./disko-configuration.nix
