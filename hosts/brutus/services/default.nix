@@ -7,6 +7,7 @@
     ./immich.nix
     ./litellm.nix
     ./mealie.nix
+    ./memos.nix
     ./open-webui.nix
     ./opencloud.nix
     ./pocket-id.nix
