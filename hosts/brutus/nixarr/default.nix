@@ -9,6 +9,7 @@
   transmissionPort = 9091;
 in {
   imports = [
+    ./audiobookshelfFixes.nix
     ./transmissionPortForwarding.nix
   ];
   age.secrets.nixarr-wgconf = {
