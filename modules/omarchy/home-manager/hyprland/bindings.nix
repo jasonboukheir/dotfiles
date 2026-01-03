@@ -1,5 +1,6 @@
 {...}: let
   quickAppBindings = [
+    "SUPER, T, exec, $calendar"
     "SUPER, return, exec, $terminal"
     "SUPER, F, exec, $fileManager"
     "SUPER, B, exec, $browser"
