@@ -4,8 +4,8 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs;
-    lib.optionals config.omarchy.enable [
+  config = lib.mkIf config.omarchy.enable {
+    environment.systemPackages = with pkgs; [
       hyprshot
       hyprpicker
       hyprsunset
@@ -21,5 +21,8 @@
         ${hyprland}/bin/hyprctl dispatch exit
         ${systemd}/bin/loginctl terminate-user "''$USER"
       '')
+      beeper
     ];
+    allowUnfreePackageNames = ["beeper"];
+  };
 }

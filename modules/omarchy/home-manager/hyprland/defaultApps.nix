@@ -48,7 +48,7 @@ in {
         description = "Command to use when launching password manager";
       };
       messenger = lib.mkOption {
-        default = "signal-desktop";
+        default = "beeper";
         type = lib.types.str;
         description = "Command to use when launching messenger";
       };
