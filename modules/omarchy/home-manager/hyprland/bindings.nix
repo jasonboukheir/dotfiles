@@ -1,6 +1,7 @@
 {...}: let
   quickAppBindings = [
-    "SUPER, T, exec, $calendar"
+    "SUPER, C, exec, $calendar"
+    "SUPER, R, exec, $reminders"
     "SUPER, return, exec, $terminal"
     "SUPER, F, exec, $fileManager"
     "SUPER, B, exec, $browser"
@@ -18,10 +19,6 @@ in {
         "SUPER SHIFT, SPACE, exec, pkill -SIGUSR1 waybar"
 
         "SUPER, Backspace, killactive,"
-
-        "SUPER, C, sendshortcut, CTRL, Insert"
-        "SUPER, V, sendshortcut, SHIFT, Insert"
-        "SUPER, X, sendshortcut, CTRL, X"
 
         # End active session
         "SUPER, ESCAPE, exec, hyprlock"

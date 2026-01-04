@@ -8,9 +8,14 @@ in {
   options.omarchy = {
     defaultApps = {
       calendar = lib.mkOption {
-        default = "morgen";
+        default = "gnome-calendar";
         type = lib.types.str;
         description = "Command to use when launching calendar";
+      };
+      reminders = lib.mkOption {
+        default = "endeavour";
+        type = lib.types.str;
+        description = "Command to use when launching reminders";
       };
       terminal = lib.mkOption {
         default = "ghostty";
@@ -57,6 +62,7 @@ in {
   config = {
     wayland.windowManager.hyprland.settings = {
       "$calendar" = cfg.defaultApps.calendar;
+      "$reminders" = cfg.defaultApps.reminders;
       "$terminal" = cfg.defaultApps.terminal;
       "$editor" = cfg.defaultApps.editor;
       "$fileManager" = cfg.defaultApps.fileManager;
