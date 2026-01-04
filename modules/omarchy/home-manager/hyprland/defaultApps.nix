@@ -38,7 +38,7 @@ in {
         description = "Command to use when launching browser";
       };
       music = lib.mkOption {
-        default = "spotify";
+        default = "supersonic-wayland";
         type = lib.types.str;
         description = "Command to use when launching music";
       };
