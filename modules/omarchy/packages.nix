@@ -22,6 +22,7 @@
         ${systemd}/bin/loginctl terminate-user "''$USER"
       '')
       beeper
+      supersonic-wayland
     ];
     allowUnfreePackageNames = ["beeper"];
   };
