@@ -14,7 +14,7 @@ in {
     environment.systemPackages = with pkgs;
       lib.optionals cfg.enable [
         gnome-calendar
-        endeavour
+        errands
       ];
     programs.dconf.enable = lib.mkDefault cfg.enable;
     services.gnome = lib.mkIf cfg.enable {

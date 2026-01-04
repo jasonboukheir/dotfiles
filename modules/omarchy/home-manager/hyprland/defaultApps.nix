@@ -13,7 +13,7 @@ in {
         description = "Command to use when launching calendar";
       };
       reminders = lib.mkOption {
-        default = "endeavour";
+        default = "errands";
         type = lib.types.str;
         description = "Command to use when launching reminders";
       };
