@@ -1,3 +1,7 @@
-{config, ...}: {
-  programs.hyprland.enable = config.omarchy.enable;
+{
+  config,
+  lib,
+  ...
+}: {
+  programs.hyprland.enable = lib.mkDefault config.omarchy.enable;
 }

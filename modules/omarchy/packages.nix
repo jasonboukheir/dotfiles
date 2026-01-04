@@ -21,6 +21,5 @@
         ${hyprland}/bin/hyprctl dispatch exit
         ${systemd}/bin/loginctl terminate-user "''$USER"
       '')
-      morgen
     ];
 }
