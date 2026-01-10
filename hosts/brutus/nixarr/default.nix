@@ -18,7 +18,7 @@ in {
     group = globals.libraryOwner.group;
   };
   nixarr = {
-    enable = true;
+    enable = config.services.brutus.enable;
 
     mediaDir = "${dataDir}";
     stateDir = "${dataDir}/.state/nixarr";

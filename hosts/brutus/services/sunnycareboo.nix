@@ -13,6 +13,6 @@ in {
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets."acme/env".path;
   };
-  sunnycareboo.enable = true;
+  sunnycareboo.enable = config.services.brutus.enable;
   sunnycareboo.baseDomain = "sunnycareboo.com";
 }

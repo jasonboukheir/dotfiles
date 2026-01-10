@@ -7,7 +7,7 @@
   port = 5007;
 in {
   services.actual = {
-    enable = true;
+    enable = config.services.brutus.enable;
     settings = {
       port = port;
       # discoveryURL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";

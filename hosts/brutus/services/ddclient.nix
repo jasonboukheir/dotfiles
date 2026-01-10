@@ -3,7 +3,7 @@
     file = ../secrets/cloudflare/token.age;
   };
   services.ddclient = {
-    enable = true;
+    enable = config.services.brutus.enable;
     domains = ["sunnycareboo.com"];
     protocol = "cloudflare";
     zone = "sunnycareboo.com";

@@ -10,7 +10,7 @@
 in {
   allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
   services.open-webui = {
-    enable = true;
+    enable = config.services.brutus.enable;
     package = pkgs.open-webui.overridePythonAttrs (oldAttrs: {
       dependencies = oldAttrs.dependencies ++ oldAttrs.optional-dependencies.postgres;
     });

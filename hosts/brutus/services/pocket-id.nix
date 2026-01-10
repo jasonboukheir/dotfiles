@@ -18,7 +18,7 @@ in {
     file = ../secrets/pocket-id/env.age;
   };
   services.pocket-id = {
-    enable = true;
+    enable = config.services.brutus.enable;
     environmentFile = config.age.secrets."pocket-id/env".path;
     settings = {
       "APP_URL" = "https://${domain}";

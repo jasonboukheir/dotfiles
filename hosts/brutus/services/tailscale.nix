@@ -1,12 +1,6 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  cfg = config.services.tailscale;
-in {
+{config, ...}: {
   services.tailscale = {
-    enable = true;
+    enable = config.services.brutus.enable;
     openFirewall = true;
     authKeyFile = config.age.secrets."tailscale/authkey".path;
     authKeyParameters = {
