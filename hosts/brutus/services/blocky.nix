@@ -6,7 +6,7 @@
   cfg = config.services.blocky;
 in {
   services.blocky = {
-    enable = true;
+    enable = config.services.brutus.enable;
   };
 
   sunnycareboo.services.blocky = lib.mkIf cfg.enable {

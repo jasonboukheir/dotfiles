@@ -6,7 +6,7 @@
   cfg = config.services.immich;
 in {
   services.immich = {
-    enable = true;
+    enable = config.services.brutus.enable;
     port = 2283;
     database = {
       user = "immich";
@@ -238,7 +238,7 @@ in {
     };
   };
 
-  sunnycareboo.services.photos = {
+  sunnycareboo.services.photos = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://localhost:${toString cfg.port}";
     extraConfig = ''

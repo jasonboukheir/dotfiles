@@ -11,7 +11,7 @@
   oidc_url = "https://${oidc_domain}";
 in {
   services.opencloud = {
-    enable = true;
+    enable = config.services.brutus.enable;
 
     url = url;
     address = "127.0.0.1";

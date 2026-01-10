@@ -1,6 +1,10 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   services.postgresql = {
-    enable = true;
+    enable = config.services.brutus.enable;
     # enable host connections only
     enableTCPIP = true;
     # See https://wiki.nixos.org/wiki/PostgreSQL#Harden_authentication

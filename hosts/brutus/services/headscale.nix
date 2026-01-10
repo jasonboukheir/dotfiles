@@ -12,7 +12,7 @@
   port = 3400;
 in {
   services.headscale = {
-    enable = true;
+    enable = config.services.brutus.enable;
     port = port;
     settings = {
       tls_letsencrypt_listen = null;
@@ -43,7 +43,7 @@ in {
       prefixes.v4 = "100.64.0.0/10";
     };
   };
-  age.secrets."headscale/clientSecret" = {
+  age.secrets."headscale/clientSecret" = lib.mkIf cfg.enable {
     file = ../secrets/headscale/clientSecret.age;
     owner = cfg.user;
     group = cfg.group;
