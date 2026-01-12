@@ -5,7 +5,6 @@
     ./power
     ./services
     ./configuration.nix
-    ./disko-configuration.nix
     ./hardware-configuration.nix
     ./networking
     ./virtualization.nix
