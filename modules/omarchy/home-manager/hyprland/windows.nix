@@ -2,41 +2,41 @@
   wayland.windowManager.hyprland.settings = {
     windowrule = [
       # See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
-      "suppressevent maximize, class:.*"
+      "suppress_event maximize, match:class .*"
 
       # Force chromium into a tile to deal with --app bug
-      "tile, class:^(chromium)$"
+      "tile on, match:class ^(chromium)$"
 
       # Settings management
-      "float, class:^(org.pulseaudio.pavucontrol|blueberry.py)$"
+      "float on, match:class ^(org.pulseaudio.pavucontrol|blueberry.py)$"
 
       # Float Steam, fullscreen RetroArch
-      "float, class:^(steam)$"
-      "fullscreen, class:^(com.libretro.RetroArch)$"
+      "float on, match:class ^(steam)$"
+      "fullscreen on, match:class ^(com.libretro.RetroArch)$"
 
       # Just dash of transparency
-      "opacity 0.97 0.9, class:.*"
+      "opacity 0.97 0.9, match:class .*"
       # Normal chrome Youtube tabs
-      "opacity 1 1, class:^(chromium|google-chrome|google-chrome-unstable)$, title:.*Youtube.*"
-      "opacity 1 0.97, class:^(chromium|google-chrome|google-chrome-unstable)$"
-      "opacity 0.97 0.9, initialClass:^(chrome-.*-Default)$ # web apps"
-      "opacity 1 1, initialClass:^(chrome-youtube.*-Default)$ # Youtube"
-      "opacity 1 1, class:^(zoom|vlc|org.kde.kdenlive|com.obsproject.Studio)$"
-      "opacity 1 1, class:^(com.libretro.RetroArch|steam)$"
+      "opacity 1 1, match:class ^(chromium|google-chrome|google-chrome-unstable|brave)$, match:title .*Youtube.*"
+      "opacity 1 0.97, match:class ^(chromium|google-chrome|google-chrome-unstable)$"
+      "opacity 0.97 0.9, match:initial_class ^(chrome-.*-Default)$ # web apps"
+      "opacity 1 1, match:initial_class ^(chrome-youtube.*-Default)$ # Youtube"
+      "opacity 1 1, match:class ^(zoom|vlc|org.kde.kdenlive|com.obsproject.Studio)$"
+      "opacity 1 1, match:class ^(com.libretro.RetroArch|steam)$"
 
       # Fix some dragging issues with XWayland
-      "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+      "no_focus on,match:class ^$,match:title ^$,match:xwayland 1,match:float 1,match:fullscreen 0,match:pin 0"
 
       # Float in the middle for clipse clipboard manager
-      "float, class:(clipse)"
-      "size 622 652, class:(clipse)"
-      "stayfocused, class:(clipse)"
+      "float on, match:class (clipse)"
+      "size 622 652, match:class (clipse)"
+      "stay_focused on, match:class (clipse)"
     ];
 
     layerrule = [
       # Proper background blur for wofi
-      "blur,wofi"
-      "blur,waybar"
+      "blur on, match:namespace wofi"
+      "blur on, match:namespace waybar"
     ];
   };
 }
