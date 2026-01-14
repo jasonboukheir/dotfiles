@@ -3,15 +3,16 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixos-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     agenix.url = "github:ryantm/agenix";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixos";
-    };
     home-manager-nixos = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixos";
+    };
+    home-manager-nixos-unstable = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixos-unstable";
     };
     home-manager-darwin = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -44,6 +45,10 @@
       inputs.nixpkgs.follows = "nixos";
       url = "github:notashelf/nvf/v0.8";
     };
+    nvf-nixos-unstable = {
+      inputs.nixpkgs.follows = "nixos-unstable";
+      url = "github:notashelf/nvf/v0.8";
+    };
     nvf-darwin = {
       inputs.nixpkgs.follows = "nixpkgs-darwin";
       url = "github:notashelf/nvf/v0.8";
@@ -52,29 +57,35 @@
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixos";
     };
+    stylix-nixos-unstable = {
+      url = "github:nix-community/stylix/master";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
     stylix-darwin = {
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
     jovian = {
       url = "github:Jovian-Experiments/Jovian-NixOS/development";
-      inputs.nixpkgs.follows = "nixos";
+      inputs.nixpkgs.follows = "nixos-unstable";
     };
   };
 
   outputs = inputs @ {
     agenix,
     determinate,
-    disko,
     home-manager-nixos,
+    home-manager-nixos-unstable,
     home-manager-darwin,
     mac-app-util,
     nix-darwin,
     nix-homebrew,
     nixarr,
     nixos,
+    nixos-unstable,
     nixpkgs-unstable,
     stylix-nixos,
+    stylix-nixos-unstable,
     stylix-darwin,
     jovian,
     ...
@@ -115,18 +126,16 @@
     };
 
     nixosConfigurations = {
-      thebeast = nixos.lib.nixosSystem {
+      thebeast = nixos-unstable.lib.nixosSystem {
         specialArgs = {
           inherit inputs;
-          pkgs-unstable = import nixpkgs-unstable {system = "x86_64-linux";};
         };
         modules = [
           ./hosts/thebeast
           agenix.nixosModules.default
           determinate.nixosModules.default
-          disko.nixosModules.disko
-          home-manager-nixos.nixosModules.home-manager
-          stylix-nixos.nixosModules.stylix
+          home-manager-nixos-unstable.nixosModules.home-manager
+          stylix-nixos-unstable.nixosModules.stylix
           jovian.nixosModules.default
         ];
       };
@@ -140,7 +149,6 @@
           ./hosts/brutus
           agenix.nixosModules.default
           determinate.nixosModules.default
-          disko.nixosModules.disko
           home-manager-nixos.nixosModules.home-manager
           nixarr.nixosModules.default
           stylix-nixos.nixosModules.stylix
