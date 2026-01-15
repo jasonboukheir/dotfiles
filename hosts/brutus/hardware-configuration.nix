@@ -17,6 +17,14 @@
   boot.extraModulePackages = [];
   boot.supportedFilesystems.zfs = true;
 
+  environment.etc."crypttab".text = ''
+    # Name            UUID                                               Keyfile
+    ssd_pool1         UUID=6f2f7f2b-c5e4-441f-988e-3bf5f1d92970          /var/lib/secrets/data.key
+    ssd_pool2         UUID=25b86ef8-d936-400c-b54e-98cd362f6251          /var/lib/secrets/data.key
+    ssd_pool3         UUID=1f4d139d-5441-4c47-8cbc-cc110b8513d2          /var/lib/secrets/data.key
+    ssd_pool4         UUID=c0f82819-c7e9-412d-bec0-222473e73681          /var/lib/secrets/data.key
+  '';
+
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/18012e8f-6414-45ff-a364-f23e4bb4cae6";
     fsType = "ext4";
@@ -26,6 +34,11 @@
     device = "/dev/disk/by-uuid/6482-84CB";
     fsType = "vfat";
     options = ["fmask=0077" "dmask=0077"];
+  };
+
+  fileSystems."/ssd_pool" = {
+    device = "ssd_pool/main";
+    fsType = "zfs";
   };
 
   fileSystems."/usb1" = {
