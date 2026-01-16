@@ -24,7 +24,8 @@
       ];
 
       exclude = [
-        "/var/lib/nixarr"
+        "${config.nixarr.mediaDir}/library"
+        "${config.nixarr.mediaDir}/torrents"
       ];
     };
   };
