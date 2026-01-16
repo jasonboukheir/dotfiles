@@ -1,4 +1,3 @@
-# modules/sunnycareboo-services.nix
 {
   config,
   lib,
