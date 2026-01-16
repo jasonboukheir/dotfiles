@@ -1,10 +1,6 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   age.secrets."power/ups/user/pw".file = ../secrets/power/ups/user/pw.age;
-  power.ups = lib.mkIf config.services.brutus.enable {
+  power.ups = {
     enable = true;
     mode = "standalone";
 
