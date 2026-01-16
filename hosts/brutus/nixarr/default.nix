@@ -3,10 +3,11 @@
   config,
   ...
 }: let
-  dataDir = "/usb1/nixarr";
+  dataDir = "/var/lib/nixarr";
   globals = config.util-nixarr.globals;
   jellyfinPort = 8096;
   transmissionPort = 9091;
+  cfg = config.nixarr;
 in {
   imports = [
     ./audiobookshelfFixes.nix
@@ -118,5 +119,15 @@ in {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.jellyseerr.port}";
     };
+  };
+
+  fileSystems."${cfg.mediaDir}" = lib.mkIf cfg.enable {
+    depends = [
+      "/"
+      "/ssd_pool"
+    ];
+    device = "/ssd_pool/var/lib/nixarr";
+    fsType = "none";
+    options = ["bind"];
   };
 }
