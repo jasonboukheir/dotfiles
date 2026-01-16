@@ -252,9 +252,9 @@ in {
   fileSystems."${cfg.mediaLocation}" = lib.mkIf cfg.enable {
     depends = [
       "/"
-      "/usb2"
+      "/ssd_pool"
     ];
-    device = "usb2/immich";
+    device = "/ssd_pool/var/lib/immich";
     fsType = "none";
     options = ["bind"];
   };

@@ -95,9 +95,9 @@ in {
   fileSystems."${cfg.stateDir}" = lib.mkIf cfg.enable {
     depends = [
       "/"
-      "/usb2"
+      "/ssd_pool"
     ];
-    device = "/usb2/opencloud";
+    device = "/ssd_pool/var/lib/opencloud";
     fsType = "none";
     options = ["bind"];
   };
