@@ -1,84 +1,38 @@
 let
   root = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPjx7uRpFx9S/K1rjIuoCFUuXnN+99oMtSah8KBjHBRq";
-in {
-  "acme/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "actual/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "cloudflare/token.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "davis/appSecret" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "davis/clientSecret" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "pocket-id-env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "litellm/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "mealie/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "nixarr-wgconf.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "opencloud-env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "open-webui/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "photos/clientId.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "photos/clientSecret.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "restic/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "restic/repo.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "restic/password.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "searx/env.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "headscale/clientSecret.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "tailscale/authkey.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-  "power/ups/user/pw.age" = {
-    armor = true;
-    publicKeys = [root];
-  };
-}
+  backup = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDC1d6WAsibDd8ewY0nhn52l4wMLOEkqwOoVdCAhm7kV";
+
+  allKeys = [root backup];
+
+  files = [
+    "acme/env.age"
+    "actual/env.age"
+    "cloudflare/token.age"
+    "davis/appSecret"
+    "davis/clientSecret"
+    "pocket-id/env.age"
+    "litellm/env.age"
+    "mealie/env.age"
+    "nixarr-wgconf.age"
+    "opencloud-env.age"
+    "open-webui/env.age"
+    "photos/clientId.age"
+    "photos/clientSecret.age"
+    "restic/env.age"
+    "restic/repo.age"
+    "restic/password.age"
+    "searx/env.age"
+    "headscale/clientSecret.age"
+    "tailscale/authkey.age"
+    "power/ups/user/pw.age"
+  ];
+in
+  # Generate the configuration for each file
+  builtins.listToAttrs (map (file: {
+      name = file;
+      value = {
+        armor = true;
+        publicKeys = allKeys;
+      };
+    })
+    files)
