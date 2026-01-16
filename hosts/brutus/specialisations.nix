@@ -1,6 +1,6 @@
 {...}: {
   specialisation = {
-    maintenance = {
+    maintenance.configuration = {
       services.brutus.enable = false;
     };
   };
