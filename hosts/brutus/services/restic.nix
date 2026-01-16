@@ -18,6 +18,14 @@
         "--keep-weekly 5"
         "--keep-monthly 12"
       ];
+
+      paths = [
+        "/var/lib"
+      ];
+
+      exclude = [
+        "/var/lib/nixarr"
+      ];
     };
   };
 }

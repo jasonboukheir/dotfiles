@@ -259,10 +259,6 @@ in {
     options = ["bind"];
   };
 
-  services.restic.backups.daily.paths = lib.optionals cfg.enable [
-    cfg.mediaLocation
-  ];
-
   age.secrets = lib.mkIf cfg.enable {
     "photos/clientId".file = ../secrets/photos/clientId.age;
     "photos/clientSecret".file = ../secrets/photos/clientSecret.age;
