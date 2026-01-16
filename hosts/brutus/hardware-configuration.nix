@@ -23,6 +23,9 @@
     ssd_pool2         UUID=25b86ef8-d936-400c-b54e-98cd362f6251          /var/lib/secrets/data.key
     ssd_pool3         UUID=1f4d139d-5441-4c47-8cbc-cc110b8513d2          /var/lib/secrets/data.key
     ssd_pool4         UUID=c0f82819-c7e9-412d-bec0-222473e73681          /var/lib/secrets/data.key
+
+    ext_pool1         UUID=7e22ac54-07b0-4157-8a01-97b87d708c19          /var/lib/secrets/data.key
+    ext_pool2         UUID=08ef1925-a3db-4fff-80df-a9e21fa68578          /var/lib/secrets/data.key
   '';
 
   fileSystems."/" = {
@@ -41,14 +44,9 @@
     fsType = "zfs";
   };
 
-  fileSystems."/usb1" = {
-    device = "/dev/disk/by-uuid/be182953-fba8-4f58-a96d-af3a20c06d42";
-    fsType = "ext4";
-  };
-
-  fileSystems."/usb2" = {
-    device = "/dev/disk/by-uuid/7dcfbedb-0a31-49b4-af44-45d730768760";
-    fsType = "ext4";
+  fileSystems."/ext_pool" = {
+    device = "ext_pool/main";
+    fsType = "zfs";
   };
 
   swapDevices = [];
