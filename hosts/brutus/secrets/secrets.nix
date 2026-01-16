@@ -13,7 +13,7 @@ let
     "pocket-id/env.age"
     "litellm/env.age"
     "mealie/env.age"
-    "nixarr-wgconf.age"
+    "nixarr/wgconf.age"
     "opencloud-env.age"
     "open-webui/env.age"
     "photos/clientId.age"

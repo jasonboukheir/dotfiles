@@ -13,8 +13,8 @@ in {
     ./audiobookshelfFixes.nix
     ./transmissionPortForwarding.nix
   ];
-  age.secrets.nixarr-wgconf = {
-    file = ../secrets/nixarr-wgconf.age;
+  age.secrets."nixarr/wgconf" = {
+    file = ../secrets/nixarr/wgconf.age;
     owner = globals.libraryOwner.user;
     group = globals.libraryOwner.group;
   };
@@ -26,7 +26,7 @@ in {
 
     vpn = {
       enable = true;
-      wgConf = config.age.secrets.nixarr-wgconf.path;
+      wgConf = config.age.secrets."nixarr/wgconf".path;
     };
 
     transmission = {
