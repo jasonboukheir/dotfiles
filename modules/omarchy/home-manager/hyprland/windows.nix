@@ -12,6 +12,7 @@
 
       # Float Steam, fullscreen RetroArch
       "float on, match:class ^(steam)$"
+      "center on, match:class ^(steam)$"
       "fullscreen on, match:class ^(com.libretro.RetroArch)$"
 
       # Just dash of transparency
