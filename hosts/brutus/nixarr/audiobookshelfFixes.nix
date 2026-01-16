@@ -10,6 +10,11 @@ in {
   # Only apply this if both nixarr and audiobookshelf are enabled
   config = lib.mkIf (nixarr.enable && cfg.enable) {
     systemd.services.audiobookshelf = {
+      environment = {
+        CONFIG_PATH = "${cfg.stateDir}/config";
+        METADATA_PATH = "${cfg.stateDir}/metadata";
+        BACKUP_PATH = "${cfg.stateDir}/metadata/backups";
+      };
       serviceConfig = {
         # This appends your media directory to the existing ReadWritePaths.
         # It uses the 'mediaDir' variable defined in your nixarr config.
