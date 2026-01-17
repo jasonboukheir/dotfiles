@@ -22,7 +22,7 @@ in {
 
         # End active session
         "SUPER, ESCAPE, exec, hyprlock"
-        "SUPER SHIFT, ESCAPE, exec, hyprexit"
+        "SUPER SHIFT, ESCAPE, exec, pkill -TERM steam; sleep 1; hyprexit"
         "SUPER CTRL, ESCAPE, exec, reboot"
         "SUPER SHIFT CTRL, ESCAPE, exec, systemctl poweroff"
 
