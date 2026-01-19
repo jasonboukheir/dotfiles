@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs-unstable,
   ...
 }: let
   dataDir = "/var/lib/nixarr";
