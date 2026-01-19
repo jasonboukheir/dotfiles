@@ -47,7 +47,6 @@ in {
       enable = true;
       openFirewall = false;
     };
-
     bazarr = {
       enable = true;
       openFirewall = false;
@@ -65,6 +64,10 @@ in {
       openFirewall = false;
     };
     readarr = {
+      enable = true;
+      openFirewall = false;
+    };
+    readarr-audiobook = {
       enable = true;
       openFirewall = false;
     };
@@ -110,6 +113,10 @@ in {
     readarr = lib.mkIf config.nixarr.readarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.readarr.port}";
+    };
+    readarr-audiobook = lib.mkIf config.nixarr.readarr-audiobook.enable {
+      enable = true;
+      proxyPass = "http://localhost:${toString config.nixarr.readarr-audiobook.port}";
     };
     sonarr = lib.mkIf config.nixarr.sonarr.enable {
       enable = true;
