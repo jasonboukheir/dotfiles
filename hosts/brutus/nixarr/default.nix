@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs-unstable,
   ...
 }: let
   dataDir = "/var/lib/nixarr";
@@ -12,6 +11,7 @@
 in {
   imports = [
     ./audiobookshelfFixes.nix
+    ./lidarr.nix
     ./transmissionPortForwarding.nix
   ];
   age.secrets."nixarr/wgconf" = {

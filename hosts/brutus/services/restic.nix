@@ -26,6 +26,7 @@
       exclude = [
         "${config.nixarr.mediaDir}/library"
         "${config.nixarr.mediaDir}/torrents"
+        "${config.nixarr.mediaDir}/downloads"
       ];
     };
   };
