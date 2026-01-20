@@ -6,6 +6,7 @@
     ./headscale.nix
     ./immich.nix
     ./litellm.nix
+    ./lldap.nix
     ./mealie.nix
     ./memos.nix
     ./open-webui.nix
