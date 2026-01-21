@@ -32,8 +32,8 @@ in {
   };
 
   age.secrets = lib.mkIf cfg.enable {
-    "lldap/admin_password" = {
-      file = ../secrets/lldap/admin_password.age;
+    "lldap/users/admin/pw" = {
+      file = ../secrets/lldap/users/admin/pw.age;
     };
     "lldap/jwt_secret" = {
       file = ../secrets/lldap/jwt_secret.age;
@@ -42,7 +42,7 @@ in {
 
   systemd.services.lldap.serviceConfig = lib.mkIf cfg.enable {
     LoadCredential = [
-      "ldap_pass:${config.age.secrets."lldap/admin_password".path}"
+      "ldap_pass:${config.age.secrets."lldap/users/admin/pw".path}"
       "jwt_secret:${config.age.secrets."lldap/jwt_secret".path}"
     ];
   };
