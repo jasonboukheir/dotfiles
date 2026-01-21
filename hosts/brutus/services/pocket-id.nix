@@ -11,9 +11,11 @@ in {
     enable = true;
     proxyPass = "http://localhost:${toString port}";
     isExternal = true;
-  };
-  services.nginx.virtualHosts."${domain}" = {
-    default = true;
+    extraConfig = ''
+      proxy_busy_buffers_size   512k;
+      proxy_buffers   4 512k;
+      proxy_buffer_size   256k;
+    '';
   };
   age.secrets."pocket-id/encryptionKey" = {
     file = ../secrets/pocket-id/encryptionKey.age;
