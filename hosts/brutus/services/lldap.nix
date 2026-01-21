@@ -4,6 +4,11 @@
   ...
 }: let
   cfg = config.services.lldap;
+  defaultGroups = {
+    "lldap_admin" = {name = "lldap_admin";};
+    "lldap_password_manager" = {name = "lldap_password_manager";};
+    "lldap_strict_readonly" = {name = "lldap_strict_readonly";};
+  };
 in {
   services.lldap = {
     enable = config.services.brutus.enable;
@@ -29,11 +34,48 @@ in {
       LLDAP_LDAP_USER_PASS_FILE = "/run/credentials/lldap.service/ldap_pass";
       LLDAP_JWT_SECRET_FILE = "/run/credentials/lldap.service/jwt_secret";
     };
+
+    enforceUsers = true;
+    enforceUserMemberships = true;
+    enforceGroups = true;
+
+    ensureUsers = {
+      "jasonbk" = {
+        firstName = "Jason";
+        lastName = "Bou Kheir";
+        displayName = "Jason Bou Kheir";
+        email = "jasonbk@sunnycareboo.com";
+        password_file = config.age.secrets."lldap/users/jasonbk/pw".path;
+        groups = [
+          cfg.ensureGroups."_pocket_id_admin".name
+          defaultGroups."lldap_admin".name
+        ];
+      };
+      "izmabk" = {
+        firstName = "Izma";
+        lastName = "Bou Kheir";
+        displayName = "Izma Bou Kheir";
+        email = "izmabk@sunnycareboo.com";
+        password_file = config.age.secrets."lldap/users/izmabk/pw".path;
+        groups = [];
+      };
+    };
+    ensureGroups = {
+      "_pocket_id_admin" = {};
+    };
+    ensureUserFields = {};
+    ensureGroupFields = {};
   };
 
   age.secrets = lib.mkIf cfg.enable {
     "lldap/users/admin/pw" = {
       file = ../secrets/lldap/users/admin/pw.age;
+    };
+    "lldap/users/jasonbk/pw" = {
+      file = ../secrets/lldap/users/jasonbk/pw.age;
+    };
+    "lldap/users/izmabk/pw" = {
+      file = ../secrets/lldap/users/izmabk/pw.age;
     };
     "lldap/jwt_secret" = {
       file = ../secrets/lldap/jwt_secret.age;

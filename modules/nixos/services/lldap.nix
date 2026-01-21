@@ -9,6 +9,9 @@
   # --- 1. DEFINE THE MISSING PACKAGE ---
   # Extracted from the patch you provided.
   lldap-bootstrap = pkgs.stdenv.mkDerivation rec {
+    meta = {
+      mainProgram = "lldap-bootstrap";
+    };
     pname = "lldap-bootstrap";
     version = "0.6.2"; # Matches the patch version
 
@@ -27,10 +30,12 @@
       cp ./scripts/bootstrap.sh $out/bin/lldap-bootstrap
 
       wrapProgram $out/bin/lldap-bootstrap \
-        --set LLDAP_SET_PASSWORD_PATH ${lib.getExe cfg.package} \
+        --set LLDAP_SET_PASSWORD_PATH ${cfg.package}/bin/lldap_set_password \
         --prefix PATH : ${lib.makeBinPath [pkgs.curl pkgs.jq pkgs.jo]}
     '';
   };
+
+  mkCredName = username: "lldap-user-${username}";
 
   # --- 2. HELPER FUNCTIONS ---
   # Logic to generate JSON files for users/groups
@@ -127,19 +132,6 @@ in {
       type = types.attrsOf (types.submodule ({name, ...}: {options = ensureFieldsOptions name;}));
     };
 
-    ensureAdminUsername = mkOption {
-      type = types.str;
-      default = "admin";
-    };
-    ensureAdminPassword = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-    };
-    ensureAdminPasswordFile = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-    };
-
     enforceUsers = mkOption {
       type = types.bool;
       default = false;
@@ -157,7 +149,31 @@ in {
   # --- 4. IMPLEMENTATION ---
   config = lib.mkIf cfg.enable {
     # Hook into the existing service
-    systemd.services.lldap = {
+    systemd.services.lldap = let
+      # 1. Create the list of credentials to load
+      # Format: "credName:/path/to/source"
+      userCredentials =
+        lib.mapAttrsToList (
+          name: user:
+            if user.password_file != null
+            then "${mkCredName name}:${user.password_file}"
+            else null
+        )
+        cfg.ensureUsers;
+
+      # 2. Create the "Runtime" version of the users config
+      # This swaps the file path with the path where systemd will mount the secret
+      runtimeUsers =
+        lib.mapAttrs (
+          name: user:
+            if user.password_file != null
+            then user // {password_file = "/run/credentials/lldap.service/${mkCredName name}";}
+            else user
+        )
+        cfg.ensureUsers;
+    in {
+      serviceConfig.LoadCredential = lib.filter (x: x != null) userCredentials;
+
       # Add the bootstrap package to the path if needed, though we wrapped it above.
       path = [lldap-bootstrap];
 
@@ -171,19 +187,10 @@ in {
         done
 
         export LLDAP_URL=http://127.0.0.1:${toString cfg.settings.http_port}
-        export LLDAP_ADMIN_USERNAME=${cfg.ensureAdminUsername}
-        export LLDAP_ADMIN_PASSWORD=${
-          if cfg.ensureAdminPassword != null
-          then cfg.ensureAdminPassword
-          else ""
-        }
-        export LLDAP_ADMIN_PASSWORD_FILE=${
-          if cfg.ensureAdminPasswordFile != null
-          then cfg.ensureAdminPasswordFile
-          else ""
-        }
+        export LLDAP_ADMIN_USERNAME=${cfg.settings.ldap_user_dn}
+        export LLDAP_ADMIN_PASSWORD_FILE=${cfg.environment.LLDAP_LDAP_USER_PASS_FILE}
 
-        export USER_CONFIGS_DIR=${generateEnsureConfigDir "users" cfg.ensureUsers}
+        export USER_CONFIGS_DIR=${generateEnsureConfigDir "users" runtimeUsers}
         export GROUP_CONFIGS_DIR=${generateEnsureConfigDir "groups" cfg.ensureGroups}
         export USER_SCHEMAS_DIR=${generateEnsureConfigDir "userFields" (lib.mapAttrs (n: v: [v]) cfg.ensureUserFields)}
         export GROUP_SCHEMAS_DIR=${generateEnsureConfigDir "groupFields" (lib.mapAttrs (n: v: [v]) cfg.ensureGroupFields)}
