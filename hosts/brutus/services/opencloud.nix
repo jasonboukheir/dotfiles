@@ -90,6 +90,24 @@ in {
   sunnycareboo.services.cloud = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "https://localhost:${toString cfg.port}";
+    extraConfig = ''
+      # Increase max upload size (required for Tus — without this, uploads over 1 MB fail)
+      client_max_body_size 10M;
+
+      # Disable buffering - essential for SSE
+      proxy_buffering off;
+      proxy_request_buffering off;
+
+      # Extend timeouts for long connections
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
+      keepalive_requests 100000;
+      keepalive_timeout 5m;
+      http2_max_concurrent_streams 512;
+
+      # Prevent nginx from trying other upstreams
+      proxy_next_upstream off;
+    '';
   };
 
   fileSystems."${cfg.stateDir}" = lib.mkIf cfg.enable {
