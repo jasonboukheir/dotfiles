@@ -20,7 +20,7 @@ let
     "opencloud-env.age"
     "photos/clientId.age"
     "photos/clientSecret.age"
-    "pocket-id/env.age"
+    "pocket-id/encryptionKey.age"
     "power/ups/user/pw.age"
     "restic/env.age"
     "restic/password.age"
