@@ -182,6 +182,13 @@ in {
                 svcCfg.enable
             )
             cfg.services)))
+        # 2. Create a "catch-all" vhost to handle unknown domains/IPs
+        (nameValuePair "_" {
+          default = true; # This adds the 'default_server' flag to the listen directive
+          locations."/" = {
+            return = "404";
+          };
+        })
       ];
     };
 
