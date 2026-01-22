@@ -30,6 +30,16 @@
   exportAllCredentials = vars: lib.concatStringsSep "\n" (lib.mapAttrsToList exportCredentials vars);
   getLoadCredentialList = lib.mapAttrsToList (n: v: "${n}_FILE:${v}") effectiveCredentials;
 
+  allDependentServices = lib.unique (lib.flatten (lib.mapAttrsToList (
+      _: c:
+        map (s:
+          if lib.hasSuffix ".service" s
+          then s
+          else "${s}.service")
+        c.dependentServices
+    )
+    cfg.ensureClients));
+
   pocket-id-bootstrap = import ./pocket-id-bootstrap.nix pkgs;
 in {
   options.services.pocket-id = {
@@ -53,31 +63,45 @@ in {
         config,
         ...
       }: {
-        freeformType = jsonFormat.type;
         options = {
-          id = mkOption {
-            type = types.str;
-            default = name;
-            description = "The Client ID (defaults to attribute name).";
+          settings = mkOption {
+            description = "Settings object passed directly to the Pocket ID API.";
+            default = {};
+            type = types.submodule {
+              freeformType = jsonFormat.type;
+              options = {
+                id = mkOption {
+                  type = types.str;
+                  default = name;
+                  description = "The Client ID (defaults to attribute name).";
+                };
+                name = mkOption {
+                  type = types.str;
+                  default = name;
+                  description = "Friendly name for the client.";
+                };
+                isPublic = mkOption {
+                  type = types.bool;
+                  default = false;
+                  description = "whether client has a secret or not";
+                };
+                pkceEnabled = mkOption {
+                  type = types.bool;
+                  default = true;
+                  description = "has pkce enabled or not";
+                };
+                callbackURLs = mkOption {
+                  type = types.listOf types.str;
+                  default = [];
+                };
+              };
+            };
           };
-          name = mkOption {
-            type = types.str;
-            default = name;
-            description = "Friendly name for the client.";
-          };
-          isPublic = mkOption {
-            type = types.bool;
-            default = false;
-            description = "whether client has a secret or not";
-          };
-          pkceEnabled = mkOption {
-            type = types.bool;
-            default = true;
-            description = "has pkce enabled or not";
-          };
-          callbackURLs = mkOption {
+
+          dependentServices = mkOption {
             type = types.listOf types.str;
             default = [];
+            description = "List of systemd services (e.g. ['grafana']) that depend on this client. They will be configured to start after provisioning is complete.";
           };
 
           secretFile = mkOption {
@@ -85,7 +109,7 @@ in {
             readOnly = true;
             # Resolves to: /run/pocket-id-secrets/<client_id>
             # Note: For public clients, this file will not be created.
-            default = "${secretsDir}/${config.id}";
+            default = "${secretsDir}/${config.settings.id}";
             description = "The expected path to the secret file for this client. Use this in other modules.";
           };
         };
@@ -123,12 +147,15 @@ in {
     };
 
     systemd.services.pocket-id-provisioner = mkIf (cfg.ensureClients != {}) (let
-      clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" (lib.attrValues cfg.ensureClients);
+      clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" (map (c: c.settings) (lib.attrValues cfg.ensureClients));
     in {
       description = "Provision Pocket ID OIDC Clients";
       after = ["pocket-id.service"];
       wants = ["pocket-id.service"];
       wantedBy = ["multi-user.target"];
+
+      before = allDependentServices;
+      requiredBy = allDependentServices;
 
       serviceConfig = {
         Type = "oneshot";
