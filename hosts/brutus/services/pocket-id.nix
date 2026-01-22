@@ -17,8 +17,10 @@ in {
       proxy_buffer_size   256k;
     '';
   };
-  age.secrets."pocket-id/encryptionKey" = {
-    file = ../secrets/pocket-id/encryptionKey.age;
+  age.secrets = {
+    "pocket-id/encryptionKey" = {
+      file = ../secrets/pocket-id/encryptionKey.age;
+    };
   };
   services.pocket-id = {
     enable = config.services.brutus.enable;
@@ -49,6 +51,11 @@ in {
       # LDAP_ATTRIBUTE_GROUP_UNIQUE_IDENTIFIER = "uuid";
       # LDAP_ATTRIBUTE_GROUP_NAME = "cn";
       # LDAP_ADMIN_GROUP_NAME = "pocket_id_admin";
+    };
+    ensureClients = {
+      test = {
+        isPublic = true;
+      };
     };
   };
 }
