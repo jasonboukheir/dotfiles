@@ -54,7 +54,7 @@ in {
     };
     ensureClients = {
       test = {
-        isPublic = true;
+        settings = {isPublic = true;};
       };
     };
   };
