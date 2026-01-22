@@ -4,7 +4,7 @@
     ./iina.nix
     ./lmstudio.nix
     ./nushell.nix
-    ./proton-drive.nix
+    ./opencloud-desktop.nix
     ./sparrow.nix
     ./utm.nix
   ];
