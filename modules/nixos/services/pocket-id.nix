@@ -24,50 +24,56 @@
       SECRETS_DIR="$3"
       STATIC_TOKEN="$4"
 
+      # Timeout Configuration
+      MAX_RETRIES=5
+      count=0
+
       echo "Waiting for Pocket ID at $API_URL..."
-      # Loop until healthz returns 204
+
+      # Loop with timeout
       until curl -s -o /dev/null -w "%{http_code}" "$API_URL/healthz" | grep -q "204"; do
+        if [ "$count" -ge "$MAX_RETRIES" ]; then
+          echo "Error: Timed out waiting for Pocket ID to become healthy after $MAX_RETRIES seconds."
+          exit 1
+        fi
         sleep 1
+        count=$((count + 1))
       done
+
       echo "Pocket ID is online. Starting provisioning..."
 
       mkdir -p "$SECRETS_DIR"
 
-      # Iterate over the JSON list of clients
       jq -c '.[]' "$CONFIG_FILE" | while read -r client_json; do
         CLIENT_ID=$(echo "$client_json" | jq -r '.id')
 
-        # Check if client exists
+        # Check existence
         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-          -H "Authorization: Bearer $STATIC_TOKEN" \
+          -H "X-API-Key: $STATIC_TOKEN" \
           "$API_URL/api/oidc/clients/$CLIENT_ID")
 
         if [ "$HTTP_CODE" -eq 404 ]; then
           echo "Creating client: $CLIENT_ID"
           curl -s -X POST "$API_URL/api/oidc/clients" \
-            -H "Authorization: Bearer $STATIC_TOKEN" \
+            -H "X-API-Key: $STATIC_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$client_json" > /dev/null
         else
           echo "Updating client: $CLIENT_ID"
           curl -s -X PUT "$API_URL/api/oidc/clients/$CLIENT_ID" \
-            -H "Authorization: Bearer $STATIC_TOKEN" \
+            -H "X-API-Key: $STATIC_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$client_json" > /dev/null
         fi
 
         # Secret Management
-        # We only generate a new secret if we don't have one stored locally.
         SECRET_FILE="$SECRETS_DIR/$CLIENT_ID"
-
         if [ ! -f "$SECRET_FILE" ]; then
           echo "Generating new secret for $CLIENT_ID..."
-          # The /secret endpoint rotates the secret and returns it
           SECRET_PAYLOAD=$(curl -s -X POST "$API_URL/api/oidc/clients/$CLIENT_ID/secret" \
-            -H "Authorization: Bearer $STATIC_TOKEN" \
+            -H "X-API-Key: $STATIC_TOKEN" \
             -H "Content-Length: 0")
 
-          # Extract and save
           SECRET_VAL=$(echo "$SECRET_PAYLOAD" | jq -r '.secret')
 
           if [ -n "$SECRET_VAL" ] && [ "$SECRET_VAL" != "null" ]; then
@@ -166,6 +172,7 @@ in {
         DynamicUser = true;
         RuntimeDirectory = baseNameOf secretsDir;
         LoadCredential = ["static_api_key:${cfg.credentials.STATIC_API_KEY}"];
+        RemainAfterExit = true;
       };
 
       script = ''
@@ -173,7 +180,7 @@ in {
 
         ${pocket-id-bootstrap}/bin/pocket-id-bootstrap \
           "${clientsConfigFile}" \
-          "http://127.0.0.1:${toString cfg.settings.port or "8080"}" \
+          "http://127.0.0.1:${toString cfg.settings.PORT or "8080"}" \
           "$RUNTIME_DIRECTORY" \
           "$API_KEY"
       '';
