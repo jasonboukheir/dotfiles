@@ -23,6 +23,7 @@ let
     "photos/clientId.age"
     "photos/clientSecret.age"
     "pocket-id/encryptionKey.age"
+    "pocket-id/staticApiKey.age"
     "power/ups/user/pw.age"
     "restic/env.age"
     "restic/password.age"
