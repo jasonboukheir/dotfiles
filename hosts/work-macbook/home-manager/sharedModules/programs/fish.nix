@@ -14,6 +14,7 @@ in {
         set -gx ANDROID_SDK ${SDK_DIR}
         set -gx ANDROID_NDK_REPOSITORY ${NDK_DIR}
         set -gx ANDROID_HOME "''$ANDROID_SDK"
+        set -gx ANDROID_SDK_ROOT "''$ANDROID_SDK"
         set -gx PATH "''$PATH"':'"''$ANDROID_SDK"'/emulator:'"''$ANDROID_SDK"'/tools:'"''$ANDROID_SDK"'/tools/bin:'"''$ANDROID_SDK"'/platform-tools'
       '';
     };
