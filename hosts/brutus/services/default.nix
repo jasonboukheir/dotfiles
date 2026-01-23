@@ -14,6 +14,7 @@
     ./options.nix
     ./pocket-id.nix
     ./postgresql.nix
+    ./radicale.nix
     ./restic.nix
     ./searx.nix
     ./sunnycareboo.nix

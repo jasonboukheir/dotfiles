@@ -4,11 +4,7 @@
   ...
 }: let
   cfg = config.services.lldap;
-  defaultGroups = {
-    "lldap_admin" = {name = "lldap_admin";};
-    "lldap_password_manager" = {name = "lldap_password_manager";};
-    "lldap_strict_readonly" = {name = "lldap_strict_readonly";};
-  };
+  defaultGroups = cfg.defaultGroups;
 in {
   services.lldap = {
     enable = config.services.brutus.enable;
