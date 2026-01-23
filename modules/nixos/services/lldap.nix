@@ -144,6 +144,25 @@ in {
       type = types.bool;
       default = false;
     };
+
+    defaultGroups = mkOption {
+      default = {
+        "lldap_admin" = {name = "lldap_admin";};
+        "lldap_password_manager" = {name = "lldap_password_manager";};
+        "lldap_strict_readonly" = {name = "lldap_strict_readonly";};
+      };
+      readOnly = true;
+      description = "reference for default groups that are always created in lldap";
+      type = types.attrsOf (types.submodule ({name, ...}: {
+        freeformType = ensureFormat.type;
+        options = {
+          name = mkOption {
+            type = types.str;
+            default = name;
+          };
+        };
+      }));
+    };
   };
 
   # --- 4. IMPLEMENTATION ---

@@ -70,7 +70,6 @@ in {
         additionalScriptSrc = [oidc_url];
       };
     };
-    radicale.enable = true;
     environment = {
       "OC_INSECURE" = "true";
       "INSECURE" = "true";
