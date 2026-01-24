@@ -6,6 +6,11 @@
   ...
 }: let
   cfg = config.services.opencloud.csp;
+
+  # Helper to filter out empty lists to keep the generated YAML clean,
+  # though OpenCloud's merge logic should handle empty lists fine.
+  mkDirectives = directives:
+    lib.filterAttrs (n: v: v != []) directives;
 in {
   options.services.opencloud.csp = {
     enable = lib.mkEnableOption "OpenCloud CSP configuration";
@@ -105,95 +110,47 @@ in {
 
   config = lib.mkIf cfg.enable {
     services.opencloud.csp.configFile = let
+      # We now only construct the DELTAS.
+      # The upstream application will merge these with its internal defaults (including 'self', 'unsafe-inline', etc.)
+      # See https://github.com/opencloud-eu/opencloud/pull/1617
       cspConfig = {
-        directives = {
-          child-src =
-            [
-              "'self'"
-            ]
-            ++ cfg.directives.additionalChildSrc;
+        directives = mkDirectives {
+          child-src = cfg.directives.additionalChildSrc;
 
           connect-src =
             [
-              "'self'"
-              "blob:"
               "https://${cfg.companionDomain}/"
               "wss://${cfg.companionDomain}/"
-              "https://raw.githubusercontent.com/opencloud-eu/awesome-apps/"
-              "https://update.opencloud.eu/"
             ]
             ++ cfg.directives.additionalConnectSrc;
 
-          default-src =
-            [
-              "'none'"
-            ]
-            ++ cfg.directives.additionalDefaultSrc;
+          default-src = cfg.directives.additionalDefaultSrc;
 
-          font-src =
-            [
-              "'self'"
-            ]
-            ++ cfg.directives.additionalFontSrc;
+          font-src = cfg.directives.additionalFontSrc;
 
-          frame-ancestors =
-            [
-              "'self'"
-            ]
-            ++ cfg.directives.additionalFrameAncestors;
+          frame-ancestors = cfg.directives.additionalFrameAncestors;
 
           frame-src =
             [
-              "'self'"
-              "blob:"
-              "https://embed.diagrams.net/"
               "https://${cfg.collaboraDomain}/"
-              "https://docs.opencloud.eu"
             ]
             ++ cfg.directives.additionalFrameSrc;
 
           img-src =
             [
-              "'self'"
-              "data:"
-              "blob:"
-              "https://raw.githubusercontent.com/opencloud-eu/awesome-apps/"
               "https://${cfg.collaboraDomain}/"
             ]
             ++ cfg.directives.additionalImgSrc;
 
-          manifest-src =
-            [
-              "'self'"
-            ]
-            ++ cfg.directives.additionalManifestSrc;
+          manifest-src = cfg.directives.additionalManifestSrc;
 
-          media-src =
-            [
-              "'self'"
-            ]
-            ++ cfg.directives.additionalMediaSrc;
+          media-src = cfg.directives.additionalMediaSrc;
 
-          object-src =
-            [
-              "'self'"
-              "blob:"
-            ]
-            ++ cfg.directives.additionalObjectSrc;
+          object-src = cfg.directives.additionalObjectSrc;
 
-          script-src =
-            [
-              "'self'"
-              "'unsafe-inline'"
-            ]
-            ++ cfg.directives.additionalScriptSrc;
+          script-src = cfg.directives.additionalScriptSrc;
 
-          style-src =
-            [
-              "'self'"
-              "'unsafe-inline'"
-            ]
-            ++ cfg.directives.additionalStyleSrc;
+          style-src = cfg.directives.additionalStyleSrc;
         };
       };
     in
@@ -201,6 +158,8 @@ in {
       (lib.generators.toYAML {} cspConfig);
 
     services.opencloud.environment = {
+      # This variable now triggers a MERGE with internal defaults.
+      # To strictly replace defaults (old behavior), one would use PROXY_CSP_CONFIG_FILE_OVERRIDE_LOCATION
       "PROXY_CSP_CONFIG_FILE_LOCATION" = "${cfg.configFile}";
     };
   };
