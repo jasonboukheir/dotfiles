@@ -1,8 +1,8 @@
 {...}: {
   imports = [
     ./home-manager
+    ./calendar.nix
     ./config.nix
-    ./gnome-calendar.nix
     ./packages.nix
     ./programs.nix
   ];

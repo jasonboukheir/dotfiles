@@ -1,54 +1,56 @@
 {
   config,
   lib,
+  systemConfig,
   ...
 }: let
   cfg = config.omarchy;
+  systemCfg = systemConfig.omarchy;
 in {
   options.omarchy = {
     defaultApps = {
       calendar = lib.mkOption {
-        default = "gnome-calendar";
+        default = systemCfg.defaultApps.calendar;
         type = lib.types.str;
         description = "Command to use when launching calendar";
       };
       reminders = lib.mkOption {
-        default = "errands";
+        default = systemCfg.defaultApps.reminders;
         type = lib.types.str;
         description = "Command to use when launching reminders";
       };
       terminal = lib.mkOption {
-        default = "ghostty";
+        default = systemCfg.defaultApps.terminal;
         type = lib.types.str;
         description = "Command to use when launching terminal";
       };
       editor = lib.mkOption {
-        default = "zeditor";
+        default = systemCfg.defaultApps.editor;
         type = lib.types.str;
         description = "Command to use when launching code editor";
       };
       fileManager = lib.mkOption {
-        default = "nautilus --new-window";
+        default = systemCfg.defaultApps.fileManager;
         type = lib.types.str;
         description = "Command to use when launching fileManager";
       };
       browser = lib.mkOption {
-        default = "brave --new-window --ozone-platform=wayland";
+        default = systemCfg.defaultApps.browser;
         type = lib.types.str;
         description = "Command to use when launching browser";
       };
       music = lib.mkOption {
-        default = "supersonic-wayland";
+        default = systemCfg.defaultApps.music;
         type = lib.types.str;
         description = "Command to use when launching music";
       };
       passwordManager = lib.mkOption {
-        default = "1password";
+        default = systemCfg.defaultApps.passwordManager;
         type = lib.types.str;
         description = "Command to use when launching password manager";
       };
       messenger = lib.mkOption {
-        default = "beeper";
+        default = systemCfg.defaultApps.messenger;
         type = lib.types.str;
         description = "Command to use when launching messenger";
       };
