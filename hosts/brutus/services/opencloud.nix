@@ -14,7 +14,7 @@ in {
     enable = true;
 
     url = url;
-    address = "127.0.0.1";
+    address = "0.0.0.0";
     port = 9200;
     stateDir = "/var/lib/opencloud";
 
@@ -74,6 +74,8 @@ in {
       "OC_INSECURE" = "true";
       "INSECURE" = "true";
       "INITIAL_ADMIN_PASSWORD" = "admin";
+      "OC_DOMAIN" = config.sunnycareboo.services.cloud.domain;
+      "PROXY_TLS" = "false";
 
       # oidc
       "OC_ADMIN_USER_ID" = "";

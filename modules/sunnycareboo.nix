@@ -187,6 +187,7 @@ in {
           "_" = {
             default = true; # This adds the 'default_server' flag to the listen directive
             listen = internalHttpListeners ++ externalHttpListeners;
+            rejectSSL = true;
             locations."/" = {
               return = "404";
             };
