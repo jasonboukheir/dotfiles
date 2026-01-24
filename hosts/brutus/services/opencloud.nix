@@ -88,7 +88,7 @@ in {
 
   sunnycareboo.services.cloud = lib.mkIf cfg.enable {
     enable = true;
-    proxyPass = "https://localhost:${toString cfg.port}";
+    proxyPass = "http://localhost:${toString cfg.port}";
     extraConfig = ''
       # Increase max upload size (required for Tus — without this, uploads over 1 MB fail)
       client_max_body_size 10M;
