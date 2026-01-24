@@ -65,13 +65,4 @@ in {
       };
     };
   };
-
-  config = lib.mkMerge [
-    (lib.mkIf (cfg.calendarSuite == "gnome") {
-      omarchy.defaultApps = {
-        calendar = lib.mkDefault "gnome-calendar";
-        reminders = lib.mkDefault "errands";
-      };
-    })
-  ];
 }
