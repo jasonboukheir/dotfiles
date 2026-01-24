@@ -6,6 +6,51 @@
 with lib; let
   cfg = config.sunnycareboo;
 
+  internalHttpListeners = [
+    {
+      addr = "0.0.0.0";
+      port = 80;
+      ssl = false;
+    }
+    {
+      addr = "[::]";
+      port = 80;
+      ssl = false;
+    }
+    {
+      addr = "0.0.0.0";
+      port = 443;
+      ssl = true;
+    }
+    {
+      addr = "[::]";
+      port = 443;
+      ssl = true;
+    }
+  ];
+  externalHttpListeners = [
+    {
+      addr = "0.0.0.0";
+      port = 8080;
+      ssl = false;
+    }
+    {
+      addr = "[::]";
+      port = 8080;
+      ssl = false;
+    }
+    {
+      addr = "0.0.0.0";
+      port = 8443;
+      ssl = true;
+    }
+    {
+      addr = "[::]";
+      port = 8443;
+      ssl = true;
+    }
+  ];
+
   serviceModule = types.submodule ({name, ...}: {
     options = {
       enable = mkEnableOption "this service";
@@ -105,55 +150,10 @@ in {
               domain = svcCfg.domain;
 
               # Base listeners (80 and 443)
-              baseListen = [
-                {
-                  addr = "0.0.0.0";
-                  port = 80;
-                  ssl = false;
-                }
-                {
-                  addr = "[::]";
-                  port = 80;
-                  ssl = false;
-                }
-                {
-                  addr = "0.0.0.0";
-                  port = 443;
-                  ssl = true;
-                }
-                {
-                  addr = "[::]";
-                  port = 443;
-                  ssl = true;
-                }
-              ];
+              baseListen = internalHttpListeners;
 
               # Extra listeners for external services (8080 and 8443)
-              extraListen =
-                if svcCfg.isExternal
-                then [
-                  {
-                    addr = "0.0.0.0";
-                    port = 8080;
-                    ssl = false;
-                  }
-                  {
-                    addr = "[::]";
-                    port = 8080;
-                    ssl = false;
-                  }
-                  {
-                    addr = "0.0.0.0";
-                    port = 8443;
-                    ssl = true;
-                  }
-                  {
-                    addr = "[::]";
-                    port = 8443;
-                    ssl = true;
-                  }
-                ]
-                else [];
+              extraListen = lib.optionals svcCfg.isExternal externalHttpListeners;
 
               # Build locations (only if proxyPass is set)
               allLocations =
@@ -186,6 +186,7 @@ in {
         {
           "_" = {
             default = true; # This adds the 'default_server' flag to the listen directive
+            listen = internalHttpListeners ++ externalHttpListeners;
             locations."/" = {
               return = "404";
             };
