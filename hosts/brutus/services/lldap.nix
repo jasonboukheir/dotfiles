@@ -7,7 +7,7 @@
   defaultGroups = cfg.defaultGroups;
 in {
   services.lldap = {
-    enable = config.services.brutus.enable;
+    enable = true;
     settings = {
       ldap_base_dn = "dc=sunnycareboo,dc=com";
 

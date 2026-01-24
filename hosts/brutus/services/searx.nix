@@ -16,7 +16,7 @@ in {
   };
 
   services.searx = {
-    enable = config.services.brutus.enable;
+    enable = true;
     redisCreateLocally = true;
     configureNginx = true;
     domain = domain;

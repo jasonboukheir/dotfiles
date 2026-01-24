@@ -23,7 +23,7 @@ in {
     };
   };
   services.pocket-id = {
-    enable = config.services.brutus.enable;
+    enable = true;
     credentials = {
       ENCRYPTION_KEY = config.age.secrets."pocket-id/encryptionKey".path;
       # LDAP_BIND_PASSWORD = config.age.secrets."lldap/admin".path;

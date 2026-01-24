@@ -12,7 +12,7 @@
   port = 3400;
 in {
   services.headscale = {
-    enable = config.services.brutus.enable;
+    enable = true;
     port = port;
     settings = {
       tls_letsencrypt_listen = null;

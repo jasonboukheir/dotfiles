@@ -6,7 +6,7 @@
   cfg = config.services.mealie;
 in {
   services.mealie = {
-    enable = config.services.brutus.enable;
+    enable = true;
     port = 9000;
     settings = {
       "OIDC_AUTH_ENABLED" = "True";

@@ -7,7 +7,7 @@
   cfg = config.services.memos;
 in {
   services.memos = {
-    enable = config.services.brutus.enable;
+    enable = true;
     package = pkgs-unstable.memos;
   };
 
