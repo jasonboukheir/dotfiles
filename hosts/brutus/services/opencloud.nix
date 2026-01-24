@@ -11,7 +11,7 @@
   oidc_url = "https://${oidc_domain}";
 in {
   services.opencloud = {
-    enable = config.services.brutus.enable;
+    enable = true;
 
     url = url;
     address = "127.0.0.1";
@@ -118,4 +118,6 @@ in {
     fsType = "none";
     options = ["bind"];
   };
+
+  users.users.nginx.extraGroups = lib.optionals cfg.enable [cfg.group];
 }

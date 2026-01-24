@@ -6,7 +6,7 @@
   cfg = config.services.immich;
 in {
   services.immich = {
-    enable = config.services.brutus.enable;
+    enable = true;
     port = 2283;
     database = {
       user = "immich";

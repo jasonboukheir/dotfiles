@@ -11,7 +11,7 @@ in {
   };
 
   config = {
-    services.litellm-container.enable = config.services.brutus.enable;
+    services.litellm-container.enable = true;
     age.secrets."litellm/env" = lib.mkIf cfg.enable {
       file = ../secrets/litellm/env.age;
     };

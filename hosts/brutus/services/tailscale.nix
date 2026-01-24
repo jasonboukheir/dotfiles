@@ -1,6 +1,6 @@
 {config, ...}: {
   services.tailscale = {
-    enable = config.services.brutus.enable;
+    enable = true;
     openFirewall = true;
     authKeyFile = config.age.secrets."tailscale/authkey".path;
     authKeyParameters = {

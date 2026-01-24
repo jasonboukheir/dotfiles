@@ -6,7 +6,7 @@
   cfg = config.services.radicale;
   ldapCfg = config.services.lldap;
 in {
-  services.radicale = lib.mkIf config.services.brutus.enable {
+  services.radicale = {
     enable = true;
     settings = {
       server = {
