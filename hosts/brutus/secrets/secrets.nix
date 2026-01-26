@@ -6,7 +6,6 @@ let
 
   files = [
     "acme/env.age"
-    "actual/env.age"
     "cloudflare/token.age"
     "davis/appSecret"
     "davis/clientSecret"
