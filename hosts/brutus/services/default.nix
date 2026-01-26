@@ -3,13 +3,13 @@
     ./actual
     ./headscale
     ./immich
+    ./mealie
     ./open-webui
     ./opencloud
     ./blocky.nix
     ./ddclient.nix
     ./litellm.nix
     ./lldap.nix
-    ./mealie.nix
     ./memos.nix
     ./pocket-id.nix
     ./postgresql.nix

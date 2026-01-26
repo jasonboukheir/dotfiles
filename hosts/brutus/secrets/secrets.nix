@@ -15,7 +15,7 @@ let
     "lldap/users/admin/pw.age"
     "lldap/users/jasonbk/pw.age"
     "lldap/users/izmabk/pw.age"
-    "mealie/env.age"
+    "mealie/openaiApiKey.age"
     "nixarr/wgconf.age"
     "open-webui/openaiApiKey.age"
     "open-webui/webuiSecretKey.age"
