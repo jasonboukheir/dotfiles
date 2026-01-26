@@ -1,10 +1,10 @@
 {...}: {
   imports = [
     ./actual
+    ./headscale
     ./open-webui
     ./blocky.nix
     ./ddclient.nix
-    ./headscale.nix
     ./immich.nix
     ./litellm.nix
     ./lldap.nix
