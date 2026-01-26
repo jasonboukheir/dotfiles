@@ -9,7 +9,7 @@
     ./lldap.nix
     ./mealie.nix
     ./memos.nix
-    ./open-webui.nix
+    ./open-webui
     ./opencloud.nix
     ./pocket-id.nix
     ./postgresql.nix
