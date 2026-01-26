@@ -4,41 +4,11 @@
   config,
   ...
 }: let
-  inherit (lib) getExe mkIf mkOption types;
+  inherit (lib) mkIf mkOption types;
   cfg = config.services.pocket-id;
   jsonFormat = pkgs.formats.json {};
 
-  # Import the credentials library
-  credsLib = import ../../lib/credentials.nix {inherit lib;};
-
-  secretsDir = "/run/pocket-id-secrets";
-  sharedKeyDir = "/run/pocket-id-shared";
-  generatedApiKeyPath = "${sharedKeyDir}/api_key";
-
-  # Determine if we should use the generated key or a user-provided one
-  useGeneratedKey = ! (cfg.credentials ? STATIC_API_KEY);
-  finalApiKeyPath =
-    if useGeneratedKey
-    then generatedApiKeyPath
-    else cfg.credentials.STATIC_API_KEY;
-
-  # Create a "virtual" config that merges user credentials with the generated key
-  # This allows us to pass the complete set to mkCredentialsHelpers
-  effectiveConfig =
-    cfg
-    // {
-      credentials =
-        cfg.credentials
-        // (lib.optionalAttrs useGeneratedKey {
-          STATIC_API_KEY = generatedApiKeyPath;
-        });
-    };
-
-  # Generate the helpers using the effective config
-  credHelpers = credsLib.mkCredentialsHelpers {
-    cfg = effectiveConfig;
-    inherit pkgs;
-  };
+  pocket-id-bootstrap = pkgs.callPackage ./bootstrap-script.nix {};
 
   allDependentServices = lib.unique (lib.flatten (lib.mapAttrsToList (
       _: c:
@@ -49,13 +19,8 @@
         c.dependentServices
     )
     cfg.ensureClients));
-
-  pocket-id-bootstrap = pkgs.callPackage ./bootstrap-script.nix {};
 in {
   options.services.pocket-id = {
-    # Use the helper to define the option
-    credentials = credsLib.mkCredentialsOption {};
-
     ensureClients = mkOption {
       description = "Declarative OIDC client management.";
       default = {};
@@ -124,7 +89,7 @@ in {
             readOnly = true;
             # Resolves to: /run/pocket-id-secrets/<client_id>
             # Note: For public clients, this file will not be created.
-            default = "${secretsDir}/${config.settings.id}";
+            default = "${cfg.internal.secretsDir}/${config.settings.id}";
             description = "The expected path to the secret file for this client. Use this in other modules.";
           };
         };
@@ -132,50 +97,20 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
-    # Generate a random API Key if one isn't provided in credentials
-    systemd.services.pocket-id-key-gen = mkIf useGeneratedKey {
-      description = "Generate shared API key for Pocket ID";
-      before = ["pocket-id.service" "pocket-id-provisioner.service"];
-      requiredBy = ["pocket-id.service" "pocket-id-provisioner.service"];
-      serviceConfig = {
-        Type = "oneshot";
-        RuntimeDirectory = baseNameOf sharedKeyDir; # pocket-id-shared
-        RuntimeDirectoryMode = "0700";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "gen-pocket-id-key" ''
-          if [ ! -f ${generatedApiKeyPath} ]; then
-            ${getExe pkgs.openssl} rand -hex 32 | tr -d '\n' > ${generatedApiKeyPath}
-          fi
-        '';
-      };
-    };
-
-    systemd.services.pocket-id = {
-      serviceConfig = {
-        # Use the generated load list
-        LoadCredential = credHelpers.loadList;
-        ExecStart = lib.mkForce (pkgs.writeShellScript "pocket-id-start" ''
-          # Use the generated export script
-          ${credHelpers.exportScript}
-          exec ${getExe cfg.package}
-        '');
-      };
-    };
-
-    systemd.services.pocket-id-provisioner = mkIf (cfg.ensureClients != {}) (let
-      clientsList =
-        lib.mapAttrsToList (
-          _: c:
-            c.settings
-            // {
-              logo = c.logo;
-              darkLogo = c.darkLogo;
-            }
-        )
-        cfg.ensureClients;
-      clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" clientsList;
-    in {
+  config = mkIf (cfg.enable && cfg.ensureClients != {}) (let
+    clientsList =
+      lib.mapAttrsToList (
+        _: c:
+          c.settings
+          // {
+            logo = c.logo;
+            darkLogo = c.darkLogo;
+          }
+      )
+      cfg.ensureClients;
+    clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" clientsList;
+  in {
+    systemd.services.pocket-id-provisioner = {
       description = "Provision Pocket ID OIDC Clients";
       after = ["pocket-id.service"];
       wants = ["pocket-id.service"];
@@ -187,8 +122,8 @@ in {
       serviceConfig = {
         Type = "oneshot";
         DynamicUser = true;
-        RuntimeDirectory = baseNameOf secretsDir;
-        LoadCredential = ["static_api_key:${finalApiKeyPath}"];
+        RuntimeDirectory = baseNameOf cfg.internal.secretsDir;
+        LoadCredential = ["static_api_key:${cfg.internal.finalApiKeyPath}"];
         RemainAfterExit = true;
       };
 
@@ -201,6 +136,6 @@ in {
           "$RUNTIME_DIRECTORY" \
           "$API_KEY"
       '';
-    });
-  };
+    };
+  });
 }

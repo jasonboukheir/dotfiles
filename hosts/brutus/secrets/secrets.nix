@@ -19,6 +19,8 @@ let
     "mealie/env.age"
     "nixarr/wgconf.age"
     "open-webui/env.age"
+    "open-webui/openaiApiKey.age"
+    "open-webui/webuiSecretKey.age"
     "opencloud-env.age"
     "photos/clientId.age"
     "photos/clientSecret.age"

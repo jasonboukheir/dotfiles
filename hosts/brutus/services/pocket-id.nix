@@ -52,11 +52,5 @@ in {
       # LDAP_ATTRIBUTE_GROUP_NAME = "cn";
       # LDAP_ADMIN_GROUP_NAME = "pocket_id_admin";
     };
-    ensureClients = {
-      test = {
-        logo = ./gomft.svg;
-        settings = {isPublic = true;};
-      };
-    };
   };
 }
