@@ -4,6 +4,8 @@
   ...
 }: let
   cfg = config.services.immich;
+  domain = config.sunnycareboo.services.photos;
+  oidcCfg = config.services.pocket-id.ensureClients.immich;
 in {
   services.immich = {
     enable = true;
@@ -186,8 +188,8 @@ in {
         autoLaunch = false;
         autoRegister = true;
         buttonText = "Login with Pocket Id";
-        clientId._secret = config.age.secrets."photos/clientId".path;
-        clientSecret._secret = config.age.secrets."photos/clientSecret".path;
+        clientId = oidcCfg.settings.id;
+        clientSecret._secret = oidcCfg.secretFile;
         defaultStorageQuota = null;
         enabled = true;
         issuerUrl = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
@@ -249,6 +251,20 @@ in {
     '';
   };
 
+  services.pocket-id.ensureClients.immich = lib.mkIf cfg.enable {
+    logo = ./immich.svg;
+    dependentServices = [config.systemd.services.immich-backend.name];
+    settings = {
+      name = "Immich";
+      launchURL = "https://${domain}";
+      callbackURLs = [
+        "app.immich:///oauth-callback"
+        "https://${domain}/auth/login"
+        "https://${domain}/user-settings"
+      ];
+    };
+  };
+
   fileSystems."${cfg.mediaLocation}" = lib.mkIf cfg.enable {
     depends = [
       "/"
@@ -257,10 +273,5 @@ in {
     device = "/ssd_pool/var/lib/immich";
     fsType = "none";
     options = ["bind"];
-  };
-
-  age.secrets = lib.mkIf cfg.enable {
-    "photos/clientId".file = ../secrets/photos/clientId.age;
-    "photos/clientSecret".file = ../secrets/photos/clientSecret.age;
   };
 }

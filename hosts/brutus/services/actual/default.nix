@@ -26,7 +26,7 @@ in {
   };
 
   services.pocket-id.ensureClients.actual = lib.mkIf cfg.enable {
-    dependentServices = ["actual"];
+    dependentServices = [config.systemd.services.actual.name];
     logo = ./actual-budget.svg;
     settings = {
       name = "Actual Budget";

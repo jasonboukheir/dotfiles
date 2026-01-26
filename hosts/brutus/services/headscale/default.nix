@@ -52,7 +52,7 @@ in {
 
   services.pocket-id.ensureClients.headscale = lib.mkIf cfg.enable {
     logo = ./headscale.svg;
-    dependentServices = ["headscale"];
+    dependentServices = [config.systemd.services.headscale.name];
     settings = {
       name = "Headscale";
       isPublic = true;

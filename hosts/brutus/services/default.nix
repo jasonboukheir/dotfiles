@@ -2,10 +2,10 @@
   imports = [
     ./actual
     ./headscale
+    ./immich
     ./open-webui
     ./blocky.nix
     ./ddclient.nix
-    ./immich.nix
     ./litellm.nix
     ./lldap.nix
     ./mealie.nix
