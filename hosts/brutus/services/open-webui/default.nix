@@ -61,7 +61,7 @@ in {
   services.pocket-id.ensureClients.open-webui = lib.mkIf cfg.enable {
     logo = ./open-webui-light.svg;
     darkLogo = ./open-webui-dark.svg;
-    dependentServices = ["open-webui"];
+    dependentServices = [config.systemd.services.open-webui.name];
     settings = {
       name = "Open WebUI";
       isPublic = true;
