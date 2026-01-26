@@ -10,6 +10,7 @@
   magicDomain = "ts.${internalDomain}";
   issuerDomain = config.sunnycareboo.services.id.domain;
   port = 3400;
+  oidcCfg = config.services.pocket-id.ensureClients.headscale;
 in {
   services.headscale = {
     enable = true;
@@ -37,20 +38,28 @@ in {
         allowed_domains = [config.sunnycareboo.baseDomain];
         pkce.enabled = true;
         issuer = "https://${issuerDomain}";
-        client_id = "42a92e0e-0cb3-4545-bcae-a77115d8db5b";
-        client_secret_path = config.age.secrets."headscale/clientSecret".path;
+        client_id = oidcCfg.settings.id;
       };
       prefixes.v4 = "100.64.0.0/10";
     };
   };
-  age.secrets."headscale/clientSecret" = lib.mkIf cfg.enable {
-    file = ../secrets/headscale/clientSecret.age;
-    owner = cfg.user;
-    group = cfg.group;
-  };
+
   sunnycareboo.services.headscale = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${toString port}";
+  };
+
+  services.pocket-id.ensureClients.headscale = lib.mkIf cfg.enable {
+    logo = ./headscale.svg;
+    dependentServices = ["headscale"];
+    settings = {
+      name = "Headscale";
+      isPublic = true;
+      launchURL = "https://${domain}";
+      callbackURLs = [
+        "https://${domain}/oidc/callback"
+      ];
+    };
   };
 }
