@@ -4,13 +4,13 @@
     ./headscale
     ./immich
     ./open-webui
+    ./opencloud
     ./blocky.nix
     ./ddclient.nix
     ./litellm.nix
     ./lldap.nix
     ./mealie.nix
     ./memos.nix
-    ./opencloud.nix
     ./pocket-id.nix
     ./postgresql.nix
     ./radicale.nix
