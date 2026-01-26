@@ -9,6 +9,7 @@
   url = "https://${domain}";
   oidc_domain = config.sunnycareboo.services.id.domain;
   oidc_url = "https://${oidc_domain}";
+  oidcWebCfg = config.services.pocket-id.ensureClients.opencloud-web;
 in {
   services.opencloud = {
     enable = true;
@@ -79,7 +80,7 @@ in {
 
       # oidc
       "OC_ADMIN_USER_ID" = "";
-      "OC_OIDC_CLIENT_ID" = "4c4ddfb4-b892-4563-9f7f-80cad38fd084";
+      "OC_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
       "OC_OIDC_ISSUER" = oidc_url;
       "WEB_OPTION_ACCOUNT_EDIT_LINK_HREF" = "${oidc_url}/settings/account";
       "OC_EXCLUDE_RUN_SERVICES" = "idp";
@@ -121,5 +122,67 @@ in {
     options = ["bind"];
   };
 
-  users.users.nginx.extraGroups = lib.optionals cfg.enable [cfg.group];
+  services.pocket-id.ensureClients = lib.mkIf cfg.enable {
+    opencloud-web = {
+      logo = ./opencloud-light.svg;
+      darkLogo = ./opencloud-dark.svg;
+      dependentServices = [config.systemd.services.opencloud.name];
+      settings = {
+        name = "Open Cloud Web";
+        isPublic = true;
+        launchURL = url;
+        callbackURLs = [
+          url
+          "${url}/oidc-callback.html"
+          "${url}/oidc-silent-redirect.html"
+        ];
+      };
+    };
+
+    opencloud-android = {
+      logo = ./opencloud-light.svg;
+      darkLogo = ./opencloud-dark.svg;
+      dependentServices = [config.systemd.services.opencloud.name];
+      settings = {
+        id = "OpenCloudAndroid";
+        name = "Open Cloud Android";
+        isPublic = true;
+        launchURL = "oc://android.opencloud.eu";
+        callbackURLs = [
+          "oc://android.opencloud.eu"
+        ];
+      };
+    };
+
+    opencloud-ios = {
+      logo = ./opencloud-light.svg;
+      darkLogo = ./opencloud-dark.svg;
+      dependentServices = [config.systemd.services.opencloud.name];
+      settings = {
+        id = "OpenCloudIOS";
+        name = "Open Cloud iOS";
+        isPublic = true;
+        launchURL = "oc://ios.opencloud.eu";
+        callbackURLs = [
+          "oc://ios.opencloud.eu"
+        ];
+      };
+    };
+
+    opencloud-desktop = {
+      logo = ./opencloud-light.svg;
+      darkLogo = ./opencloud-dark.svg;
+      dependentServices = [config.systemd.services.opencloud.name];
+      settings = {
+        id = "OpenCloudDesktop";
+        name = "Open Cloud Desktop";
+        isPublic = true;
+        launchURL = null;
+        callbackURLs = [
+          "https://127.0.0.1"
+          "http://localhost"
+        ];
+      };
+    };
+  };
 }
