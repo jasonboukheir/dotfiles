@@ -1,5 +1,6 @@
 {...}: {
   system.defaults.NSGlobalDomain = {
-    AppleInterfaceStyleSwitchesAutomatically = true;
+    AppleInterfaceStyle = "Dark";
+    AppleInterfaceStyleSwitchesAutomatically = false;
   };
 }
