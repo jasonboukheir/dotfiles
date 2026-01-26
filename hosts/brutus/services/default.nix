@@ -1,6 +1,7 @@
 {...}: {
   imports = [
-    ./actual.nix
+    ./actual
+    ./open-webui
     ./blocky.nix
     ./ddclient.nix
     ./headscale.nix
@@ -9,7 +10,6 @@
     ./lldap.nix
     ./mealie.nix
     ./memos.nix
-    ./open-webui
     ./opencloud.nix
     ./pocket-id.nix
     ./postgresql.nix
