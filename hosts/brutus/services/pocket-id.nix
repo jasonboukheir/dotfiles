@@ -54,6 +54,7 @@ in {
     };
     ensureClients = {
       test = {
+        logo = ./gomft.svg;
         settings = {isPublic = true;};
       };
     };
