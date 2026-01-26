@@ -40,7 +40,7 @@
     )
     cfg.ensureClients));
 
-  pocket-id-bootstrap = import ./pocket-id-bootstrap.nix pkgs;
+  pocket-id-bootstrap = pkgs.callPackage ./pocket-id-bootstrap.nix {};
 in {
   options.services.pocket-id = {
     credentials = mkOption {
@@ -64,6 +64,16 @@ in {
         ...
       }: {
         options = {
+          logo = mkOption {
+            type = types.nullOr types.path;
+            default = null;
+            description = "Path to the light mode logo file.";
+          };
+          darkLogo = mkOption {
+            type = types.nullOr types.path;
+            default = null;
+            description = "Path to the dark mode logo file.";
+          };
           settings = mkOption {
             description = "Settings object passed directly to the Pocket ID API.";
             default = {};
@@ -147,7 +157,17 @@ in {
     };
 
     systemd.services.pocket-id-provisioner = mkIf (cfg.ensureClients != {}) (let
-      clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" (map (c: c.settings) (lib.attrValues cfg.ensureClients));
+      clientsList =
+        lib.mapAttrsToList (
+          _: c:
+            c.settings
+            // {
+              logo = c.logo;
+              darkLogo = c.darkLogo;
+            }
+        )
+        cfg.ensureClients;
+      clientsConfigFile = jsonFormat.generate "pocket-id-clients.json" clientsList;
     in {
       description = "Provision Pocket ID OIDC Clients";
       after = ["pocket-id.service"];

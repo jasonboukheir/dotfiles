@@ -1,7 +1,12 @@
-pkgs:
-pkgs.writeShellApplication {
+{
+  writeShellApplication,
+  curl,
+  jq,
+  coreutils,
+}:
+writeShellApplication {
   name = "pocket-id-bootstrap";
-  runtimeInputs = [pkgs.curl pkgs.jq pkgs.coreutils];
+  runtimeInputs = [curl jq coreutils];
   text = ''
     set -e
     CONFIG_FILE="$1"
@@ -10,7 +15,7 @@ pkgs.writeShellApplication {
     STATIC_TOKEN="$4"
 
     # Timeout Configuration
-    MAX_RETRIES=5
+    MAX_RETRIES=30 # Increased to 30s to be safe
     count=0
 
     echo "Waiting for Pocket ID at $API_URL..."
@@ -29,9 +34,14 @@ pkgs.writeShellApplication {
 
     mkdir -p "$SECRETS_DIR"
 
+    # Read the entire array, but process objects one by one
     jq -c '.[]' "$CONFIG_FILE" | while read -r client_json; do
       CLIENT_ID=$(echo "$client_json" | jq -r '.id')
       IS_PUBLIC=$(echo "$client_json" | jq -r '.isPublic // false')
+
+      # Extract logo paths (if they exist)
+      LOGO_PATH=$(echo "$client_json" | jq -r '.logo // empty')
+      DARK_LOGO_PATH=$(echo "$client_json" | jq -r '.darkLogo // empty')
 
       # Check existence
       HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -51,6 +61,22 @@ pkgs.writeShellApplication {
           -H "Content-Type: application/json" \
           -d "$client_json" > /dev/null
       fi
+
+      # --- LOGO UPLOAD LOGIC ---
+      if [ -n "$LOGO_PATH" ] && [ -f "$LOGO_PATH" ]; then
+        echo "Uploading light logo for $CLIENT_ID..."
+        curl -s -X POST "$API_URL/api/oidc/clients/$CLIENT_ID/logo?light=true" \
+          -H "X-API-Key: $STATIC_TOKEN" \
+          -F "file=@$LOGO_PATH" > /dev/null
+      fi
+
+      if [ -n "$DARK_LOGO_PATH" ] && [ -f "$DARK_LOGO_PATH" ]; then
+        echo "Uploading dark logo for $CLIENT_ID..."
+        curl -s -X POST "$API_URL/api/oidc/clients/$CLIENT_ID/logo?light=false" \
+          -H "X-API-Key: $STATIC_TOKEN" \
+          -F "file=@$DARK_LOGO_PATH" > /dev/null
+      fi
+      # -------------------------
 
       # Secret Management (Skip for public clients)
       if [ "$IS_PUBLIC" != "true" ]; then
