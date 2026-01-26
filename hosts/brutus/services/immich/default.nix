@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.immich;
-  domain = config.sunnycareboo.services.photos;
+  domain = config.sunnycareboo.services.photos.domain;
   oidcCfg = config.services.pocket-id.ensureClients.immich;
 in {
   services.immich = {
@@ -253,7 +253,7 @@ in {
 
   services.pocket-id.ensureClients.immich = lib.mkIf cfg.enable {
     logo = ./immich.svg;
-    dependentServices = [config.systemd.services.immich-backend.name];
+    dependentServices = [config.systemd.services.immich-server.name];
     settings = {
       name = "Immich";
       launchURL = "https://${domain}";
