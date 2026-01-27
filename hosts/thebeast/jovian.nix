@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  gameUser = "jasonbk";
+  gameUser = "gamer";
   plasma = config.services.desktopManager.plasma6;
   hyprland = config.programs.hyprland;
   session =
@@ -15,7 +15,7 @@
 in {
   jovian.steam = {
     enable = true;
-    autoStart = true;
+    autoStart = false;
     user = gameUser;
     desktopSession = session;
   };
@@ -29,5 +29,23 @@ in {
     mangohud
     protonup-qt
   ];
-  users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager" "input"];
+  users.users."${gameUser}" = {
+    isNormalUser = true;
+    description = "Steam Console";
+    extraGroups = ["networkmanager" "gamemode" "input"];
+    initialPassword = "";
+  };
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+    settings.General.InputMethod = "qtvirtualkeyboard";
+  };
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = gameUser;
+  };
+  services.displayManager.defaultSession = "gamescope-wayland";
+  systemd.tmpfiles.rules = [
+    "f /var/lib/AccountService/users/jasonbk 0644 root root - [User]\nSession=${session}\n"
+  ];
 }
