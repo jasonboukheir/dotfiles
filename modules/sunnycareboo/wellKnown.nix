@@ -25,15 +25,19 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.nginx.virtualHosts.${cfg.baseDomain}.locations = {
-      "/.well-known/caldav" = mkIf (cfg.wellKnown.caldav != null) {
-        return = "301 https://${cfg.wellKnown.caldav}";
-      };
-      "/.well-known/carddav" = mkIf (cfg.wellKnown.carddav != null) {
-        return = "301 https://${cfg.wellKnown.carddav}";
-      };
-      "/remote.php/dav" = mkIf (cfg.wellKnown.webdav != null) {
-        return = "301 https://${cfg.wellKnown.webdav}/remote.php/dav";
+    services.nginx.virtualHosts.${cfg.baseDomain} = {
+      forceSSL = true;
+      useACMEHost = cfg.baseDomain;
+      locations = {
+        "/.well-known/caldav" = mkIf (cfg.wellKnown.caldav != null) {
+          return = "301 https://${cfg.wellKnown.caldav}";
+        };
+        "/.well-known/carddav" = mkIf (cfg.wellKnown.carddav != null) {
+          return = "301 https://${cfg.wellKnown.carddav}";
+        };
+        "/remote.php/dav" = mkIf (cfg.wellKnown.webdav != null) {
+          return = "301 https://${cfg.wellKnown.webdav}/remote.php/dav";
+        };
       };
     };
   };
