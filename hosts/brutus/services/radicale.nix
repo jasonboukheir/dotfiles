@@ -19,7 +19,7 @@ in {
         type = "ldap";
         ldap_uri = "ldap://${ldapCfg.settings.ldap_host}:${toString ldapCfg.settings.ldap_port}";
         ldap_base = ldapCfg.settings.ldap_base_dn;
-        ldap_filter = "(uid={0})";
+        ldap_filter = "(email={0})";
         ldap_reader_dn = "uid=${ldapCfg.ensureUsers.radicale.id},ou=people,${ldapCfg.settings.ldap_base_dn}";
         ldap_secret_file = config.ephemeral-secrets."radicale.ldap.pw".path;
       };
@@ -58,8 +58,12 @@ in {
     };
   };
 
-  sunnycareboo.services.radicale = lib.mkIf cfg.enable {
-    enable = true;
-    proxyPass = "http://127.0.0.1:${toString cfg.port}";
+  sunnycareboo = lib.mkIf cfg.enable {
+    services.radicale = {
+      enable = true;
+      proxyPass = "http://127.0.0.1:${toString cfg.port}";
+    };
+    wellKnown.caldav = config.sunnycareboo.services.radicale.domain;
+    wellKnown.carddav = config.sunnycareboo.services.radicale.domain;
   };
 }
