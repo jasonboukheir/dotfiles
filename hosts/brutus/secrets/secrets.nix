@@ -10,8 +10,6 @@ let
     "litellm/env.age"
     "lldap/jwt_secret.age"
     "lldap/users/admin/pw.age"
-    "lldap/users/jasonbk/pw.age"
-    "lldap/users/izmabk/pw.age"
     "mealie/openaiApiKey.age"
     "nixarr/wgconf.age"
     "open-webui/openaiApiKey.age"

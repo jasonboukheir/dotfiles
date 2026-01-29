@@ -94,7 +94,10 @@ in {
             default = name;
           };
           email = mkOption {type = types.str;};
-          password_file = mkOption {type = types.str;};
+          password_file = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+          };
           groups = mkOption {
             type = types.listOf types.str;
             default = [];
