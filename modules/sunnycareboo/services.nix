@@ -115,14 +115,6 @@ with lib; let
   });
 in {
   options.sunnycareboo = {
-    enable = mkEnableOption "Sunnycareboo service management";
-
-    baseDomain = mkOption {
-      type = types.str;
-      default = "sunnycareboo.com";
-      description = "Base domain for all services";
-    };
-
     services = mkOption {
       type = types.attrsOf serviceModule;
       default = {};

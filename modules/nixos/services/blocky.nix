@@ -33,6 +33,18 @@ in {
       customDNS = {
         mapping = {
           "sunnycareboo.com" = "192.168.50.237";
+          "_caldavs._tcp.sunnycareboo.com" = [
+            {
+              type = "SRV";
+              value = "0 1 443 radicale.internal.sunnycareboo.com.";
+            }
+          ];
+          "_carddavs._tcp.sunnycareboo.com" = [
+            {
+              type = "SRV";
+              value = "0 1 443 radicale.internal.sunnycareboo.com.";
+            }
+          ];
         };
       };
     };
