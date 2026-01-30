@@ -8,6 +8,7 @@
     ./opencloud
     ./blocky.nix
     ./ddclient.nix
+    ./hydroxide.nix
     ./litellm.nix
     ./lldap.nix
     ./memos.nix
