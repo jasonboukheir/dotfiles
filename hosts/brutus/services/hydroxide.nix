@@ -1,5 +1,5 @@
 {...}: {
   services.hydroxide = {
-    enable = true;
+    enable = false;
   };
 }
