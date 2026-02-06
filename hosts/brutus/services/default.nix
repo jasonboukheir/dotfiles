@@ -6,7 +6,6 @@
     ./mealie
     ./open-webui
     ./opencloud
-    ./step-ca
     ./blocky.nix
     ./ddclient.nix
     ./hydroxide.nix
