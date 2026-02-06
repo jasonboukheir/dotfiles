@@ -10,6 +10,7 @@
     ./jovian.nix
     ./networking.nix
     ./nixpkgs.nix
+    ./printing.nix
     ./programs.nix
     ./stylix.nix
     ./../../modules
