@@ -10,6 +10,7 @@ in {
     enable = true;
     address = "127.0.0.1";
     port = 8444;
+    openFirewall = true;
     intermediatePasswordFile = config.age.secrets."step-ca/intermediatePassword".path;
     settings = lib.mkMerge [
       (builtins.fromJSON (builtins.readFile ./ca.json))
@@ -32,13 +33,6 @@ in {
 
   age.secrets = lib.mkIf cfg.enable {
     "step-ca/intermediatePassword".file = ../../secrets/step-ca/intermediatePassword.age;
-  };
-
-  sunnycareboo = lib.mkIf cfg.enable {
-    services.ca = {
-      enable = true;
-      proxyPass = "http://${cfg.address}:${toString cfg.port}";
-    };
   };
 
   services.pocket-id = lib.mkIf cfg.enable {
