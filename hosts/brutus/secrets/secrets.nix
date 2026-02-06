@@ -21,6 +21,7 @@ let
     "restic/password.age"
     "restic/repo.age"
     "searx/env.age"
+    "step-ca/intermediatePassword.age"
     "tailscale/authkey.age"
   ];
 in
