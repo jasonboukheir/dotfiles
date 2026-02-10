@@ -85,7 +85,7 @@ in {
   sunnycareboo.services = lib.mkIf config.nixarr.enable {
     transmission = lib.mkIf config.nixarr.transmission.enable {
       enable = true;
-      proxyPass = "http://localhost:${toString transmissionPort}";
+      proxyPass = "http://127.0.0.1:${toString transmissionPort}";
     };
     audiobookshelf = lib.mkIf config.nixarr.audiobookshelf.enable {
       enable = true;
