@@ -14,6 +14,9 @@
         "zig"
         "ruff"
       ];
+      extraPackages = with pkgs; [
+        gemini-cli
+      ];
       package = pkgs.zed-editor.override {
         rustPlatform =
           pkgs.rustPlatform
