@@ -2,6 +2,7 @@
   imports = [
     ./opencloud
     ./pocket-id
+    ./vaultls-container
     ./blocky.nix
     ./hydroxide.nix
     ./lldap.nix
