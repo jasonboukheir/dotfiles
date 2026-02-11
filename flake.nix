@@ -47,7 +47,7 @@
     };
     nvf-nixos-unstable = {
       inputs.nixpkgs.follows = "nixos-unstable";
-      url = "github:notashelf/nvf/v0.8";
+      url = "github:notashelf/nvf/main";
     };
     nvf-darwin = {
       inputs.nixpkgs.follows = "nixpkgs-darwin";
