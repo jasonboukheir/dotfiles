@@ -59,7 +59,7 @@
           };
           nu.enable = true;
           python.enable = true;
-          zig.enable = true;
+          # zig.enable = true;
         };
       };
     };
