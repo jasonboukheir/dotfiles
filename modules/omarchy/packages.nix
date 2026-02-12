@@ -15,7 +15,6 @@
       pavucontrol
       libnotify
       nautilus
-      blueberry
       clipse
       (writeShellScriptBin "hyprexit" ''
         ${hyprland}/bin/hyprctl dispatch exit
