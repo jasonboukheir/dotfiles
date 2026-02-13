@@ -17,6 +17,7 @@
       extraPackages = with pkgs; [
         gemini-cli
         claude-code
+        package-version-server
       ];
       package = pkgs.zed-editor.override {
         rustPlatform =
