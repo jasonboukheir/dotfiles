@@ -1,33 +1,46 @@
-{
-  config,
-  pkgs,
-  ...
-}: let
-  gameUser = "jasonbk";
-  plasma = config.services.desktopManager.plasma6;
-  hyprland = config.programs.hyprland;
-  session =
-    if plasma.enable
-    then "plasma"
-    else if hyprland.enable
-    then "hyprland"
-    else null;
+{pkgs, ...}: let
+  gameUser = "gamer";
 in {
-  jovian.steam = {
-    enable = true;
-    autoStart = true;
-    user = gameUser;
-    desktopSession = session;
-  };
-  jovian.steamos = {
-    useSteamOSConfig = false;
-  };
+  # Ensure the gamer home directory exists on the games drive
+  systemd.tmpfiles.rules = [
+    "d /games/home/gamer 0755 ${gameUser} ${gameUser} -"
+  ];
+  jovian.steam.enable = true;
+  jovian.steamos.useSteamOSConfig = false;
   jovian.devices.steamdeck.enable = false;
   jovian.hardware.has.amd.gpu = true;
+
   environment.systemPackages = with pkgs; [
+    cmake
+    steam-rom-manager
     gamescope
     mangohud
     protonup-qt
+    hyprland
   ];
-  users.users."${gameUser}".extraGroups = ["gamemode" "networkmanager" "input"];
+  services.displayManager.sessionPackages = [pkgs.hyprland];
+  programs.regreet.enable = true;
+  services.greetd.settings.initial_session = {
+    command = "start-gamescope-session";
+    user = "${gameUser}";
+  };
+
+  security.pam.services.greetd.enableGnomeKeyring = true;
+
+  users = {
+    groups.${gameUser} = {
+      name = "${gameUser}";
+    };
+
+    users.${gameUser} = {
+      description = "${gameUser}";
+      extraGroups = ["gamemode" "networkmanager" "input"];
+      group = "${gameUser}";
+      home = "/home/${gameUser}";
+      isNormalUser = true;
+    };
+    users.jasonbk = {
+      extraGroups = ["gamemode" "networkmanager" "input"];
+    };
+  };
 }

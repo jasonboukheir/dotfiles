@@ -32,6 +32,13 @@
     fsType = "ext4";
   };
 
+  fileSystems."/home/gamer" = {
+    device = "/games/home/gamer";
+    fsType = "none";
+    options = ["bind"];
+    depends = ["/games"];
+  };
+
   swapDevices = [];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
