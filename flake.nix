@@ -69,6 +69,10 @@
       url = "github:Jovian-Experiments/Jovian-NixOS/development";
       inputs.nixpkgs.follows = "nixos-unstable";
     };
+    nix-cachyos-kernel = {
+      url = "github:xddxdd/nix-cachyos-kernel/release";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
   };
 
   outputs = inputs @ {
