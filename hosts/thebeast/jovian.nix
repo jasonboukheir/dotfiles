@@ -1,6 +1,10 @@
 {pkgs, ...}: let
   gameUser = "gamer";
 in {
+  # Ensure the gamer home directory exists on the games drive
+  systemd.tmpfiles.rules = [
+    "d /games/home/gamer 0755 ${gameUser} ${gameUser} -"
+  ];
   jovian.steam.enable = true;
   jovian.steamos.useSteamOSConfig = false;
   jovian.devices.steamdeck.enable = false;
@@ -22,28 +26,6 @@ in {
   };
 
   security.pam.services.greetd.enableGnomeKeyring = true;
-
-  #
-  # Steam
-  #
-  # Set game launcher: gamemoderun %command%
-  #   Set this for each game in Steam, if the game could benefit from a minor
-  #   performance tweak: YOUR_GAME > Properties > General > Launch > Options
-  #   It's a modest tweak that may not be needed. Jovian is optimized for
-  #   high performance by default.
-  # programs.gamemode = {
-  #   enable = true;
-  #   settings = {
-  #     general = {
-  #       renice = 10;
-  #     };
-  #     gpu = {
-  #       apply_gpu_optimisations = "accept-responsibility"; # For systems with AMD GPUs
-  #       gpu_device = 0;
-  #       amd_performance_level = "high";
-  #     };
-  #   };
-  # };
 
   users = {
     groups.${gameUser} = {
