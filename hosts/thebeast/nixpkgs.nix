@@ -1,7 +1,5 @@
 {...}: {
   allowUnfreePackageNames = [
-    "1password"
-    "1password-cli"
     "steam"
     "steamcmd"
     "steam-tui"

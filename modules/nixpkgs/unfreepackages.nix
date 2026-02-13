@@ -2,7 +2,13 @@
   lib,
   config,
   ...
-}: {
+}: let
+  commonUnfreePackages = [
+    "1password"
+    "1password-cli"
+    "claude-code"
+  ];
+in {
   imports = [./overlays];
   options = {
     allowUnfreePackageNames = lib.mkOption {
@@ -17,6 +23,6 @@
 
   config = {
     nixpkgs.config.allowUnfreePredicate = pkg:
-      builtins.elem (lib.getName pkg) config.allowUnfreePackageNames;
+      builtins.elem (lib.getName pkg) (config.allowUnfreePackageNames ++ commonUnfreePackages);
   };
 }
