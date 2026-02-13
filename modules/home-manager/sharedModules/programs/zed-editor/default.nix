@@ -19,18 +19,6 @@
         claude-code
         package-version-server
       ];
-      package = pkgs.zed-editor.override {
-        rustPlatform =
-          pkgs.rustPlatform
-          // {
-            buildRustPackage = (
-              args:
-                pkgs.rustPlatform.buildRustPackage (
-                  finalAttrs: lib.removeAttrs (args finalAttrs // {useNextest = true;}) ["checkFlags"]
-                )
-            );
-          };
-      };
       # mutableUserKeymaps = false;
       # mutableUserSettings = false;
       # mutableUserTasks = false;
