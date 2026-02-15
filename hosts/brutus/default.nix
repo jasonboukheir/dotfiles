@@ -6,6 +6,7 @@
     ./services
     ./configuration.nix
     ./hardware-configuration.nix
+    ./packages.nix
     ./networking
     ./virtualization.nix
     ./../../modules
