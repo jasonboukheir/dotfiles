@@ -9,6 +9,7 @@
     ./blocky.nix
     ./ddclient.nix
     ./hydroxide.nix
+    ./libation.nix
     ./litellm.nix
     ./lldap.nix
     ./memos.nix
