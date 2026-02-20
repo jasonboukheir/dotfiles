@@ -38,7 +38,10 @@ in {
       passwordCommand = passwordCommand;
     };
     khal.enable = true;
-    khard.enable = true;
+    khard = {
+      type = "discover";
+      enable = true;
+    };
     pimsync = {
       enable = true;
       extraPairDirectives = [
