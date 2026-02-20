@@ -9,7 +9,7 @@ in {
     omarchy.defaultApps = {
       calendar = lib.mkDefault "ghostty -e khal interactive";
       contacts = lib.mkDefault "ghostty -e khard";
-      reminders = lib.mkDefault "ghostty -e todoman";
+      reminders = lib.mkDefault "ghostty -e todo repl";
     };
   };
 }

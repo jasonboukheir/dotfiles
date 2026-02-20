@@ -13,6 +13,7 @@
     ./printing.nix
     ./programs.nix
     ./stylix.nix
+    ./secrets/radicale.nix
     ./../../modules
     ./../../modules/nixos
     ./../../modules/omarchy
