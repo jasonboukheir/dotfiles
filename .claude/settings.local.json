@@ -7,7 +7,13 @@
       "mcp__acp__Write",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:getlibation.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:home-manager-options.extranix.com)",
+      "WebFetch(domain:nix-community.github.io)",
+      "WebFetch(domain:mynixos.com)",
+      "WebFetch(domain:todoman.readthedocs.io)",
+      "WebFetch(domain:vdirsyncer.pimutils.org)"
     ]
   }
 }
