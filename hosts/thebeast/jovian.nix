@@ -25,8 +25,6 @@ in {
     user = "${gameUser}";
   };
 
-  security.pam.services.greetd.enableGnomeKeyring = true;
-
   users = {
     groups.${gameUser} = {
       name = "${gameUser}";

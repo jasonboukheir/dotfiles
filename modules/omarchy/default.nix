@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./home-manager
-    ./calendar.nix
+    ./calendar
     ./config.nix
     ./packages.nix
     ./programs.nix
