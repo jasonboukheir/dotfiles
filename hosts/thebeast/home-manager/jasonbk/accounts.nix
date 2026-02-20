@@ -19,6 +19,14 @@ in {
     };
     pimsync = {
       enable = true;
+      extraPairDirectives = [
+        {
+          name = "collections";
+          params = [
+            "all"
+          ];
+        }
+      ];
     };
   };
   accounts.contact.basePath = ".contacts";
@@ -31,6 +39,16 @@ in {
     };
     khal.enable = true;
     khard.enable = true;
-    pimsync.enable = true;
+    pimsync = {
+      enable = true;
+      extraPairDirectives = [
+        {
+          name = "collections";
+          params = [
+            "all"
+          ];
+        }
+      ];
+    };
   };
 }
