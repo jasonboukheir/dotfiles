@@ -1,8 +1,8 @@
-{...}: let
+{osConfig, ...}: let
   url = "https://radicale.internal.sunnycareboo.com";
-  user = "jasonbk";
+  user = "jasonbk@sunnycareboo.com";
   account = "personal";
-  passwordCommand = ["op" "item" "get" "tbzwwt5biofc66lx27pmcvunuq" "--reveal" "--fields" "password"];
+  passwordCommand = ["cat" osConfig.age.secrets."radicale/jasonbk/password".path];
 in {
   accounts.calendar.basePath = ".calendars";
   accounts.calendar.accounts."${account}" = {
@@ -13,8 +13,12 @@ in {
       userName = user;
       passwordCommand = passwordCommand;
     };
-    vdirsyncer = {
-      conflictResolution = "remote wins";
+    khal = {
+      enable = true;
+      type = "discover";
+    };
+    pimsync = {
+      enable = true;
     };
   };
   accounts.contact.basePath = ".contacts";
@@ -25,9 +29,8 @@ in {
       userName = user;
       passwordCommand = passwordCommand;
     };
-    vdirsyncer = {
-      conflictResolution = "remote wins";
-    };
+    khal.enable = true;
+    khard.enable = true;
+    pimsync.enable = true;
   };
-  programs.todoman.enable = true;
 }
