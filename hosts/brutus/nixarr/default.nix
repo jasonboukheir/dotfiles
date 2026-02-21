@@ -38,6 +38,10 @@ in {
       extraSettings = {
         rpc-host-whitelist = config.sunnycareboo.services.transmission.domain;
       };
+      privateTrackers.cross-seed = {
+        enable = false;
+        indexIds = [5];
+      };
     };
 
     audiobookshelf = {
