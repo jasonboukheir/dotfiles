@@ -8,6 +8,7 @@
 in {
   config = lib.mkIf (cfg.enable && cfg.pim == "gnome") {
     environment.systemPackages = with pkgs; [
+      gnome-online-accounts-gtk
       gnome-calendar
       gnome-contacts
       errands
