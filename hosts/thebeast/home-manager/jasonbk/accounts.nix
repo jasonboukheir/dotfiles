@@ -1,18 +1,27 @@
-{osConfig, ...}: let
-  url = "https://radicale.internal.sunnycareboo.com";
-  user = "jasonbk@sunnycareboo.com";
+{
+  lib,
+  osConfig,
+  ...
+}: let
   account = "personal";
-  passwordCommand = ["cat" osConfig.age.secrets."radicale/jasonbk/password".path];
+  remoteArgs = {
+    url = "https://radicale.internal.sunnycareboo.com";
+    userName = "jasonbk@sunnycareboo.com";
+    passwordCommand = ["cat" osConfig.age.secrets."radicale/jasonbk/password".path];
+  };
+  mkRemote = type:
+    lib.mkMerge [
+      {
+        type = type;
+      }
+      remoteArgs
+    ];
 in {
   accounts.calendar.basePath = ".calendars";
   accounts.calendar.accounts."${account}" = {
     primary = true;
-    remote = {
-      type = "caldav";
-      url = url;
-      userName = user;
-      passwordCommand = passwordCommand;
-    };
+    primaryCollection = "def-calendar";
+    remote = mkRemote "caldav";
     khal = {
       enable = true;
       type = "discover";
@@ -30,13 +39,8 @@ in {
     };
   };
   accounts.contact.basePath = ".contacts";
-  accounts.contact.accounts."${account}" = {
-    remote = {
-      type = "carddav";
-      url = url;
-      userName = user;
-      passwordCommand = passwordCommand;
-    };
+  accounts.contact.accounts."${account}-contacts" = {
+    remote = mkRemote "carddav";
     khal.enable = true;
     khard = {
       type = "discover";

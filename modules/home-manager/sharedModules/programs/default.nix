@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./calcure
     ./nushell
     ./nvf
     ./zed-editor
