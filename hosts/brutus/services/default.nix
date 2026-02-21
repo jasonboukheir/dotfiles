@@ -20,5 +20,6 @@
     ./searx.nix
     ./sunnycareboo.nix
     ./tailscale.nix
+    # ./vaultls.nix
   ];
 }
