@@ -182,7 +182,7 @@ in {
         isPublic = true;
         launchURL = null;
         callbackURLs = [
-          "https://127.0.0.1"
+          "http://127.0.0.1"
           "http://localhost"
         ];
       };
