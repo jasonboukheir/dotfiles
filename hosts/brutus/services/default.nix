@@ -6,6 +6,7 @@
     ./mealie
     ./open-webui
     ./opencloud
+    ./vaultls
     ./blocky.nix
     ./ddclient.nix
     ./hydroxide.nix

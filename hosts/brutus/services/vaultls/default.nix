@@ -1,4 +1,8 @@
-{config, lib, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   cfg = config.services.vaultls-container;
   dataDir = "/var/lib/vaultls";
   caCertFile = "${dataDir}/ca-tls.cert";
@@ -10,10 +14,10 @@ in {
     url = "https://${domain}";
     inherit dataDir;
 
-    ca = {
-      outputFile = caCertFile;
-      reloadServices = ["nginx.service"];
-    };
+    # ca = {
+    #   outputFile = caCertFile;
+    #   reloadServices = ["nginx.service"];
+    # };
 
     oidc = {
       enable = true;
@@ -23,7 +27,7 @@ in {
     };
   };
 
-  sunnycareboo.mtls.caCertFile = caCertFile;
+  # sunnycareboo.mtls.caCertFile = caCertFile;
 
   sunnycareboo.services.vaultls = {
     enable = cfg.enable;
@@ -32,7 +36,7 @@ in {
 
   services.pocket-id.ensureClients.vaultls = lib.mkIf cfg.enable {
     logo = ./vaultls.svg;
-    dependentServices = ["podman-vaultls.service"];
+    dependentServices = ["vaultls-setup.service"];
     settings = {
       name = "VaulTLS";
       launchURL = "https://${domain}";

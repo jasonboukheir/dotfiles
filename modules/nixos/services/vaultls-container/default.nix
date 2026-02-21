@@ -9,6 +9,7 @@
   stateDir = "/var/lib/vaultls";
   generatedApiSecretFile = "${stateDir}/api-secret";
   generatedDatabaseSecretFile = "${stateDir}/db-secret";
+  envFile = "${stateDir}/container.env";
   apiSecretFile =
     if cfg.apiSecretFile != null
     then cfg.apiSecretFile
@@ -17,6 +18,16 @@
     if cfg.databaseSecretFile != null
     then cfg.databaseSecretFile
     else generatedDatabaseSecretFile;
+
+  # Build credentials map for the container
+  containerCredentials =
+    {
+      VAULTLS_API_SECRET = apiSecretFile;
+      VAULTLS_DB_SECRET = databaseSecretFile;
+    }
+    // lib.optionalAttrs oidcCfg.enable {
+      VAULTLS_OIDC_SECRET = oidcCfg.clientSecretFile;
+    };
 in {
   options.services.vaultls-container = {
     enable = lib.mkEnableOption "VaulTLS container";
@@ -136,32 +147,32 @@ in {
           VAULTLS_URL = cfg.url;
           VAULTLS_LOG_LEVEL = cfg.logLevel;
         }
-        // (lib.mkIf oidcCfg.enable {
+        // lib.optionalAttrs oidcCfg.enable {
           VAULTLS_OIDC_AUTH_URL = oidcCfg.authUrl;
           VAULTLS_OIDC_CALLBACK_URL = "${cfg.url}/api/auth/oidc/callback";
           VAULTLS_OIDC_ID = oidcCfg.clientId;
-        }));
+        });
 
-      environmentFiles = lib.filterAttrs (_: v: v != null) {
-        VAULTLS_API_SECRET = apiSecretFile;
-        VAULTLS_DB_SECRET = databaseSecretFile;
-        VAULTLS_OIDC_SECRET =
-          if oidcCfg.enable
-          then oidcCfg.clientSecretFile
-          else null;
-      };
+      environmentFiles = [envFile];
     };
 
-    systemd.services.vaultls-setup = lib.mkIf (cfg.apiSecretFile == null || cfg.databaseSecretFile == null) {
-      description = "VaulTLS setup - generate secrets if missing";
-      wantedBy = ["oci-container-vaultls.service"];
-      before = ["oci-container-vaultls.service"];
+    systemd.services.vaultls-setup = {
+      description = "VaulTLS setup - generate secrets and environment file";
+      wantedBy = ["podman-vaultls.service"];
+      before = ["podman-vaultls.service"];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
       };
-      script = ''
+      script = let
+        # Generate script to build env file from credentials
+        envLines = lib.mapAttrsToList (name: path: ''
+          echo "${name}=$(cat ${path})" >> ${envFile}
+        '') containerCredentials;
+      in ''
         mkdir -p ${stateDir}
+
+        # Generate secrets if not provided
         ${lib.optionalString (cfg.apiSecretFile == null) ''
           if [ ! -f ${generatedApiSecretFile} ]; then
             echo "Generating VaulTLS API secret..."
@@ -176,6 +187,12 @@ in {
             chmod 600 ${generatedDatabaseSecretFile}
           fi
         ''}
+
+        # Generate environment file from credentials
+        rm -f ${envFile}
+        touch ${envFile}
+        chmod 600 ${envFile}
+        ${lib.concatStringsSep "" envLines}
       '';
     };
 
