@@ -1,4 +1,4 @@
 {...}: {
   omarchy.enable = true;
-  omarchy.pim = "terminal";
+  omarchy.pim = "gnome";
 }
