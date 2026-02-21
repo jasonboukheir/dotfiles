@@ -41,6 +41,7 @@ in {
     (lib.mkIf hasCalendars {
       programs.khal.enable = true;
       programs.todoman.enable = true;
+      programs.todoman.glob = "*/*";
       programs.todoman.package = todomanWithRepl;
       programs.pimsync.enable = true;
       services.pimsync.enable = true;
