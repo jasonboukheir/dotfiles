@@ -1,4 +1,5 @@
-colors: with colors.withHashtag; {
+colors:
+with colors.withHashtag; {
   "$schema" = "vscode://schemas/color-theme";
   name = scheme;
   type = "dark";
@@ -886,12 +887,12 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Properties";
-      scope = [ "variable.other.object.property" ];
+      scope = ["variable.other.object.property"];
       settings.foreground = base0D;
     }
     {
       name = "Colors";
-      scope = [ "constant.other.color" ];
+      scope = ["constant.other.color"];
       settings.foreground = base0B;
     }
     {
@@ -904,7 +905,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Invalid - Deprecated";
-      scope = [ "invalid.deprecated" ];
+      scope = ["invalid.deprecated"];
       settings.foreground = base0F;
     }
     {
@@ -949,7 +950,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Function";
-      scope = [ "storage.type.function" ];
+      scope = ["storage.type.function"];
       settings.foreground = base0D;
     }
     {
@@ -999,7 +1000,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Block Level Variables";
-      scope = [ "meta.block variable.other" ];
+      scope = ["meta.block variable.other"];
       settings.foreground = base08;
     }
     {
@@ -1063,12 +1064,12 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Fields";
-      scope = [ "entity.name.variable.field" ];
+      scope = ["entity.name.variable.field"];
       settings.foreground = base0D;
     }
     {
       name = "Entity Types";
-      scope = [ "support.type" ];
+      scope = ["support.type"];
       settings.foreground = base0C;
     }
     {
@@ -1094,7 +1095,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Language methods";
-      scope = [ "variable.language" ];
+      scope = ["variable.language"];
       settings = {
         fontStyle = "italic";
         foreground = base08;
@@ -1102,7 +1103,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "entity.name.method.js";
-      scope = [ "entity.name.method.js" ];
+      scope = ["entity.name.method.js"];
       settings = {
         fontStyle = "italic";
         foreground = base0D;
@@ -1118,7 +1119,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Attributes";
-      scope = [ "entity.other.attribute-name" ];
+      scope = ["entity.other.attribute-name"];
       settings.foreground = base0D;
     }
     {
@@ -1134,37 +1135,37 @@ colors: with colors.withHashtag; {
     }
     {
       name = "CSS Classes";
-      scope = [ "entity.other.attribute-name.class" ];
+      scope = ["entity.other.attribute-name.class"];
       settings.foreground = base0A;
     }
     {
       name = "CSS ID's";
-      scope = [ "source.sass keyword.control" ];
+      scope = ["source.sass keyword.control"];
       settings.foreground = base0D;
     }
     {
       name = "Inserted";
-      scope = [ "markup.inserted" ];
+      scope = ["markup.inserted"];
       settings.foreground = base0B;
     }
     {
       name = "Deleted";
-      scope = [ "markup.deleted" ];
+      scope = ["markup.deleted"];
       settings.foreground = base08;
     }
     {
       name = "Changed";
-      scope = [ "markup.changed" ];
+      scope = ["markup.changed"];
       settings.foreground = base0E;
     }
     {
       name = "Regular Expressions";
-      scope = [ "string.regexp" ];
+      scope = ["string.regexp"];
       settings.foreground = base0C;
     }
     {
       name = "Escape Characters";
-      scope = [ "constant.character.escape" ];
+      scope = ["constant.character.escape"];
       settings.foreground = base0C;
     }
     {
@@ -1189,7 +1190,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "ES7 Bind Operator";
-      scope = [ "source.js constant.other.object.key.js string.unquoted.label.js" ];
+      scope = ["source.js constant.other.object.key.js string.unquoted.label.js"];
       settings = {
         fontStyle = "italic";
         foreground = base0E;
@@ -1268,7 +1269,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markdown - Markup Raw Inline";
-      scope = [ "text.html.markdown markup.inline.raw.markdown" ];
+      scope = ["text.html.markdown markup.inline.raw.markdown"];
       settings.foreground = base0E;
     }
     {
@@ -1280,7 +1281,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markdown - Line Break";
-      scope = [ "text.html.markdown meta.dummy.line-break" ];
+      scope = ["text.html.markdown meta.dummy.line-break"];
       settings.foreground = base03;
     }
     {
@@ -1294,7 +1295,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markup - Italic";
-      scope = [ "markup.italic" ];
+      scope = ["markup.italic"];
       settings = {
         fontStyle = "italic";
         foreground = base08;
@@ -1328,7 +1329,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markup - Underline";
-      scope = [ "markup.underline" ];
+      scope = ["markup.underline"];
       settings = {
         fontStyle = "underline";
         foreground = base09;
@@ -1336,42 +1337,42 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markdown - Blockquote";
-      scope = [ "markup.quote punctuation.definition.blockquote.markdown" ];
+      scope = ["markup.quote punctuation.definition.blockquote.markdown"];
       settings.foreground = base0C;
     }
     {
       name = "Markup - Quote";
-      scope = [ "markup.quote" ];
+      scope = ["markup.quote"];
       settings.fontStyle = "italic";
     }
     {
       name = "Markdown - Link";
-      scope = [ "string.other.link.title.markdown" ];
+      scope = ["string.other.link.title.markdown"];
       settings.foreground = base0D;
     }
     {
       name = "Markdown - Link Description";
-      scope = [ "string.other.link.description.title.markdown" ];
+      scope = ["string.other.link.description.title.markdown"];
       settings.foreground = base0E;
     }
     {
       name = "Markdown - Link Anchor";
-      scope = [ "constant.other.reference.link.markdown" ];
+      scope = ["constant.other.reference.link.markdown"];
       settings.foreground = base0A;
     }
     {
       name = "Markup - Raw Block";
-      scope = [ "markup.raw.block" ];
+      scope = ["markup.raw.block"];
       settings.foreground = base0E;
     }
     {
       name = "Markdown - Raw Block Fenced";
-      scope = [ "markup.raw.block.fenced.markdown" ];
+      scope = ["markup.raw.block.fenced.markdown"];
       settings.foreground = "#00000050";
     }
     {
       name = "Markdown - Fenced Bode Block";
-      scope = [ "punctuation.definition.fenced.markdown" ];
+      scope = ["punctuation.definition.fenced.markdown"];
       settings.foreground = "#00000050";
     }
     {
@@ -1384,12 +1385,12 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markdown - Fenced Language";
-      scope = [ "variable.language.fenced.markdown" ];
+      scope = ["variable.language.fenced.markdown"];
       settings.foreground = base08;
     }
     {
       name = "Markdown - Separator";
-      scope = [ "meta.separator" ];
+      scope = ["meta.separator"];
       settings = {
         fontStyle = "bold";
         foreground = base0C;
@@ -1397,7 +1398,7 @@ colors: with colors.withHashtag; {
     }
     {
       name = "Markup - Table";
-      scope = [ "markup.table" ];
+      scope = ["markup.table"];
       settings.foreground = base0E;
     }
     {
