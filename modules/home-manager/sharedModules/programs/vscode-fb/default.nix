@@ -7,6 +7,19 @@
   cfg = config.programs.vscode-fb;
   jq = "${pkgs.jq}/bin/jq";
 
+  # Flatten nested attrsets into dot-separated keys for VS Code settings.json
+  # e.g. { editor = { fontSize = 14; }; } -> { "editor.fontSize" = 14; }
+  flattenAttrs = prefix: attrs:
+    builtins.foldl' (acc: name:
+      let
+        value = attrs.${name};
+        key = if prefix == "" then name else "${prefix}.${name}";
+      in
+        if builtins.isAttrs value && !lib.isDerivation value
+        then acc // (flattenAttrs key value)
+        else acc // {${key} = value;}
+    ) {} (builtins.attrNames attrs);
+
   # Extract the extension directory from a derivation
   extensionDir = ext: "${ext}/share/vscode/extensions/${ext.vscodeExtUniqueId}";
   extensionDirName = ext: "${ext.vscodeExtUniqueId}-${ext.version}";
@@ -55,6 +68,8 @@ in {
       description = "List of VS Code extension derivations to install.";
     };
 
+    stylixColors = lib.mkEnableOption "Stylix-generated color theme for VS Code @ FB";
+
     userSettings = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
       default = {};
@@ -75,10 +90,14 @@ in {
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
-    # Stylix theme extension and settings
-    (lib.mkIf config.stylix.enable (let
+    # Stylix font/size settings (always applied when stylix is enabled)
+    (lib.mkIf config.stylix.enable {
+      programs.vscode-fb.userSettings = import ./templates/settings.nix config.stylix.fonts;
+    })
+
+    # Stylix color theme extension (only when stylixColors is enabled)
+    (lib.mkIf (config.stylix.enable && cfg.stylixColors) (let
       colors = config.lib.stylix.colors;
-      fonts = config.stylix.fonts;
 
       themeExtension = pkgs.runCommandLocal "stylix-vscode" {
         vscodeExtUniqueId = "stylix.stylix";
@@ -93,7 +112,7 @@ in {
       '';
     in {
       programs.vscode-fb.extensions = [themeExtension];
-      programs.vscode-fb.userSettings = import ./templates/settings.nix fonts;
+      programs.vscode-fb.userSettings."workbench.colorTheme" = "Stylix";
     }))
 
     # Install extensions via home.file and register them in extensions.json
@@ -122,13 +141,15 @@ in {
 
     # Activation script to merge settings into the imperative settings.json
     (lib.mkIf (cfg.userSettings != {}) (let
-      settingsJson = pkgs.writeText "vscode-fb-nix-settings.json" (builtins.toJSON cfg.userSettings);
+      settingsJson = pkgs.writeText "vscode-fb-nix-settings.json" (builtins.toJSON (flattenAttrs "" cfg.userSettings));
     in {
       home.activation.vscodeAtFbSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
         settingsFile="$HOME/${cfg.settingsPath}"
-        if [ -f "$settingsFile" ]; then
+        if [ -f "$settingsFile" ] && [ -s "$settingsFile" ] && ${jq} type "$settingsFile" >/dev/null 2>&1; then
           ${jq} -s '.[0] * .[1]' "$settingsFile" "${settingsJson}" > "$settingsFile.tmp"
           mv "$settingsFile.tmp" "$settingsFile"
+        else
+          cp "${settingsJson}" "$settingsFile"
         fi
       '';
     }))
