@@ -90,6 +90,21 @@ in {
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
+    # Auto-detect the user's shell and set the terminal default profile
+    (let
+      shellName =
+        if config.programs.fish.enable then "fish"
+        else if config.programs.nushell.enable then "nu"
+        else if config.programs.zsh.enable then "zsh"
+        else if config.programs.bash.enable then "bash"
+        else null;
+      profileKey =
+        if pkgs.stdenv.hostPlatform.isDarwin then "osx"
+        else "linux";
+    in lib.mkIf (shellName != null) {
+      programs.vscode-fb.userSettings.terminal.integrated.defaultProfile.${profileKey} = shellName;
+    })
+
     # Stylix font/size settings (always applied when stylix is enabled)
     (lib.mkIf config.stylix.enable {
       programs.vscode-fb.userSettings = import ./templates/settings.nix config.stylix.fonts;
