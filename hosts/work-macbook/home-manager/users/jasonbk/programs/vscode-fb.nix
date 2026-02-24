@@ -27,7 +27,6 @@
         snippetSuggestions = "top";
         tabCompletion = "onlySnippets";
         tabSize = 4;
-        tokenColorCustomizations."[Nord]".textMateRules = [];
         wordWrapColumn = 120;
       };
       explorer = {
