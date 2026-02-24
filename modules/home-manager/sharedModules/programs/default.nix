@@ -3,6 +3,7 @@
     ./calcure
     ./nushell
     ./nvf
+    ./vscode-fb
     ./zed-editor
     ./_1password.nix
     ./direnv.nix
