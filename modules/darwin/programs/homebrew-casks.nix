@@ -68,7 +68,7 @@ in {
     homebrewCasks.zed = {
       caskName = lib.mkDefault "zed";
       appName = lib.mkDefault "Zed";
-      binaries = lib.mkDefault {zeditor = "zed";};
+      binaries = lib.mkDefault {zeditor = "cli";};
     };
 
     homebrew.casks = lib.pipe cfg [
