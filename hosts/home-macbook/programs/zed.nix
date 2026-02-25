@@ -1,0 +1,3 @@
+{...}: {
+  homebrewCasks.zed.enable = true;
+}
