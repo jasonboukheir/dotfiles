@@ -1,11 +1,13 @@
 {...}: {
-  imports = [
-    ./1password.nix
-    ./brave.nix
-    ./fish.nix
-    ./ghostty.nix
-    ./nushell.nix
-    ./ssh.nix
-    ./zed-editor.nix
-  ];
+  programs = {
+    _1password.enable = true;
+    brave.enable = true;
+    claude-code.enable = true;
+    fish.enable = true;
+    gemini-cli.enable = true;
+    ghostty.enable = true;
+    nushell.enable = true;
+    ssh.enable = true;
+    zed-editor.enable = true;
+  };
 }
