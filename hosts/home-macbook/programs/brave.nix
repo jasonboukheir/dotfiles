@@ -1,0 +1,3 @@
+{...}: {
+  homebrewCasks.brave.enable = true;
+}
