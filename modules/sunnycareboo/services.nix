@@ -61,6 +61,13 @@ with lib; let
         description = "Whether this is an external service";
       };
 
+      mtls.enable = mkOption {
+        type = types.bool;
+        default = cfg.services.${name}.isExternal && cfg.mtls.caCertFile != null;
+        defaultText = literalExpression "isExternal && config.sunnycareboo.mtls.caCertFile != null";
+        description = "Enable mTLS client certificate verification for this service";
+      };
+
       proxyPass = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -127,6 +134,13 @@ in {
   };
 
   config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !(any (svc: svc.enable && svc.mtls.enable) (attrValues cfg.services)) || cfg.mtls.caCertFile != null;
+        message = "sunnycareboo.mtls.caCertFile must be set when mTLS is enabled for any service";
+      }
+    ];
+
     # Enable nginx if any services are enabled
     services.nginx = {
       enable = true;
@@ -137,15 +151,9 @@ in {
 
       virtualHosts = mkMerge [
         # Services that we manage the virtualHost for
-        (listToAttrs (mapAttrsToList (
+        (listToAttrs (concatLists (mapAttrsToList (
             name: svcCfg: let
               domain = svcCfg.domain;
-
-              # Base listeners (80 and 443)
-              baseListen = internalHttpListeners;
-
-              # Extra listeners for external services (8080 and 8443)
-              extraListen = lib.optionals svcCfg.isExternal externalHttpListeners;
 
               # Build locations (only if proxyPass is set)
               allLocations =
@@ -161,19 +169,42 @@ in {
                     extraConfig = locCfg.extraConfig;
                   })
                   svcCfg.locations);
-            in
-              nameValuePair domain {
+
+              # Base vhost config shared between internal and external
+              baseVhostConfig = {
                 inherit (svcCfg) extraConfig;
                 forceSSL = true;
                 useACMEHost = cfg.baseDomain;
-                listen = baseListen ++ extraListen;
                 locations = allLocations;
+              };
+
+              # Internal vhost (ports 80/443) - no mTLS
+              internalVhost = nameValuePair domain (baseVhostConfig // {
+                listen = internalHttpListeners;
+              });
+
+              # External vhost (ports 8080/8443) - with mTLS if enabled
+              externalVhost = nameValuePair "${domain}-external" (baseVhostConfig // {
+                serverName = domain;
+                listen = externalHttpListeners;
               }
+              // optionalAttrs svcCfg.mtls.enable {
+                extraConfig = svcCfg.extraConfig + ''
+                  ssl_verify_client on;
+                '';
+                sslTrustedCertificate = cfg.mtls.caCertFile;
+              });
+            in
+              # Internal services: just internal vhost
+              # External services: internal vhost + external vhost (with mTLS)
+              if svcCfg.isExternal
+              then [internalVhost externalVhost]
+              else [internalVhost]
           ) (filterAttrs (
               name: svcCfg:
                 svcCfg.enable
             )
-            cfg.services)))
+            cfg.services))))
         # 2. Create a "catch-all" vhost to handle unknown domains/IPs
         {
           "_" = {
