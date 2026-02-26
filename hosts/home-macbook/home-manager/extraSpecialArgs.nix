@@ -6,7 +6,7 @@
 }: {
   home-manager.extraSpecialArgs = {
     pkgs-unstable = import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
+      inherit (pkgs.stdenv.hostPlatform) system;
       inherit (config.nixpkgs) config;
     };
   };
