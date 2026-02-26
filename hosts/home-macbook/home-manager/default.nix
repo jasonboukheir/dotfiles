@@ -1,5 +1,6 @@
 {...}: {
   imports = [
     ./users
+    ./extraSpecialArgs.nix
   ];
 }
