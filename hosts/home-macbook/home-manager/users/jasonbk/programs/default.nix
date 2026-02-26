@@ -1,4 +1,7 @@
 {pkgs-unstable, ...}: {
+  home.packages = [
+    pkgs-unstable.amp-cli
+  ];
   programs = {
     _1password.enable = true;
     brave.enable = true;
