@@ -6,6 +6,11 @@ in {
     "d /games/home/gamer 0755 ${gameUser} ${gameUser} -"
   ];
   jovian.steam.enable = true;
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
+  };
   jovian.steamos.useSteamOSConfig = false;
   jovian.devices.steamdeck.enable = false;
   jovian.hardware.has.amd.gpu = true;
