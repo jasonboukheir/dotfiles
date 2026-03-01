@@ -69,6 +69,10 @@
       url = "github:xddxdd/nix-cachyos-kernel/release";
       inputs.nixpkgs.follows = "nixos-unstable";
     };
+    ezmtls = {
+      url = "git+https://codeberg.org/jasonboukheir/ezmtls.git?ref=main";
+      inputs.nixpkgs.follows = "nixos";
+    };
   };
 
   outputs = inputs @ {
@@ -152,6 +156,7 @@
           home-manager-nixos.nixosModules.home-manager
           nixarr.nixosModules.default
           stylix-nixos.nixosModules.stylix
+          inputs.ezmtls.nixosModules.default
         ];
       };
 
