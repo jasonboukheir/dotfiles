@@ -7,7 +7,6 @@
     ./mealie
     ./open-webui
     ./opencloud
-    ./vaultls
     ./blocky.nix
     ./ddclient.nix
     ./hydroxide.nix
@@ -22,6 +21,5 @@
     ./searx.nix
     ./sunnycareboo.nix
     ./tailscale.nix
-    # ./vaultls.nix
   ];
 }

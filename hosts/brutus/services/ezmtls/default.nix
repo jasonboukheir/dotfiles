@@ -8,7 +8,7 @@
   domain = config.sunnycareboo.services.certs.domain;
 in {
   services.ezmtls = {
-    enable = true;
+    enable = false;
     url = "https://${domain}";
     oidc = {
       issuer = "https://${config.sunnycareboo.services.id.domain}";
