@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./actual
+    ./ezmtls
     ./headscale
     ./immich
     ./mealie
