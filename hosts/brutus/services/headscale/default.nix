@@ -52,6 +52,7 @@ in {
 
   sunnycareboo.services.headscale = lib.mkIf cfg.enable {
     enable = true;
+    mtls.enable = false;
     isExternal = true;
     proxyPass = "http://localhost:${toString port}";
   };

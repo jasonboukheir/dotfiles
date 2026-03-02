@@ -11,6 +11,7 @@ in {
     enable = true;
     proxyPass = "http://localhost:${toString port}";
     isExternal = true;
+    mtls.enable = false;
     extraConfig = ''
       proxy_busy_buffers_size   512k;
       proxy_buffers   4 512k;
