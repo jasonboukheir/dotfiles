@@ -12,8 +12,7 @@
   credsLib = import ../../lib/credentials.nix {inherit lib;};
 
   secretsDir = "/run/pocket-id-secrets";
-  sharedKeyDir = "/run/pocket-id-shared";
-  generatedApiKeyPath = "${sharedKeyDir}/api_key";
+  generatedApiKeyPath = config.ephemeral-secrets.pocket-id-api-key.path;
 
   # Determine if we should use the generated key or a user-provided one
   useGeneratedKey = ! (cfg.credentials ? STATIC_API_KEY);
@@ -133,23 +132,8 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Generate a random API Key if one isn't provided in credentials
-    systemd.services.pocket-id-key-gen = mkIf useGeneratedKey {
-      description = "Generate shared API key for Pocket ID";
-      before = ["pocket-id.service" "pocket-id-provisioner.service"];
-      requiredBy = ["pocket-id.service" "pocket-id-provisioner.service"];
-      serviceConfig = {
-        Type = "oneshot";
-        RuntimeDirectory = baseNameOf sharedKeyDir; # pocket-id-shared
-        RuntimeDirectoryMode = "0700";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "gen-pocket-id-key" ''
-          if [ ! -f ${generatedApiKeyPath} ]; then
-            ${getExe pkgs.openssl} rand -hex 32 | tr -d '\n' > ${generatedApiKeyPath}
-          fi
-        '';
-      };
-    };
+    # Generate a random API key via ephemeral-secrets if one isn't provided
+    ephemeral-secrets.pocket-id-api-key = mkIf useGeneratedKey {};
 
     systemd.services.pocket-id = {
       serviceConfig = {

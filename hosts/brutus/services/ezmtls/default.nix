@@ -11,6 +11,7 @@ in {
     enable = false;
     url = "https://${domain}";
     oidc = {
+      enable = true;
       issuer = "https://${config.sunnycareboo.services.id.domain}";
       clientId = oidcCfg.settings.id;
       clientSecretFile = oidcCfg.secretFile;
@@ -25,7 +26,7 @@ in {
 
   sunnycareboo.services.certs = lib.mkIf cfg.enable {
     enable = true;
-    proxyPass = "http://localhost:4000";
+    proxyPass = "http://localhost:${toString cfg.port}";
   };
 
   services.pocket-id.ensureClients.ezmtls = lib.mkIf cfg.enable {
