@@ -44,6 +44,12 @@ in {
     };
   };
 
+  # Start after nginx so the OIDC endpoint is reachable.
+  systemd.services.headscale = lib.mkIf cfg.enable {
+    after = ["nginx.service"];
+    wants = ["nginx.service"];
+  };
+
   sunnycareboo.services.headscale = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
