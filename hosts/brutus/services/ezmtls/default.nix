@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.services.ezmtls;
@@ -8,7 +9,7 @@
   domain = config.sunnycareboo.services.certs.domain;
 in {
   services.ezmtls = {
-    enable = false;
+    enable = true;
     url = "https://${domain}";
     oidc = {
       enable = true;
@@ -27,6 +28,16 @@ in {
   sunnycareboo.services.certs = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://localhost:${toString cfg.port}";
+  };
+
+  # Start after nginx so the OIDC endpoint is reachable, and reload
+  # nginx once the real CA cert has been exported (replacing the placeholder).
+  systemd.services.ezmtls = lib.mkIf cfg.enable {
+    after = ["nginx.service"];
+    wants = ["nginx.service"];
+    serviceConfig.ExecStartPost = "+${pkgs.writeShellScript "ezmtls-reload-nginx" ''
+      ${lib.getExe' pkgs.systemd "systemctl"} reload nginx.service
+    ''}";
   };
 
   services.pocket-id.ensureClients.ezmtls = lib.mkIf cfg.enable {

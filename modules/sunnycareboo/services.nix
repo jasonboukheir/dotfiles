@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib; let
@@ -232,6 +233,23 @@ in {
         extraDomainNames = map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services));
         email = "postmaster@${cfg.baseDomain}";
       };
+    };
+
+    # When mTLS is configured with a runtime-provided CA cert, create a
+    # placeholder so nginx can start before the real cert is exported.
+    # The providing service should reload nginx once the real cert is ready.
+    system.activationScripts.mtls-placeholder-cert = lib.mkIf (cfg.mtls.caCertFile != null) {
+      text = ''
+        cert="${cfg.mtls.caCertFile}"
+        dir="$(dirname "$cert")"
+        mkdir -p "$dir"
+        if [ ! -f "$cert" ]; then
+          ${lib.getExe' pkgs.openssl "openssl"} req -x509 -newkey ec \
+            -pkeyopt ec_paramgen_curve:prime256v1 \
+            -keyout /dev/null -out "$cert" \
+            -days 1 -nodes -subj "/CN=placeholder" 2>/dev/null
+        fi
+      '';
     };
 
     users.users.nginx.extraGroups = lib.optionals cfg.enable ["acme"];
