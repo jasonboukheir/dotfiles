@@ -381,11 +381,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772354926,
-        "narHash": "sha256-hWo51X40KMRPXLue4ZI29z6/YWgvcBVbNRGNw9QkxsM=",
+        "lastModified": 1772411676,
+        "narHash": "sha256-hSObx0cwanBgCbTw1H2KJQ/sI+WsQa3ejEh0CBrL6TE=",
         "ref": "main",
-        "rev": "204cb4c1b917d4b94caf5b0135c767a013b58edc",
-        "revCount": 31,
+        "rev": "9c6430b574210d415881cbd6dbde1a027cc30915",
+        "revCount": 42,
         "type": "git",
         "url": "https://codeberg.org/jasonboukheir/ezmtls.git"
       },
