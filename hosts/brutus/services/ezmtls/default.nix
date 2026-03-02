@@ -20,7 +20,13 @@ in {
     ensureCAs.mtls = {
       commonName = "Sunnycareboo mTLS CA";
     };
-    initialAdmin.email = "jasonbk@sunnycareboo.com";
+    seedAccounts = [
+      {
+        name = "Jason Bou Kheir";
+        email = "jasonbk@sunnycareboo.com";
+        role = "admin";
+      }
+    ];
   };
 
   sunnycareboo.mtls.caCertFile = lib.mkIf cfg.enable cfg.ensureCAs.mtls.certFile;
