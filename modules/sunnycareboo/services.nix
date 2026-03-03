@@ -180,21 +180,25 @@ in {
               };
 
               # Internal vhost (ports 80/443) - no mTLS
-              internalVhost = nameValuePair domain (baseVhostConfig // {
-                listen = internalHttpListeners;
-              });
+              internalVhost = nameValuePair domain (baseVhostConfig
+                // {
+                  listen = internalHttpListeners;
+                });
 
               # External vhost (ports 8080/8443) - with mTLS if enabled
-              externalVhost = nameValuePair "${domain}-external" (baseVhostConfig // {
-                serverName = domain;
-                listen = externalHttpListeners;
-              }
-              // optionalAttrs svcCfg.mtls.enable {
-                extraConfig = svcCfg.extraConfig + ''
-                  ssl_verify_client on;
-                '';
-                sslTrustedCertificate = cfg.mtls.caCertFile;
-              });
+              externalVhost = nameValuePair "${domain}-external" (baseVhostConfig
+                // {
+                  serverName = domain;
+                  listen = externalHttpListeners;
+                }
+                // optionalAttrs svcCfg.mtls.enable {
+                  extraConfig =
+                    svcCfg.extraConfig
+                    + ''
+                      ssl_verify_client on;
+                      ssl_client_certificate ${cfg.mtls.caCertFile};
+                    '';
+                });
             in
               # Internal services: just internal vhost
               # External services: internal vhost + external vhost (with mTLS)
@@ -226,7 +230,7 @@ in {
       lib.optionals (any (svc: svc.enable) (attrValues cfg.services)) [80 443]
       ++ lib.optionals hasExternal [8080 8443];
 
-    security.acme = lib.mkIf cfg.enable {
+    security.acme = {
       acceptTerms = true;
       certs."${cfg.baseDomain}" = {
         domain = cfg.baseDomain;
@@ -252,6 +256,6 @@ in {
       '';
     };
 
-    users.users.nginx.extraGroups = lib.optionals cfg.enable ["acme"];
+    users.users.nginx.extraGroups = ["acme"];
   };
 }
