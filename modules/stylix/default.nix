@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   stylix = {
     image = ./wallpapers/nord.jpg;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
+    base16Scheme = ./themes/eastern-orthodox.yaml;
     polarity = "dark";
     fonts = {
       monospace = {
