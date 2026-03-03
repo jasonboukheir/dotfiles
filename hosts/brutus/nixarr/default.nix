@@ -98,6 +98,7 @@ in {
     };
     jellyfin = lib.mkIf config.nixarr.jellyfin.enable {
       enable = true;
+      isExternal = true;
       proxyPass = "http://localhost:${toString jellyfinPort}";
     };
     bazarr = lib.mkIf config.nixarr.bazarr.enable {
@@ -130,6 +131,7 @@ in {
     };
     jellyseerr = lib.mkIf config.nixarr.jellyseerr.enable {
       enable = true;
+      isExternal = true;
       proxyPass = "http://localhost:${toString config.nixarr.jellyseerr.port}";
     };
   };
