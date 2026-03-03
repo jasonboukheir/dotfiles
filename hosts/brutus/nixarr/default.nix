@@ -93,6 +93,7 @@ in {
     };
     audiobookshelf = lib.mkIf config.nixarr.audiobookshelf.enable {
       enable = true;
+      isExternal = true;
       proxyPass = "http://localhost:${toString config.nixarr.audiobookshelf.port}";
     };
     jellyfin = lib.mkIf config.nixarr.jellyfin.enable {
