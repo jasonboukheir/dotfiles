@@ -22,6 +22,7 @@ in {
   };
   sunnycareboo.services.budget = lib.mkIf cfg.enable {
     enable = true;
+    isExternal = true;
     proxyPass = "http://localhost:${toString port}";
   };
 

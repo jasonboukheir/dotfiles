@@ -80,6 +80,7 @@ in {
   # NGINX
   sunnycareboo.services.ai = lib.mkIf cfg.enable {
     enable = true;
+    isExternal = true;
     proxyPass = "http://localhost:${toString cfg.port}";
   };
 
