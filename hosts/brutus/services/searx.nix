@@ -9,6 +9,7 @@
 in {
   sunnycareboo.services.search = lib.mkIf cfg.enable {
     enable = true;
+    isExternal = true;
   };
 
   age.secrets = {
