@@ -128,6 +128,8 @@ in {
     in {
       programs.vscode-fb.extensions = [themeExtension];
       programs.vscode-fb.userSettings."workbench.colorTheme" = "Stylix";
+      programs.vscode-fb.userSettings."workbench.preferredDarkColorTheme" = "Stylix";
+      programs.vscode-fb.userSettings."workbench.preferredLightColorTheme" = "Stylix";
     }))
 
     # Install extensions via home.file and register them in extensions.json
