@@ -1,9 +1,8 @@
 {pkgs, ...}: {
   programs.vscode-fb = {
     enable = true;
+    stylixColors = true;
     extensions = with pkgs.vscode-extensions; [
-      arcticicestudio.nord-visual-studio-code
-      huytd.nord-light
       pkief.material-icon-theme
     ];
     userSettings = {
@@ -67,11 +66,6 @@
       };
       workbench = {
         activityBar.visible = true;
-        colorTheme = "Nord";
-        preferredDarkColorTheme = "Nord";
-        preferredLightColorTheme = "Nord Light";
-        preferredHighContrastColorTheme = "Nord Midnight";
-        preferredHighContrastLightColorTheme = "Nord Light Brighter";
         commandPalette.preserveInput = true;
         editor = {
           enablePreview = false;
