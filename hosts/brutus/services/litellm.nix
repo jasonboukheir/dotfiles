@@ -18,7 +18,7 @@ in {
     virtualisation.oci-containers.containers = lib.mkIf cfg.enable {
       litellm = {
         autoStart = true;
-        image = "berriai/litellm:main-stable";
+        image = "ghcr.io/berriai/litellm:main-latest";
         cmd = [
           "--port=${toString port}"
           "--host=localhost"
