@@ -4,7 +4,16 @@
       "Bash(cd /Users/jasonbk/Projects/ezmtls && nix flake check --no-build 2>&1)",
       "Bash(ls:*)",
       "Bash(find:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(grep:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:nixarr.com)",
+      "WebSearch",
+      "WebFetch(domain:wiki.nixos.org)",
+      "WebFetch(domain:blog.yanlincs.com)",
+      "WebFetch(domain:www.fuzzygrim.com)",
+      "WebFetch(domain:mynixos.com)",
+      "Bash(nix flake:*)"
     ]
   }
 }

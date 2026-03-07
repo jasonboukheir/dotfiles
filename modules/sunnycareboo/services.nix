@@ -134,7 +134,10 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (let
+    hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
+    nginxLogDir = "/var/log/nginx";
+  in {
     assertions = [
       {
         assertion = !(any (svc: svc.enable && svc.mtls.enable) (attrValues cfg.services)) || cfg.mtls.caCertFile != null;
@@ -149,6 +152,11 @@ in {
       recommendedTlsSettings = true;
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
+      commonHttpConfig = mkIf hasExternal ''
+        limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+        access_log ${nginxLogDir}/access.log;
+        error_log ${nginxLogDir}/error.log warn;
+      '';
 
       virtualHosts = mkMerge [
         # Services that we manage the virtualHost for
@@ -185,16 +193,18 @@ in {
                   listen = internalHttpListeners;
                 });
 
-              # External vhost (ports 8080/8443) - with mTLS if enabled
+              # External vhost (ports 8080/8443) - with rate limiting and optional mTLS
               externalVhost = nameValuePair "${domain}-external" (baseVhostConfig
                 // {
                   serverName = domain;
                   listen = externalHttpListeners;
-                }
-                // optionalAttrs svcCfg.mtls.enable {
                   extraConfig =
                     svcCfg.extraConfig
                     + ''
+                      limit_req zone=general burst=20 nodelay;
+                      limit_req_status 429;
+                    ''
+                    + optionalString svcCfg.mtls.enable ''
                       ssl_verify_client on;
                       ssl_client_certificate ${cfg.mtls.caCertFile};
                     '';
@@ -224,9 +234,7 @@ in {
       ];
     };
 
-    networking.firewall.allowedTCPPorts = let
-      hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
-    in
+    networking.firewall.allowedTCPPorts =
       lib.optionals (any (svc: svc.enable) (attrValues cfg.services)) [80 443]
       ++ lib.optionals hasExternal [8080 8443];
 
@@ -257,5 +265,42 @@ in {
     };
 
     users.users.nginx.extraGroups = ["acme"];
-  };
+
+    environment.etc."fail2ban/filter.d/pocket-id.conf" = mkIf hasExternal {
+      text = ''
+        [Definition]
+        journalmatch = _SYSTEMD_UNIT=pocket-id.service
+        failregex    = token is invalid or expired.*"ip":"<HOST>"
+      '';
+    };
+
+    services.fail2ban = mkIf hasExternal {
+      enable = true;
+      jails = {
+        nginx-botsearch = ''
+          enabled  = true
+          filter   = nginx-botsearch
+          logpath  = ${nginxLogDir}/access.log
+          maxretry = 2
+          findtime = 60
+        '';
+        pocket-id = ''
+          enabled  = true
+          filter   = pocket-id
+          backend  = systemd
+          maxretry = 5
+          findtime = 300
+          bantime  = 3600
+        '';
+        nginx-limit-req = ''
+          enabled  = true
+          filter   = nginx-limit-req
+          logpath  = ${nginxLogDir}/error.log
+          maxretry = 10
+          findtime = 60
+          bantime  = 3600
+        '';
+      };
+    };
+  });
 }
