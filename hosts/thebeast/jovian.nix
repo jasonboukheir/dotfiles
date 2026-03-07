@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   gameUser = "gamer";
 in {
   # Ensure the gamer home directory exists on the games drive
@@ -6,6 +10,9 @@ in {
     "d /games/home/gamer 0755 ${gameUser} ${gameUser} -"
   ];
   jovian.steam.enable = true;
+  jovian.steam.autoStart = true;
+  jovian.steam.user = "${gameUser}";
+  jovian.steam.desktopSession = "plasma";
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;
@@ -24,11 +31,8 @@ in {
     hyprland
   ];
   services.displayManager.sessionPackages = [pkgs.hyprland];
-  programs.regreet.enable = true;
-  services.greetd.settings.initial_session = {
-    command = "start-gamescope-session";
-    user = "${gameUser}";
-  };
+  services.displayManager.sddm.autoLogin.relogin = lib.mkForce false;
+  services.desktopManager.plasma6.enable = true;
 
   users = {
     groups.${gameUser} = {

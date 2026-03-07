@@ -13,7 +13,20 @@
       "WebFetch(domain:blog.yanlincs.com)",
       "WebFetch(domain:www.fuzzygrim.com)",
       "WebFetch(domain:mynixos.com)",
-      "Bash(nix flake:*)"
+      "Bash(nix flake:*)",
+      "Bash(gh api:*)",
+      "Bash(while read sha)",
+      "Bash(do gh api \"repos/Jovian-Experiments/Jovian-NixOS/commits/$sha\" -q '\"\"\\\\\\(.sha[0:8]\\) \\\\\\(.commit.committer.date[0:10]\\) \\\\\\(.commit.message\\)\"\" | split\\(\"\"\\\\n\"\"\\)[0]')",
+      "Bash(done)",
+      "Bash(gh search issues:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:gitlab.steamos.cloud)",
+      "WebFetch(domain:jovian-experiments.github.io)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:linuxcommandlibrary.com)",
+      "WebFetch(domain:discuss.cachyos.org)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:nix-community.github.io)"
     ]
   }
 }
