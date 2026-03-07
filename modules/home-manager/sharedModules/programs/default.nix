@@ -6,6 +6,7 @@
     ./vscode-fb
     ./zed-editor
     ./_1password.nix
+    ./claude-code.nix
     ./direnv.nix
     ./fish.nix
     ./ghostty.nix
