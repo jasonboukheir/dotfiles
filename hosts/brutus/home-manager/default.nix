@@ -3,6 +3,7 @@
     ./jasonbk
   ];
   imports = [
+    ./extraSpecialArgs.nix
     ./sharedModules
   ];
 }
