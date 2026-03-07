@@ -67,7 +67,6 @@
     };
     nix-cachyos-kernel = {
       url = "github:xddxdd/nix-cachyos-kernel/release";
-      inputs.nixpkgs.follows = "nixos-unstable";
     };
     ezmtls = {
       url = "git+https://codeberg.org/jasonboukheir/ezmtls.git?ref=main";
