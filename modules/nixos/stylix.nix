@@ -1,15 +1,15 @@
 {pkgs, ...}: {
   stylix = {
     cursor = {
-      name = "Capitaine Cursors (Nord)";
-      package = pkgs.capitaine-cursors-themed;
+      name = "Bibata-Modern-Amber";
+      package = pkgs.bibata-cursors;
       size = 18;
     };
     icons = {
       enable = true;
-      package = pkgs.nordzy-icon-theme;
-      light = "Nordzy";
-      dark = "Nordzy-dark";
+      package = pkgs.papirus-icon-theme;
+      light = "Papirus-Light";
+      dark = "Papirus-Dark";
     };
   };
 }
