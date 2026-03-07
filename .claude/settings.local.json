@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /Users/jasonbk/Projects/ezmtls && nix flake check --no-build 2>&1)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(open:*)"
+    ]
+  }
+}
