@@ -4,10 +4,10 @@
     ./audio.nix
     ./bluetooth.nix
     ./configuration.nix
-    ./desktop.nix
     ./graphics.nix
     ./hardware-configuration.nix
-    ./jovian.nix
+    ./specialisations.nix
+    ./users.nix
     ./networking.nix
     ./nixpkgs.nix
     ./printing.nix

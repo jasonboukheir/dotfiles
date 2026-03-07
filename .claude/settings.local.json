@@ -26,7 +26,13 @@
       "WebFetch(domain:linuxcommandlibrary.com)",
       "WebFetch(domain:discuss.cachyos.org)",
       "WebFetch(domain:gist.github.com)",
-      "WebFetch(domain:nix-community.github.io)"
+      "WebFetch(domain:nix-community.github.io)",
+      "Bash(git -C /home/jasonbk/.config/nix log --oneline --all)",
+      "Bash(git -C /home/jasonbk/.config/nix log --oneline --grep=\"autolog\\\\|jovian\\\\|steam\\\\|sddm\" --all)",
+      "Bash(git -C /home/jasonbk/.config/nix show fix/jovian/autologin:hosts/thebeast/jovian.nix)",
+      "Bash(git -C /home/jasonbk/.config/nix show:*)",
+      "Bash(git -C /home/jasonbk/.config/nix diff main fix/jovian/autologin -- hosts/thebeast/jovian.nix)",
+      "Bash(git -C /home/jasonbk/.config/nix log --all --pretty=format:\"%h %s\" -- hosts/thebeast/jovian.nix)"
     ]
   }
 }
