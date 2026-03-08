@@ -1,10 +1,12 @@
-{...}: {
-  specialisation.gaming.configuration = {
-    system.nixos.tags = ["gaming"];
-    imports = [./specialisations/gaming];
-  };
-  specialisation.dev.configuration = {
-    system.nixos.tags = ["dev"];
-    imports = [./specialisations/dev];
+{thebeastModules, ...}: {
+  specialisation.dev = {
+    inheritParentConfig = false;
+    configuration = {
+      system.nixos.tags = ["dev"];
+      imports = thebeastModules ++ [
+        ./common.nix
+        ./specialisations/dev
+      ];
+    };
   };
 }
