@@ -1,0 +1,18 @@
+scheme: "Batou"
+author: "jasonbk"
+base00: "121212" # Background – deep charcoal black
+base01: "282725" # Raised Surface – subtle warm dark grey
+base02: "383735" # Selection – muted dark grey-brown
+base03: "605d5b" # Comments – warm mid-grey, accent tone
+base04: "8a8575" # Dark Foreground – dusty warm grey
+base05: "a4a4a4" # Foreground – neutral mid-grey
+base06: "C2BBB0" # Light Foreground – warm pale grey
+base07: "dbd9d3" # Lightest Foreground – soft off-white
+base08: "984b1e" # Red – burnt sienna
+base09: "e19e74" # Orange – warm terracotta
+base0A: "c6c4b0" # Yellow – pale khaki
+base0B: "a5a297" # Green – muted sage
+base0C: "90947a" # Cyan – dusty olive
+base0D: "637380" # Blue – steel blue-grey
+base0E: "8f4445" # Magenta – faded burgundy
+base0F: "b7a798" # Extra – warm taupe
