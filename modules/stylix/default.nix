@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   stylix = {
-    image = ./wallpapers/vaporwave-dolphins.jpg;
+    image = ./wallpapers/analog-dreams.jpeg;
     # base16Scheme = ./themes/eastern-orthodox.yaml;
     base16Scheme = ./themes/analog-dreams.yaml;
     polarity = "light";
