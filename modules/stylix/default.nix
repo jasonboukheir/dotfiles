@@ -1,7 +1,8 @@
 {pkgs, ...}: {
   stylix = {
-    image = ./wallpapers/tree-of-life.jpg;
-    base16Scheme = ./themes/eastern-orthodox.yaml;
+    image = ./wallpapers/batou.jpg;
+    # base16Scheme = ./themes/eastern-orthodox.yaml;
+    base16Scheme = ./themes/batou.yaml;
     polarity = "dark";
     fonts = {
       monospace = {

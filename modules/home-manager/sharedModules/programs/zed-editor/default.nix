@@ -19,9 +19,6 @@
         claude-code
         package-version-server
       ];
-      # mutableUserKeymaps = false;
-      # mutableUserSettings = false;
-      # mutableUserTasks = false;
       installRemoteServer = true;
       userSettings = lib.mkMerge [
         (import
