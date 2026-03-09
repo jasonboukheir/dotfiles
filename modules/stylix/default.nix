@@ -1,8 +1,8 @@
 {pkgs, ...}: {
   stylix = {
-    image = ./wallpapers/batou.jpg;
+    image = ./wallpapers/vaporwave-dolphins.jpg;
     # base16Scheme = ./themes/eastern-orthodox.yaml;
-    base16Scheme = ./themes/batou.yaml;
+    base16Scheme = ./themes/analog-dreams.yaml;
     polarity = "dark";
     fonts = {
       monospace = {
