@@ -1,3 +1,4 @@
-nix monoflake for config of my nixos and nix-darwin hosts
-hosts/ is host configuration
-modules/ has common modules
+- use nix idiomatically
+- prefer variables instead of hardcoded magic values (including paths)
+- consider config options instead of const variables
+- always see if there is an existing option that can be used to simplify the problem, e.g. instead of writing files to /etc to setup nginx, see if there is an option in services.nginx.
