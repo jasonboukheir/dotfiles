@@ -1,5 +1,5 @@
-{...}: let
-  gameUser = "gamer";
+{config, ...}: let
+  gameUser = config.gaming.user;
 in {
   # Ensure the gamer home directory exists on the games drive
   systemd.tmpfiles.rules = [
