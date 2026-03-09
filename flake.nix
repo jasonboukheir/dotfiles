@@ -129,18 +129,19 @@
     };
 
     nixosConfigurations = {
-      thebeast = nixos-unstable.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-        };
-        modules = [
-          ./hosts/thebeast
+      thebeast = let
+        thebeastModules = [
           agenix.nixosModules.default
           determinate.nixosModules.default
           home-manager-nixos-unstable.nixosModules.home-manager
           stylix-nixos-unstable.nixosModules.stylix
           jovian.nixosModules.default
         ];
+      in nixos-unstable.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs thebeastModules;
+        };
+        modules = [ ./hosts/thebeast ] ++ thebeastModules;
       };
 
       brutus = nixos.lib.nixosSystem {
