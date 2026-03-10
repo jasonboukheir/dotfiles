@@ -1,8 +1,8 @@
 {pkgs, ...}: {
   stylix = {
     image = ./wallpapers/analog-dreams.jpeg;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/penumbra-light-contrast-plus.yaml";
     # base16Scheme = ./themes/eastern-orthodox.yaml;
-    base16Scheme = ./themes/analog-dreams.yaml;
     polarity = "light";
     fonts = {
       monospace = {
