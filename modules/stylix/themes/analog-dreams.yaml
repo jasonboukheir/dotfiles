@@ -1,18 +1,18 @@
-scheme: "Analog Dreams"
-author: "Custom (GMK Analog Dreams)"
-base00: "eae5d9"
-base01: "d5d0c4"
-base02: "b9b6af"
-base03: "8c8982"
-base04: "6e6b66"
-base05: "3d3b37"
-base06: "2b2a27"
-base07: "141413"
-base08: "de9090"
-base09: "d89b73"
-base0A: "e8df79"
-base0B: "81b69b"
-base0C: "83acb9"
-base0D: "9b84a1"
-base0E: "b694ba"
-base0F: "c8a59c"
+scheme: Analog Dreams
+author: Jason Bou Kheir
+base00: c8d8d4
+base01: a3b4b0
+base02: 7f908d
+base03: 5a6c69
+base04: "364745"
+base05: "112321"
+base06: 0f1e1c
+base07: 0c1917
+base08: 4b6666
+base09: 4b6664
+base0A: "616158"
+base0B: 6d5d59
+base0C: "496760"
+base0D: 62615e
+base0E: "466763"
+base0F: 5f6350
