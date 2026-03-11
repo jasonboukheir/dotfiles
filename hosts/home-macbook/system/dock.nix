@@ -1,4 +1,8 @@
-{config, pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   system.defaults.dock = {
     persistent-apps = [
       config.homebrewCasks.brave.appPath

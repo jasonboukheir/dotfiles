@@ -137,12 +137,13 @@
           stylix-nixos-unstable.nixosModules.stylix
           jovian.nixosModules.default
         ];
-      in nixos-unstable.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs thebeastModules;
+      in
+        nixos-unstable.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs thebeastModules;
+          };
+          modules = [./hosts/thebeast] ++ thebeastModules;
         };
-        modules = [ ./hosts/thebeast ] ++ thebeastModules;
-      };
 
       brutus = nixos.lib.nixosSystem {
         specialArgs = {

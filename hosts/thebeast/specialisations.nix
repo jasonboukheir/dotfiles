@@ -3,10 +3,12 @@
     inheritParentConfig = false;
     configuration = {
       system.nixos.tags = ["dev"];
-      imports = thebeastModules ++ [
-        ./common.nix
-        ./specialisations/dev
-      ];
+      imports =
+        thebeastModules
+        ++ [
+          ./common.nix
+          ./specialisations/dev
+        ];
     };
   };
 }

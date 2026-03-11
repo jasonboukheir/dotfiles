@@ -1,4 +1,8 @@
-{config, lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   system.defaults.NSGlobalDomain = {
     AppleInterfaceStyle =
       if config.stylix.polarity == "dark"

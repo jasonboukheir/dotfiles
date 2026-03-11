@@ -1,4 +1,5 @@
-fonts: with fonts; {
+fonts:
+with fonts; {
   "editor.fontFamily" = monospace.name;
   "editor.inlayHints.fontFamily" = monospace.name;
   "editor.inlineSuggest.fontFamily" = monospace.name;

@@ -16,8 +16,7 @@
   retroarchPkg = config.programs.retroarch.finalPackage;
 
   # SRM parser generation
-  mkGlobPattern = exts:
-    "\${title}@(${lib.concatMapStringsSep "|" (e: ".${e}") exts})";
+  mkGlobPattern = exts: "\${title}@(${lib.concatMapStringsSep "|" (e: ".${e}") exts})";
 
   mkParser = system: let
     isRetroarch = system.type == "retroarch";
