@@ -10,10 +10,13 @@
   # Flatten nested attrsets into dot-separated keys for VS Code settings.json
   # e.g. { editor = { fontSize = 14; }; } -> { "editor.fontSize" = 14; }
   flattenAttrs = prefix: attrs:
-    builtins.foldl' (acc: name:
-      let
+    builtins.foldl' (
+      acc: name: let
         value = attrs.${name};
-        key = if prefix == "" then name else "${prefix}.${name}";
+        key =
+          if prefix == ""
+          then name
+          else "${prefix}.${name}";
       in
         if builtins.isAttrs value && !lib.isDerivation value
         then acc // (flattenAttrs key value)
@@ -93,17 +96,23 @@ in {
     # Auto-detect the user's shell and set the terminal default profile
     (let
       shellName =
-        if config.programs.fish.enable then "fish"
-        else if config.programs.nushell.enable then "nu"
-        else if config.programs.zsh.enable then "zsh"
-        else if config.programs.bash.enable then "bash"
+        if config.programs.fish.enable
+        then "fish"
+        else if config.programs.nushell.enable
+        then "nu"
+        else if config.programs.zsh.enable
+        then "zsh"
+        else if config.programs.bash.enable
+        then "bash"
         else null;
       profileKey =
-        if pkgs.stdenv.hostPlatform.isDarwin then "osx"
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then "osx"
         else "linux";
-    in lib.mkIf (shellName != null) {
-      programs.vscode-fb.userSettings.terminal.integrated.defaultProfile.${profileKey} = shellName;
-    })
+    in
+      lib.mkIf (shellName != null) {
+        programs.vscode-fb.userSettings.terminal.integrated.defaultProfile.${profileKey} = shellName;
+      })
 
     # Stylix font/size settings (always applied when stylix is enabled)
     (lib.mkIf config.stylix.enable {
@@ -113,18 +122,24 @@ in {
     # Stylix color theme extension (only when stylixColors is enabled)
     (lib.mkIf (config.stylix.enable && cfg.stylixColors) (let
       colors = config.lib.stylix.colors;
+      polarity = config.stylix.polarity;
 
-      themeExtension = pkgs.runCommandLocal "stylix-vscode" {
-        vscodeExtUniqueId = "stylix.stylix";
-        vscodeExtPublisher = "stylix";
-        version = "0.0.0";
-        theme = builtins.toJSON (import ./templates/theme.nix colors);
-        passAsFile = ["theme"];
-      } ''
-        mkdir -p "$out/share/vscode/extensions/$vscodeExtUniqueId/themes"
-        ln -s ${./package.json} "$out/share/vscode/extensions/$vscodeExtUniqueId/package.json"
-        cp "$themePath" "$out/share/vscode/extensions/$vscodeExtUniqueId/themes/stylix.json"
-      '';
+      themeExtension =
+        pkgs.runCommandLocal "stylix-vscode" {
+          vscodeExtUniqueId = "stylix.stylix";
+          vscodeExtPublisher = "stylix";
+          version = "0.0.0";
+          packageJson = builtins.toJSON (import ./templates/package.nix polarity);
+          theme = builtins.toJSON (import ./templates/theme.nix {
+            inherit colors;
+            inherit polarity;
+          });
+          passAsFile = ["packageJson" "theme"];
+        } ''
+          mkdir -p "$out/share/vscode/extensions/$vscodeExtUniqueId/themes"
+          cp "$packageJsonPath" "$out/share/vscode/extensions/$vscodeExtUniqueId/package.json"
+          cp "$themePath" "$out/share/vscode/extensions/$vscodeExtUniqueId/themes/stylix.json"
+        '';
     in {
       programs.vscode-fb.extensions = [themeExtension];
       programs.vscode-fb.userSettings."workbench.colorTheme" = "Stylix";
@@ -135,9 +150,10 @@ in {
     # Install extensions via home.file and register them in extensions.json
     (lib.mkIf (cfg.extensions != []) {
       home.file = lib.listToAttrs (map (ext: {
-        name = "${cfg.extensionsDir}/${extensionDirName ext}";
-        value.source = extensionDir ext;
-      }) cfg.extensions);
+          name = "${cfg.extensionsDir}/${extensionDirName ext}";
+          value.source = extensionDir ext;
+        })
+        cfg.extensions);
 
       home.activation.vscodeAtFbExtensions = lib.hm.dag.entryAfter ["writeBoundary"] ''
         extensionsJson="$HOME/${cfg.extensionsDir}/extensions.json"

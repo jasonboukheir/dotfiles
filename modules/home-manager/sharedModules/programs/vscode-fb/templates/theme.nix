@@ -1,8 +1,11 @@
-colors:
+{
+  colors,
+  polarity,
+}:
 with colors.withHashtag; {
   "$schema" = "vscode://schemas/color-theme";
   name = scheme;
-  type = "dark";
+  type = polarity;
   colors = {
     "actionBar.toggledBackground" = null;
     "activityBar.activeBackground" = base02;

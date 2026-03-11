@@ -40,13 +40,13 @@
             mkdir -p "$out/bin"
           ''
           + lib.concatStringsSep "\n" (lib.mapAttrsToList (binName: macOSName: ''
-            cat > "$out/bin/${binName}" <<'STUB'
-            #!/bin/sh
-            exec "/Applications/${config.appName}.app/Contents/MacOS/${macOSName}" "$@"
-            STUB
-            chmod +x "$out/bin/${binName}"
-          '')
-          config.binaries)
+              cat > "$out/bin/${binName}" <<'STUB'
+              #!/bin/sh
+              exec "/Applications/${config.appName}.app/Contents/MacOS/${macOSName}" "$@"
+              STUB
+              chmod +x "$out/bin/${binName}"
+            '')
+            config.binaries)
         );
         description = "Stub package providing bin/ shims to the Homebrew-installed app.";
       };

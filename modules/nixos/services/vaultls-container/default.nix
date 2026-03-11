@@ -166,9 +166,11 @@ in {
       };
       script = let
         # Generate script to build env file from credentials
-        envLines = lib.mapAttrsToList (name: path: ''
-          echo "${name}=$(cat ${path})" >> ${envFile}
-        '') containerCredentials;
+        envLines =
+          lib.mapAttrsToList (name: path: ''
+            echo "${name}=$(cat ${path})" >> ${envFile}
+          '')
+          containerCredentials;
       in ''
         mkdir -p ${stateDir}
 
