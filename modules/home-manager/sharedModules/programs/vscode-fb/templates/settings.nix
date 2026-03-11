@@ -15,6 +15,8 @@ fonts: with fonts; {
   "markdown.preview.fontSize" = sizes.terminal * 4.0 / 3.0;
   "terminal.integrated.fontSize" = sizes.terminal * 4.0 / 3.0;
   "chat.editor.fontSize" = sizes.terminal * 4.0 / 3.0;
+  "chat.fontSize" = sizes.terminal * 4.0 / 3.0;
+  "devmate.sidebar.fontSize" = sizes.terminal * 4.0 / 3.0;
 
   # other factors (9/14, 13/14, 56/14) based on default for given value
   # divided by default for `editor.fontSize` (14) from
