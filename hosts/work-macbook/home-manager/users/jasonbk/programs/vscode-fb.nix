@@ -62,7 +62,7 @@
       window = {
         autoDetectColorScheme = true;
         autoDetectHighContrast = true;
-        titleBarStyle = "native";
+        titleBarStyle = "custom";
       };
       workbench = {
         activityBar.visible = true;
