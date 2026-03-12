@@ -36,7 +36,8 @@
       "Bash(nix eval:*)",
       "WebFetch(domain:matrixzj.github.io)",
       "Bash(fish:*)",
-      "WebFetch(domain:lvra.gitlab.io)"
+      "WebFetch(domain:lvra.gitlab.io)",
+      "Bash(git add:*)"
     ]
   }
 }
