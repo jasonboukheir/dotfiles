@@ -37,7 +37,8 @@
       "WebFetch(domain:matrixzj.github.io)",
       "Bash(fish:*)",
       "WebFetch(domain:lvra.gitlab.io)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:zed.dev)"
     ]
   }
 }

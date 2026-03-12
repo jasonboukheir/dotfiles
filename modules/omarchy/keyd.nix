@@ -57,6 +57,8 @@ in {
 
           [cmd+shift]
           z = C-S-z
+          c = C-S-c
+          v = C-S-v
           left = S-home
           right = S-end
         '';
