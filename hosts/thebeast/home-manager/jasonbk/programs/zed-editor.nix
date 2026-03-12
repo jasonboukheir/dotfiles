@@ -13,7 +13,7 @@
           "ctrl-shift-z" = "editor::Redo";
           "ctrl-a" = "editor::SelectAll";
           "ctrl-s" = "workspace::Save";
-          "ctrl-f" = "search::Deploy";
+          "ctrl-f" = "buffer_search::Deploy";
           "ctrl-w" = "pane::CloseActiveItem";
           "ctrl-p" = "file_finder::Toggle";
           "ctrl-shift-p" = "command_palette::Toggle";
