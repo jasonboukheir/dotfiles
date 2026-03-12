@@ -16,8 +16,8 @@ in {
       keyboards.default = {
         ids = ["*"];
         settings.main = {
-          leftalt = "layer(cmd)";
-          rightalt = "layer(cmd)";
+          leftmeta = "layer(cmd)";
+          rightmeta = "layer(cmd)";
         };
         extraConfig = ''
           ${capsLockMapping}
@@ -28,7 +28,6 @@ in {
           v = C-v
           x = C-x
           z = C-z
-          shift.z = C-S-z
           s = C-s
           f = C-f
           w = C-w
@@ -40,13 +39,26 @@ in {
           p = C-p
           b = C-b
           k = C-k
+          1 = C-1
+          2 = C-2
+          3 = C-3
+          4 = C-4
+          5 = C-5
+          6 = C-6
+          7 = C-7
+          8 = C-8
+          9 = C-9
           left = home
           right = end
-          shift.left = S-home
-          shift.right = S-end
           up = C-home
           down = C-end
           backspace = C-backspace
+          space = M-space
+
+          [cmd+shift]
+          z = C-S-z
+          left = S-home
+          right = S-end
         '';
       };
     };
