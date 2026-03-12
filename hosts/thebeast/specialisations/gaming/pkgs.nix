@@ -4,6 +4,6 @@
     gamescope
     mangohud
     protonup-qt
-    wlx-overlay-s
+    wayvr
   ];
 }

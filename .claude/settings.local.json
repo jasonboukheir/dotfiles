@@ -35,7 +35,8 @@
       "Bash(git -C /home/jasonbk/.config/nix log --all --pretty=format:\"%h %s\" -- hosts/thebeast/jovian.nix)",
       "Bash(nix eval:*)",
       "WebFetch(domain:matrixzj.github.io)",
-      "Bash(fish:*)"
+      "Bash(fish:*)",
+      "WebFetch(domain:lvra.gitlab.io)"
     ]
   }
 }
