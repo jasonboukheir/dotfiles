@@ -19,7 +19,7 @@ in {
       isNormalUser = true;
     };
     users.jasonbk = {
-      extraGroups = ["gamemode" "networkmanager" "input"];
+      extraGroups = ["gamemode" "input"];
     };
   };
 }
