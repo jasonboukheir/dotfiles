@@ -13,7 +13,7 @@ in {
 
     users.${gameUser} = {
       description = "${gameUser}";
-      extraGroups = ["gamemode" "networkmanager" "input" "wheel" "podman"];
+      extraGroups = ["gamemode" "networkmanager" "input"];
       group = "${gameUser}";
       home = "/home/${gameUser}";
       isNormalUser = true;
