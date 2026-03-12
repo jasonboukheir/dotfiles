@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./home-manager
-    ./specialisations/gaming/options.nix
+    ./options.nix
     ./audio.nix
     ./bluetooth.nix
     ./configuration.nix
