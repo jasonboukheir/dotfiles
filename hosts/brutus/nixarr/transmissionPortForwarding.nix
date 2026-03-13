@@ -24,6 +24,8 @@ in {
     };
 
     systemd.services."transmission-port-forwarding" = {
+      after = ["transmission.service"];
+      requires = ["transmission.service"];
       serviceConfig = {
         Type = "oneshot";
         User = "root";

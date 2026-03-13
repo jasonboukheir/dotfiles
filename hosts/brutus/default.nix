@@ -7,6 +7,7 @@
     ./configuration.nix
     ./hardware-configuration.nix
     ./packages.nix
+    ./stylix.nix
     ./networking
     ./virtualization.nix
     ./../../modules
