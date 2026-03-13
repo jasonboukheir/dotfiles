@@ -91,6 +91,7 @@ in {
 
   sunnycareboo = lib.mkIf cfg.enable {
     services.cloud = {
+      isExternal = true;
       enable = true;
       proxyPass = "http://localhost:${toString cfg.port}";
       extraConfig = ''
