@@ -60,6 +60,7 @@ in {
 
   sunnycareboo = lib.mkIf cfg.enable {
     services.radicale = {
+      isExternal = true;
       enable = true;
       proxyPass = "http://127.0.0.1:${toString cfg.port}";
     };
