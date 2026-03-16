@@ -32,7 +32,7 @@ in {
       };
       customDNS = {
         mapping = {
-          "sunnycareboo.com" = "192.168.50.237";
+          "sunnycareboo.com" = "192.168.50.182";
         };
       };
     };
