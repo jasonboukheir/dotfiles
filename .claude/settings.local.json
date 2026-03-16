@@ -38,7 +38,12 @@
       "Bash(fish:*)",
       "WebFetch(domain:lvra.gitlab.io)",
       "Bash(git add:*)",
-      "WebFetch(domain:zed.dev)"
+      "WebFetch(domain:zed.dev)",
+      "Bash(systemctl status:*)",
+      "Bash(ip addr:*)",
+      "Bash(dig +short:*)",
+      "Bash(curl:*)",
+      "Bash(host:*)"
     ]
   }
 }
