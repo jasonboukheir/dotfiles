@@ -17,16 +17,36 @@
   boot.extraModulePackages = [];
   boot.supportedFilesystems.zfs = true;
 
-  environment.etc."crypttab".text = ''
-    # Name            UUID                                               Keyfile
-    ssd_pool1         UUID=6f2f7f2b-c5e4-441f-988e-3bf5f1d92970          /var/lib/secrets/data.key
-    ssd_pool2         UUID=25b86ef8-d936-400c-b54e-98cd362f6251          /var/lib/secrets/data.key
-    ssd_pool3         UUID=1f4d139d-5441-4c47-8cbc-cc110b8513d2          /var/lib/secrets/data.key
-    ssd_pool4         UUID=c0f82819-c7e9-412d-bec0-222473e73681          /var/lib/secrets/data.key
+  boot.initrd.secrets = {
+    "/var/lib/secrets/data.key" = "/var/lib/secrets/data.key";
+  };
 
-    ext_pool1         UUID=7e22ac54-07b0-4157-8a01-97b87d708c19          /var/lib/secrets/data.key
-    ext_pool2         UUID=08ef1925-a3db-4fff-80df-a9e21fa68578          /var/lib/secrets/data.key
-  '';
+  boot.initrd.luks.devices = {
+    ssd_pool1 = {
+      device = "/dev/disk/by-uuid/6f2f7f2b-c5e4-441f-988e-3bf5f1d92970";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+    ssd_pool2 = {
+      device = "/dev/disk/by-uuid/25b86ef8-d936-400c-b54e-98cd362f6251";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+    ssd_pool3 = {
+      device = "/dev/disk/by-uuid/1f4d139d-5441-4c47-8cbc-cc110b8513d2";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+    ssd_pool4 = {
+      device = "/dev/disk/by-uuid/c0f82819-c7e9-412d-bec0-222473e73681";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+    ext_pool1 = {
+      device = "/dev/disk/by-uuid/7e22ac54-07b0-4157-8a01-97b87d708c19";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+    ext_pool2 = {
+      device = "/dev/disk/by-uuid/08ef1925-a3db-4fff-80df-a9e21fa68578";
+      keyFile = "/var/lib/secrets/data.key";
+    };
+  };
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/18012e8f-6414-45ff-a364-f23e4bb4cae6";
