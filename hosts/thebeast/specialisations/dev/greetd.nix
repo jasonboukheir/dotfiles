@@ -1,25 +1,22 @@
 {pkgs, ...}: let
   tuigreet = "${pkgs.tuigreet}/bin/tuigreet";
-  hyprland-session = "${pkgs.hyprland}/share/wayland-sessions";
+  hyprlandSessions = "${pkgs.hyprland}/share/wayland-sessions";
 in {
+  boot.kernelParams = ["console=tty1"];
+
   services.greetd = {
     enable = true;
+    vt = 2;
     settings = {
       default_session = {
-        command = "${tuigreet} --time --remember --remember-session --sessions ${hyprland-session}";
+        command = "${tuigreet} --time --remember --remember-session --sessions ${hyprlandSessions}";
         user = "greeter";
       };
     };
   };
 
-  # https://www.reddit.com/r/NixOS/comments/u0cdpi/tuigreet_with_xmonad_how/
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
-    StandardInput = "tty";
-    StandardOutput = "tty";
     StandardError = "journal";
-    TTYReset = true;
-    TTYVHangup = true;
-    TTYVTDisallocate = true;
   };
 }

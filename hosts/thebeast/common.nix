@@ -10,6 +10,7 @@
     ./users.nix
     ./networking.nix
     ./nixpkgs.nix
+    ./logitechBrio.nix
     ./printing.nix
     ./programs.nix
     ./stylix.nix
