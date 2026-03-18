@@ -16,6 +16,7 @@
   boot.kernelModules = ["kvm-amd"];
   boot.extraModulePackages = [];
   boot.supportedFilesystems.zfs = true;
+  boot.initrd.systemd.enable = true;
 
   boot.initrd.secrets = {
     "/var/lib/secrets/data.key" = "/var/lib/secrets/data.key";
@@ -25,26 +26,32 @@
     ssd_pool1 = {
       device = "/dev/disk/by-uuid/6f2f7f2b-c5e4-441f-988e-3bf5f1d92970";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
     ssd_pool2 = {
       device = "/dev/disk/by-uuid/25b86ef8-d936-400c-b54e-98cd362f6251";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
     ssd_pool3 = {
       device = "/dev/disk/by-uuid/1f4d139d-5441-4c47-8cbc-cc110b8513d2";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
     ssd_pool4 = {
       device = "/dev/disk/by-uuid/c0f82819-c7e9-412d-bec0-222473e73681";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
     ext_pool1 = {
       device = "/dev/disk/by-uuid/7e22ac54-07b0-4157-8a01-97b87d708c19";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
     ext_pool2 = {
       device = "/dev/disk/by-uuid/08ef1925-a3db-4fff-80df-a9e21fa68578";
       keyFile = "/var/lib/secrets/data.key";
+      crypttabExtraOpts = ["nofail"];
     };
   };
 
