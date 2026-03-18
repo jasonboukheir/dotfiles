@@ -11,6 +11,8 @@
   issuerDomain = config.sunnycareboo.services.id.domain;
   port = 3400;
   oidcCfg = config.services.pocket-id.ensureClients.headscale;
+  brutusTailscaleIP = "100.64.0.7";
+  litusTailscaleIP = "100.64.0.2";
 in {
   services.headscale = {
     enable = true;
@@ -21,7 +23,7 @@ in {
       log.level = "verbose";
       dns = {
         override_local_dns = true;
-        nameservers.global = ["100.64.0.1" "100.64.0.2"];
+        nameservers.global = [brutusTailscaleIP litusTailscaleIP];
         base_domain = magicDomain;
         search_domains = [
           magicDomain
@@ -31,7 +33,7 @@ in {
         extra_records = map (svc: {
           name = svc.domain;
           type = "A";
-          value = "100.64.0.1";
+          value = brutusTailscaleIP;
         }) (lib.attrValues (lib.filterAttrs (_: svc: svc.enable) config.sunnycareboo.services));
       };
       oidc = {
