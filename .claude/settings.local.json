@@ -51,7 +51,10 @@
       "WebFetch(domain:wiki.archlinux.org)",
       "Bash(lsusb:*)",
       "Read(//dev/bus/usb/**)",
-      "Read(//sys/bus/usb/devices/**)"
+      "Read(//sys/bus/usb/devices/**)",
+      "Bash(ping:*)",
+      "Bash(tailscale status:*)",
+      "Bash(systemctl:*)"
     ]
   }
 }
