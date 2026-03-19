@@ -1,0 +1,18 @@
+scheme: "Pascha"
+author: "jasonbk"
+base00: "100e0c" # surface-container-lowest (Code block background)
+base01: "161311" # surface (Main background)
+base02: "231f1c" # Custom header/selection background
+base03: "4d4635" # outline-variant (Line numbers)
+base04: "99907c" # outline (Comments like /* Extinguish all mundane light sources */)
+base05: "e9e1dd" # on-surface (Default Foreground text in editor)
+base06: "d0c5af" # on-surface-variant (Light Foreground/Metadata text)
+base07: "ffdad7" # tertiary-fixed (Lightest Background)
+base08: "ffb4ab" # error (Variables/Deleted)
+base09: "d4af37" # primary-container (Attributes like [CanonicalStatus])
+base0A: "f2ca50" # primary (Classes and Objects like ResurrectionManager, Terminal)
+base0B: "ffbfba" # tertiary (Strings like "[HALLELUJAH] Christ is Risen!")
+base0C: "9fbae6" # on-secondary-container (Support/Regex)
+base0D: "f2ca50" # primary (Methods like InitializePaschalVigil)
+base0E: "adc8f5" # secondary (Keywords like using, namespace, public class, await)
+base0F: "93000a" # error-container (Deprecated/Embedded tags)
