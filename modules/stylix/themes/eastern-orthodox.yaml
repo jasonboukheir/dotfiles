@@ -1,18 +1,18 @@
 scheme: "Eastern Orthodox"
 author: "jasonbk"
-base00: "161311" # Background – deep warm black (background)
-base01: "1e1b19" # Raised Surface – very dark brown (surface-container-low)
-base02: "2d2927" # Selection – dark warm grey (surface-container-high)
-base03: "4d4635" # Comments – muted olive brown (outline-variant)
-base04: "99907c" # Dark Foreground – warm grey-khaki (outline)
-base05: "d0c5af" # Foreground – light warm beige (on-surface-variant)
-base06: "e9e1dd" # Light Foreground – soft off-white (on-background)
-base07: "ffffff" # Lightest Foreground – pure white
-base08: "ffb4ab" # Red – soft salmon pink (error)
-base09: "d4af37" # Orange – metallic gold/mustard (primary-container)
-base0A: "f2ca50" # Yellow – bright golden yellow (primary)
-base0B: "e9c349" # Green – warm yellow-ochre (primary-fixed-dim)
-base0C: "d5e3ff" # Cyan – pale icy blue (secondary-fixed)
-base0D: "adc8f5" # Blue – soft periwinkle blue (secondary)
-base0E: "ffbfba" # Magenta – pale rose pink (tertiary)
-base0F: "735c00" # Extra – deep golden brown (inverse-primary)
+base00: "161311"
+base01: "221f1d"
+base02: "383432"
+base03: "4d4635"
+base04: "99907c"
+base05: "d4be98"
+base06: "e9e1dd"
+base07: "ffdad7"
+base08: "ffb4ab"
+base09: "e9c349"
+base0A: "ffbfba"
+base0B: "adc8f5"
+base0C: "9fbae6"
+base0D: "adc8f5"
+base0E: "f2ca50"
+base0F: "93000a"
