@@ -1,18 +1,18 @@
 scheme: "Eastern Orthodox"
 author: "jasonbk"
-base00: "181820" # Monastic Black – deep obsidian, monastic schema robes
-base01: "282830" # Incense Smoke – charcoal grey, UI panels
-base02: "3a3430" # Aged Cedar – dark muted brown/grey, ancient church woodwork
-base03: "6a6a72" # Tarnished Silver – mid-tone metallic grey, old censer
-base04: "9a9080" # Faded Parchment – muted warm grey-beige
-base05: "d4c8a8" # Beeswax – soft warm off-white
-base06: "e8dcc8" # Iconographer's Gesso – bright crisp white
-base07: "f5efe0" # Tabor Light – the uncreated light of the Transfiguration
-base08: "c24040" # Paschal Crimson – deep earthy red, Martyr's Blood
-base09: "c07844" # Clay / Sienna – earthy terracotta, asceticism
-base0A: "d4a844" # Byzantine Gold – halos and divine presence
-base0B: "48946a" # Pentecost Emerald – Holy Spirit, renewal of creation
-base0C: "5ea8b0" # Theophany Water – waters of baptism
-base0D: "4878a8" # Marian Blue / Lapis Lazuli – garments of the Theotokos
-base0E: "8858a0" # Imperial Porphyry – Lenten Purple, somber violet
-base0F: "a07838" # Frankincense Resin – warm amber-brown
+base00: "161311" # Background – deep warm black (background)
+base01: "1e1b19" # Raised Surface – very dark brown (surface-container-low)
+base02: "2d2927" # Selection – dark warm grey (surface-container-high)
+base03: "4d4635" # Comments – muted olive brown (outline-variant)
+base04: "99907c" # Dark Foreground – warm grey-khaki (outline)
+base05: "d0c5af" # Foreground – light warm beige (on-surface-variant)
+base06: "e9e1dd" # Light Foreground – soft off-white (on-background)
+base07: "ffffff" # Lightest Foreground – pure white
+base08: "ffb4ab" # Red – soft salmon pink (error)
+base09: "d4af37" # Orange – metallic gold/mustard (primary-container)
+base0A: "f2ca50" # Yellow – bright golden yellow (primary)
+base0B: "e9c349" # Green – warm yellow-ochre (primary-fixed-dim)
+base0C: "d5e3ff" # Cyan – pale icy blue (secondary-fixed)
+base0D: "adc8f5" # Blue – soft periwinkle blue (secondary)
+base0E: "ffbfba" # Magenta – pale rose pink (tertiary)
+base0F: "735c00" # Extra – deep golden brown (inverse-primary)
