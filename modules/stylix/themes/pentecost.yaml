@@ -1,0 +1,18 @@
+scheme: "Pentecost"
+author: "jasonbk"
+base00: "100e0c" # surface-container-lowest (Code block background)
+base01: "1a2e1a" # pentecost-forest (Lighter Background/Gradient base)
+base02: "221f1d" # surface-container (Selection/Header background)
+base03: "4d4635" # outline-variant (Comments)
+base04: "99907c" # outline (Line numbers)
+base05: "a8c69f" # pentecost-sage (Default Foreground text in editor)
+base06: "e9e1dd" # on-surface (Light Foreground)
+base07: "d5e3ff" # secondary-fixed (Lightest Background)
+base08: "ffb4ab" # error (Variables/Deleted)
+base09: "4ade80" # pentecost-lime (Booleans like True)
+base0A: "f2ca50" # primary (Function calls like invoke_holy_spirit)
+base0B: "adc8f5" # secondary (Strings like "Pentecost", "tongues_of_fire")
+base0C: "9fbae6" # on-secondary-container (Support/Regex)
+base0D: "f2ca50" # primary (Methods/Functions)
+base0E: "2d5a27" # pentecost-emerald (Keywords like import, def, if, return)
+base0F: "93000a" # error-container (Deprecated/Embedded)

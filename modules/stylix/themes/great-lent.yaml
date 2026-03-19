@@ -1,18 +1,18 @@
 scheme: "Great Lent"
 author: "jasonbk"
-base00: "0e0c0b" # Background – deep liturgical charcoal/black
-base01: "161311" # Raised Surface – dark umber
-base02: "231f1c" # Selection – warm dark brown
-base03: "4a443f" # Comments – muted earthy grey
-base04: "8c8479" # Dark Foreground – aged parchment shadow
-base05: "adc8f5" # Foreground – faded sky blue (Theotokos accent)
-base06: "d4be98" # Light Foreground – classic icon parchment
-base07: "f2ca50" # Lightest Foreground – bright icon gold
-base08: "ea6962" # Red – Cinnabar / Martyr's Red (Error/Alert)
-base09: "d8a657" # Orange – Warm Gold (Warning)
-base0A: "f2ca50" # Yellow – Icon Gold (Highlight)
-base0B: "7daea3" # Green – Faded Lapis/Sea (Success)
-base0C: "89b482" # Cyan – Soft Sage
-base0D: "7d8ead" # Blue – Faded Lapis
-base0E: "b16286" # Magenta – Lenten Purple
-base0F: "a89984" # Extra – Warm Taupe / Earth
+base00: "161311"
+base01: "221f1d"
+base02: "383432"
+base03: "7d728c"
+base04: "99907c"
+base05: "e9e1dd"
+base06: "d5e3ff"
+base07: "ffdad7"
+base08: "ffb4ab"
+base09: "e9c349"
+base0A: "f2ca50"
+base0B: "ffbfba"
+base0C: "9fbae6"
+base0D: "adc8f5"
+base0E: "b088ff"
+base0F: "93000a"
