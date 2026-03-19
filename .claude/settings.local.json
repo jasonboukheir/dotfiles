@@ -59,7 +59,8 @@
       "Bash(nix-instantiate:*)",
       "Bash(headscale nodes:*)",
       "Bash(/nix/store/hwkkllsckjdanzqmlgpzg8rfq1cnnw2r-headscale-0.27.1/bin/headscale:*)",
-      "Bash(sudo:*)"
+      "Bash(sudo:*)",
+      "Bash(nix path-info:*)"
     ]
   }
 }
