@@ -10,8 +10,8 @@ in {
     stylix = {
       image = ./wallpapers/analog-dreams.jpeg;
       # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-      base16Scheme = ./themes/great-lent.yaml;
-      polarity = "dark";
+      base16Scheme = ./themes/analog-dreams.yaml;
+      polarity = "light";
       fonts = {
         monospace = {
           package = pkgs.nerd-fonts.fira-code;
