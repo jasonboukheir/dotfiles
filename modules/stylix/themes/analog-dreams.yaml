@@ -14,10 +14,10 @@ base05: "9a3cbd" # Darkened original magenta (Default Text)
 base06: "8529a6" # Deeper magenta (Prominent Text)
 base07: "6f1a8c" # Deepest magenta (High Contrast Text)
 
-# -- The Syntax (Darkened Pastels) --
+# -- The Syntax (Darkened Pastels & Rich Gold) --
 base08: "e89bcd" # Darkened pink (Variables, Properties)
 base09: "ebb878" # Darkened peach (Numbers, Booleans)
-base0A: "e6e27a" # Darkened yellow (Classes, Types)
+base0A: "c9a032" # Golden Yellow (Classes, Types, Git Modified gutter) - FIXED!
 base0B: "90dfd2" # Slightly lighter teal (Strings - to contrast with base03)
 base0C: "6bc4b5" # Deeper teal (Escape Characters, Regex)
 base0D: "63d2f7" # Darkened blue (Functions, Methods)
