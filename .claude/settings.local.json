@@ -62,7 +62,13 @@
       "Bash(sudo:*)",
       "Bash(nix path-info:*)",
       "Bash(nix build:*)",
-      "mcp__plugin_meta_mux__three_pai_external_web_search"
+      "mcp__plugin_meta_mux__three_pai_external_web_search",
+      "Bash(nix-store --query --requisites /nix/store/)",
+      "Bash(find /nix/store -maxdepth 1 -name '*source*' -type d 2>/dev/null | xargs -I{} sh -c 'test -d \"{}/modules/neovim\" && echo {}' 2>/dev/null | head -5)",
+      "Bash(for d:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/jasonbk/.config/nix/$d/modules/**)",
+      "Bash(find /nix/store -maxdepth 1 -name '*source*' -type d 2>/dev/null | xargs -I{} sh -c 'test -f \"{}/flake.nix\" && grep -l \"nvf\\\\|neovim-flake\" \"{}/flake.nix\" 2>/dev/null && echo {}' 2>/dev/null | head -5)"
     ]
   }
 }
