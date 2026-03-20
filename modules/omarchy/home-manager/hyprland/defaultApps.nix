@@ -73,7 +73,6 @@ in {
       "$passwordManager" = cfg.defaultApps.passwordManager;
       "$messenger" = cfg.defaultApps.messenger;
       "$webapp" = cfg.defaultApps.webapp;
-      monitor = [];
     };
   };
 }
