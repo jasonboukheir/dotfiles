@@ -7,6 +7,11 @@
 in {
   programs.waybar = {
     enable = true;
+    style = lib.mkAfter ''
+      .modules-right > widget > * {
+        padding: 0 8px;
+      }
+    '';
     settings = [
       {
         layer = "top";
@@ -142,7 +147,7 @@ in {
         };
         "custom/sdr-brightness" = lib.mkIf hdrEnabled {
           return-type = "json";
-          format = "󰃠";
+          format = "󰛨";
           exec = "sdr-brightness waybar";
           interval = 2;
           on-scroll-up = "sdr-brightness up";
