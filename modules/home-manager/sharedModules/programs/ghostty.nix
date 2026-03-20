@@ -10,7 +10,6 @@
       settings = {
         window-theme = "auto";
         macos-option-as-alt = true;
-        unfocused-split-opacity = 0.7;
       };
     };
   };
