@@ -6,20 +6,20 @@ variant: "light"
 base00: "f0eee4" # Slightly darker "lightest bg" (Editor Background)
 base01: "d8d2c3" # Original bg (Panels, Inactive Tabs)
 base02: "c7c1b3" # Darker bg (Selection Background, Hover States)
-base03: "7acfc1" # Darkened teal (Funky Comments, Borders, Active Line Numbers)
+base03: "5fb5a6" # Deeper teal (Funky Comments, Borders, Active Line Numbers)
 
 # -- The Foreground (Text) --
-base04: "b868d4" # Lighter magenta (Muted Text, Secondary UI)
-base05: "9a3cbd" # Darkened original magenta (Default Text)
-base06: "8529a6" # Deeper magenta (Prominent Text)
-base07: "6f1a8c" # Deepest magenta (High Contrast Text)
+base04: "a351bf" # Deeper magenta (Muted Text, Secondary UI)
+base05: "7f26a1" # Rich deep magenta (Default Text)
+base06: "6a1987" # Dark magenta (Prominent Text)
+base07: "520d6b" # Deepest dark magenta (High Contrast Text)
 
 # -- The Syntax (Darkened Pastels & Rich Gold) --
-base08: "e89bcd" # Darkened pink (Variables, Properties)
-base09: "ebb878" # Darkened peach (Numbers, Booleans)
-base0A: "c9a032" # Golden Yellow (Classes, Types, Git Modified gutter) - FIXED!
-base0B: "90dfd2" # Slightly lighter teal (Strings - to contrast with base03)
-base0C: "6bc4b5" # Deeper teal (Escape Characters, Regex)
-base0D: "63d2f7" # Darkened blue (Functions, Methods)
-base0E: "c386d9" # Darkened pastel purple (Keywords, Operators)
-base0F: "82dbfc" # Lighter blue (Macros, Deprecated)
+base08: "cc7ca8" # Richer pink (Variables, Properties)
+base09: "d19954" # Richer peach (Numbers, Booleans)
+base0A: "ab8522" # Deep Golden Yellow (Classes, Types, Git Modified gutter)
+base0B: "5bb3a4" # Deeper teal (Strings)
+base0C: "4ba394" # Darkest teal (Escape Characters, Regex)
+base0D: "3fb4db" # Richer blue (Functions, Methods)
+base0E: "a663bd" # Rich pastel purple (Keywords, Operators)
+base0F: "5ac1e6" # Deeper light blue (Macros, Deprecated)
