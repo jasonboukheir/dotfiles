@@ -14,6 +14,11 @@ in {
         default = 1.0;
         description = "Default SDR brightness when HDR is active (0.5–2.5)";
       };
+      sdrSaturation = lib.mkOption {
+        type = lib.types.addCheck lib.types.float (x: x >= 0.0 && x <= 1.5);
+        default = 1.0;
+        description = "SDR saturation when HDR is active — reduce slightly when brightness > 1.0 to prevent color clipping (0.0–1.5)";
+      };
     };
     macKeybindings = {
       enable = lib.mkEnableOption "macOS-style keybindings via keyd";

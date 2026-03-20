@@ -4,6 +4,7 @@
       RULE: Self-documenting code instead of comments
     '';
     settings = {
+      effortLevel = "high";
       permissions = {
         defaultMode = "acceptEdits";
       };
