@@ -8,8 +8,9 @@
     programs.ghostty = {
       package = lib.mkIf pkgs.stdenv.isDarwin pkgs.ghostty-bin;
       settings = {
-        window-theme = "system";
+        window-theme = "auto";
         macos-option-as-alt = true;
+        unfocused-split-opacity = 0.7;
       };
     };
   };
