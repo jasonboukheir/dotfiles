@@ -68,7 +68,11 @@
       "Bash(for d:*)",
       "Bash(do echo:*)",
       "Read(//Users/jasonbk/.config/nix/$d/modules/**)",
-      "Bash(find /nix/store -maxdepth 1 -name '*source*' -type d 2>/dev/null | xargs -I{} sh -c 'test -f \"{}/flake.nix\" && grep -l \"nvf\\\\|neovim-flake\" \"{}/flake.nix\" 2>/dev/null && echo {}' 2>/dev/null | head -5)"
+      "Bash(find /nix/store -maxdepth 1 -name '*source*' -type d 2>/dev/null | xargs -I{} sh -c 'test -f \"{}/flake.nix\" && grep -l \"nvf\\\\|neovim-flake\" \"{}/flake.nix\" 2>/dev/null && echo {}' 2>/dev/null | head -5)",
+      "Bash(which nvim:*)",
+      "Bash(nvim --headless -c 'echo g:colors_name' -c 'qa' 2>&1)",
+      "Bash(nvim --headless -c 'highlight Normal' -c 'qa' 2>&1)",
+      "Bash(nvim --headless -c 'highlight Normal' -c 'highlight Comment' -c 'highlight String' -c 'qa' 2>&1)"
     ]
   }
 }
