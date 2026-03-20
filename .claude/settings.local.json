@@ -61,7 +61,8 @@
       "Bash(/nix/store/hwkkllsckjdanzqmlgpzg8rfq1cnnw2r-headscale-0.27.1/bin/headscale:*)",
       "Bash(sudo:*)",
       "Bash(nix path-info:*)",
-      "Bash(nix build:*)"
+      "Bash(nix build:*)",
+      "mcp__plugin_meta_mux__three_pai_external_web_search"
     ]
   }
 }
