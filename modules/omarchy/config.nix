@@ -7,6 +7,14 @@
 in {
   options.omarchy = {
     enable = lib.mkEnableOption "Omarchy-esque Hyprland config";
+    hdr = {
+      enable = lib.mkEnableOption "HDR and 10-bit color support";
+      sdrBrightness = lib.mkOption {
+        type = lib.types.addCheck lib.types.float (x: x >= 0.5 && x <= 2.5);
+        default = 1.0;
+        description = "Default SDR brightness when HDR is active (0.5–2.5)";
+      };
+    };
     macKeybindings = {
       enable = lib.mkEnableOption "macOS-style keybindings via keyd";
       capsLockAsCmd = lib.mkEnableOption "remap Caps Lock to act as Cmd (Meta)";

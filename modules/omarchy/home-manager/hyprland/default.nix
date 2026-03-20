@@ -8,6 +8,7 @@
     ./envs.nix
     ./input.nix
     ./looknfeel.nix
+    ./monitor.nix
     ./windows.nix
   ];
 }

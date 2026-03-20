@@ -1,4 +1,10 @@
-{...}: {
+{
+  lib,
+  osConfig,
+  ...
+}: let
+  hdrEnabled = osConfig.omarchy.hdr.enable;
+in {
   programs.waybar = {
     enable = true;
     settings = [
@@ -13,15 +19,17 @@
         modules-center = [
           "clock"
         ];
-        modules-right = [
-          "tray"
-          "bluetooth"
-          "network"
-          "wireplumber"
-          "cpu"
-          "power-profiles-daemon"
-          "battery"
-        ];
+        modules-right =
+          ["tray"]
+          ++ lib.optional hdrEnabled "custom/sdr-brightness"
+          ++ [
+            "bluetooth"
+            "network"
+            "wireplumber"
+            "cpu"
+            "power-profiles-daemon"
+            "battery"
+          ];
         "hyprland/workspaces" = {
           on-click = "activate";
           format = "{icon}";
@@ -131,6 +139,15 @@
           tooltip-format = "Playing at {volume}%";
           on-click-right = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; # Updated command
           max-volume = 150; # Optional: allow volume over 100%
+        };
+        "custom/sdr-brightness" = lib.mkIf hdrEnabled {
+          return-type = "json";
+          format = "󰃠";
+          exec = "sdr-brightness waybar";
+          interval = 2;
+          on-scroll-up = "sdr-brightness up";
+          on-scroll-down = "sdr-brightness down";
+          on-click = "sdr-brightness reset";
         };
         tray = {
           spacing = 13;
