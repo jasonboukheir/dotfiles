@@ -1,0 +1,25 @@
+scheme: "Digital Nightmares"
+author: "Jason Bou Kheir"
+variant: "dark"
+
+# -- The Deep Void (Darker Backgrounds) --
+base00: "1c1a27" # Darkened bg (Main Editor Background)
+base01: "29263b" # exact bg (Panels, Inactive Tabs, Toolbars)
+base02: "3b3754" # Lighter bg (Selection, Hover States, Active Line)
+base03: "4d486d" # Lightest bg shade (Comments, Window Borders, Invisibles)
+
+# -- The Teal Glow (Text Track) --
+base04: "6ebdae" # Muted/darker teal (Secondary UI Text / Inactive Text)
+base05: "9de7d7" # exact teal (Default Foreground Text)
+base06: "bbf0e5" # Lighter glowing teal (Prominent UI Text)
+base07: "dcfaf4" # Lightest neon teal (Maximum Contrast Text)
+
+# -- The Synthwave Syntax (Accent Track) --
+base08: "f1b2dc" # exact pink (Variables, Properties)
+base09: "f2c791" # Neon peach (Numbers, Constants, Booleans)
+base0A: "f2f0a1" # exact yellow (Classes, Types)
+base0B: "ac4fc6" # exact magenta (Strings, Inherited Classes - swapped from teal!)
+base0C: "c778de" # Lighter magenta (Escape Characters, Regex)
+base0D: "8ae0ff" # exact blue (Functions, Methods)
+base0E: "c882e8" # Neon lavender (Keywords, Operators)
+base0F: "6bd6ff" # Deep sky blue (Macros, Deprecated)
