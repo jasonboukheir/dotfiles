@@ -1,0 +1,18 @@
+scheme: "Analog Dreams"
+author: "jasonbk"
+base00: "fff9eb" # background/surface (Main editor background)
+base01: "f4eedb" # surface-container (Line numbers/Status bar)
+base02: "e9e2d0" # surface-variant (Selection background)
+base03: "87717c" # outline (Invisibles/Guides)
+base04: "54414b" # on-surface-variant (Comments like // Initializing CRT scanlines...)
+base05: "1e1c10" # on-surface (Default Foreground text)
+base06: "333024" # inverse-surface (Darker foreground)
+base07: "001f29" # on-secondary-fixed (Darkest text)
+base08: "ba1a1a" # error (Variables/Deleted)
+base09: "a72683" # primary (Numbers like 1994, Variables like aesthetic)
+base0A: "ff71ce" # primary-container (Classes)
+base0B: "00a48b" # Custom Teal (Strings like "Vaporwave", "Analog")
+base0C: "0fceff" # secondary-container (Support/Regex/Escape chars)
+base0D: "006781" # secondary (Functions like renderDream)
+base0E: "852fca" # tertiary (Keywords like const, function, return)
+base0F: "93000a" # on-error-container (Deprecated/Embedded)
