@@ -1,5 +1,10 @@
 {lib, ...}: {
   options.gaming = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Whether to enable gaming mode with Steam, emulators, and gaming packages";
+    };
     user = lib.mkOption {
       type = lib.types.str;
       default = "gamer";

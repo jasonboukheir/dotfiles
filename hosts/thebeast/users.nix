@@ -1,7 +1,11 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   gameUser = config.gaming.user;
+  gamingEnabled = config.gaming.enable;
 in {
-  # Ensure the gamer home directory exists on the games drive
   systemd.tmpfiles.rules = [
     "d /games/home/gamer 0755 ${gameUser} ${gameUser} -"
   ];
@@ -13,13 +17,13 @@ in {
 
     users.${gameUser} = {
       description = "${gameUser}";
-      extraGroups = ["gamemode" "networkmanager" "input"];
+      extraGroups =
+        ["networkmanager" "input"]
+        ++ lib.optionals gamingEnabled ["gamemode"];
       group = "${gameUser}";
       home = "/home/${gameUser}";
       isNormalUser = true;
     };
-    users.jasonbk = {
-      extraGroups = ["gamemode" "input"];
-    };
+    users.jasonbk.extraGroups = lib.optionals gamingEnabled ["gamemode" "input"];
   };
 }
