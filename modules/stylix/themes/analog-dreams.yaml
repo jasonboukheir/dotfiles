@@ -1,19 +1,25 @@
 scheme: "Analog Dreams"
 author: "Jason Bou Kheir"
 variant: "light"
-base00: "f6f4ee" # Lightest shade of bg (Default Background)
-base01: "d8d2c3" # exact bg (Secondary Background / Status Bars)
-base02: "c7c1b3" # Darker bg (Selection Background)
-base03: "9de7d7" # exact teal (Comments, Invisibles, Line Highlighting)
-base04: "cd8adf" # Pastel magenta (Secondary Text)
-base05: "ac4fc6" # exact magenta (Default Foreground Text)
-base06: "9a42b3" # Slightly deeper magenta
-base07: "86349c" # Deepest magenta (High Contrast Foreground)
-base08: "f1b2dc" # exact pink (Variables)
-base09: "f3d2a6" # Pastel peach (Integers/Constants)
-base0A: "f2f0a1" # exact yellow (Classes)
-base0B: "b4eee1" # Lighter teal (Strings)
-base0C: "7bd8c6" # Slightly deeper teal (Regex/Escapes)
-base0D: "8ae0ff" # exact blue (Functions/Methods)
-base0E: "d29ce6" # Light pastel purple (Keywords)
-base0F: "aae8ff" # Lighter blue (Tags/Deprecated)
+
+# -- The Canvas & Funky UI --
+base00: "f0eee4" # Slightly darker "lightest bg" (Editor Background)
+base01: "d8d2c3" # Original bg (Panels, Inactive Tabs)
+base02: "c7c1b3" # Darker bg (Selection Background, Hover States)
+base03: "7acfc1" # Darkened teal (Funky Comments, Borders, Active Line Numbers)
+
+# -- The Foreground (Text) --
+base04: "b868d4" # Lighter magenta (Muted Text, Secondary UI)
+base05: "9a3cbd" # Darkened original magenta (Default Text)
+base06: "8529a6" # Deeper magenta (Prominent Text)
+base07: "6f1a8c" # Deepest magenta (High Contrast Text)
+
+# -- The Syntax (Darkened Pastels) --
+base08: "e89bcd" # Darkened pink (Variables, Properties)
+base09: "ebb878" # Darkened peach (Numbers, Booleans)
+base0A: "e6e27a" # Darkened yellow (Classes, Types)
+base0B: "90dfd2" # Slightly lighter teal (Strings - to contrast with base03)
+base0C: "6bc4b5" # Deeper teal (Escape Characters, Regex)
+base0D: "63d2f7" # Darkened blue (Functions, Methods)
+base0E: "c386d9" # Darkened pastel purple (Keywords, Operators)
+base0F: "82dbfc" # Lighter blue (Macros, Deprecated)
