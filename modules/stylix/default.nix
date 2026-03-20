@@ -19,6 +19,9 @@ in {
           name = "FiraCode Nerd Font";
         };
       };
+      targets = {
+        nvf.plugin = "mini-base16";
+      };
     };
   };
 }

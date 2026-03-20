@@ -72,7 +72,8 @@
       "Bash(which nvim:*)",
       "Bash(nvim --headless -c 'echo g:colors_name' -c 'qa' 2>&1)",
       "Bash(nvim --headless -c 'highlight Normal' -c 'qa' 2>&1)",
-      "Bash(nvim --headless -c 'highlight Normal' -c 'highlight Comment' -c 'highlight String' -c 'qa' 2>&1)"
+      "Bash(nvim --headless -c 'highlight Normal' -c 'highlight Comment' -c 'highlight String' -c 'qa' 2>&1)",
+      "Bash(nvim --headless -c 'echo &background' -c 'qa' 2>&1)"
     ]
   }
 }
