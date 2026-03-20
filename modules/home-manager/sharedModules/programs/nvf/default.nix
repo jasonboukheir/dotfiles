@@ -3,10 +3,19 @@
   config,
   lib,
   ...
-}: {
+}: let
+  stylixEnabled = config ? stylix && config.stylix.enable;
+  stylixPolarity = lib.optionalString stylixEnabled config.stylix.polarity;
+in {
   config = lib.mkIf config.programs.nvf.enable {
-    programs.nvf.settings = {
-      vim = {
+    programs.nvf.settings = {lib, ...}: {
+      vim = lib.mkMerge [
+        (lib.mkIf stylixEnabled {
+          luaConfigRC.background = lib.nvim.dag.entryBefore ["theme"] ''
+            vim.o.background = "${stylixPolarity}"
+          '';
+        })
+        {
         autocomplete.blink-cmp = {
           enable = true;
         };
@@ -61,7 +70,8 @@
           python.enable = true;
           zig.enable = true;
         };
-      };
+        }
+      ];
     };
   };
 }
