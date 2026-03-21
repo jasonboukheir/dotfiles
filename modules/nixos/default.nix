@@ -4,8 +4,8 @@
     ./programs
     ./services
     ./configuration.nix
+    ./cursors.nix
     ./ephemeral-secrets.nix
-    ./stylix.nix
     ./users.nix
   ];
 }

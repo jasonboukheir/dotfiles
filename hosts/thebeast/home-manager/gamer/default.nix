@@ -70,11 +70,6 @@
 in {
   home.stateVersion = "25.11";
 
-  stylix.cursor = {
-    inherit (osConfig.stylix.cursor) name package;
-    size = 12;
-  };
-
   programs.retroarch = lib.mkIf (retroarchSystems != []) {
     enable = true;
     cores = lib.listToAttrs (map (s: lib.nameValuePair s.core {enable = true;}) retroarchSystems);
