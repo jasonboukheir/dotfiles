@@ -13,8 +13,8 @@
       old.postPatch
       + ''
         find src/svg/dark -name '*.svg' -exec sed -i \
-          -e 's/#fff"/#${colors.base00}"/g' \
-          -e 's/#1a1a1a/#${colors.base04}/g' \
+          -e 's/#fff"/#${colors.base04}"/g' \
+          -e 's/#1a1a1a/#${colors.base00}/g' \
           {} +
       '';
 
