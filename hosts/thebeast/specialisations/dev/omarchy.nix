@@ -6,7 +6,7 @@
   };
   omarchy.hdr = {
     enable = true;
-    colorManagement = "hdredid";
+    colorManagement = "hdr";
     sdrMinLuminance = 0.005;
     sdrMaxLuminance = 203;
   };
