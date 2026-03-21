@@ -6,6 +6,8 @@
 }: {
   config = lib.mkIf config.omarchy.enable {
     environment.systemPackages = with pkgs; [
+      gpu-screen-recorder
+      gpu-screen-recorder-gtk
       hyprshot
       hyprpicker
       hyprsunset

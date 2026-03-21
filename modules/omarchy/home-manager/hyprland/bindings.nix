@@ -65,6 +65,8 @@ in {
         "SHIFT, PRINT, exec, hyprshot -m window"
         "CTRL, PRINT, exec, hyprshot -m output"
 
+        ", XF86Tools, exec, gpu-screen-recorder-gtk"
+
         "ALT, PRINT, exec, hyprpicker -a"
 
         "CTRL ALT, V, exec, ghostty --class clipse -e clipse"

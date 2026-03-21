@@ -56,6 +56,8 @@ in {
           space = M-space
 
           [cmd+shift]
+          4 = print
+          5 = f13
           z = C-S-z
           c = C-S-c
           v = C-S-v
