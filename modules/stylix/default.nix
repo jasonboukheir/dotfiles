@@ -10,8 +10,8 @@ in {
     stylix = {
       image = ./wallpapers/analog-dreams.jpeg;
       # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-      base16Scheme = ./themes/analog-dreams.yaml;
-      polarity = "light";
+      base16Scheme = ./themes/digital-nightmares.yaml;
+      polarity = "dark";
       opacity.terminal = 0.97;
       fonts = {
         monospace = {
