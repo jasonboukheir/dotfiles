@@ -32,7 +32,7 @@ in {
     stylix.cursor = {
       name = "Capitaine Cursors";
       package = themedCursors;
-      size = 18;
+      size = 24;
     };
   };
 }
