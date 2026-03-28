@@ -6,12 +6,13 @@
 
     # 1. Define the UPS Device (The Hardware)
     ups.tripplite = {
-      # The OMNI1500LCDT is a USB HID compliant device
       driver = "usbhid-ups";
       port = "auto";
       description = "Tripp Lite OMNI1500LCDT";
-      # If you have USB connection issues, you can uncomment the pollinterval
-      # directives = [ "pollinterval = 2" ];
+      directives = [
+        "vendorid = 09ae"
+        "productid = 3016"
+      ];
       maxStartDelay = null;
     };
 
