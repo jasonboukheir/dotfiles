@@ -3,7 +3,6 @@
 in {
   wayland.windowManager.hyprland.settings = {
     env = [
-      "GDK_SCALE,2"
       "XCURSOR_SIZE,${cursorSize}"
       "HYPRCURSOR_SIZE,${cursorSize}"
 
