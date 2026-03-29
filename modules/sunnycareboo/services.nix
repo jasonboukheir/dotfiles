@@ -153,18 +153,28 @@ in {
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
       commonHttpConfig = mkIf hasExternal ''
-        limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+        map $server_port $external_limit_key {
+          8443  $binary_remote_addr;
+          8080  $binary_remote_addr;
+          default "";
+        }
+        limit_req_zone $external_limit_key zone=external:10m rate=10r/s;
+
+        map "$server_port:$ssl_client_verify" $mtls_reject {
+          "~^8443:SUCCESS$"  0;
+          "~^8443:"          1;
+          default            0;
+        }
+
         access_log ${nginxLogDir}/access.log;
         error_log ${nginxLogDir}/error.log warn;
       '';
 
       virtualHosts = mkMerge [
-        # Services that we manage the virtualHost for
-        (listToAttrs (concatLists (mapAttrsToList (
+        (listToAttrs (mapAttrsToList (
             name: svcCfg: let
               domain = svcCfg.domain;
 
-              # Build locations (only if proxyPass is set)
               allLocations =
                 optionalAttrs (svcCfg.proxyPass != null) {
                   "/" = {
@@ -178,48 +188,34 @@ in {
                     extraConfig = locCfg.extraConfig;
                   })
                   svcCfg.locations);
-
-              # Base vhost config shared between internal and external
-              baseVhostConfig = {
-                inherit (svcCfg) extraConfig;
+            in
+              nameValuePair domain {
                 forceSSL = true;
                 useACMEHost = cfg.baseDomain;
                 locations = allLocations;
-              };
-
-              # Internal vhost (ports 80/443) - no mTLS
-              internalVhost = nameValuePair domain (baseVhostConfig
-                // {
-                  listen = internalHttpListeners;
-                });
-
-              # External vhost (ports 8080/8443) - with rate limiting and optional mTLS
-              externalVhost = nameValuePair "${domain}-external" (baseVhostConfig
-                // {
-                  serverName = domain;
-                  listen = externalHttpListeners;
-                  extraConfig =
-                    svcCfg.extraConfig
-                    + ''
-                      limit_req zone=general burst=20 nodelay;
-                      limit_req_status 429;
-                    ''
-                    + optionalString svcCfg.mtls.enable ''
-                      ssl_verify_client on;
-                      ssl_client_certificate ${cfg.mtls.caCertFile};
-                    '';
-                });
-            in
-              # Internal services: just internal vhost
-              # External services: internal vhost + external vhost (with mTLS)
-              if svcCfg.isExternal
-              then [internalVhost externalVhost]
-              else [internalVhost]
+                listen =
+                  if svcCfg.isExternal
+                  then internalHttpListeners ++ externalHttpListeners
+                  else internalHttpListeners;
+                extraConfig =
+                  svcCfg.extraConfig
+                  + optionalString svcCfg.isExternal ''
+                    limit_req zone=external burst=20 nodelay;
+                    limit_req_status 429;
+                  ''
+                  + optionalString svcCfg.mtls.enable ''
+                    ssl_verify_client optional;
+                    ssl_client_certificate ${cfg.mtls.caCertFile};
+                    if ($mtls_reject) {
+                      return 403;
+                    }
+                  '';
+              }
           ) (filterAttrs (
               name: svcCfg:
                 svcCfg.enable
             )
-            cfg.services))))
+            cfg.services)))
         # 2. Create a "catch-all" vhost to handle unknown domains/IPs
         {
           "_" = {
