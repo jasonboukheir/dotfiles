@@ -1,11 +1,12 @@
-{...}: let
+{config, lib, ...}: let
+  cursorSize = toString config.stylix.cursor.size;
 in {
   wayland.windowManager.hyprland.settings = {
-    # Environment variables
     env = [
       "GDK_SCALE,2"
+      "XCURSOR_SIZE,${cursorSize}"
+      "HYPRCURSOR_SIZE,${cursorSize}"
 
-      # Force all apps to use Wayland
       "GDK_BACKEND,wayland"
       "QT_QPA_PLATFORM,wayland"
       "QT_STYLE_OVERRIDE,kvantum"
@@ -14,10 +15,8 @@ in {
       "ELECTRON_OZONE_PLATFORM_HINT,wayland"
       "OZONE_PLATFORM,wayland"
 
-      # Make .desktop files available for wofi
       "XDG_DATA_DIRS,$XDG_DATA_DIRS:$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share"
 
-      # Use XCompose file
       "XCOMPOSEFILE,~/.XCompose"
       "EDITOR,nvim"
     ];
