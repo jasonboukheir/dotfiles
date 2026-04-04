@@ -2,6 +2,7 @@
   lib,
   config,
   pkgs,
+  pkgs-unstable,
   ...
 }: {
   config = lib.mkIf config.programs.zed-editor.enable {
@@ -14,10 +15,10 @@
         "zig"
         "ruff"
       ];
-      extraPackages = with pkgs; [
-        gemini-cli
-        claude-code
-        package-version-server
+      extraPackages = [
+        pkgs-unstable.gemini-cli
+        pkgs-unstable.claude-code
+        pkgs.package-version-server
       ];
       installRemoteServer = true;
       userSettings = lib.mkMerge [
