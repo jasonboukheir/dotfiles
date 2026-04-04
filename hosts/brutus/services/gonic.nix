@@ -4,7 +4,6 @@
   ...
 }: let
   musicDir = "${config.nixarr.mediaDir}/library/music";
-  podcastDir = "${config.nixarr.mediaDir}/library/podcasts";
   gonicDataDir = "/var/lib/gonic";
   cfg = config.services.gonic;
 in {
@@ -12,22 +11,15 @@ in {
     enable = true;
     settings = {
       music-path = [musicDir];
-      podcast-path = podcastDir;
+      podcast-path = "${gonicDataDir}/podcasts";
       playlists-path = "${gonicDataDir}/playlists";
     };
   };
 
   systemd.tmpfiles.rules = [
     "d ${gonicDataDir}/playlists 0755 root root -"
+    "d ${gonicDataDir}/podcasts 0755 root root -"
   ];
-
-  systemd.services.gonic.serviceConfig = {
-    BindPaths = lib.mkForce [
-      cfg.settings.playlists-path
-      cfg.settings.cache-path
-    ];
-    BindReadOnlyPaths = lib.mkAfter [podcastDir];
-  };
 
   sunnycareboo.services.gonic = lib.mkIf cfg.enable {
     enable = true;
