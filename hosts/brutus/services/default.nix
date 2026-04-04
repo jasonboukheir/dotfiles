@@ -9,6 +9,7 @@
     ./opencloud
     ./blocky.nix
     ./ddclient.nix
+    ./gonic.nix
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
