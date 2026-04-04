@@ -7,6 +7,7 @@
     ./zed-editor
     ./_1password.nix
     ./claude-code.nix
+    ./gemini-cli.nix
     ./direnv.nix
     ./fish.nix
     ./ghostty.nix
