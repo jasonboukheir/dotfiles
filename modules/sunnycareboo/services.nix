@@ -103,6 +103,12 @@ with lib; let
         description = "Additional location blocks";
       };
 
+      noCache = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Add Cache-Control: no-cache to force browsers to revalidate on every request";
+      };
+
       extraConfig = mkOption {
         type = types.lines;
         default = "";
@@ -175,17 +181,23 @@ in {
             name: svcCfg: let
               domain = svcCfg.domain;
 
+              noCacheConfig = optionalString svcCfg.noCache ''
+                proxy_hide_header Cache-Control;
+                add_header Cache-Control "no-cache" always;
+              '';
+
               allLocations =
                 optionalAttrs (svcCfg.proxyPass != null) {
                   "/" = {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = svcCfg.proxyWebsockets;
+                    extraConfig = noCacheConfig;
                   };
                 }
                 // (mapAttrs (path: locCfg: {
                     proxyPass = locCfg.proxyPass;
                     proxyWebsockets = locCfg.proxyWebsockets;
-                    extraConfig = locCfg.extraConfig;
+                    extraConfig = locCfg.extraConfig + noCacheConfig;
                   })
                   svcCfg.locations);
             in
