@@ -142,6 +142,7 @@ in {
 
   config = mkIf cfg.enable (let
     hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
+    hasNoCache = any (svc: svc.enable && svc.noCache) (attrValues cfg.services);
     nginxLogDir = "/var/log/nginx";
   in {
     assertions = [
@@ -158,23 +159,42 @@ in {
       recommendedTlsSettings = true;
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
-      commonHttpConfig = mkIf hasExternal ''
-        map $server_port $external_limit_key {
-          8443  $binary_remote_addr;
-          8080  $binary_remote_addr;
-          default "";
-        }
-        limit_req_zone $external_limit_key zone=external:10m rate=10r/s;
+      commonHttpConfig =
+        optionalString hasExternal ''
+          map $server_port $external_limit_key {
+            8443  $binary_remote_addr;
+            8080  $binary_remote_addr;
+            default "";
+          }
+          limit_req_zone $external_limit_key zone=external:10m rate=10r/s;
 
-        map "$server_port:$ssl_client_verify" $mtls_reject {
-          "~^8443:SUCCESS$"  0;
-          "~^8443:"          1;
-          default            0;
-        }
+          map "$server_port:$ssl_client_verify" $mtls_reject {
+            "~^8443:SUCCESS$"  0;
+            "~^8443:"          1;
+            default            0;
+          }
 
-        access_log ${nginxLogDir}/access.log;
-        error_log ${nginxLogDir}/error.log warn;
-      '';
+          access_log ${nginxLogDir}/access.log;
+          error_log ${nginxLogDir}/error.log warn;
+        ''
+        + optionalString hasNoCache ''
+          map $upstream_http_cache_control $no_cache_cc_override {
+            ""                    "no-cache";
+            "~no-store"           $upstream_http_cache_control;
+            "~no-cache"           $upstream_http_cache_control;
+            "~must-revalidate"    $upstream_http_cache_control;
+            default               "no-cache";
+          }
+
+          map $upstream_http_content_type $no_cache_override {
+            ~image/                    $upstream_http_cache_control;
+            ~video/                    $upstream_http_cache_control;
+            ~audio/                    $upstream_http_cache_control;
+            ~font/                     $upstream_http_cache_control;
+            ~application/octet-stream  $upstream_http_cache_control;
+            default                    $no_cache_cc_override;
+          }
+        '';
 
       virtualHosts = mkMerge [
         (listToAttrs (mapAttrsToList (
@@ -183,7 +203,7 @@ in {
 
               noCacheConfig = optionalString svcCfg.noCache ''
                 proxy_hide_header Cache-Control;
-                add_header Cache-Control "no-cache" always;
+                add_header Cache-Control $no_cache_override always;
               '';
 
               allLocations =
@@ -197,7 +217,10 @@ in {
                 // (mapAttrs (path: locCfg: {
                     proxyPass = locCfg.proxyPass;
                     proxyWebsockets = locCfg.proxyWebsockets;
-                    extraConfig = locCfg.extraConfig + noCacheConfig;
+                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
+                      locCfg.extraConfig
+                      noCacheConfig
+                    ]);
                   })
                   svcCfg.locations);
             in
