@@ -208,22 +208,26 @@ in {
                 add_header Cache-Control $no_cache_override always;
               '';
 
+              rateLimitConfig = optionalString svcCfg.isExternal ''
+                limit_req zone=external burst=20 nodelay;
+              '';
+
               allLocations =
                 optionalAttrs (svcCfg.proxyPass != null) {
                   "/" = {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = svcCfg.proxyWebsockets;
-                    extraConfig = noCacheConfig;
+                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
+                      rateLimitConfig
+                      noCacheConfig
+                    ]);
                   };
                 }
                 // optionalAttrs (svcCfg.isExternal && svcCfg.proxyPass != null) {
                   ${staticAssetPattern} = {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = false;
-                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
-                      "limit_req off;"
-                      noCacheConfig
-                    ]);
+                    extraConfig = noCacheConfig;
                   };
                 }
                 // (mapAttrs (path: locCfg: {
@@ -231,6 +235,7 @@ in {
                     proxyWebsockets = locCfg.proxyWebsockets;
                     extraConfig = concatStringsSep "\n" (filter (s: s != "") [
                       locCfg.extraConfig
+                      rateLimitConfig
                       noCacheConfig
                     ]);
                   })
@@ -247,7 +252,6 @@ in {
                 extraConfig =
                   svcCfg.extraConfig
                   + optionalString svcCfg.isExternal ''
-                    limit_req zone=external burst=20 nodelay;
                     limit_req_status 429;
                   ''
                   + optionalString svcCfg.mtls.enable ''
