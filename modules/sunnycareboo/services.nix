@@ -52,6 +52,8 @@ with lib; let
     }
   ];
 
+  staticAssetPattern = "~* \\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|webp|avif)$";
+
   serviceModule = types.submodule ({name, ...}: {
     options = {
       enable = mkEnableOption "this service";
@@ -212,6 +214,16 @@ in {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = svcCfg.proxyWebsockets;
                     extraConfig = noCacheConfig;
+                  };
+                }
+                // optionalAttrs (svcCfg.isExternal && svcCfg.proxyPass != null) {
+                  ${staticAssetPattern} = {
+                    proxyPass = svcCfg.proxyPass;
+                    proxyWebsockets = false;
+                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
+                      "limit_req off;"
+                      noCacheConfig
+                    ]);
                   };
                 }
                 // (mapAttrs (path: locCfg: {
