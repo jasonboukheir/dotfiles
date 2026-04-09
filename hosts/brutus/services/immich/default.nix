@@ -242,6 +242,7 @@ in {
 
   sunnycareboo.services.photos = lib.mkIf cfg.enable {
     enable = true;
+    isExternal = true;
     proxyPass = "http://localhost:${toString cfg.port}";
     extraConfig = ''
       client_max_body_size 5000M;
