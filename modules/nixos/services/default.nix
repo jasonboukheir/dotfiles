@@ -4,6 +4,7 @@
     ./pocket-id
     ./vaultls-container
     ./blocky.nix
+    ./eternal-terminal.nix
     ./hydroxide.nix
     ./libation.nix
     ./lldap.nix
