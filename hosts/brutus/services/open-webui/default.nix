@@ -48,7 +48,7 @@ in {
           SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
         }
       ]
-      ++ (lib.optional config.services.litellm-container.enable {
+      ++ (lib.optional config.services.litellm.enable {
         # OPENAI API
         OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
       }));
@@ -81,7 +81,7 @@ in {
   sunnycareboo.services.ai = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
-    proxyPass = "http://localhost:${toString cfg.port}";
+    proxyPass = "http://${cfg.host}:${toString cfg.port}";
   };
 
   # PostgreSQL

@@ -3,52 +3,37 @@
   config,
   ...
 }: let
+  cfg = config.services.litellm;
   port = 3200;
-  cfg = config.services.litellm-container;
 in {
-  options = {
-    services.litellm-container.enable = lib.mkEnableOption "litellm-container";
+  services.litellm = {
+    enable = true;
+    port = port;
+    environment = {
+      DATABASE_URL = "postgresql://litellm@localhost:5432/litellm";
+      STORE_MODEL_IN_DB = "True";
+    };
+    environmentFile = config.age.secrets."litellm/env".path;
   };
 
-  config = {
-    services.litellm-container.enable = true;
-    age.secrets."litellm/env" = lib.mkIf cfg.enable {
-      file = ../secrets/litellm/env.age;
-    };
-    virtualisation.oci-containers.containers = lib.mkIf cfg.enable {
-      litellm = {
-        autoStart = true;
-        image = "ghcr.io/berriai/litellm:main-latest";
-        cmd = [
-          "--port=${toString port}"
-          "--host=localhost"
-        ];
-        environment = {
-          "DATABASE_URL" = "postgresql://litellm@localhost:5432/litellm";
-          "STORE_MODEL_IN_DB" = "True";
-        };
-        environmentFiles = [
-          config.age.secrets."litellm/env".path
-        ];
-        extraOptions = [
-          "--network=host"
-        ];
-      };
-    };
-    services.postgresql = lib.mkIf cfg.enable {
-      ensureUsers = [
-        {
-          name = "litellm";
-          ensureDBOwnership = true;
-        }
-      ];
-      ensureDatabases = [
-        "litellm"
-      ];
-    };
-    sunnycareboo.services.litellm = lib.mkIf cfg.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString port}";
-    };
+  age.secrets."litellm/env" = lib.mkIf cfg.enable {
+    file = ../secrets/litellm/env.age;
+  };
+
+  services.postgresql = lib.mkIf cfg.enable {
+    ensureUsers = [
+      {
+        name = "litellm";
+        ensureDBOwnership = true;
+      }
+    ];
+    ensureDatabases = [
+      "litellm"
+    ];
+  };
+
+  sunnycareboo.services.litellm = lib.mkIf cfg.enable {
+    enable = true;
+    proxyPass = "http://${cfg.host}:${toString cfg.port}";
   };
 }
