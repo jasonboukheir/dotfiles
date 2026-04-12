@@ -6,6 +6,7 @@
 }: let
   cfg = config.services.open-webui;
   oidcCfg = config.services.pocket-id.ensureClients.open-webui;
+  proxyCfg = config.sunnycareboo.services.litellm;
   domain = config.sunnycareboo.services.ai.domain;
   port = 3100;
 in {
@@ -48,9 +49,9 @@ in {
           SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
         }
       ]
-      ++ (lib.optional config.services.litellm.enable {
+      ++ (lib.optional proxyCfg.enable {
         # OPENAI API
-        OPENAI_API_BASE_URL = "https://${config.sunnycareboo.services.litellm.domain}";
+        OPENAI_API_BASE_URL = "https://${proxyCfg.domain}";
       }));
     credentials = {
       "OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
