@@ -28,9 +28,7 @@ in {
 
     sourceRoot = ".";
 
-    nativeBuildInputs =
-      [final.installShellFiles]
-      ++ final.lib.optionals final.stdenv.hostPlatform.isDarwin [final.fixDarwinDylibNames];
+    nativeBuildInputs = [final.installShellFiles];
 
     installPhase = ''
       install -Dm755 zmx $out/bin/zmx

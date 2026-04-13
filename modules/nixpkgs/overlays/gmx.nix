@@ -12,7 +12,8 @@ final: prev: let
     };
   };
 
-  src = final.fetchurl sources.${final.stdenv.hostPlatform.system};
+  src = final.fetchurl (sources.${final.stdenv.hostPlatform.system}
+    or (throw "gmx: unsupported platform ${final.stdenv.hostPlatform.system}"));
 in {
   gmx = final.stdenvNoCC.mkDerivation {
     pname = "gmx";
@@ -20,7 +21,7 @@ in {
 
     sourceRoot = ".";
 
-    nativeBuildInputs = [final.fixDarwinDylibNames final.installShellFiles];
+    nativeBuildInputs = [final.installShellFiles];
 
     installPhase = ''
       install -Dm755 gmx $out/bin/gmx
