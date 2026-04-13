@@ -94,6 +94,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    ephemeral-secrets.new-api-session = {};
+
+    services.new-api.credentials = {
+      SESSION_SECRET = config.ephemeral-secrets.new-api-session.path;
+      CRYPTO_SECRET = "${cfg.stateDir}/crypto-secret";
+    };
+
     systemd.services.new-api = {
       description = "new-api LLM gateway";
       after = ["network.target"];
@@ -102,6 +109,13 @@ in {
       environment = cfg.environment;
 
       serviceConfig = {
+        ExecStartPre = "+" + pkgs.writeShellScript "new-api-gen-secrets" ''
+          if [ ! -f ${cfg.stateDir}/crypto-secret ]; then
+            ${lib.getExe' pkgs.openssl "openssl"} rand -base64 32 > ${cfg.stateDir}/crypto-secret
+            chown root:root ${cfg.stateDir}/crypto-secret
+            chmod 600 ${cfg.stateDir}/crypto-secret
+          fi
+        '';
         LoadCredential = credHelpers.loadList;
         ExecStart = pkgs.writeShellScript "new-api-start" ''
           ${credHelpers.exportScript}
