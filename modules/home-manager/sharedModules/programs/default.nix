@@ -7,10 +7,12 @@
     ./zed-editor
     ./_1password.nix
     ./claude-code.nix
-    ./gemini-cli.nix
     ./direnv.nix
+    ./eternal-terminal.nix
     ./fish.nix
+    ./gemini-cli.nix
     ./ghostty.nix
+    ./gmx.nix
     ./ssh.nix
     ./starship.nix
     ./zsh.nix
