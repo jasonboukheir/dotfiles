@@ -6,7 +6,7 @@
     ./eternal-terminal.nix
     ./fish.nix
     ./ghostty.nix
-    ./gmx.nix
+    ./zmx.nix
     ./ssh.nix
     ./zed-editor.nix
   ];

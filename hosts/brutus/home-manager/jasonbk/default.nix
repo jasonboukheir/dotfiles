@@ -3,6 +3,6 @@
   programs = {
     claude-code.enable = true;
     gemini-cli.enable = true;
-    gmx.enable = true;
+    zmx.enable = true;
   };
 }

@@ -12,7 +12,7 @@
     ./fish.nix
     ./gemini-cli.nix
     ./ghostty.nix
-    ./gmx.nix
+    ./zmx.nix
     ./ssh.nix
     ./starship.nix
     ./zsh.nix
