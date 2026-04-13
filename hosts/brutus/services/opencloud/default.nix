@@ -78,6 +78,8 @@ in {
       "OC_DOMAIN" = config.sunnycareboo.services.cloud.domain;
       "PROXY_TLS" = "false";
 
+      "OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD" = "false";
+
       # oidc
       "OC_ADMIN_USER_ID" = "";
       "OC_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
