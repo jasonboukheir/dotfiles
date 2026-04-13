@@ -52,8 +52,6 @@ with lib; let
     }
   ];
 
-  staticAssetPattern = "~* \\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|webp|avif)$";
-
   serviceModule = types.submodule ({name, ...}: {
     options = {
       enable = mkEnableOption "this service";
@@ -105,12 +103,6 @@ with lib; let
         description = "Additional location blocks";
       };
 
-      noCache = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Add Cache-Control: no-cache to force browsers to revalidate on every request";
-      };
-
       extraConfig = mkOption {
         type = types.lines;
         default = "";
@@ -144,7 +136,6 @@ in {
 
   config = mkIf cfg.enable (let
     hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
-    hasNoCache = any (svc: svc.enable && svc.noCache) (attrValues cfg.services);
     nginxLogDir = "/var/log/nginx";
   in {
     assertions = [
@@ -179,34 +170,12 @@ in {
           access_log ${nginxLogDir}/access.log;
           error_log ${nginxLogDir}/error.log warn;
         ''
-        + optionalString hasNoCache ''
-          map $upstream_http_cache_control $no_cache_cc_override {
-            ""                    "no-cache";
-            "~no-store"           $upstream_http_cache_control;
-            "~no-cache"           $upstream_http_cache_control;
-            "~must-revalidate"    $upstream_http_cache_control;
-            default               "no-cache";
-          }
-
-          map $upstream_http_content_type $no_cache_override {
-            ~image/                    $upstream_http_cache_control;
-            ~video/                    $upstream_http_cache_control;
-            ~audio/                    $upstream_http_cache_control;
-            ~font/                     $upstream_http_cache_control;
-            ~application/octet-stream  $upstream_http_cache_control;
-            default                    $no_cache_cc_override;
-          }
-        '';
+        ;
 
       virtualHosts = mkMerge [
         (listToAttrs (mapAttrsToList (
             name: svcCfg: let
               domain = svcCfg.domain;
-
-              noCacheConfig = optionalString svcCfg.noCache ''
-                proxy_hide_header Cache-Control;
-                add_header Cache-Control $no_cache_override always;
-              '';
 
               rateLimitConfig = optionalString svcCfg.isExternal ''
                 limit_req zone=external burst=20 nodelay;
@@ -217,17 +186,7 @@ in {
                   "/" = {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = svcCfg.proxyWebsockets;
-                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
-                      rateLimitConfig
-                      noCacheConfig
-                    ]);
-                  };
-                }
-                // optionalAttrs (svcCfg.isExternal && svcCfg.proxyPass != null) {
-                  ${staticAssetPattern} = {
-                    proxyPass = svcCfg.proxyPass;
-                    proxyWebsockets = false;
-                    extraConfig = noCacheConfig;
+                    extraConfig = rateLimitConfig;
                   };
                 }
                 // (mapAttrs (path: locCfg: {
@@ -236,7 +195,6 @@ in {
                     extraConfig = concatStringsSep "\n" (filter (s: s != "") [
                       locCfg.extraConfig
                       rateLimitConfig
-                      noCacheConfig
                     ]);
                   })
                   svcCfg.locations);
