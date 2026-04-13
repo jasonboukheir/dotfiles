@@ -98,7 +98,6 @@ in {
 
     services.new-api.credentials = {
       SESSION_SECRET = config.ephemeral-secrets.new-api-session.path;
-      CRYPTO_SECRET = "${cfg.stateDir}/crypto-secret";
     };
 
     systemd.services.new-api = {
@@ -109,16 +108,16 @@ in {
       environment = cfg.environment;
 
       serviceConfig = {
-        ExecStartPre = "+" + pkgs.writeShellScript "new-api-gen-secrets" ''
+        ExecStartPre = pkgs.writeShellScript "new-api-gen-secrets" ''
           if [ ! -f ${cfg.stateDir}/crypto-secret ]; then
             ${lib.getExe' pkgs.openssl "openssl"} rand -base64 32 > ${cfg.stateDir}/crypto-secret
-            chown root:root ${cfg.stateDir}/crypto-secret
             chmod 600 ${cfg.stateDir}/crypto-secret
           fi
         '';
         LoadCredential = credHelpers.loadList;
         ExecStart = pkgs.writeShellScript "new-api-start" ''
           ${credHelpers.exportScript}
+          export CRYPTO_SECRET="$(cat ${cfg.stateDir}/crypto-secret)"
           exec ${lib.getExe cfg.package} --port ${toString cfg.port} --log-dir ${cfg.stateDir}/logs
         '';
         WorkingDirectory = cfg.stateDir;
