@@ -22,5 +22,33 @@ with lib; {
         When set, external services will have mTLS enabled by default.
       '';
     };
+
+    smtp = {
+      host = mkOption {
+        type = types.str;
+        description = "SMTP server hostname";
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 587;
+        description = "SMTP server port";
+      };
+
+      from = mkOption {
+        type = types.str;
+        description = "From address for outgoing email";
+      };
+
+      username = mkOption {
+        type = types.str;
+        description = "SMTP authentication username";
+      };
+
+      passwordFile = mkOption {
+        type = types.path;
+        description = "Path to file containing the SMTP password";
+      };
+    };
   };
 }

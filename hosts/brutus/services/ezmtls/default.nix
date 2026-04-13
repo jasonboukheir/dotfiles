@@ -6,6 +6,7 @@
 }: let
   cfg = config.services.ezmtls;
   oidcCfg = config.services.pocket-id.ensureClients.ezmtls;
+  smtpCfg = config.sunnycareboo.smtp;
   domain = config.sunnycareboo.services.certs.domain;
 in {
   services.ezmtls = {
@@ -16,6 +17,13 @@ in {
       issuer = "https://${config.sunnycareboo.services.id.domain}";
       clientId = oidcCfg.settings.id;
       clientSecretFile = oidcCfg.secretFile;
+    };
+    smtp = {
+      host = smtpCfg.host;
+      port = smtpCfg.port;
+      from = smtpCfg.from;
+      username = smtpCfg.username;
+      passwordFile = smtpCfg.passwordFile;
     };
     ensureCAs.mtls = {
       commonName = "Sunnycareboo mTLS CA";

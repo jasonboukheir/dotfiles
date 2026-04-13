@@ -21,7 +21,9 @@
     ./radicale.nix
     ./restic.nix
     ./searx.nix
+    ./smtp.nix
     ./sunnycareboo.nix
     ./tailscale.nix
+    ./zfs.nix
   ];
 }
