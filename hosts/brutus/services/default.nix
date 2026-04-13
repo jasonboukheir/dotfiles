@@ -13,7 +13,7 @@
     ./gonic.nix
     ./hydroxide.nix
     ./libation.nix
-    ./new-api.nix
+    ./litellm.nix
     ./lldap.nix
     ./memos.nix
     ./pocket-id.nix

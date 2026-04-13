@@ -6,7 +6,7 @@
     ./eternal-terminal.nix
     ./hydroxide.nix
     ./libation.nix
-    ./new-api
+    ./litellm.nix
     ./lldap.nix
     ./mealie.nix
     ./open-webui.nix
