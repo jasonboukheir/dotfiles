@@ -9,6 +9,7 @@ let
     "cloudflare/token.age"
     "libation/AccountsSettings.json.age"
     # "libation/Settings.json.age"  # Uncomment if using custom settings
+    "litellm/env.age"
     "lldap/jwt_secret.age"
     "lldap/users/admin/pw.age"
     "mealie/openaiApiKey.age"

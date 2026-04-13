@@ -6,7 +6,7 @@
 }: let
   cfg = config.services.open-webui;
   oidcCfg = config.services.pocket-id.ensureClients.open-webui;
-  proxyCfg = config.sunnycareboo.services.llm;
+  proxyCfg = config.sunnycareboo.services.litellm;
   domain = config.sunnycareboo.services.ai.domain;
   port = 3100;
 in {
