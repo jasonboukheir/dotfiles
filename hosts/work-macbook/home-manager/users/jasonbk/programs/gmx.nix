@@ -1,4 +1,3 @@
 {...}: {
-  home.stateVersion = "25.11";
   programs.gmx.enable = true;
 }
