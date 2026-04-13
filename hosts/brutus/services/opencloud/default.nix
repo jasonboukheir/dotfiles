@@ -10,6 +10,9 @@
   oidc_domain = config.sunnycareboo.services.id.domain;
   oidc_url = "https://${oidc_domain}";
   oidcWebCfg = config.services.pocket-id.ensureClients.opencloud-web;
+  oidcAndroidCfg = config.services.pocket-id.ensureClients.opencloud-android;
+  oidcIosCfg = config.services.pocket-id.ensureClients.opencloud-ios;
+  oidcDesktopCfg = config.services.pocket-id.ensureClients.opencloud-desktop;
 in {
   services.opencloud = {
     enable = true;
@@ -83,6 +86,10 @@ in {
       # oidc
       "OC_ADMIN_USER_ID" = "";
       "OC_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
+      "WEBFINGER_WEB_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
+      "WEBFINGER_ANDROID_OIDC_CLIENT_ID" = oidcAndroidCfg.settings.id;
+      "WEBFINGER_IOS_OIDC_CLIENT_ID" = oidcIosCfg.settings.id;
+      "WEBFINGER_DESKTOP_OIDC_CLIENT_ID" = oidcDesktopCfg.settings.id;
       "OC_OIDC_ISSUER" = oidc_url;
       "WEB_OPTION_ACCOUNT_EDIT_LINK_HREF" = "${oidc_url}/settings/account";
       "OC_EXCLUDE_RUN_SERVICES" = "idp";
