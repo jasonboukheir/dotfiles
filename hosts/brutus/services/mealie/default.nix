@@ -22,7 +22,7 @@ in {
       "OIDC_ADMIN_GROUP" = "admin";
       "OIDC_PROVIDER_NAME" = "Pocket ID";
 
-      "OPENAI_BASE_URL" = "https://${config.sunnycareboo.services.litellm.domain}";
+      "OPENAI_BASE_URL" = "https://${config.sunnycareboo.services.llm.domain}";
       "OPENAI_MODEL" = "xai/grok-4-fast-non-reasoning";
     };
     database.createLocally = true;
