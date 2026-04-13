@@ -32,7 +32,7 @@ in {
     ];
   };
 
-  sunnycareboo.services.litellm = lib.mkIf cfg.enable {
+  sunnycareboo.services.llm = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://${cfg.host}:${toString cfg.port}";
   };
