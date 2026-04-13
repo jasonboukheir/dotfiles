@@ -7,6 +7,7 @@
     ./mealie
     ./open-webui
     ./opencloud
+    ./bifrost.nix
     ./blocky.nix
     ./ddclient.nix
     ./eternal-terminal.nix
