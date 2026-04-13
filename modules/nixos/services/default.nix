@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./bifrost
     ./opencloud
     ./pocket-id
     ./blocky.nix
