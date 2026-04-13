@@ -5,6 +5,7 @@
 }: let
   cfg = config.services.immich;
   domain = config.sunnycareboo.services.photos.domain;
+  smtpCfg = config.sunnycareboo.smtp;
   oidcCfg = config.services.pocket-id.ensureClients.immich;
 in {
   services.immich = {
@@ -171,16 +172,16 @@ in {
       };
       notifications = {
         smtp = {
-          enabled = false;
-          from = "";
+          enabled = true;
+          from = smtpCfg.from;
           replyTo = "";
           transport = {
-            host = "";
+            host = smtpCfg.host;
+            port = smtpCfg.port;
+            username = smtpCfg.username;
+            password._secret = smtpCfg.passwordFile;
             ignoreCert = false;
-            password = "";
-            port = 587;
             secure = false;
-            username = "";
           };
         };
       };

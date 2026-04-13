@@ -23,6 +23,7 @@ let
     "restic/password.age"
     "restic/repo.age"
     "searx/env.age"
+    "smtp/password.age"
     "step-ca/intermediatePassword.age"
     "tailscale/authkey.age"
   ];

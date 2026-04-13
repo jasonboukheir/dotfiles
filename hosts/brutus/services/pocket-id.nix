@@ -5,6 +5,7 @@
 }: let
   port = 1411;
   domain = config.sunnycareboo.services.id.domain;
+  smtpCfg = config.sunnycareboo.smtp;
   lldapCfg = config.services.lldap;
 in {
   sunnycareboo.services.id = lib.mkIf config.services.pocket-id.enable {
@@ -27,6 +28,7 @@ in {
     enable = true;
     credentials = {
       ENCRYPTION_KEY = config.age.secrets."pocket-id/encryptionKey".path;
+      SMTP_PASSWORD = smtpCfg.passwordFile;
       # LDAP_BIND_PASSWORD = config.age.secrets."lldap/admin".path;
     };
     settings = {
@@ -35,7 +37,17 @@ in {
       LOG_JSON = true;
       PORT = port;
 
-      # UI_CONFIG_DISABLED = true;
+      SMTP_HOST = smtpCfg.host;
+      SMTP_PORT = smtpCfg.port;
+      SMTP_FROM = smtpCfg.from;
+      SMTP_USER = smtpCfg.username;
+      SMTP_TLS = "starttls";
+
+      EMAIL_LOGIN_NOTIFICATION_ENABLED = true;
+      EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED = true;
+      EMAIL_VERIFICATION_ENABLED = true;
+
+      UI_CONFIG_DISABLED = true;
 
       # LDAP_ENABLED = true;
       # LDAP_URL = "ldap://${lldapCfg.settings.ldap_host}:${toString lldapCfg.settings.ldap_port}";
