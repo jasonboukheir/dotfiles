@@ -5,7 +5,7 @@
     ./claude-code.nix
     ./eternal-terminal.nix
     ./ghostty.nix
-    ./gmx.nix
+    ./zmx.nix
     ./ssh.nix
     ./vscode-fb.nix
     ./zed-editor.nix

@@ -1,3 +1,0 @@
-{...}: {
-  programs.gmx.enable = true;
-}
