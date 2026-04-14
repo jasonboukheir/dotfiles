@@ -80,10 +80,6 @@ in {
       enable = true;
       openFirewall = false;
     };
-    jellyseerr = {
-      enable = true;
-      openFirewall = false;
-    };
   };
 
   sunnycareboo.services = lib.mkIf config.nixarr.enable {
@@ -128,11 +124,6 @@ in {
     sonarr = lib.mkIf config.nixarr.sonarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.sonarr.port}";
-    };
-    jellyseerr = lib.mkIf config.nixarr.jellyseerr.enable {
-      enable = true;
-      isExternal = true;
-      proxyPass = "http://localhost:${toString config.nixarr.jellyseerr.port}";
     };
   };
 
