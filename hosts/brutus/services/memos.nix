@@ -13,6 +13,7 @@ in {
 
   sunnycareboo.services.memos = lib.mkIf cfg.enable {
     enable = true;
+    isExternal = true;
     proxyPass = "http://localhost:${cfg.settings.MEMOS_PORT}";
   };
 }
