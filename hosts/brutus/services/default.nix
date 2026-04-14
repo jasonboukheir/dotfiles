@@ -21,6 +21,7 @@
     ./radicale.nix
     ./restic.nix
     ./searx.nix
+    ./seerr.nix
     ./smtp.nix
     ./sunnycareboo.nix
     ./tailscale.nix

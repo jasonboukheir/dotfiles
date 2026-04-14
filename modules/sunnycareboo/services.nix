@@ -154,13 +154,6 @@ in {
       recommendedGzipSettings = true;
       commonHttpConfig =
         optionalString hasExternal ''
-          map $server_port $external_limit_key {
-            8443  $binary_remote_addr;
-            8080  $binary_remote_addr;
-            default "";
-          }
-          limit_req_zone $external_limit_key zone=external:10m rate=10r/s;
-
           map "$server_port:$ssl_client_verify" $mtls_reject {
             "~^8443:SUCCESS$"  0;
             "~^8443:"          1;
@@ -177,25 +170,17 @@ in {
             name: svcCfg: let
               domain = svcCfg.domain;
 
-              rateLimitConfig = optionalString svcCfg.isExternal ''
-                limit_req zone=external burst=20 nodelay;
-              '';
-
               allLocations =
                 optionalAttrs (svcCfg.proxyPass != null) {
                   "/" = {
                     proxyPass = svcCfg.proxyPass;
                     proxyWebsockets = svcCfg.proxyWebsockets;
-                    extraConfig = rateLimitConfig;
                   };
                 }
                 // (mapAttrs (path: locCfg: {
                     proxyPass = locCfg.proxyPass;
                     proxyWebsockets = locCfg.proxyWebsockets;
-                    extraConfig = concatStringsSep "\n" (filter (s: s != "") [
-                      locCfg.extraConfig
-                      rateLimitConfig
-                    ]);
+                    extraConfig = locCfg.extraConfig;
                   })
                   svcCfg.locations);
             in
@@ -209,9 +194,6 @@ in {
                   else internalHttpListeners;
                 extraConfig =
                   svcCfg.extraConfig
-                  + optionalString svcCfg.isExternal ''
-                    limit_req_status 429;
-                  ''
                   + optionalString svcCfg.mtls.enable ''
                     ssl_verify_client optional;
                     ssl_client_certificate ${cfg.mtls.caCertFile};
@@ -295,14 +277,6 @@ in {
           backend  = systemd
           maxretry = 5
           findtime = 300
-          bantime  = 3600
-        '';
-        nginx-limit-req = ''
-          enabled  = true
-          filter   = nginx-limit-req
-          logpath  = ${nginxLogDir}/error.log
-          maxretry = 10
-          findtime = 60
           bantime  = 3600
         '';
       };
