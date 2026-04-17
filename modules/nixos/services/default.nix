@@ -3,7 +3,6 @@
     ./opencloud
     ./pocket-id
     ./blocky.nix
-    ./eternal-terminal.nix
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix

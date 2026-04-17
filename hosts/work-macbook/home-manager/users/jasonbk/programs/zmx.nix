@@ -1,3 +1,0 @@
-{...}: {
-  programs.zmx.enable = true;
-}

@@ -8,7 +8,6 @@
     ./_1password.nix
     ./claude-code.nix
     ./direnv.nix
-    ./eternal-terminal.nix
     ./fish.nix
     ./gemini-cli.nix
     ./ghostty.nix
