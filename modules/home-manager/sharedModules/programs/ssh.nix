@@ -2,7 +2,24 @@
   config,
   lib,
   ...
-}: {
+}: let
+  sshMultiplexing = {
+    ControlMaster = "auto";
+    ControlPath = "~/.ssh/control-%C";
+    ControlPersist = "10m";
+  };
+
+  zmxSessionBlock = host: {
+    hostname = host;
+    forwardAgent = true;
+    extraOptions =
+      sshMultiplexing
+      // {
+        RemoteCommand = "zmx attach %n";
+        RequestTTY = "yes";
+      };
+  };
+in {
   options = {
     _1passwordSshHostGlob = lib.mkOption {
       type = lib.types.str;
@@ -19,10 +36,14 @@
       matchBlocks = {
         "brutus" = {
           forwardAgent = true;
+          extraOptions = sshMultiplexing;
         };
+        "brutus.*" = zmxSessionBlock "brutus";
         "litus" = {
           forwardAgent = true;
+          extraOptions = sshMultiplexing;
         };
+        "litus.*" = zmxSessionBlock "litus";
         "pibitcoin" = {
           forwardAgent = true;
         };
