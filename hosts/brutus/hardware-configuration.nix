@@ -25,6 +25,10 @@
     after = ["cryptsetup.target"];
     wants = ["cryptsetup.target"];
   };
+  systemd.services."zfs-import-hdd_pool1" = {
+    after = ["cryptsetup.target"];
+    wants = ["cryptsetup.target"];
+  };
 
   environment.etc."crypttab".text = ''
     ssd_pool1         UUID=6f2f7f2b-c5e4-441f-988e-3bf5f1d92970          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
@@ -34,6 +38,11 @@
 
     ext_pool1         UUID=7e22ac54-07b0-4157-8a01-97b87d708c19          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
     ext_pool2         UUID=08ef1925-a3db-4fff-80df-a9e21fa68578          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
+
+    hdd_pool1a        UUID=bfeb2887-efda-4362-a6b2-4815a6a8c7bb          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
+    hdd_pool1b        UUID=a045a547-bbf4-4852-b065-4fe5260b8d88          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
+    hdd_pool1c        UUID=0fdf34b5-1c04-4447-b0b3-bf3de650d071          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
+    hdd_pool1d        UUID=f4147898-2820-4b9a-921b-3e07eedc8f5e          /var/lib/secrets/data.key  luks,x-systemd.device-timeout=120
   '';
 
   fileSystems."/" = {
@@ -54,6 +63,11 @@
 
   fileSystems."/ext_pool" = {
     device = "ext_pool/main";
+    fsType = "zfs";
+  };
+
+  fileSystems."/hdd_pool1" = {
+    device = "hdd_pool1/main";
     fsType = "zfs";
   };
 
