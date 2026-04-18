@@ -5,6 +5,7 @@
     ./power
     ./services
     ./configuration.nix
+    ./graphics.nix
     ./hardware-configuration.nix
     ./packages.nix
     ./stylix.nix
