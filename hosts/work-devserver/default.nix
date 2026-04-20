@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  proxyUrl = "http://localhost:18082";
+  proxyUrl = "http://[::1]:18082";
 
   nixProxyWrapper = {
     bash = ''
@@ -39,6 +39,7 @@ in {
   ];
 
   stylix.enable = true;
+  dconf.enable = false;
 
   home = {
     username = "jasonbk";
@@ -61,6 +62,8 @@ in {
       enable = true;
       matchBlocks."github.com".proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
     };
+
+    git.settings.gpg.ssh.defaultKeyCommand = "ssh-add -L";
 
     zmx.enable = true;
 
