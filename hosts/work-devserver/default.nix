@@ -57,6 +57,11 @@ in {
   };
 
   programs = {
+    ssh = {
+      enable = true;
+      matchBlocks."github.com".proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
+    };
+
     zmx.enable = true;
 
     bash = {
