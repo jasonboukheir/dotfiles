@@ -1,3 +1,4 @@
 .direnv
 VaulTLS
 .claude/settings.local.json
+nix.conf
