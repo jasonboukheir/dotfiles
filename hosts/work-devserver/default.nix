@@ -4,6 +4,7 @@
   ...
 }: let
   proxyUrl = "http://[::1]:18082";
+  sshKeyPath = "~/.ssh/id_ed25519";
 
   nixProxyWrapper = {
     bash = ''
@@ -60,10 +61,14 @@ in {
   programs = {
     ssh = {
       enable = true;
-      matchBlocks."github.com".proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
+      matchBlocks."github.com" = {
+        proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
+        identityFile = sshKeyPath;
+        extraOptions.AddKeysToAgent = "yes";
+      };
     };
 
-    git.settings.gpg.ssh.defaultKeyCommand = "ssh-add -L";
+    git.settings.user.signingKey = "${sshKeyPath}.pub";
 
     zmx.enable = true;
 
