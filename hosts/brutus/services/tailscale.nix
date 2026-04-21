@@ -2,6 +2,7 @@
   services.tailscale = {
     enable = true;
     openFirewall = true;
+    extraDaemonFlags = [ "--encrypt-state=false" ];
     authKeyFile = config.age.secrets."tailscale/authkey".path;
     authKeyParameters = {
       baseURL = "https://${config.sunnycareboo.services.headscale.domain}";
