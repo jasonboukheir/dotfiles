@@ -57,6 +57,7 @@
   fileSystems."/ext_pool" = {
     device = "ext_pool/main";
     fsType = "zfs";
+    options = ["nofail"];
   };
 
   fileSystems."/hdd_pool1" = {
