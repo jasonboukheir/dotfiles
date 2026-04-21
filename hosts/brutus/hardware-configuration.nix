@@ -52,6 +52,7 @@
   fileSystems."/ssd_pool" = {
     device = "ssd_pool/main";
     fsType = "zfs";
+    options = ["nofail"];
   };
 
   fileSystems."/ext_pool" = {
