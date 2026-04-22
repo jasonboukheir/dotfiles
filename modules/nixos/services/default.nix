@@ -11,5 +11,6 @@
     ./open-webui.nix
     ./openssh.nix
     ./radicale.nix
+    ./speaches.nix
   ];
 }
