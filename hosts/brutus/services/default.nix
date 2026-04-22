@@ -13,6 +13,7 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
+    ./speaches.nix
     ./lldap.nix
     ./memos.nix
     ./pocket-id.nix

@@ -43,6 +43,15 @@ in {
           OAUTH_MERGE_ACCOUNTS_BY_EMAIL = "True";
           ENABLE_OAUTH_SIGNUP = "True";
 
+          # audio via litellm proxy
+          AUDIO_STT_ENGINE = "openai";
+          AUDIO_STT_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          AUDIO_STT_MODEL = "whisper-1";
+          AUDIO_TTS_ENGINE = "openai";
+          AUDIO_TTS_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          AUDIO_TTS_MODEL = "tts-1";
+          AUDIO_TTS_VOICE = "alloy";
+
           # search settings
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
@@ -55,6 +64,8 @@ in {
       }));
     credentials = {
       "OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
+      "AUDIO_STT_OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
+      "AUDIO_TTS_OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
       "WEBUI_SECRET_KEY" = config.age.secrets."open-webui/webuiSecretKey".path;
     };
   };

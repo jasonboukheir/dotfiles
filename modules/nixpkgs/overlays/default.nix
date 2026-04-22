@@ -5,5 +5,6 @@
     (import ./lidarr.nix)
     (import ./pocket-id.nix)
     (import ./zmx.nix)
+    (import ./speaches.nix)
   ];
 }
