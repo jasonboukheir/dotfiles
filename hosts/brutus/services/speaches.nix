@@ -8,6 +8,8 @@
     environment = {
       LOG_LEVEL = "info";
       ENABLE_UI = "False";
+      STT_MODEL_TTL = "3600";
+      TTS_MODEL_TTL = "3600";
     };
   };
 }
