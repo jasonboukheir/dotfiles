@@ -3,6 +3,7 @@
     ./actual
     ./ezmtls
     ./headscale
+    ./home-assistant
     ./immich
     ./mealie
     ./open-webui
