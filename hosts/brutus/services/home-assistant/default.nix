@@ -8,7 +8,21 @@
   oidcCfg = config.services.pocket-id.ensureClients.home-assistant;
   domain = config.sunnycareboo.services.home.domain;
   url = "https://${domain}";
-
+  auth_oidc = pkgs.home-assistant-custom-components.auth_oidc.overridePythonAttrs (old: {
+    version = "1.0.2";
+    src = pkgs.fetchFromGitHub {
+      owner = "christiaangoossens";
+      repo = "hass-oidc-auth";
+      tag = "v1.0.2";
+      hash = "sha256-ZYJD0PVh2E07cdY1a7uxSxdooAMz78HwJpwr4uWofZM=";
+    };
+    dependencies = with pkgs.python3Packages; [
+      aiofiles
+      bcrypt
+      jinja2
+      joserfc
+    ];
+  });
 in {
   services.home-assistant = {
     enable = true;
@@ -29,7 +43,7 @@ in {
       "ollama"
     ];
     customComponents = [
-      pkgs.home-assistant-custom-components.auth_oidc
+      auth_oidc
     ];
     extraPackages = ps: with ps; [psycopg2];
     config = {
@@ -50,6 +64,11 @@ in {
       auth_oidc = {
         client_id = oidcCfg.settings.id;
         discovery_url = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+        features = {
+          automatic_user_linking = true;
+          default_redirect = true;
+          force_https = true;
+        };
       };
 
       homekit = [
