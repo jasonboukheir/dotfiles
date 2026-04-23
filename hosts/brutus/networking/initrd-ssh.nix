@@ -12,5 +12,5 @@
   };
 
   # Ensure networking is up in initrd so SSH can accept connections
-  boot.initrd.availableKernelModules = ["r8169"]; # Realtek NIC, common on AMD boards
+  boot.initrd.availableKernelModules = ["igc"];
 }
