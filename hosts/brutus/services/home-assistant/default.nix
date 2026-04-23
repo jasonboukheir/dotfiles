@@ -8,7 +8,7 @@
   oidcCfg = config.services.pocket-id.ensureClients.home-assistant;
   domain = config.sunnycareboo.services.home.domain;
   url = "https://${domain}";
-  port = 8123;
+
 in {
   services.home-assistant = {
     enable = true;
@@ -41,7 +41,7 @@ in {
       };
       http = {
         server_host = "::1";
-        server_port = port;
+        server_port = 8123;
         trusted_proxies = ["::1"];
         use_x_forwarded_for = true;
       };
@@ -69,9 +69,6 @@ in {
         }
       ];
 
-      "automation ui" = "!include automations.yaml";
-      "scene ui" = "!include scenes.yaml";
-      "script ui" = "!include scripts.yaml";
     };
   };
 
@@ -91,7 +88,7 @@ in {
   sunnycareboo.services.home = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
-    proxyPass = "http://[::1]:${toString port}";
+    proxyPass = "http://[::1]:${toString cfg.config.http.server_port}";
     extraConfig = ''
       proxy_buffering off;
     '';
