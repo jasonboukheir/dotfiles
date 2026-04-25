@@ -12,5 +12,6 @@
     ./openssh.nix
     ./radicale.nix
     ./speaches.nix
+    ./vllm.nix
   ];
 }

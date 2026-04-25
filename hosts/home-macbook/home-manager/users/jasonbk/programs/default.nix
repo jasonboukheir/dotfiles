@@ -4,6 +4,7 @@
   ];
   programs = {
     _1password.enable = true;
+    _1password.sshAuthSock.enable = true;
     brave.enable = true;
     claude-code.enable = true;
     fish.enable = true;
