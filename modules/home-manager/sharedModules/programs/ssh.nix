@@ -15,7 +15,7 @@
     extraOptions =
       sshMultiplexing
       // {
-        RemoteCommand = "zmx attach %n";
+        RemoteCommand = "name=%n; zmx attach \"\${name#*.}\"";
         RequestTTY = "yes";
       };
   };
