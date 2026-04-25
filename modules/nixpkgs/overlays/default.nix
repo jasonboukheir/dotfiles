@@ -6,5 +6,6 @@
     (import ./pocket-id.nix)
     (import ./zmx.nix)
     (import ./speaches.nix)
+    (import ./intel-vllm-image.nix)
   ];
 }

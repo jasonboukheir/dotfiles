@@ -26,6 +26,7 @@
     ./smtp.nix
     ./sunnycareboo.nix
     ./tailscale.nix
+    ./vllm.nix
     ./zfs.nix
   ];
 }

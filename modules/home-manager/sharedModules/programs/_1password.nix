@@ -33,15 +33,27 @@ in {
         default = onePassSshSignPath;
         description = "Path to 1Password ssh sign binary";
       };
+      sshAuthSock.enable = lib.mkEnableOption "setting SSH_AUTH_SOCK to the 1Password agent socket";
     };
   };
 
   config = lib.mkIf config.programs._1password.enable {
-    # install _1password gui and _1password cli
     home.packages = [
       pkgs._1password-gui
       pkgs._1password-cli
     ];
+    home.sessionVariables = let
+      homeDir = config.home.homeDirectory;
+      agentSocket =
+        if isLinux
+        then "${homeDir}/.1password/agent.sock"
+        else if isDarwin
+        then "${homeDir}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        else null;
+    in
+      lib.mkIf (config.programs._1password.sshAuthSock.enable && agentSocket != null) {
+        SSH_AUTH_SOCK = agentSocket;
+      };
     programs.git = lib.mkIf (config.programs.git.enable && config.programs.ssh.enable) {
       settings = {
         "gpg \"ssh\"" = {
@@ -49,6 +61,9 @@ in {
         };
         user.signingKey = signingKey;
       };
+    };
+    programs.jujutsu = lib.mkIf (config.programs.jujutsu.enable && config.programs.ssh.enable) {
+      settings.signing.key = signingKey;
     };
   };
 }
