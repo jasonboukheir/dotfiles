@@ -8,7 +8,6 @@
     brave.enable = true;
     claude-code.enable = true;
     fish.enable = true;
-    fish.interactiveShellInit = "ulimit -n 8192";
     gemini-cli.enable = true;
     ghostty.enable = true;
     nushell.enable = true;
