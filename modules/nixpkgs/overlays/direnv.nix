@@ -1,6 +1,9 @@
 final: prev: {
   direnv = prev.direnv.overrideAttrs (previousAttrs: {
-    # test-fish is flaky on darwin and gets SIGKILL'd during the build
+    # TODO: drop this checkPhase override once the Nix Mach-O codesigning fix
+    # lands. test-fish gets SIGKILL'd during the build on darwin, likely the
+    # same root cause as the fish overlay.
+    # https://github.com/NixOS/nix/pull/15638
     checkPhase = ''
       runHook preCheck
 

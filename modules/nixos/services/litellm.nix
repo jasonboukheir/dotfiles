@@ -11,6 +11,10 @@
   py = pkgs.python3;
   ps = pkgs.python3Packages;
 
+  # TODO: drop this fork override once upstream prisma-client-py works with
+  # the litellm proxy + nixpkgs prisma engines. No upstream issue tracked;
+  # investigate before lifting.
+  # Fork: https://github.com/kkkykin/prisma-client-py
   prismaPatched = ps.prisma.overridePythonAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "kkkykin";

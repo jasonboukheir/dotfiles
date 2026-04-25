@@ -10,10 +10,10 @@
   hasCalendars = config.accounts.calendar.accounts != {};
   hasContacts = config.accounts.contact.accounts != {};
 
-  # Create a Python environment with fixed click-repl
+  # TODO: drop click downgrade once click-repl supports click >= 8.2.0.
+  # https://github.com/click-contrib/click-repl
   pythonWithWorkingClickRepl = pkgs.python3.override {
     packageOverrides = self: super: {
-      # Downgrade click to < 8.2.0 for click-repl compatibility
       click = super.click.overridePythonAttrs (old: rec {
         version = "8.1.8";
         src = pkgs.fetchPypi {
