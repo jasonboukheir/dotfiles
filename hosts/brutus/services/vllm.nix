@@ -7,7 +7,7 @@
   port = 8000;
 in {
   services.vllm = {
-    enable = true;
+    enable = false;
     port = port;
     model = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
     maxModelLen = 8192;
