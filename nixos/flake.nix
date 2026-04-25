@@ -7,6 +7,26 @@
 
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixos";
+    };
+
+    home-manager-nixos-unstable = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
+
+    stylix-nixos-unstable = {
+      url = "github:nix-community/stylix/master";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
+
+    nvf-nixos-unstable = {
+      url = "github:notashelf/nvf/main";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
+
     jovian = {
       url = "github:Jovian-Experiments/Jovian-NixOS/development";
       inputs.nixpkgs.follows = "nixos-unstable";
