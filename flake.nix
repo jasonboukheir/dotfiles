@@ -1,11 +1,19 @@
 {
+  description = "jasonbk's mono-flake (NixOS + nix-darwin + home-manager).";
+
   inputs = {
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixos-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    agenix.url = "github:ryantm/agenix";
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixos";
+    };
+
     home-manager-nixos = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixos";
@@ -18,41 +26,20 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-    mac-app-util.url = "github:hraban/mac-app-util";
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin/nix-darwin-25.11";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-    # TODO: switch back to zhaofengli-wip/nix-homebrew once PR #133 (brew 5.1.7) merges.
-    # brew 5.1.1 has a Cask DSL regression where depends_on rejects positional args
-    # (e.g. `depends_on :macos`), breaking nearly every cask. Fixed in brew 5.1.7.
-    # https://github.com/zhaofengli/nix-homebrew/pull/133
-    nix-homebrew.url = "github:Azd325/nix-homebrew/8eb1c803b4f9cd8cb4db4b04fe692dfb915d09ba";
-    nixarr.url = "github:rasmus-kirk/nixarr";
+
     nvf-nixos = {
-      inputs.nixpkgs.follows = "nixos";
       url = "github:notashelf/nvf/v0.8";
+      inputs.nixpkgs.follows = "nixos";
     };
     nvf-nixos-unstable = {
-      inputs.nixpkgs.follows = "nixos-unstable";
       url = "github:notashelf/nvf/main";
+      inputs.nixpkgs.follows = "nixos-unstable";
     };
     nvf-darwin = {
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
       url = "github:notashelf/nvf/v0.8";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
     stylix-nixos = {
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixos";
@@ -65,141 +52,14 @@
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
-    jovian = {
-      url = "github:Jovian-Experiments/Jovian-NixOS/development";
-      inputs.nixpkgs.follows = "nixos-unstable";
-    };
-    nix-cachyos-kernel = {
-      url = "github:xddxdd/nix-cachyos-kernel/release";
-    };
-    ezmtls = {
-      url = "git+https://codeberg.org/jasonboukheir/ezmtls.git?ref=main";
-      inputs.nixpkgs.follows = "nixos";
-    };
   };
 
-  outputs = inputs @ {
-    agenix,
-    determinate,
-    home-manager-nixos,
-    home-manager-nixos-unstable,
-    home-manager-darwin,
-    mac-app-util,
-    nix-darwin,
-    nix-homebrew,
-    nixarr,
-    nixos,
-    nixos-unstable,
-    nixpkgs-unstable,
-    stylix-nixos,
-    stylix-nixos-unstable,
-    stylix-darwin,
-    jovian,
-    ...
-  }: let
-    forAllSystems = nixpkgs-unstable.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
-  in {
-    # Build darwin flake using:
-    # $ darwin-rebuild switch --flake .
-    darwinConfigurations = let
-      specialArgs = {
-        inherit inputs;
-      };
-      darwinModules = [
-        mac-app-util.darwinModules.default
-        home-manager-darwin.darwinModules.home-manager
-        nix-homebrew.darwinModules.nix-homebrew
-        stylix-darwin.darwinModules.stylix
-      ];
-    in {
-      "Jasons-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        specialArgs = specialArgs;
-        modules =
-          darwinModules
-          ++ [
-            ./hosts/home-macbook
-          ];
-      };
-      "jasonbk-mac" = nix-darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        specialArgs = specialArgs;
-        modules =
-          darwinModules
-          ++ [
-            ./hosts/work-macbook
-          ];
-      };
-    };
-
-    nixosConfigurations = {
-      thebeast = nixos-unstable.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-        };
-        modules = [
-          ./hosts/thebeast
-          agenix.nixosModules.default
-          determinate.nixosModules.default
-          home-manager-nixos-unstable.nixosModules.home-manager
-          stylix-nixos-unstable.nixosModules.stylix
-          jovian.nixosModules.default
-        ];
-      };
-
-      brutus = nixos.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-          pkgs-unstable = import nixpkgs-unstable {
-            localSystem = "x86_64-linux";
-            config.allowUnfree = true;
-          };
-        };
-        modules = [
-          ./hosts/brutus
-          agenix.nixosModules.default
-          determinate.nixosModules.default
-          home-manager-nixos.nixosModules.home-manager
-          nixarr.nixosModules.default
-          stylix-nixos.nixosModules.stylix
-          inputs.ezmtls.nixosModules.default
-        ];
-      };
-
-      litus = nixos.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-        };
-        modules = [
-          ./hosts/litus
-          agenix.nixosModules.default
-          determinate.nixosModules.default
-          home-manager-nixos.nixosModules.home-manager
-          stylix-nixos.nixosModules.stylix
-        ];
-      };
-    };
-
-    homeConfigurations."jasonbk@work-devserver" = home-manager-nixos.lib.homeManagerConfiguration {
-      pkgs = import nixos {
-        system = "x86_64-linux";
-        config.allowUnfree = true;
-        overlays = [
-          (import ./modules/nixpkgs/overlays/zmx.nix)
-        ];
-      };
-      extraSpecialArgs = {
-        inherit inputs;
-        pkgs-unstable = import nixpkgs-unstable {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
-        };
-      };
-      modules = [
-        ./hosts/work-devserver
-        inputs.nvf-nixos.homeManagerModules.default
-        inputs.stylix-nixos.homeManagerModules.stylix
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+      imports = [
+        inputs.flake-parts.flakeModules.partitions
+        ./modules/flake
       ];
     };
-  };
 }
