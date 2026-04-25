@@ -35,7 +35,11 @@
       url = "github:LnL7/nix-darwin/nix-darwin-25.11";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    # TODO: switch back to zhaofengli-wip/nix-homebrew once PR #133 (brew-src 5.1.7) merges.
+    # Pinned to the PR's commit because brew 5.1.1 has a Cask DSL regression where
+    # depends_on rejects positional args (e.g. `depends_on :macos`), breaking nearly every cask.
+    # https://github.com/zhaofengli/nix-homebrew/pull/133
+    nix-homebrew.url = "github:Azd325/nix-homebrew/8eb1c803b4f9cd8cb4db4b04fe692dfb915d09ba";
     nixarr.url = "github:rasmus-kirk/nixarr";
     nvf-nixos = {
       inputs.nixpkgs.follows = "nixos";
