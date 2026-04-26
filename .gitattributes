@@ -1,0 +1,4 @@
+# Vendored ELF binaries (patched llama-server + companion libs).
+# Tracked via git-lfs to keep the repo's `.git/` lean.
+pkgs/llamacpp-intel-arc-server/bin/llama-server filter=lfs diff=lfs merge=lfs -text
+pkgs/llamacpp-intel-arc-server/bin/lib*.so* filter=lfs diff=lfs merge=lfs -text

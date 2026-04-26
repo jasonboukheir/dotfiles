@@ -10,6 +10,7 @@
     enable = true;
     extraPackages = with pkgs-unstable; [
       intel-compute-runtime
+      intel-compute-runtime.drivers
       intel-media-driver
       vpl-gpu-rt
     ];
