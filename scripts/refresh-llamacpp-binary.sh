@@ -46,14 +46,21 @@ for src in "$SRC"/lib*.so.*.*; do
     strip --strip-unneeded "$DEST/$base" || true
 done
 
-# Recreate the symlink chain that the runtime linker walks
-# (lib<NAME>.so → lib<NAME>.so.<MAJOR> → lib<NAME>.so.<MAJOR>.<MINOR>.<PATCH>).
+# Recreate the symlink chain that the runtime linker walks. Reads the
+# real DT_SONAME out of each .so via readelf so it works for both 3-part
+# (libfoo.so.X.Y.Z, common) and 2-part (libdnnl.so.3.9, oneDNN) versions.
 cd "$DEST"
+shopt -s nullglob
 for full in lib*.so.*.*; do
-    soname="${full%.*.*}"
-    short="${soname%.*}"
-    ln -sf "$full" "$soname"
-    ln -sf "$soname" "$short"
+    soname=$(readelf -d "$full" 2>/dev/null \
+        | awk -F'[][]' '/SONAME/ {print $2}')
+    if [ -z "$soname" ]; then
+        echo "WARN: $full has no DT_SONAME; skipping symlink creation" >&2
+        continue
+    fi
+    short="${full%%.so*}.so"
+    [ "$soname" != "$full" ] && ln -sf "$full" "$soname"
+    [ "$short" != "$soname" ] && ln -sf "$soname" "$short"
 done
 shopt -u nullglob
 

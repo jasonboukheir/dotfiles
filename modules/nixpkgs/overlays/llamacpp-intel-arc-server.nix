@@ -6,6 +6,5 @@
 in {
   llamacpp-intel-arc-server = final.callPackage ../../../pkgs/llamacpp-intel-arc-server {
     inherit (unstable.intel-oneapi) base;
-    inherit (unstable) onednn;
   };
 }

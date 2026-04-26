@@ -14,7 +14,6 @@
   autoPatchelfHook,
   base,
   level-zero,
-  onednn,
 }: let
   src = ./bin;
   buildStamp = builtins.substring 11 8 (builtins.hashFile "sha256" (src + "/llama-server"));
@@ -35,7 +34,6 @@ in
     buildInputs = [
       base
       level-zero
-      onednn
       stdenv.cc.cc.lib
     ];
 
