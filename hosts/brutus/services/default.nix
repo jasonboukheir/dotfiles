@@ -14,6 +14,7 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
+    ./llamacpp-intel-arc.nix
     ./speaches.nix
     ./lldap.nix
     ./memos.nix
