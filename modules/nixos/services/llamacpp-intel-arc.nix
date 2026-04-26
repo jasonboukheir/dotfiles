@@ -7,6 +7,9 @@
 }: let
   cfg = config.services.llamacpp-intel-arc;
 
+  stateDirName = "llamacpp";
+  stateDir = "/var/lib/${stateDirName}";
+
   validKvTypes = [
     "f32"
     "f16"
@@ -23,6 +26,23 @@
     if cfg.flashAttn
     then "on"
     else "off";
+
+  fetchModelScript = pkgs.writeShellApplication {
+    name = "llamacpp-intel-arc-fetch-model";
+    runtimeInputs = [pkgs.coreutils pkgs.curl];
+    text = ''
+      target="${cfg.modelDir}/${cfg.modelFile}"
+      if [ -f "$target" ]; then
+        exit 0
+      fi
+      mkdir -p "${cfg.modelDir}"
+      echo "fetching ${cfg.modelFile} from ${toString cfg.modelUrl}"
+      curl --location --fail --retry 5 --retry-delay 5 --continue-at - \
+        --output "$target.partial" \
+        "${toString cfg.modelUrl}"
+      mv "$target.partial" "$target"
+    '';
+  };
 
   serverArgs =
     [
@@ -87,18 +107,39 @@ in {
 
     modelDir = lib.mkOption {
       type = lib.types.str;
+      default = "${stateDir}/models";
+      defaultText = lib.literalExpression "\"\${stateDir}/models\"";
       description = ''
-        Directory containing the GGUF file. Read by the service via
-        systemd `ReadOnlyPaths` — pick whatever cache the model is
-        already in (e.g. `/home/jasonbk/.cache/llamacpp/models`).
+        Directory containing the GGUF file. Defaults to a `models/`
+        subdirectory of the unit's `StateDirectory` (`/var/lib/llamacpp`)
+        so the model lives next to the persisted NEO compiler cache and
+        is owned by the dynamic UID via `StateDirectory` ownership
+        migration. Override to point at a pre-existing cache.
       '';
-      example = "/home/jasonbk/.cache/llamacpp/models";
     };
 
     modelFile = lib.mkOption {
       type = lib.types.str;
       description = "GGUF filename inside `modelDir` (e.g. `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf`).";
       example = "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
+    };
+
+    modelUrl = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        If set, the unit's `ExecStartPre` fetches the GGUF from this URL
+        into `modelDir/modelFile` when the file is missing. Resumable
+        via `curl --continue-at -`; an atomic rename from `.partial`
+        avoids leaving a half-written file behind on interruption.
+
+        Typical Hugging Face form:
+        `https://huggingface.co/<user>/<repo>/resolve/main/<file>`.
+        Public repos work without auth; gated repos would need an
+        `Authorization` header which this option does not currently
+        plumb through.
+      '';
+      example = "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
     };
 
     alias = lib.mkOption {
@@ -198,6 +239,29 @@ in {
       default = [];
       description = "Additional flags appended to the llama-server command line.";
     };
+
+    gpuRuntimeLibs = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
+      default = [pkgs.level-zero pkgs.intel-graphics-compiler];
+      defaultText = lib.literalExpression "[pkgs.level-zero pkgs.intel-graphics-compiler]";
+      description = ''
+        Packages whose `lib/` is prepended to `LD_LIBRARY_PATH` so the
+        SYCL/Level Zero stack can dlopen its runtime dependencies:
+
+          - `level-zero` provides `libze_loader.so.1`. The Level Zero
+            UR adapter inside oneAPI dlopens this by `SONAME` and only
+            looks at oneAPI's own RUNPATH dirs, which do not contain it.
+          - `intel-graphics-compiler` provides `libigc.so.2` and
+            `libigdfcl.so.2`. `intel-compute-runtime` (the GPU driver
+            shipped via `/run/opengl-driver/lib`) dlopens these to JIT
+            SPIR-V to native Battlemage ISA; without them GMM init
+            aborts in `gmm_helper/resource_info.cpp`.
+
+        Override from the host config (e.g. `with pkgs-unstable; [...]`)
+        so the versions match whatever `hardware.graphics.extraPackages`
+        is using for `intel-compute-runtime`.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -210,7 +274,8 @@ in {
 
       environment =
         {
-          LD_LIBRARY_PATH = lib.makeLibraryPath [pkgs.level-zero] + ":/run/opengl-driver/lib";
+          LD_LIBRARY_PATH = lib.makeLibraryPath cfg.gpuRuntimeLibs + ":/run/opengl-driver/lib";
+          HOME = stateDir;
         }
         // lib.optionalAttrs cfg.attnRotIso {
           LLAMA_ATTN_ROT_ISO = "1";
@@ -220,14 +285,18 @@ in {
         ExecStart = utils.escapeSystemdExecArgs (
           ["${cfg.package}/bin/llama-server"] ++ serverArgs
         );
+        ExecStartPre = lib.mkIf (cfg.modelUrl != null) [
+          "${fetchModelScript}/bin/llamacpp-intel-arc-fetch-model"
+        ];
+        TimeoutStartSec = "30min";
         DynamicUser = true;
         SupplementaryGroups = ["video" "render"];
-        DeviceAllow = ["/dev/dri/* rw"];
-        PrivateDevices = false;
-        BindReadOnlyPaths = [cfg.modelDir];
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        NoNewPrivileges = true;
+        StateDirectory = stateDirName;
+        WorkingDirectory = stateDir;
+        ProtectSystem = false;
+        ProtectHome = false;
+        LockPersonality = false;
+        RestrictSUIDSGID = false;
         Restart = "on-failure";
         RestartSec = 5;
       };

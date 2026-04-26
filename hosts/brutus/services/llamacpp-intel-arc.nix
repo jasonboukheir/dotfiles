@@ -1,10 +1,12 @@
-{...}: {
+{pkgs-unstable, ...}: {
   services.llamacpp-intel-arc = {
     enable = true;
 
-    modelDir = "/home/jasonbk/.cache/llamacpp/models";
     modelFile = "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
+    modelUrl = "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
     alias = "qwen3.6-35b-a3b-q4km";
+
+    gpuRuntimeLibs = with pkgs-unstable; [level-zero intel-graphics-compiler];
 
     # Defaults from the module: port 8081 / 127.0.0.1, q4_0 KV,
     # Walsh-Hadamard rotation, Unsloth thinking-coding sampling
