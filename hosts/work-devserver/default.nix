@@ -4,34 +4,8 @@
   ...
 }: let
   proxyUrl = "http://[::1]:18082";
+  noProxy = ".fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost";
   sshKeyPath = "~/.ssh/id_ed25519";
-
-  nixProxyWrapper = {
-    bash = ''
-      nix() {
-        http_proxy=${proxyUrl} https_proxy=${proxyUrl} command nix "$@"
-      }
-    '';
-    fish = ''
-      function nix --wraps nix
-        set -lx http_proxy ${proxyUrl}
-        set -lx https_proxy ${proxyUrl}
-        command nix $argv
-      end
-    '';
-    nushell = ''
-      def --wrapped nix [...rest] {
-        $env.http_proxy = "${proxyUrl}"
-        $env.https_proxy = "${proxyUrl}"
-        ^nix ...$rest
-      }
-    '';
-    zsh = ''
-      nix() {
-        http_proxy=${proxyUrl} https_proxy=${proxyUrl} command nix "$@"
-      }
-    '';
-  };
 in {
   imports = [
     ../../modules/home-manager/sharedModules/programs
@@ -56,6 +30,9 @@ in {
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
+      http_proxy = proxyUrl;
+      https_proxy = proxyUrl;
+      no_proxy = noProxy;
     };
   };
 
@@ -85,12 +62,7 @@ in {
         source /etc/bashrc
         source /usr/facebook/ops/rc/master.bashrc
       '';
-      initExtra = nixProxyWrapper.bash;
     };
-
-    fish.interactiveShellInit = lib.mkAfter nixProxyWrapper.fish;
-
-    nushell.extraConfig = lib.mkAfter nixProxyWrapper.nushell;
 
     zsh = {
       enable = true;
@@ -104,9 +76,9 @@ in {
         (lib.mkBefore ''
           source /usr/facebook/ops/rc/master.zshrc
         '')
-        (lib.mkAfter (''
+        (lib.mkAfter ''
           setopt COMPLETE_IN_WORD
-        '' + nixProxyWrapper.zsh))
+        '')
       ];
     };
   };
