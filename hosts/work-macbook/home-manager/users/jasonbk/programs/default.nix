@@ -4,6 +4,7 @@
     ./brave.nix
     ./claude-code.nix
     ./ghostty.nix
+    ./nvf.nix
     ./ssh.nix
     ./vscode-fb.nix
     ./zed-editor.nix

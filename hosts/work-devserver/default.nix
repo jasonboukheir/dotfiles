@@ -35,6 +35,7 @@
 in {
   imports = [
     ../../modules/home-manager/sharedModules/programs
+    ../../modules/home-manager/sharedModules/programs/nvf/meta.nix
     ../../modules/home-manager/jasonbk/programs
     ../../modules/stylix
   ];
@@ -59,6 +60,8 @@ in {
   };
 
   programs = {
+    nvf.meta.enable = true;
+
     ssh = {
       enable = true;
       matchBlocks."github.com" = {
