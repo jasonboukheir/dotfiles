@@ -8,6 +8,17 @@
 #
 # Versioned per-build via the bin/ directory's narHash so each refresh
 # produces a uniquely-named store path (visible in `nix store ls`).
+#
+# Two outputs:
+#   default — autoPatchelf'd against nixpkgs oneAPI/level-zero so the
+#             binary runs natively under systemd (RUNPATH points into
+#             /nix/store).
+#   passthru.raw — bit-for-bit copy of the in-container build with its
+#             original RUNPATH (`/work/build/bin`) intact. Used by the
+#             container variant of the service module so resolution
+#             goes through `setvars.sh` LD_LIBRARY_PATH inside the
+#             intel/vllm runtime image, where the matching oneAPI
+#             libraries already live.
 {
   stdenv,
   lib,
@@ -17,6 +28,46 @@
 }: let
   src = ./bin;
   buildStamp = builtins.substring 11 8 (builtins.hashFile "sha256" (src + "/llama-server"));
+
+  raw = stdenv.mkDerivation {
+    pname = "llamacpp-intel-arc-server-raw";
+    version = "0.10.0-aicss-${buildStamp}";
+
+    inherit src;
+
+    dontUnpack = true;
+    dontConfigure = true;
+    dontBuild = true;
+    dontStrip = true;
+    dontPatchELF = true;
+    dontFixup = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/bin $out/lib
+
+      if [ ! -x "$src/llama-server" ]; then
+        echo "ERROR: $src/llama-server not present in vendored bin/" >&2
+        exit 1
+      fi
+
+      cp -L "$src/llama-server" "$out/bin/llama-server"
+
+      for f in "$src"/lib*.so*; do
+        [ -e "$f" ] || continue
+        cp -L "$f" "$out/lib/"
+      done
+
+      runHook postInstall
+    '';
+
+    meta = with lib; {
+      description = "Raw (un-autopatched) llama.cpp server for container runtime";
+      platforms = ["x86_64-linux"];
+      mainProgram = "llama-server";
+    };
+  };
 in
   stdenv.mkDerivation {
     pname = "llamacpp-intel-arc-server";
@@ -58,6 +109,8 @@ in
 
       runHook postInstall
     '';
+
+    passthru = {inherit raw;};
 
     meta = with lib; {
       description = "Patched llama.cpp server (Intel SYCL, Battlemage)";

@@ -44,16 +44,23 @@
     '';
   };
 
-  serverArgs =
+  # Server CLI args. In container mode the host/port refer to the
+  # in-container bind (host=0.0.0.0, port=8080) and the model path is
+  # rewritten to the in-container mount.
+  mkServerArgs = {
+    modelPath,
+    host,
+    port,
+  }:
     [
       "--model"
-      "${cfg.modelDir}/${cfg.modelFile}"
+      modelPath
       "--alias"
       cfg.alias
       "--host"
-      cfg.host
+      host
       "--port"
-      (toString cfg.port)
+      (toString port)
       "--ctx-size"
       (toString cfg.contextSize)
       "--n-gpu-layers"
@@ -76,6 +83,24 @@
     ]
     ++ cfg.samplingArgs
     ++ cfg.extraArgs;
+
+  nativeServerArgs = mkServerArgs {
+    modelPath = "${cfg.modelDir}/${cfg.modelFile}";
+    host = cfg.host;
+    port = cfg.port;
+  };
+
+  # Inside the container the binary lives at /llama, the model is
+  # bind-mounted at /models, and the server binds 0.0.0.0:8080.
+  # Podman publishes that to ${cfg.host}:${cfg.port} on the host.
+  containerServerArgs = mkServerArgs {
+    modelPath = "/models/${cfg.modelFile}";
+    host = "0.0.0.0";
+    port = 8080;
+  };
+
+  # Shell-quoted form for the container entrypoint (`bash -lc`).
+  containerServerArgsShell = lib.escapeShellArgs containerServerArgs;
 in {
   options.services.llamacpp-intel-arc = {
     enable = lib.mkEnableOption "patched llama-server (Intel SYCL, Battlemage)";
@@ -260,46 +285,144 @@ in {
         Override from the host config (e.g. `with pkgs-unstable; [...]`)
         so the versions match whatever `hardware.graphics.extraPackages`
         is using for `intel-compute-runtime`.
+
+        Only used in native mode (`enableContainer = false`).
+      '';
+    };
+
+    enableContainer = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Run the patched `llama-server` inside the `intel/vllm:*-xpu`
+        OCI image instead of natively. The same vendored binary is
+        bind-mounted into the container in its raw (un-autopatched)
+        form, and `setvars.sh` is sourced so that resolution goes
+        through the container's matching oneAPI/level-zero/NEO/IGC
+        stack.
+
+        Use this when the host's nixpkgs Intel GPU userspace stack
+        (`intel-compute-runtime`, `intel-graphics-compiler`,
+        `level-zero`) drifts ahead of what the AICSS binary was
+        AOT-compiled against (oneAPI 2025.3 + the runtime libraries
+        baked into the chosen container image), which has been
+        observed to cost 5× decode throughput even though the
+        binary still loads, all layers offload, and SYCL kernels
+        for SSM_SCAN / GATED_DELTA_NET dispatch.
+      '';
+    };
+
+    containerImage = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.intel-vllm-image;
+      defaultText = lib.literalExpression "pkgs.intel-vllm-image";
+      description = ''
+        OCI image used when `enableContainer = true`. Must contain
+        `/opt/intel/oneapi/setvars.sh` and a matching `libze_intel_gpu`
+        / `libigc` / `libigdfcl` set under `/usr/lib`.
       '';
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    allowUnfreePackageNames = ["intel-oneapi-base-toolkit"];
+  config = lib.mkIf cfg.enable (lib.mkMerge [
+    {
+      allowUnfreePackageNames = ["intel-oneapi-base-toolkit"];
+    }
 
-    systemd.services.llamacpp-intel-arc = {
-      description = "llama-server (Intel SYCL, Battlemage)";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
+    # Native variant — autopatched binary, NixOS Intel userspace stack.
+    (lib.mkIf (!cfg.enableContainer) {
+      systemd.services.llamacpp-intel-arc = {
+        description = "llama-server (Intel SYCL, Battlemage)";
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
 
-      environment =
-        {
-          LD_LIBRARY_PATH = lib.makeLibraryPath cfg.gpuRuntimeLibs + ":/run/opengl-driver/lib";
-          HOME = stateDir;
-        }
-        // lib.optionalAttrs cfg.attnRotIso {
-          LLAMA_ATTN_ROT_ISO = "1";
+        environment =
+          {
+            LD_LIBRARY_PATH = lib.makeLibraryPath cfg.gpuRuntimeLibs + ":/run/opengl-driver/lib";
+            HOME = stateDir;
+          }
+          // lib.optionalAttrs cfg.attnRotIso {
+            LLAMA_ATTN_ROT_ISO = "1";
+          };
+
+        serviceConfig = {
+          ExecStart = utils.escapeSystemdExecArgs (
+            ["${cfg.package}/bin/llama-server"] ++ nativeServerArgs
+          );
+          ExecStartPre = lib.mkIf (cfg.modelUrl != null) [
+            "${fetchModelScript}/bin/llamacpp-intel-arc-fetch-model"
+          ];
+          TimeoutStartSec = "30min";
+          DynamicUser = true;
+          SupplementaryGroups = ["video" "render"];
+          StateDirectory = stateDirName;
+          WorkingDirectory = stateDir;
+          ProtectSystem = false;
+          ProtectHome = false;
+          LockPersonality = false;
+          RestrictSUIDSGID = false;
+          Restart = "on-failure";
+          RestartSec = 5;
         };
+      };
+    })
 
-      serviceConfig = {
-        ExecStart = utils.escapeSystemdExecArgs (
-          ["${cfg.package}/bin/llama-server"] ++ serverArgs
-        );
-        ExecStartPre = lib.mkIf (cfg.modelUrl != null) [
+    # Container variant — raw binary mounted into intel/vllm image,
+    # which provides the matching oneAPI/level-zero/NEO/IGC stack.
+    # Directory creation is handled by the fetch-model ExecStartPre
+    # (`mkdir -p`) so we deliberately avoid `systemd.tmpfiles.rules`
+    # for `${stateDir}`, which the prior native unit's `DynamicUser` +
+    # `StateDirectory=llamacpp` materialized as a symlink to
+    # `/var/lib/private/llamacpp` — re-asserting ownership/mode on
+    # that path would replace the symlink and orphan the existing
+    # 20+ GiB model file.
+    (lib.mkIf cfg.enableContainer {
+      virtualisation.oci-containers.containers.llamacpp-intel-arc = let
+        rawPkg = cfg.package.raw;
+        imageTag = cfg.containerImage.imageTag;
+        imageName = cfg.containerImage.imageName;
+      in {
+        autoStart = true;
+        image = "${imageName}:${imageTag}";
+        imageFile = cfg.containerImage;
+
+        environment =
+          {
+            SETVARS_COMPLETED = "0";
+          }
+          // lib.optionalAttrs cfg.attnRotIso {
+            LLAMA_ATTN_ROT_ISO = "1";
+          };
+
+        volumes = [
+          "${rawPkg}:/llama:ro"
+          "${cfg.modelDir}:/models:ro"
+        ];
+
+        ports = ["${cfg.host}:${toString cfg.port}:8080"];
+
+        extraOptions = [
+          "--device=/dev/dri"
+          "--shm-size=4g"
+        ];
+
+        entrypoint = "/bin/bash";
+        cmd = [
+          "-lc"
+          (". /opt/intel/oneapi/setvars.sh --force >/dev/null && "
+            + "export LD_LIBRARY_PATH=/llama/lib:\${LD_LIBRARY_PATH:-} && "
+            + "exec /llama/bin/llama-server ${containerServerArgsShell}")
+        ];
+      };
+
+      # Hook the auto-generated podman unit to fetch the model first.
+      # oci-containers sets TimeoutStartSec=0 (infinite) by default,
+      # which already accommodates the 20+ GiB weight load.
+      systemd.services.podman-llamacpp-intel-arc = lib.mkIf (cfg.modelUrl != null) {
+        serviceConfig.ExecStartPre = [
           "${fetchModelScript}/bin/llamacpp-intel-arc-fetch-model"
         ];
-        TimeoutStartSec = "30min";
-        DynamicUser = true;
-        SupplementaryGroups = ["video" "render"];
-        StateDirectory = stateDirName;
-        WorkingDirectory = stateDir;
-        ProtectSystem = false;
-        ProtectHome = false;
-        LockPersonality = false;
-        RestrictSUIDSGID = false;
-        Restart = "on-failure";
-        RestartSec = 5;
       };
-    };
-  };
+    })
+  ]);
 }
