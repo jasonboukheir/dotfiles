@@ -17,6 +17,7 @@
     ./litellm.nix
     ./local-embedding.nix
     ./local-llm.nix
+    ./local-stt.nix
     ./speaches.nix
     ./lldap.nix
     ./memos.nix
