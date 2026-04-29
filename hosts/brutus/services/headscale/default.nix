@@ -9,11 +9,12 @@
   internalDomain = "internal.${baseDomain}";
   magicDomain = "ts.${internalDomain}";
   issuerDomain = config.sunnycareboo.services.id.domain;
-  port = 3400;
+  port = config.sunnycareboo.ports.values.headscale;
   oidcCfg = config.services.pocket-id.ensureClients.headscale;
   brutusTailscaleIP = "100.64.0.7";
   litusTailscaleIP = "100.64.0.2";
 in {
+  sunnycareboo.ports.allocate.headscale = lib.mkIf cfg.enable 3400;
   services.headscale = {
     enable = true;
     port = port;

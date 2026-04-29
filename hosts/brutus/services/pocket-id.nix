@@ -3,11 +3,12 @@
   config,
   ...
 }: let
-  port = 1411;
+  port = config.sunnycareboo.ports.values.pocket-id;
   domain = config.sunnycareboo.services.id.domain;
   smtpCfg = config.sunnycareboo.smtp;
   lldapCfg = config.services.lldap;
 in {
+  sunnycareboo.ports.allocate.pocket-id = lib.mkIf config.services.pocket-id.enable 1411;
   sunnycareboo.services.id = lib.mkIf config.services.pocket-id.enable {
     enable = true;
     proxyPass = "http://localhost:${toString port}";

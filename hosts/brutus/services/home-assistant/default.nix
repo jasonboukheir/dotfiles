@@ -24,6 +24,7 @@
     ];
   });
 in {
+  sunnycareboo.ports.allocate.home-assistant = lib.mkIf cfg.enable 8123;
   services.home-assistant = {
     enable = true;
     extraComponents = [
@@ -55,7 +56,7 @@ in {
       };
       http = {
         server_host = "::1";
-        server_port = 8123;
+        server_port = config.sunnycareboo.ports.values.home-assistant;
         trusted_proxies = ["::1"];
         use_x_forwarded_for = true;
       };

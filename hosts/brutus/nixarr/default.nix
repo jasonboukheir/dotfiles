@@ -82,6 +82,20 @@ in {
     };
   };
 
+  sunnycareboo.ports.allocate = lib.mkIf cfg.enable {
+    transmission-rpc = lib.mkIf cfg.transmission.enable transmissionPort;
+    transmission-peer = lib.mkIf cfg.transmission.enable cfg.transmission.peerPort;
+    jellyfin = lib.mkIf cfg.jellyfin.enable jellyfinPort;
+    audiobookshelf = lib.mkIf cfg.audiobookshelf.enable config.services.audiobookshelf.port;
+    bazarr = lib.mkIf cfg.bazarr.enable config.services.bazarr.listenPort;
+    sonarr = lib.mkIf cfg.sonarr.enable config.services.sonarr.settings.server.port;
+    radarr = lib.mkIf cfg.radarr.enable config.services.radarr.settings.server.port;
+    prowlarr = lib.mkIf cfg.prowlarr.enable config.services.prowlarr.settings.server.port;
+    lidarr = lib.mkIf cfg.lidarr.enable config.services.lidarr.settings.server.port;
+    readarr = lib.mkIf cfg.readarr.enable config.services.readarr.settings.server.port;
+    readarr-audiobook = lib.mkIf cfg.readarr-audiobook.enable config.services.readarr-audiobook.settings.server.port;
+  };
+
   sunnycareboo.services = lib.mkIf config.nixarr.enable {
     transmission = lib.mkIf config.nixarr.transmission.enable {
       enable = true;

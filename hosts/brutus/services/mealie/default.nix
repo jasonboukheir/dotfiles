@@ -21,9 +21,10 @@
       litellmModels)
     .model_name;
 in {
+  sunnycareboo.ports.allocate.mealie = lib.mkIf cfg.enable 9000;
   services.mealie = {
     enable = true;
-    port = 9000;
+    port = config.sunnycareboo.ports.values.mealie;
     credentials = {
       OIDC_CLIENT_SECRET = oidcCfg.secretFile;
       OPENAI_API_KEY = config.age.secrets."mealie/openaiApiKey".path;

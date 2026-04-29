@@ -8,7 +8,7 @@
   oidcCfg = config.services.pocket-id.ensureClients.open-webui;
   proxyCfg = config.sunnycareboo.services.llm;
   domain = config.sunnycareboo.services.ai.domain;
-  port = 3100;
+  port = config.sunnycareboo.ports.values.open-webui;
 
   litellmModels = config.services.litellm.settings.model_list or [];
   modelByMode = mode: fallback:
@@ -20,6 +20,7 @@
   sttModel = modelByMode "audio_transcription" "whisper-1";
   ttsModel = modelByMode "audio_speech" "tts-1";
 in {
+  sunnycareboo.ports.allocate.open-webui = lib.mkIf cfg.enable 3100;
   allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
   services.open-webui = {
     enable = true;
@@ -66,6 +67,7 @@ in {
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
           SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
+          BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL = "True";
         }
       ]
       ++ (lib.optional proxyCfg.enable {

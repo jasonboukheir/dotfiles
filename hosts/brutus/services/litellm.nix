@@ -6,7 +6,7 @@
   cfg = config.services.litellm;
   llamacpp = config.services.llamacpp-intel-arc;
   speaches = config.services.speaches;
-  port = 3200;
+  port = config.sunnycareboo.ports.values.litellm;
 
   llamacppBase = "http://${llamacpp.host}:${toString llamacpp.port}/v1";
   speachesBase = "http://${speaches.host}:${toString speaches.port}/v1";
@@ -32,6 +32,7 @@
     model_info = {mode = "chat";};
   };
 in {
+  sunnycareboo.ports.allocate.litellm = lib.mkIf cfg.enable 3200;
   services.litellm = {
     enable = true;
     port = port;
