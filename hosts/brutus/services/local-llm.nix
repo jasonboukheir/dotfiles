@@ -33,7 +33,14 @@ in {
       model = "Qwen/Qwen3.6-35B-A3B";
       alias = "qwen3.6-35b-a3b";
       maxModelLen = 32768;
-      reasoningParser = "qwen3";
+      # The Qwen3.6 chat template prefills `<think>\n` into the prompt,
+      # so the model's output has `</think>` but no `<think>` opening
+      # tag. The `qwen3` parser requires *both* tokens and falls back
+      # to "all content" when start is missing — chain-of-thought leaks
+      # into `content`. The `deepseek_r1` parser uses the same delimiters
+      # but treats missing-start-token as "reasoning starts at offset 0",
+      # which is exactly what this prefill pattern needs.
+      reasoningParser = "deepseek_r1";
       limitMmPerPrompt = {
         image = 0;
         video = 0;
