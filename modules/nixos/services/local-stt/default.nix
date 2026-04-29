@@ -39,8 +39,6 @@
       cfg.language
       "--inference-path"
       "/v1/audio/transcriptions"
-      "--print-progress"
-      "false"
     ]
     ++ cfg.extraArgs;
 

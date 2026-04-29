@@ -14,8 +14,8 @@
       cfg.model
       "--served-model-name"
       cfg.alias
-      "--task"
-      cfg.task
+      "--runner"
+      "pooling"
       "--dtype"
       cfg.dtype
       "--port"
@@ -71,18 +71,6 @@ in {
       type = lib.types.str;
       description = "Served-model id over the OpenAI-compatible API (`--served-model-name`).";
       example = "qwen3-embedding-0.6b";
-    };
-
-    task = lib.mkOption {
-      type = lib.types.str;
-      default = "embed";
-      description = ''
-        vLLM `--task` flag. `embed` enables pooling-only mode and the
-        `/v1/embeddings` endpoint. Newer vLLM versions also accept
-        `--runner pooling`; if `embed` errors with an unknown-arg
-        message after an image bump, set this to e.g. `pooling` and
-        adjust the upstream flag accordingly via `extraArgs`.
-      '';
     };
 
     dtype = lib.mkOption {
