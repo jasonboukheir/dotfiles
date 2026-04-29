@@ -33,6 +33,10 @@ in {
       model = "Qwen/Qwen3.6-35B-A3B";
       alias = "qwen3.6-35b-a3b";
       maxModelLen = 32768;
+      # Co-resident with services.local-embedding (Qwen3-Embedding-0.6B
+      # at 0.10) on the same B70. 0.80 + 0.10 = 0.90 of 32 GiB,
+      # leaving ~10% for level-zero / IPEX runtime overhead.
+      gpuMemoryUtilization = 0.80;
       # The Qwen3.6 chat template prefills the *prompt* differently
       # depending on `enable_thinking`: `<think>\n` for deep mode (model
       # emits `</think>` only), `<think>\n\n</think>\n\n` for fast mode

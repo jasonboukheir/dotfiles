@@ -8,73 +8,38 @@
 
   stateDir = "/var/lib/local-embedding";
 
-  fetchModelScript = pkgs.writeShellApplication {
-    name = "local-embedding-fetch-model";
-    runtimeInputs = [pkgs.coreutils pkgs.curl];
-    text = ''
-      target="${cfg.modelDir}/${cfg.modelFile}"
-      if [ -f "$target" ]; then
-        exit 0
-      fi
-      mkdir -p "${cfg.modelDir}"
-      echo "fetching ${cfg.modelFile} from ${toString cfg.modelUrl}"
-      curl --location --fail --retry 5 --retry-delay 5 --continue-at - \
-        --output "$target.partial" \
-        "${toString cfg.modelUrl}"
-      mv "$target.partial" "$target"
-    '';
-  };
-
-  serverArgs =
+  serveArgs =
     [
-      "--model"
-      "/models/${cfg.modelFile}"
-      "--alias"
+      "serve"
+      cfg.model
+      "--served-model-name"
       cfg.alias
-      "--host"
-      "0.0.0.0"
+      "--task"
+      cfg.task
+      "--dtype"
+      cfg.dtype
       "--port"
-      "8080"
-      "--ctx-size"
-      (toString cfg.contextSize)
-      "--n-gpu-layers"
-      "-1"
-      "--batch-size"
-      (toString cfg.batchSize)
-      "--ubatch-size"
-      (toString cfg.ubatchSize)
-      "--parallel"
-      (toString cfg.parallel)
-      "--threads"
-      (toString cfg.threads)
-      "--embeddings"
-      "--pooling"
-      cfg.pooling
+      "8000"
+      "--gpu-memory-utilization"
+      (toString cfg.gpuMemoryUtilization)
+      "--max-model-len"
+      (toString cfg.maxModelLen)
     ]
+    ++ lib.optionals cfg.enforceEager ["--enforce-eager"]
     ++ cfg.extraArgs;
-
-  serverArgsShell = lib.escapeShellArgs serverArgs;
 in {
   options.services.local-embedding = {
-    enable = lib.mkEnableOption "GPU-backed embedding server (llama.cpp, Intel SYCL)";
-
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.llamacpp-intel-arc-server;
-      defaultText = lib.literalExpression "pkgs.llamacpp-intel-arc-server";
-      description = ''
-        Vendored `llama-server` derivation. Bind-mounted into the
-        container at `/llama` and resolved through the image's
-        oneAPI / level-zero / NEO / IGC stack via `setvars.sh`,
-        same pattern as `services.local-llm.llamacpp`.
-      '';
-    };
+    enable = lib.mkEnableOption "vLLM-XPU embedding server (Intel Arc, llm-scaler-vllm)";
 
     containerImage = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.intel-vllm-image;
-      defaultText = lib.literalExpression "pkgs.intel-vllm-image";
-      description = "OCI image used as the SYCL runtime stack.";
+      default = pkgs.intel-llm-scaler-vllm-image;
+      defaultText = lib.literalExpression "pkgs.intel-llm-scaler-vllm-image";
+      description = ''
+        OCI image used to run vLLM. Defaults to the same Intel
+        llm-scaler-vllm image as the chat instance — running both off
+        one image keeps the OneCCL / IPEX / level-zero stack identical.
+      '';
     };
 
     host = lib.mkOption {
@@ -88,130 +53,167 @@ in {
       default = 8001;
       description = ''
         Host-side port that the OpenAI-compatible `/v1/embeddings`
-        endpoint is published on.
+        endpoint is published on. Container-internal port is fixed to
+        vLLM's default 8000.
       '';
     };
 
-    modelDir = lib.mkOption {
+    model = lib.mkOption {
       type = lib.types.str;
-      default = "${stateDir}/models";
-      defaultText = lib.literalExpression "\"\${stateDir}/models\"";
-      description = "Host directory holding the GGUF; mounted read-only at `/models`.";
-    };
-
-    modelFile = lib.mkOption {
-      type = lib.types.str;
-      description = "GGUF filename inside `modelDir`.";
-      example = "Qwen3-Embedding-0.6B-Q8_0.gguf";
-    };
-
-    modelUrl = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
       description = ''
-        If set, an `ExecStartPre` fetches the GGUF into
-        `modelDir/modelFile` when missing. Resumable via
-        `curl --continue-at -` with an atomic rename from `.partial`.
+        HuggingFace model id of the embedding model (positional arg of
+        `vllm serve`). Pulled to `cacheDir` via HF_HOME on first start.
       '';
+      example = "Qwen/Qwen3-Embedding-0.6B";
     };
 
     alias = lib.mkOption {
       type = lib.types.str;
-      description = "Served-model id over the OpenAI-compatible API.";
+      description = "Served-model id over the OpenAI-compatible API (`--served-model-name`).";
       example = "qwen3-embedding-0.6b";
     };
 
-    contextSize = lib.mkOption {
+    task = lib.mkOption {
+      type = lib.types.str;
+      default = "embed";
+      description = ''
+        vLLM `--task` flag. `embed` enables pooling-only mode and the
+        `/v1/embeddings` endpoint. Newer vLLM versions also accept
+        `--runner pooling`; if `embed` errors with an unknown-arg
+        message after an image bump, set this to e.g. `pooling` and
+        adjust the upstream flag accordingly via `extraArgs`.
+      '';
+    };
+
+    dtype = lib.mkOption {
+      type = lib.types.str;
+      default = "float16";
+      description = ''
+        Data type for model weights. Matches the chat instance to
+        avoid IPEX bf16/fp16 path divergence on the same card.
+      '';
+    };
+
+    maxModelLen = lib.mkOption {
       type = lib.types.int;
       default = 8192;
       description = ''
-        Maximum tokens per embedding request. Caps the largest chunk
-        a client may submit in one call. Embedding models don't
-        autoregress so the KV-cache cost per slot is small; oversizing
-        here is cheap.
+        Max tokens per embedding request. Caps the largest chunk a
+        client may submit. Decoder-only embedders don't autoregress so
+        the per-request memory cost is small; oversizing is cheap.
       '';
     };
 
-    batchSize = lib.mkOption {
-      type = lib.types.int;
-      default = 2048;
-      description = "Logical prompt-processing chunk size (`--batch-size`).";
-    };
-
-    ubatchSize = lib.mkOption {
-      type = lib.types.int;
-      default = 512;
-      description = "Physical forward-pass batch (`--ubatch-size`).";
-    };
-
-    parallel = lib.mkOption {
-      type = lib.types.int;
-      default = 4;
+    gpuMemoryUtilization = lib.mkOption {
+      type = lib.types.float;
+      default = 0.10;
       description = ''
-        `--parallel` slots — concurrent in-flight embedding requests.
-        Open WebUI ingest of a multi-chunk document fans out into
-        several /v1/embeddings calls; four slots is enough for that
-        burst without much KV pressure on a 0.6B-class model.
+        Fraction of XPU VRAM vLLM may use. Sized for a 0.6B-class
+        embedding model coexisting with a chat vLLM on the same card —
+        chat takes ~0.80, embedding ~0.10, leaving ~10% headroom for
+        framework/level-zero overhead.
       '';
     };
 
-    threads = lib.mkOption {
-      type = lib.types.int;
-      default = 4;
-      description = "CPU helper threads.";
+    enforceEager = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Pass `--enforce-eager`. Same reason as the chat instance:
+        Dynamo trips on IPEX's pybind11 C-extension on XPU. Eager-mode
+        throughput is at the kernel ceiling for embedding workloads
+        anyway.
+      '';
     };
 
-    pooling = lib.mkOption {
-      type = lib.types.enum ["none" "mean" "cls" "last" "rank"];
-      default = "last";
+    cclEnv = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {
+        CCL_ZE_IPC_EXCHANGE = "sockets";
+        CCL_PROCESS_LAUNCHER = "none";
+        CCL_LOCAL_RANK = "0";
+        CCL_LOCAL_SIZE = "1";
+      };
       description = ''
-        Pooling strategy. Decoder-only embedders like Qwen3-Embedding
-        use `last`; BERT-style encoders use `cls` or `mean`.
+        OneCCL env vars. Same single-card warmup workaround as
+        services.local-llm.vllm — without these the all_reduce hangs
+        even at world_size=1.
       '';
     };
 
     extraArgs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
-      description = "Additional flags appended to the llama-server command line.";
+      description = "Additional flags appended to the `vllm serve` command line.";
+    };
+
+    environmentFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Environment file with secrets (e.g. HF_TOKEN for gated repos).";
+    };
+
+    cacheDir = lib.mkOption {
+      type = lib.types.str;
+      default = stateDir;
+      description = "Directory for the HuggingFace model cache (bind-mounted at `/cache`).";
+    };
+
+    user = lib.mkOption {
+      type = lib.types.str;
+      default = "local-embedding";
+      description = "User account that owns `cacheDir`.";
+    };
+
+    group = lib.mkOption {
+      type = lib.types.str;
+      default = "local-embedding";
+      description = "Group that owns `cacheDir`.";
     };
   };
 
   config = lib.mkIf cfg.enable {
+    users.groups.${cfg.group} = {};
+    users.users.${cfg.user} = {
+      isSystemUser = true;
+      group = cfg.group;
+      home = cfg.cacheDir;
+      createHome = true;
+    };
+
+    systemd.tmpfiles.rules = [
+      "d ${cfg.cacheDir} 0755 ${cfg.user} ${cfg.group} -"
+    ];
+
     virtualisation.oci-containers.containers.local-embedding = {
       autoStart = true;
       image = "${cfg.containerImage.imageName}:${cfg.containerImage.imageTag}";
       imageFile = cfg.containerImage;
 
-      environment = {
-        SETVARS_COMPLETED = "0";
-      };
+      environment =
+        {HF_HOME = "/cache";}
+        // cfg.cclEnv;
 
       volumes = [
-        "${cfg.package}:/llama:ro"
-        "${cfg.modelDir}:/models:ro"
+        "${cfg.cacheDir}:/cache"
       ];
 
-      ports = ["${cfg.host}:${toString cfg.port}:8080"];
+      ports = ["${cfg.host}:${toString cfg.port}:8000"];
 
       extraOptions = [
         "--device=/dev/dri"
-        "--shm-size=1g"
+        "--ipc=host"
       ];
 
       entrypoint = "/bin/bash";
       cmd = [
         "-lc"
-        (". /opt/intel/oneapi/setvars.sh --force >/dev/null && "
-          + "export LD_LIBRARY_PATH=/llama/lib:\${LD_LIBRARY_PATH:-} && "
-          + "exec /llama/bin/llama-server ${serverArgsShell}")
+        "cd /llm && exec vllm ${lib.escapeShellArgs serveArgs}"
       ];
     };
 
-    systemd.services.podman-local-embedding = lib.mkIf (cfg.modelUrl != null) {
-      serviceConfig.ExecStartPre = [
-        "${fetchModelScript}/bin/local-embedding-fetch-model"
-      ];
+    systemd.services.podman-local-embedding = lib.mkIf (cfg.environmentFile != null) {
+      serviceConfig.EnvironmentFile = cfg.environmentFile;
     };
   };
 }
