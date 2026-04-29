@@ -4,8 +4,9 @@
   ...
 }: let
   cfg = config.services.vllm;
-  port = 8000;
+  port = config.sunnycareboo.ports.values.vllm;
 in {
+  sunnycareboo.ports.allocate.vllm = lib.mkIf cfg.enable 8000;
   services.vllm = {
     enable = false;
     port = port;

@@ -5,8 +5,9 @@
 }: let
   cfg = config.services.searx;
   domain = config.sunnycareboo.services.search.domain;
-  port = 3300;
+  port = config.sunnycareboo.ports.values.searx;
 in {
+  sunnycareboo.ports.allocate.searx = lib.mkIf cfg.enable 3300;
   sunnycareboo.services.search = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;

@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./actual
+    ./coder
     ./ezmtls
     ./headscale
     ./home-assistant

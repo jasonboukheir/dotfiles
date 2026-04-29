@@ -22,6 +22,7 @@
               localSystem = "x86_64-linux";
               config.allowUnfree = true;
             };
+            terranix = inputs.terranix;
           };
           modules = [
             ../../hosts/brutus

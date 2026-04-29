@@ -19,7 +19,7 @@ in {
 
     url = url;
     address = "0.0.0.0";
-    port = 9200;
+    port = config.sunnycareboo.ports.values.opencloud;
     stateDir = "/var/lib/opencloud";
 
     package = pkgs-unstable.opencloud;
@@ -99,6 +99,7 @@ in {
   };
 
   sunnycareboo = lib.mkIf cfg.enable {
+    ports.allocate.opencloud = 9200;
     services.cloud = {
       isExternal = true;
       enable = true;

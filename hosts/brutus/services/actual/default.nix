@@ -5,10 +5,11 @@
 }: let
   cfg = config.services.actual;
   domain = config.sunnycareboo.services.budget.domain;
-  port = 5007;
+  port = config.sunnycareboo.ports.values.actual;
   url = "https://${domain}";
   oidcCfg = config.services.pocket-id.ensureClients.actual;
 in {
+  sunnycareboo.ports.allocate.actual = lib.mkIf cfg.enable 5007;
   services.actual = {
     enable = true;
     settings = {

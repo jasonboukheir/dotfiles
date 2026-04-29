@@ -8,9 +8,10 @@
   smtpCfg = config.sunnycareboo.smtp;
   oidcCfg = config.services.pocket-id.ensureClients.immich;
 in {
+  sunnycareboo.ports.allocate.immich = lib.mkIf cfg.enable 2283;
   services.immich = {
     enable = true;
-    port = 2283;
+    port = config.sunnycareboo.ports.values.immich;
     database = {
       user = "immich";
       port = 5432;

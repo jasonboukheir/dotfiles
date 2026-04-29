@@ -1,6 +1,13 @@
-{pkgs-unstable, ...}: {
+{
+  config,
+  lib,
+  pkgs-unstable,
+  ...
+}: {
+  sunnycareboo.ports.allocate.llamacpp = lib.mkIf config.services.llamacpp-intel-arc.enable 8081;
   services.llamacpp-intel-arc = {
     enable = true;
+    port = config.sunnycareboo.ports.values.llamacpp;
 
     # Run inside intel/vllm:0.17.0-xpu so the oneAPI/level-zero/NEO/IGC
     # stack matches what the AICSS binary was AOT-compiled against.
@@ -12,6 +19,9 @@
     modelFile = "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
     modelUrl = "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
     alias = "qwen3.6-35b-a3b-q4km";
+
+    parallel = 1;
+    contextSize = 131072;
 
     # gpuRuntimeLibs is unused in container mode but kept here so that
     # flipping back to native execution stays a one-line edit.

@@ -5,17 +5,22 @@
 }: let
   cfg = config.services.lldap;
   defaultGroups = cfg.defaultGroups;
+  ports = config.sunnycareboo.ports.values;
 in {
+  sunnycareboo.ports.allocate = lib.mkIf cfg.enable {
+    lldap-ldap = 3890;
+    lldap-http = 17170;
+  };
   services.lldap = {
     enable = true;
     settings = {
       ldap_base_dn = "dc=sunnycareboo,dc=com";
 
       ldap_host = "127.0.0.1";
-      ldap_port = 3890;
+      ldap_port = ports.lldap-ldap;
 
       http_host = "127.0.0.1";
-      http_port = 17170;
+      http_port = ports.lldap-http;
 
       http_url = "https://${config.sunnycareboo.services.lldap.domain}";
 

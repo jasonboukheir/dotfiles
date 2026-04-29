@@ -69,6 +69,15 @@ with lib; let
         description = "Enable mTLS client certificate verification for this service";
       };
 
+      wildcard = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          When true, also serve a wildcard vhost at *.<domain> backed by the
+          same proxyPass and add *.<domain> to the ACME cert SANs (DNS-01).
+        '';
+      };
+
       proxyPass = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -166,8 +175,12 @@ in {
         ;
 
       virtualHosts = mkMerge [
-        (listToAttrs (mapAttrsToList (
-            name: svcCfg: let
+        (listToAttrs (concatMap (
+            {
+              name,
+              value,
+            }: let
+              svcCfg = value;
               domain = svcCfg.domain;
 
               allLocations =
@@ -183,30 +196,43 @@ in {
                     extraConfig = locCfg.extraConfig;
                   })
                   svcCfg.locations);
-            in
-              nameValuePair domain {
+
+              listenSpec =
+                if svcCfg.isExternal
+                then internalHttpListeners ++ externalHttpListeners
+                else internalHttpListeners;
+
+              mtlsExtra = optionalString svcCfg.mtls.enable ''
+                ssl_verify_client optional;
+                ssl_client_certificate ${cfg.mtls.caCertFile};
+                if ($mtls_reject) {
+                  return 403;
+                }
+              '';
+
+              primaryVhost = nameValuePair domain {
                 forceSSL = true;
                 useACMEHost = cfg.baseDomain;
                 locations = allLocations;
-                listen =
-                  if svcCfg.isExternal
-                  then internalHttpListeners ++ externalHttpListeners
-                  else internalHttpListeners;
-                extraConfig =
-                  svcCfg.extraConfig
-                  + optionalString svcCfg.mtls.enable ''
-                    ssl_verify_client optional;
-                    ssl_client_certificate ${cfg.mtls.caCertFile};
-                    if ($mtls_reject) {
-                      return 403;
-                    }
-                  '';
-              }
-          ) (filterAttrs (
+                listen = listenSpec;
+                extraConfig = svcCfg.extraConfig + mtlsExtra;
+              };
+
+              wildcardVhost = nameValuePair "${domain}-wildcard" {
+                serverName = "*.${domain}";
+                forceSSL = true;
+                useACMEHost = cfg.baseDomain;
+                locations = allLocations;
+                listen = listenSpec;
+                extraConfig = svcCfg.extraConfig + mtlsExtra;
+              };
+            in
+              [primaryVhost] ++ optional svcCfg.wildcard wildcardVhost
+          ) (mapAttrsToList nameValuePair (filterAttrs (
               name: svcCfg:
                 svcCfg.enable
             )
-            cfg.services)))
+            cfg.services))))
         # 2. Create a "catch-all" vhost to handle unknown domains/IPs
         {
           "_" = {
@@ -229,7 +255,9 @@ in {
       acceptTerms = true;
       certs."${cfg.baseDomain}" = {
         domain = cfg.baseDomain;
-        extraDomainNames = map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services));
+        extraDomainNames =
+          (map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services)))
+          ++ (map (svc: "*.${svc.domain}") (attrValues (filterAttrs (_: svc: svc.enable && svc.wildcard) cfg.services)));
         email = "postmaster@${cfg.baseDomain}";
       };
     };

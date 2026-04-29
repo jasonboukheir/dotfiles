@@ -47,6 +47,11 @@
       url = "git+https://codeberg.org/jasonboukheir/ezmtls.git?ref=main";
       inputs.nixpkgs.follows = "nixos";
     };
+
+    terranix = {
+      url = "github:terranix/terranix";
+      inputs.nixpkgs.follows = "nixos";
+    };
   };
 
   outputs = _: {};
