@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs-unstable,
   ...
 }: let
   cfg = config.services.coder;
@@ -24,10 +25,16 @@ in {
 
   services.coder = {
     enable = true;
+    package = pkgs-unstable.coder;
     listenAddress = "127.0.0.1:${toString port}";
     accessUrl = "https://${proxyCfg.domain}";
     wildcardAccessUrl = "*.${proxyCfg.domain}";
     podmanGroup = "podman";
+
+    environment.extra = {
+      CODER_OAUTH2_GITHUB_DEFAULT_PROVIDER_ENABLE = "false";
+      CODER_TELEMETRY_ENABLE = "false";
+    };
 
     oidc = {
       enable = true;
@@ -46,9 +53,15 @@ in {
 
   services.pocket-id.ensureClients.coder = lib.mkIf cfg.enable {
     dependentServices = [config.systemd.services.coder.name];
+    logo = ./coder-light.svg;
+    darkLogo = ./coder-dark.svg;
     settings = {
       name = "Coder";
       isPublic = false;
+      # TODO: re-enable once nixpkgs ships Coder >= 2.30 (PKCE for OIDC)
+      # https://github.com/coder/coder/pull/21215
+      # https://github.com/NixOS/nixpkgs/pull/483203 (coder: 2.28.6 -> 2.31.10)
+      pkceEnabled = false;
       launchURL = cfg.accessUrl;
       callbackURLs = [
         "${cfg.accessUrl}/api/v2/users/oidc/callback"
