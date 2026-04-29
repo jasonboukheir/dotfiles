@@ -6,6 +6,20 @@
   cfg = config.services.mealie;
   oidcCfg = config.services.pocket-id.ensureClients.mealie;
   domain = config.sunnycareboo.services.meals.domain;
+
+  litellmModels = config.services.litellm.settings.model_list or [];
+  fastChatModel =
+    (lib.findFirst
+      (
+        m:
+          (m.model_info.mode or null)
+          == "chat"
+          && (m.litellm_params.extra_body.chat_template_kwargs.enable_thinking or true)
+          == false
+      )
+      {model_name = "qwen3.6-fast";}
+      litellmModels)
+    .model_name;
 in {
   services.mealie = {
     enable = true;
@@ -23,7 +37,7 @@ in {
       "OIDC_PROVIDER_NAME" = "Pocket ID";
 
       "OPENAI_BASE_URL" = "https://${config.sunnycareboo.services.llm.domain}";
-      "OPENAI_MODEL" = "xai/grok-4-fast-non-reasoning";
+      "OPENAI_MODEL" = fastChatModel;
     };
     database.createLocally = true;
     extraOptions = [];

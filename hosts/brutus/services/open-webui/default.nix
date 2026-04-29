@@ -9,6 +9,16 @@
   proxyCfg = config.sunnycareboo.services.llm;
   domain = config.sunnycareboo.services.ai.domain;
   port = 3100;
+
+  litellmModels = config.services.litellm.settings.model_list or [];
+  modelByMode = mode: fallback:
+    (lib.findFirst
+      (m: (m.model_info.mode or null) == mode)
+      {model_name = fallback;}
+      litellmModels)
+    .model_name;
+  sttModel = modelByMode "audio_transcription" "whisper-1";
+  ttsModel = modelByMode "audio_speech" "tts-1";
 in {
   allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
   services.open-webui = {
@@ -46,10 +56,10 @@ in {
           # audio via litellm proxy
           AUDIO_STT_ENGINE = "openai";
           AUDIO_STT_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
-          AUDIO_STT_MODEL = "whisper-1";
+          AUDIO_STT_MODEL = sttModel;
           AUDIO_TTS_ENGINE = "openai";
           AUDIO_TTS_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
-          AUDIO_TTS_MODEL = "tts-1";
+          AUDIO_TTS_MODEL = ttsModel;
           AUDIO_TTS_VOICE = "alloy";
 
           # search settings
