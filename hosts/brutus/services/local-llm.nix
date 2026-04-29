@@ -33,14 +33,18 @@ in {
       model = "Qwen/Qwen3.6-35B-A3B";
       alias = "qwen3.6-35b-a3b";
       maxModelLen = 32768;
-      # The Qwen3.6 chat template prefills `<think>\n` into the prompt,
-      # so the model's output has `</think>` but no `<think>` opening
-      # tag. The `qwen3` parser requires *both* tokens and falls back
-      # to "all content" when start is missing — chain-of-thought leaks
-      # into `content`. The `deepseek_r1` parser uses the same delimiters
-      # but treats missing-start-token as "reasoning starts at offset 0",
-      # which is exactly what this prefill pattern needs.
-      reasoningParser = "deepseek_r1";
+      # The Qwen3.6 chat template prefills the *prompt* differently
+      # depending on `enable_thinking`: `<think>\n` for deep mode (model
+      # emits `</think>` only), `<think>\n\n</think>\n\n` for fast mode
+      # (model emits no tags). The bundled parsers can't handle both —
+      # `qwen3` demands both tokens in the output and leaks deep-mode
+      # CoT into `content`; `deepseek_r1` treats fast-mode output (no
+      # `</think>`) as "still inside reasoning" and dumps every token
+      # into `reasoning_content`. The custom plugin reads the per-request
+      # `chat_template_kwargs.enable_thinking` and switches between the
+      # two extraction strategies at parser-init time.
+      reasoningParser = "qwen3_aware";
+      reasoningParserPlugin = ../../../modules/nixos/services/local-llm/qwen3_aware_reasoning_parser.py;
       limitMmPerPrompt = {
         image = 0;
         video = 0;

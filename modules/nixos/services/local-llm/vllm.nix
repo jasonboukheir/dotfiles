@@ -110,6 +110,18 @@ in {
       example = "qwen3";
     };
 
+    reasoningParserPlugin = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Path to a Python file implementing a custom reasoning parser. The
+        file is bind-mounted read-only into the container and passed as
+        `--reasoning-parser-plugin`. The plugin must register itself via
+        `ReasoningParserManager.register_module("name")`; that name then
+        goes in `reasoningParser`.
+      '';
+    };
+
     limitMmPerPrompt = lib.mkOption {
       type = lib.types.nullOr lib.types.attrs;
       default = null;
@@ -195,9 +207,13 @@ in {
         {HF_HOME = "/cache";}
         // cfg.cclEnv;
 
-      volumes = [
-        "${cfg.cacheDir}:/cache"
-      ];
+      volumes =
+        [
+          "${cfg.cacheDir}:/cache"
+        ]
+        ++ lib.optionals (cfg.reasoningParserPlugin != null) [
+          "${cfg.reasoningParserPlugin}:/etc/vllm/reasoning_parser.py:ro"
+        ];
 
       ports = ["${topCfg.host}:${toString topCfg.port}:8000"];
 
@@ -240,6 +256,10 @@ in {
           ++ lib.optionals (cfg.reasoningParser != null) [
             "--reasoning-parser"
             cfg.reasoningParser
+          ]
+          ++ lib.optionals (cfg.reasoningParserPlugin != null) [
+            "--reasoning-parser-plugin"
+            "/etc/vllm/reasoning_parser.py"
           ]
           ++ lib.optionals (cfg.limitMmPerPrompt != null) [
             "--limit-mm-per-prompt"
