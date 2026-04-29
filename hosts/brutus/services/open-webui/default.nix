@@ -64,10 +64,26 @@ in {
           AUDIO_TTS_MODEL = ttsModel;
           AUDIO_TTS_VOICE = "alloy";
 
+          # task generation: keep titles, drop the chatty ones that
+          # spend chat-model slots on every keystroke / message turn.
+          ENABLE_TAGS_GENERATION = "False";
+          ENABLE_AUTOCOMPLETE_GENERATION = "False";
+          ENABLE_FOLLOW_UP_GENERATION = "False";
+
+          # cache /v1/models instead of re-polling every second
+          ENABLE_BASE_MODELS_CACHE = "True";
+          MODELS_CACHE_TTL = "300";
+
           # search settings
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
           SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
+          WEB_SEARCH_RESULT_COUNT = "5";
+          # bound SearXNG fan-out so upstream engines (Google/Bing/Brave)
+          # don't rate-limit when OWUI splits a turn into multiple queries.
+          WEB_SEARCH_CONCURRENT_REQUESTS = "2";
+          # parallel URL fetches; different domains so no per-host rate risk.
+          WEB_LOADER_CONCURRENT_REQUESTS = "20";
 
           # web search RAG: chunk + retrieve top-k to keep prompts within model context
           BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL = "False";
