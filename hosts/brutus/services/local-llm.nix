@@ -5,9 +5,10 @@
 }: let
   cfg = config.services.local-llm;
 in {
-  sunnycareboo.ports.allocate.local-llm = lib.mkIf (cfg.backend != null) 8000;
+  sunnycareboo.ports.allocate.local-llm = lib.mkIf cfg.enable 8000;
 
   services.local-llm = {
+    enable = true;
     # vLLM-XPU on B70 Pro is mid kernel-migration as of 2026-04-29 —
     # AutoRound/INC paths disabled in newer images, MoE INT4 kernels
     # not landed, FusedMoE unpacks to BF16 → OOM on 32 GB. Sticking with
