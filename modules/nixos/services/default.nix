@@ -7,13 +7,12 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
-    ./llamacpp-intel-arc.nix
+    ./local-llm
     ./lldap.nix
     ./mealie.nix
     ./open-webui.nix
     ./openssh.nix
     ./radicale.nix
     ./speaches.nix
-    ./vllm.nix
   ];
 }

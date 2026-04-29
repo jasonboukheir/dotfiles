@@ -15,7 +15,7 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
-    ./llamacpp-intel-arc.nix
+    ./local-llm.nix
     ./speaches.nix
     ./lldap.nix
     ./memos.nix
@@ -28,7 +28,6 @@
     ./smtp.nix
     ./sunnycareboo.nix
     ./tailscale.nix
-    ./vllm.nix
     ./zfs.nix
   ];
 }

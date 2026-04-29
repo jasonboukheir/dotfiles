@@ -9,65 +9,16 @@
 # Versioned per-build via the bin/ directory's narHash so each refresh
 # produces a uniquely-named store path (visible in `nix store ls`).
 #
-# Two outputs:
-#   default — autoPatchelf'd against nixpkgs oneAPI/level-zero so the
-#             binary runs natively under systemd (RUNPATH points into
-#             /nix/store).
-#   passthru.raw — bit-for-bit copy of the in-container build with its
-#             original RUNPATH (`/work/build/bin`) intact. Used by the
-#             container variant of the service module so resolution
-#             goes through `setvars.sh` LD_LIBRARY_PATH inside the
-#             intel/vllm runtime image, where the matching oneAPI
-#             libraries already live.
+# This is a bit-for-bit copy of the in-container build with its
+# original RUNPATH (`/work/build/bin`) intact. Resolution at runtime
+# goes through `setvars.sh` LD_LIBRARY_PATH inside the intel/vllm
+# runtime image, where the matching oneAPI libraries already live.
 {
   stdenv,
   lib,
-  autoPatchelfHook,
-  base,
-  level-zero,
 }: let
   src = ./bin;
   buildStamp = builtins.substring 11 8 (builtins.hashFile "sha256" (src + "/llama-server"));
-
-  raw = stdenv.mkDerivation {
-    pname = "llamacpp-intel-arc-server-raw";
-    version = "0.10.0-aicss-${buildStamp}";
-
-    inherit src;
-
-    dontUnpack = true;
-    dontConfigure = true;
-    dontBuild = true;
-    dontStrip = true;
-    dontPatchELF = true;
-    dontFixup = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/bin $out/lib
-
-      if [ ! -x "$src/llama-server" ]; then
-        echo "ERROR: $src/llama-server not present in vendored bin/" >&2
-        exit 1
-      fi
-
-      cp -L "$src/llama-server" "$out/bin/llama-server"
-
-      for f in "$src"/lib*.so*; do
-        [ -e "$f" ] || continue
-        cp -L "$f" "$out/lib/"
-      done
-
-      runHook postInstall
-    '';
-
-    meta = with lib; {
-      description = "Raw (un-autopatched) llama.cpp server for container runtime";
-      platforms = ["x86_64-linux"];
-      mainProgram = "llama-server";
-    };
-  };
 in
   stdenv.mkDerivation {
     pname = "llamacpp-intel-arc-server";
@@ -79,14 +30,8 @@ in
     dontConfigure = true;
     dontBuild = true;
     dontStrip = true;
-
-    nativeBuildInputs = [autoPatchelfHook];
-
-    buildInputs = [
-      base
-      level-zero
-      stdenv.cc.cc.lib
-    ];
+    dontPatchELF = true;
+    dontFixup = true;
 
     installPhase = ''
       runHook preInstall
@@ -110,17 +55,16 @@ in
       runHook postInstall
     '';
 
-    passthru = {inherit raw;};
-
     meta = with lib; {
       description = "Patched llama.cpp server (Intel SYCL, Battlemage)";
       longDescription = ''
         llama.cpp `llama-server` built from upstream master + 6
         cherry-picked Intel SYCL PRs + the IsoQuant rotation patch.
-        Companion ggml/llama/mtmd `.so` files ship in `$out/lib`,
-        autopatched against `intel-oneapi.base` (MKL + DPC++ runtime)
-        and `level-zero` so the binary runs natively with no
-        LD_LIBRARY_PATH plumbing.
+        Companion ggml/llama/mtmd `.so` files ship in `$out/lib`.
+        Intended to be bind-mounted into the `intel/vllm:*-xpu`
+        container so oneAPI / level-zero / NEO / IGC resolution goes
+        through `setvars.sh` rather than the host's nixpkgs Intel
+        userspace stack.
       '';
       homepage = "https://github.com/ggml-org/llama.cpp";
       license = licenses.mit;
