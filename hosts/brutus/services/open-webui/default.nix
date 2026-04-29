@@ -74,6 +74,9 @@ in {
           ENABLE_BASE_MODELS_CACHE = "True";
           MODELS_CACHE_TTL = "300";
 
+          # only LiteLLM is upstream; default-on Ollama probe spams the journal
+          ENABLE_OLLAMA_API = "False";
+
           # search settings
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
