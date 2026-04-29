@@ -8,7 +8,7 @@ in {
   sunnycareboo.ports.allocate.local-llm = lib.mkIf cfg.enable 8000;
 
   services.local-llm = {
-    enable = false;
+    enable = true;
     backend = "vllm";
     port = lib.mkIf cfg.enable config.sunnycareboo.ports.values.local-llm;
     host = "127.0.0.1";
