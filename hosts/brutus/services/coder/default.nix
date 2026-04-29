@@ -5,7 +5,7 @@
 }: let
   cfg = config.services.coder;
   oidcCfg = config.services.pocket-id.ensureClients.coder;
-  proxyCfg = config.sunnycareboo.services.coder;
+  proxyCfg = config.sunnycareboo.services.code;
   llmCfg = config.sunnycareboo.services.llm;
   idCfg = config.sunnycareboo.services.id;
   port = config.sunnycareboo.ports.values.coder;
@@ -56,7 +56,7 @@ in {
     };
   };
 
-  sunnycareboo.services.coder = lib.mkIf cfg.enable {
+  sunnycareboo.services.code = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://${cfg.listenAddress}";
