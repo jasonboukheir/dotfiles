@@ -4,16 +4,71 @@
   ...
 }: let
   cfg = config.services.litellm;
+  llamacpp = config.services.llamacpp-intel-arc;
+  speaches = config.services.speaches;
   port = 3200;
+
+  llamacppBase = "http://${llamacpp.host}:${toString llamacpp.port}/v1";
+  speachesBase = "http://${speaches.host}:${toString speaches.port}/v1";
+
+  qwenVariant = {
+    name,
+    enableThinking,
+    extra ? {},
+  }: {
+    model_name = name;
+    litellm_params =
+      {
+        model = "openai/${llamacpp.alias}";
+        api_base = llamacppBase;
+        api_key = "sk-noop";
+        extra_body = {
+          chat_template_kwargs = {
+            enable_thinking = enableThinking;
+          };
+        };
+      }
+      // extra;
+    model_info = {mode = "chat";};
+  };
 in {
   services.litellm = {
     enable = true;
     port = port;
     environment = {
       DATABASE_URL = "postgresql://litellm@localhost:5432/litellm";
-      STORE_MODEL_IN_DB = "True";
     };
     environmentFile = config.age.secrets."litellm/env".path;
+
+    settings.model_list = [
+      (qwenVariant {
+        name = "qwen3.6-fast";
+        enableThinking = false;
+      })
+      (qwenVariant {
+        name = "qwen3.6-deep";
+        enableThinking = true;
+        extra.max_tokens = 16384;
+      })
+      {
+        model_name = "whisper-1";
+        litellm_params = {
+          model = "openai/whisper-1";
+          api_base = speachesBase;
+          api_key = "sk-noop";
+        };
+        model_info = {mode = "audio_transcription";};
+      }
+      {
+        model_name = "tts-1";
+        litellm_params = {
+          model = "openai/tts-1";
+          api_base = speachesBase;
+          api_key = "sk-noop";
+        };
+        model_info = {mode = "audio_speech";};
+      }
+    ];
   };
 
   age.secrets."litellm/env" = lib.mkIf cfg.enable {
