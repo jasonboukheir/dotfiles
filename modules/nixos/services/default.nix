@@ -7,7 +7,9 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
+    ./local-embedding
     ./local-llm
+    ./local-stt
     ./lldap.nix
     ./mealie.nix
     ./open-webui.nix

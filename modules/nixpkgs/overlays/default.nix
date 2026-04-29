@@ -7,6 +7,8 @@
     (import ./zmx.nix)
     (import ./speaches.nix)
     (import ./intel-vllm-image.nix)
+    (import ./intel-llm-scaler-vllm-image.nix)
     (import ./llamacpp-intel-arc-server.nix)
+    (import ./whispercpp-intel-arc-server.nix)
   ];
 }
