@@ -4,11 +4,11 @@
   ...
 }: let
   cfg = config.services.litellm;
-  llamacpp = config.services.llamacpp-intel-arc;
+  localLlm = config.services.local-llm;
   speaches = config.services.speaches;
   port = config.sunnycareboo.ports.values.litellm;
 
-  llamacppBase = "http://${llamacpp.host}:${toString llamacpp.port}/v1";
+  localLlmBase = "http://${localLlm.host}:${toString localLlm.port}/v1";
   speachesBase = "http://${speaches.host}:${toString speaches.port}/v1";
 
   qwenVariant = {
@@ -19,8 +19,8 @@
     model_name = name;
     litellm_params =
       {
-        model = "openai/${llamacpp.alias}";
-        api_base = llamacppBase;
+        model = "openai/${localLlm.alias}";
+        api_base = localLlmBase;
         api_key = "sk-noop";
         extra_body = {
           chat_template_kwargs = {
