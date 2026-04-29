@@ -7,14 +7,15 @@
   services.speaches = {
     enable = true;
     port = config.sunnycareboo.ports.values.speaches;
+    # STT moved to GPU via services.local-stt (whisper.cpp SYCL).
+    # Speaches now hosts only Kokoro TTS — fast enough on CPU at ~10x
+    # realtime that GPU offload doesn't pay back the engineering cost.
     preloadModels = [
-      "Systran/faster-whisper-large-v3"
       "speaches-ai/Kokoro-82M-v1.0-ONNX"
     ];
     environment = {
       LOG_LEVEL = "info";
       ENABLE_UI = "False";
-      STT_MODEL_TTL = "3600";
       TTS_MODEL_TTL = "3600";
     };
   };
