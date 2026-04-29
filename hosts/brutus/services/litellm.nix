@@ -5,10 +5,12 @@
 }: let
   cfg = config.services.litellm;
   localLlm = config.services.local-llm;
+  localEmbedding = config.services.local-embedding;
   speaches = config.services.speaches;
   port = config.sunnycareboo.ports.values.litellm;
 
   localLlmBase = "http://${localLlm.host}:${toString localLlm.port}/v1";
+  localEmbeddingBase = "http://${localEmbedding.host}:${toString localEmbedding.port}/v1";
   speachesBase = "http://${speaches.host}:${toString speaches.port}/v1";
 
   qwenVariant = {
@@ -52,6 +54,20 @@ in {
           enableThinking = true;
           extra.max_tokens = 16384;
         })
+      ]
+      ++ lib.optionals localEmbedding.enable [
+        {
+          model_name = "text-embedding-qwen3";
+          litellm_params = {
+            model = "openai/${localEmbedding.alias}";
+            api_base = localEmbeddingBase;
+            api_key = "sk-noop";
+          };
+          model_info = {
+            mode = "embedding";
+            output_vector_size = 1024;
+          };
+        }
       ]
       ++ [
         {

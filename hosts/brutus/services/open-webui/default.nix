@@ -19,6 +19,7 @@
     .model_name;
   sttModel = modelByMode "audio_transcription" "whisper-1";
   ttsModel = modelByMode "audio_speech" "tts-1";
+  embeddingModel = modelByMode "embedding" "text-embedding-3-small";
 in {
   sunnycareboo.ports.allocate.open-webui = lib.mkIf cfg.enable 3100;
   allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
@@ -67,7 +68,14 @@ in {
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
           SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
-          BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL = "True";
+
+          # web search RAG: chunk + retrieve top-k to keep prompts within model context
+          BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL = "False";
+          RAG_EMBEDDING_ENGINE = "openai";
+          RAG_EMBEDDING_MODEL = embeddingModel;
+          RAG_EMBEDDING_MODEL_AUTO_UPDATE = "False";
+          RAG_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          RAG_EMBEDDING_BATCH_SIZE = "16";
         }
       ]
       ++ (lib.optional proxyCfg.enable {
@@ -78,6 +86,7 @@ in {
       "OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
       "AUDIO_STT_OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
       "AUDIO_TTS_OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
+      "RAG_OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
       "WEBUI_SECRET_KEY" = config.age.secrets."open-webui/webuiSecretKey".path;
     };
   };

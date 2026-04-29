@@ -15,6 +15,7 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
+    ./local-embedding.nix
     ./local-llm.nix
     ./speaches.nix
     ./lldap.nix
