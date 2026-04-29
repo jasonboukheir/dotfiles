@@ -11,9 +11,10 @@ in {
   ];
 
   options.services.local-llm = {
+    enable = lib.mkEnableOption "enable local-llm";
     backend = lib.mkOption {
-      type = lib.types.nullOr (lib.types.enum ["llamacpp" "vllm"]);
-      default = null;
+      type = lib.types.enum ["llamacpp" "vllm"];
+      default = "llamacpp";
       description = ''
         Which local LLM backend should run. Backends are mutually
         exclusive — they would contend for `/dev/dri` and VRAM.
@@ -21,7 +22,6 @@ in {
         - `"llamacpp"` — patched llama.cpp `llama-server` (SYCL),
           single-stream throughput leader.
         - `"vllm"` — Intel-built vLLM, better for concurrent serving.
-        - `null` — neither runs.
 
         Backend-specific tunables live under
         `services.local-llm.<backend>.*`.
@@ -56,17 +56,17 @@ in {
         Served-model id of the active backend — what downstream
         consumers (LiteLLM) should use as the upstream model name.
         Computed from `services.local-llm.<backend>.alias`. Empty
-        when no backend is selected.
+        when the service is disabled.
       '';
     };
   };
 
   config = {
     services.local-llm.alias =
-      if cfg.backend == "llamacpp"
+      if !cfg.enable
+      then ""
+      else if cfg.backend == "llamacpp"
       then cfg.llamacpp.alias
-      else if cfg.backend == "vllm"
-      then cfg.vllm.alias
-      else "";
+      else cfg.vllm.alias;
   };
 }

@@ -76,7 +76,7 @@ in {
     };
   };
 
-  config = lib.mkIf (topCfg.backend == "vllm") {
+  config = lib.mkIf (topCfg.enable && topCfg.backend == "vllm") {
     users.groups.${cfg.group} = {};
     users.users.${cfg.user} = {
       isSystemUser = true;

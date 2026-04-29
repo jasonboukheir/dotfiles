@@ -248,7 +248,7 @@ in {
   # `/var/lib/private/llamacpp` — re-asserting ownership/mode on
   # that path would replace the symlink and orphan the existing
   # 20+ GiB model file.
-  config = lib.mkIf (topCfg.backend == "llamacpp") {
+  config = lib.mkIf (topCfg.enable && topCfg.backend == "llamacpp") {
     virtualisation.oci-containers.containers.local-llm = {
       autoStart = true;
       image = "${cfg.containerImage.imageName}:${cfg.containerImage.imageTag}";
