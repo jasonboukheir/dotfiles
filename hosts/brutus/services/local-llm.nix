@@ -16,7 +16,7 @@ in {
     # https://github.com/vllm-project/vllm-omni/issues/2570). The vllm
     # config below stays so the switch is one line when kernels land.
     backend = "llamacpp";
-    port = config.sunnycareboo.ports.values.local-llm;
+    port = lib.mkIf cfg.enable config.sunnycareboo.ports.values.local-llm;
     host = "127.0.0.1";
 
     llamacpp = {

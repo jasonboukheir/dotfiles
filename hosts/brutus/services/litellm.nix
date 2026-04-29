@@ -41,35 +41,38 @@ in {
     };
     environmentFile = config.age.secrets."litellm/env".path;
 
-    settings.model_list = [
-      (qwenVariant {
-        name = "qwen3.6-fast";
-        enableThinking = false;
-      })
-      (qwenVariant {
-        name = "qwen3.6-deep";
-        enableThinking = true;
-        extra.max_tokens = 16384;
-      })
-      {
-        model_name = "whisper-1";
-        litellm_params = {
-          model = "openai/whisper-1";
-          api_base = speachesBase;
-          api_key = "sk-noop";
-        };
-        model_info = {mode = "audio_transcription";};
-      }
-      {
-        model_name = "tts-1";
-        litellm_params = {
-          model = "openai/tts-1";
-          api_base = speachesBase;
-          api_key = "sk-noop";
-        };
-        model_info = {mode = "audio_speech";};
-      }
-    ];
+    settings.model_list =
+      lib.optionals localLlm.enable [
+        (qwenVariant {
+          name = "qwen3.6-fast";
+          enableThinking = false;
+        })
+        (qwenVariant {
+          name = "qwen3.6-deep";
+          enableThinking = true;
+          extra.max_tokens = 16384;
+        })
+      ]
+      ++ [
+        {
+          model_name = "whisper-1";
+          litellm_params = {
+            model = "openai/whisper-1";
+            api_base = speachesBase;
+            api_key = "sk-noop";
+          };
+          model_info = {mode = "audio_transcription";};
+        }
+        {
+          model_name = "tts-1";
+          litellm_params = {
+            model = "openai/tts-1";
+            api_base = speachesBase;
+            api_key = "sk-noop";
+          };
+          model_info = {mode = "audio_speech";};
+        }
+      ];
   };
 
   age.secrets."litellm/env" = lib.mkIf cfg.enable {
