@@ -124,3 +124,21 @@ Doc's estimates were conservative — single-stream is faster than llama.cpp Q4_
 - 30-min 8-way soak: 1433 requests, 286,600 tokens, **158.6 tok/s aggregate sustained**, **0 errors**, per-minute throughput stayed in 155–164 tok/s with no drift
 
 Ready to deploy: flip `enable = false → true` in `hosts/brutus/services/local-llm.nix` and `nixos-rebuild switch`.
+
+## Responses API status (probed 2026-04-29)
+
+`POST /v1/responses` works on `intel/llm-scaler-vllm:0.14.0-b8.2` with `Qwen/Qwen3.6-35B-A3B` and the existing `qwen3_aware` reasoning parser. **No experimental env var required** (`VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT` was not needed; the endpoint responds 200 in the default config).
+
+What the probe showed (`enable_thinking=true`, the default chat template):
+
+- Reasoning lands in a separate `output` item of `type: "reasoning"` with `content[].type: "reasoning_text"` — verbatim model CoT, with `<think>`/`</think>` tokens already stripped by the parser.
+- The assistant message is a *second* `output` item of `type: "message"` with `content[].type: "output_text"` — clean model reply.
+- Streaming events are typed: `response.created`, `response.output_item.added` (type=reasoning), `response.reasoning_text.delta`, `response.reasoning_text.done`, `response.output_item.done`, then `response.output_item.added` (type=message), `response.output_text.delta`, `response.output_text.done`, `response.completed`. The reasoning-to-content transition is a clean item boundary, not a regex on `</think>`.
+- `chat_template_kwargs.enable_thinking` is honored on the Responses path identically to Chat Completions; `enable_thinking=false` skips the reasoning item and emits only an `output_text` message item.
+- Cosmetic only: `usage.output_tokens_details.reasoning_tokens` is `0` even when reasoning text is non-empty. vLLM's accounting doesn't credit reasoning_text tokens through this image, but the content itself is correct.
+
+**Interaction with the `qwen3_aware` parser:** the existing plugin (`modules/nixos/services/local-llm/qwen3_aware_reasoning_parser.py`) registers via `ReasoningParserManager.register_module` and is reused by the Responses item-assembly path — no fork or reimplementation needed.
+
+**Open WebUI does not call `/v1/responses` upstream** as of `open-webui 0.8.12`. It always calls `/chat/completions` (`routers/openai.py:1148`/`1154`) and synthesizes Responses-shaped internal items from Chat Completions deltas. The `ENABLE_RESPONSES_API_STATEFUL` env var only enables `previous_response_id` re-use — it doesn't change the upstream protocol. So adopting `/v1/responses` end-to-end requires either an Open WebUI core change (not on the maintainer roadmap; see [open-webui#11874](https://github.com/open-webui/open-webui/discussions/11874)) or a community manifold pipeline (alpha quality). Not pursued.
+
+Bottom line for this stack: the Responses path on the vLLM side is healthy and would be a flag flip if/when Open WebUI grows native client support. Until then, the practical fix for the `<think>`-in-search-content UI bug is on the Open WebUI side — see notes near `services.open-webui` config.

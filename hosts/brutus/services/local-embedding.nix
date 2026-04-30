@@ -11,7 +11,8 @@ in {
   # in pooling-only mode. 1024-dim output, last-token pooling
   # (vLLM auto-detects from the repo's pooling config). 8K context.
   # Co-resident on the B70 with the Qwen3.6-35B-A3B chat instance —
-  # chat at gpuMemoryUtilization 0.80, this at 0.10.
+  # chat at gpuMemoryUtilization 0.80, this at 0.07 (module default,
+  # tightened from 0.10 once max-num-seqs landed — see module docs).
   # Top of MTEB v2 in its size class as of 2026-04-29.
   services.local-embedding = {
     enable = true;
