@@ -68,6 +68,12 @@
           repo_root=$(git rev-parse --show-toplevel)
           host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
 
+          # Meta devservers get per-allocation hostnames (devvm1234, devbig5,
+          # devgpu9, ...); they all share the work-devserver home config.
+          case "$host" in
+            devvm*|devbig*|devgpu*) host=work-devserver ;;
+          esac
+
           case "$(uname -s)" in
             Linux)
               if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
