@@ -70,17 +70,16 @@ in {
       cudagraphCaptureSizes = [1 2 4 8];
       extraArgs = ["--max-num-seqs" "8"];
       # The Qwen3.6 chat template prefills the *prompt* differently
-      # depending on `enable_thinking`: `<think>\n` for deep mode (model
-      # emits `</think>` only), `<think>\n\n</think>\n\n` for fast mode
-      # (model emits no tags). The bundled parsers can't handle both —
-      # `qwen3` demands both tokens in the output and leaks deep-mode
-      # CoT into `content`; `deepseek_r1` treats fast-mode output (no
-      # `</think>`) as "still inside reasoning" and dumps every token
-      # into `reasoning_content`. The custom plugin reads the per-request
-      # `chat_template_kwargs.enable_thinking` and switches between the
-      # two extraction strategies at parser-init time.
-      reasoningParser = "qwen3_aware";
-      reasoningParserPlugin = ../../../modules/nixos/services/local-llm/qwen3_aware_reasoning_parser.py;
+      # depending on `enable_thinking`: `<think>\n` for deep mode
+      # (model emits `</think>` only), `<think>\n\n</think>\n\n` for
+      # fast mode (model emits no tags). The bundled `qwen3` parser
+      # in vLLM 0.20+ handles both: it reads `enable_thinking` from
+      # chat_template_kwargs and the serving layer detects fast-mode
+      # via `prompt_is_reasoning_end` to route deltas as content
+      # without calling the streaming parser. Older vLLM (0.14) needed
+      # a custom plugin (qwen3_aware_reasoning_parser.py) — no longer
+      # needed.
+      reasoningParser = "qwen3";
       limitMmPerPrompt = {
         image = 0;
         video = 0;
