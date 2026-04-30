@@ -94,13 +94,47 @@ in {
       type = lib.types.bool;
       default = true;
       description = ''
-        Pass `--enforce-eager`. Required, not optional: without it
-        Dynamo trips on IPEX's pybind11 C-extension `_has_xmx`
-        called from `qwen3_5.linear_attn.forward_xpu`, raising
-        `torch._dynamo.exc.Unsupported`. Eager-mode throughput is
-        at the kernel ceiling anyway (20 tok/s single, 868 tok/s
-        64-way agg), so the inductor path wouldn't add anything.
+        Pass `--enforce-eager`. Required on the legacy
+        intel/llm-scaler-vllm image because Dynamo trips on IPEX's
+        pybind11 C-extension `_has_xmx` called from
+        `qwen3_5.linear_attn.forward_xpu`. The IPEX-free
+        vllm-xpu-int4-tq image makes Dynamo + Inductor + XPU graph
+        capture (PIECEWISE) viable; turning eager off there lifts
+        single-stream from ~20 tok/s to ~58 tok/s on
+        Qwen3.6-35B-A3B (matching llama.cpp's hand-tuned SYCL
+        pipeline). Pair with `enableXpuGraph` and
+        `cudagraphCaptureSizes`.
       '';
+    };
+
+    enableXpuGraph = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Set `VLLM_XPU_ENABLE_XPU_GRAPH=1` in the container env. This
+        is what actually captures the decode loop into a Level Zero
+        command list — torch.compile alone helps a little, but the
+        ~3x single-stream win comes from graph replay collapsing the
+        hundreds of per-kernel CPU dispatches into one submission
+        per token. No-op while `enforceEager = true`.
+      '';
+    };
+
+    cudagraphCaptureSizes = lib.mkOption {
+      type = lib.types.nullOr (lib.types.listOf lib.types.int);
+      default = null;
+      description = ''
+        Batch sizes to capture into PIECEWISE XPU graphs (passed via
+        `--compilation-config '{"cudagraph_capture_sizes":[…]}'`).
+        Defaults to `null` which lets vLLM pick — typically 19 sizes
+        from 1 to 128 costing ~7 GiB of VRAM, which OOMs the KV
+        cache budget on a 32 GiB B70 alongside a 20 GiB model. Set
+        e.g. `[ 1 2 4 8 ]` (~1.4 GiB) to cover single-stream + light
+        concurrency; beyond the largest captured size vLLM falls
+        back to eager-style submission. Ineffective unless
+        `enableXpuGraph = true` and `enforceEager = false`.
+      '';
+      example = lib.literalExpression "[ 1 2 4 8 ]";
     };
 
     reasoningParser = lib.mkOption {
@@ -216,7 +250,10 @@ in {
 
       environment =
         {HF_HOME = "/cache";}
-        // cfg.cclEnv;
+        // cfg.cclEnv
+        // lib.optionalAttrs cfg.enableXpuGraph {
+          VLLM_XPU_ENABLE_XPU_GRAPH = "1";
+        };
 
       volumes =
         [
@@ -264,6 +301,10 @@ in {
             cfg.kvCacheDtype
           ]
           ++ lib.optionals cfg.enforceEager ["--enforce-eager"]
+          ++ lib.optionals (cfg.cudagraphCaptureSizes != null) [
+            "--compilation-config"
+            (builtins.toJSON {cudagraph_capture_sizes = cfg.cudagraphCaptureSizes;})
+          ]
           ++ lib.optionals (cfg.reasoningParser != null) [
             "--reasoning-parser"
             cfg.reasoningParser
