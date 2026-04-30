@@ -23,19 +23,23 @@ in {
     };
 
     # Validated 2026-04-30 against vllm-xpu-int4-tq:fcc0c8365 with
-    # palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 + turboquant_k3v4_nc:
-    # 20.15 GiB model, 251k-token KV cache, ~28 tok/s single-stream
-    # eager, 555 tok/s 32-way agg. KL vs FP16 KV at 4096 ctx /
-    # top-2000: 0.0179 with top-1 100% / top-5 93% — k3v4 is
-    # functionally identical to FP16 for greedy decoding while
-    # adding 21% more KV headroom over the previous fp8 setup.
+    # palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 + turboquant_k3v4_nc +
+    # torch.compile + XPU graph capture: 20.15 GiB model, ~211k KV
+    # tokens at 4k ctx, ~58 tok/s single-stream (~3x the legacy
+    # 20 tok/s, matching llama.cpp Q4_K_M's hand-tuned SYCL).
+    # KL vs FP16 KV at 4096 ctx / top-2000: 0.0179 with top-1 100%
+    # / top-5 93% — k3v4 is functionally identical to FP16 for
+    # greedy decoding.
     #
     # Replaces the older intel/llm-scaler-vllm:0.14.0-b8.2 +
     # sym_int4 path (19.01 GiB / 103k KV / 20 tok/s single).
-    # The new path uses pre-quantized GPTQv2 sym int4 weights
-    # (no IPEX online quantization), routes the MoE through
-    # vllm-xpu-kernels' xpu_fused_moe(is_int4=True) via INC, and
-    # compresses the K cache to 3-bit MSE-Lloyd-Max + 4-bit V.
+    # The new path uses pre-quantized GPTQv2 sym int4 weights (no
+    # IPEX online quantization, so torch.compile / Dynamo work),
+    # routes the MoE through vllm-xpu-kernels' xpu_fused_moe(is_int4=True)
+    # via INC, and compresses the K cache to 3-bit MSE-Lloyd-Max +
+    # 4-bit V. Single-stream win comes from XPU graph replay
+    # collapsing hundreds of per-kernel CPU dispatches into one per
+    # token.
     vllm = {
       containerImage = pkgs.vllm-xpu-int4-tq-image;
       workingDir = "/workspace/vllm";
@@ -45,6 +49,19 @@ in {
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 32768;
+      # Single-stream perf opportunity: setting `enforceEager = false`
+      # + `enableXpuGraph = true` + `cudagraphCaptureSizes = [1 2 4 8]`
+      # lifts decode from ~20 tok/s to ~58 tok/s (matching llama.cpp).
+      # Smoke-tested 2026-04-30 — does NOT fit at this 32k ctx with
+      # 0.80 util because torch.compile workspace + graph capture
+      # eats ~5 GiB on top of model + KV. To enable, either:
+      #   - reduce maxModelLen to ~8192, OR
+      #   - bump gpuMemoryUtilization to 0.85 (and reduce embedding's
+      #     allocation from 0.10 to ~0.05 — its 1.2 GiB model fits
+      #     with room to spare).
+      # See vllm-intel-arc/results/PERF-INVESTIGATION.md for the full
+      # bandwidth analysis and CPU-dispatch story.
+      enforceEager = true;
       # Co-resident with services.local-embedding (Qwen3-Embedding-0.6B
       # at 0.10) on the same B70. 0.80 + 0.10 = 0.90 of 32 GiB,
       # leaving ~10% for level-zero runtime overhead.
