@@ -1,4 +1,8 @@
-{config, lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   age.secrets."power/ups/user/pw".file = ../secrets/power/ups/user/pw.age;
   power.ups = {
     enable = true;
@@ -34,8 +38,8 @@
   '';
 
   systemd.services.upsdrv = {
-    after = lib.mkForce [ "network.target" "dev-ups\\x2dtripplite.device" ];
-    wants = [ "dev-ups\\x2dtripplite.device" ];
+    after = lib.mkForce ["network.target" "dev-ups\\x2dtripplite.device"];
+    wants = ["dev-ups\\x2dtripplite.device"];
   };
 
   systemd.services.upsd.after = lib.mkForce [

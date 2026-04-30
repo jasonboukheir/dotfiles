@@ -12,8 +12,16 @@
   ];
 
   workspaceBindings = builtins.concatMap (n: [
-    "CTRL, ${toString n}, workspace, ${toString (if n == 0 then 10 else n)}"
-    "CTRL SHIFT, ${toString n}, movetoworkspace, ${toString (if n == 0 then 10 else n)}"
+    "CTRL, ${toString n}, workspace, ${toString (
+      if n == 0
+      then 10
+      else n
+    )}"
+    "CTRL SHIFT, ${toString n}, movetoworkspace, ${toString (
+      if n == 0
+      then 10
+      else n
+    )}"
   ]) (builtins.genList (i: lib.mod (i + 1) 10) 10);
 in {
   wayland.windowManager.hyprland.settings = {

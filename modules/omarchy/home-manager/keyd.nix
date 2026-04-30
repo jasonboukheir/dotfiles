@@ -7,13 +7,15 @@
 }: let
   cfg = systemConfig.omarchy;
 
-  terminalAppConfig = lib.concatMapStringsSep "\n\n" (app: ''
-    [${app}]
+  terminalAppConfig =
+    lib.concatMapStringsSep "\n\n" (app: ''
+      [${app}]
 
-    [${app}:cmd]
-    c = C-S-c
-    v = C-S-v
-  '') cfg.macKeybindings.terminalApps;
+      [${app}:cmd]
+      c = C-S-c
+      v = C-S-v
+    '')
+    cfg.macKeybindings.terminalApps;
 in {
   config = lib.mkIf (cfg.enable && cfg.macKeybindings.enable) {
     xdg.configFile."keyd/app.conf".text = terminalAppConfig;

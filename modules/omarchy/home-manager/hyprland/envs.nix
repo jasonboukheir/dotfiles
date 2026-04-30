@@ -1,4 +1,8 @@
-{config, lib, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   cursorSize = toString config.stylix.cursor.size;
 in {
   wayland.windowManager.hyprland.settings = {
