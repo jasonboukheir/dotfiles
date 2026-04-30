@@ -49,23 +49,26 @@ in {
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 32768;
-      # Single-stream perf opportunity: setting `enforceEager = false`
-      # + `enableXpuGraph = true` + `cudagraphCaptureSizes = [1 2 4 8]`
-      # lifts decode from ~20 tok/s to ~58 tok/s (matching llama.cpp).
-      # Smoke-tested 2026-04-30 — does NOT fit at this 32k ctx with
-      # 0.80 util because torch.compile workspace + graph capture
-      # eats ~5 GiB on top of model + KV. To enable, either:
-      #   - reduce maxModelLen to ~8192, OR
-      #   - bump gpuMemoryUtilization to 0.85 (and reduce embedding's
-      #     allocation from 0.10 to ~0.05 — its 1.2 GiB model fits
-      #     with room to spare).
-      # See vllm-intel-arc/results/PERF-INVESTIGATION.md for the full
-      # bandwidth analysis and CPU-dispatch story.
-      enforceEager = true;
-      # Co-resident with services.local-embedding (Qwen3-Embedding-0.6B
-      # at 0.10) on the same B70. 0.80 + 0.10 = 0.90 of 32 GiB,
-      # leaving ~10% for level-zero runtime overhead.
-      gpuMemoryUtilization = 0.80;
+      # Compile + XPU graph capture costs ~5.4 GiB on top of the model:
+      # 1.4 GiB for the captured Level Zero command lists themselves
+      # (with cudagraphCaptureSizes = [1 2 4 8]) plus ~4 GiB of
+      # profiling/Inductor workspace. vLLM probes peak memory at
+      # max-num-seqs × max-num-batched-tokens to size that workspace,
+      # so capping max-num-seqs is what keeps it bounded — at the
+      # default it balloons and OOMs the KV budget at 32k ctx.
+      #
+      # Bumping gpu-mem-util 0.80 → 0.85 (embedding at 0.07 keeps
+      # total at 0.92, ~2.5 GiB headroom) and capping max-num-seqs at
+      # 8 (matches the largest captured graph size) makes everything
+      # fit and lifts single-stream from ~20 tok/s to ~58 tok/s
+      # — matching llama.cpp Q4_K_M's hand-tuned SYCL pipeline. See
+      # vllm-intel-arc/results/PERF-INVESTIGATION.md for the full
+      # bandwidth analysis and CPU-dispatch diagnosis.
+      gpuMemoryUtilization = 0.85;
+      enforceEager = false;
+      enableXpuGraph = true;
+      cudagraphCaptureSizes = [1 2 4 8];
+      extraArgs = ["--max-num-seqs" "8"];
       # The Qwen3.6 chat template prefills the *prompt* differently
       # depending on `enable_thinking`: `<think>\n` for deep mode (model
       # emits `</think>` only), `<think>\n\n</think>\n\n` for fast mode
