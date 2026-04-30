@@ -25,7 +25,6 @@ in {
       fd
       ripgrep
       ripgrep-all
-      (writeShellScriptBin "cws" (builtins.readFile ./cws.sh))
     ];
     sessionVariables = {
       EDITOR = "nvim";
