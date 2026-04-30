@@ -143,6 +143,17 @@ in {
       description = "Additional command-line arguments appended to `vllm serve`.";
     };
 
+    workingDir = lib.mkOption {
+      type = lib.types.str;
+      default = "/llm";
+      description = ''
+        cwd to chdir into before exec'ing vllm. The default `/llm` is
+        where intel/llm-scaler-vllm puts its checked-out source tree.
+        Other images (e.g. upstream `vllm/docker/Dockerfile.xpu` which
+        WORKDIRs to `/workspace/vllm`) need a different value.
+      '';
+    };
+
     cclEnv = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = {
@@ -268,7 +279,7 @@ in {
           ++ cfg.extraArgs;
       in [
         "-lc"
-        "cd /llm && exec vllm ${lib.escapeShellArgs serveArgs}"
+        "cd ${cfg.workingDir} && exec vllm ${lib.escapeShellArgs serveArgs}"
       ];
     };
 
