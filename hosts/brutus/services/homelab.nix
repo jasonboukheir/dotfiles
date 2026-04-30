@@ -15,4 +15,23 @@ in {
   };
   homelab.enable = true;
   homelab.domain = "sunnycareboo.com";
+  homelab.secretsDir = ../secrets;
+  homelab.services = {
+    ai.enable = true;
+    budget.enable = true;
+    certs.enable = true;
+    cloud.enable = true;
+    code.enable = true;
+    gonic.enable = true;
+    headscale.enable = true;
+    home.enable = true;
+    id.enable = true;
+    lldap.enable = true;
+    meals.enable = true;
+    memos.enable = true;
+    photos.enable = true;
+    radicale.enable = true;
+    search.enable = true;
+    seer.enable = true;
+  };
 }

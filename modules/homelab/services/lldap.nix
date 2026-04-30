@@ -1,0 +1,91 @@
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab.services.lldap;
+  cfg = config.services.lldap;
+  defaultGroups = cfg.defaultGroups;
+  ports = config.homelab.ports.values;
+  domain = config.homelab.domain;
+  ldapBaseDn = lib.concatMapStringsSep "," (p: "dc=${p}") (lib.splitString "." domain);
+in {
+  config = lib.mkMerge [
+    {
+      homelab.services.lldap.proxyPass = "http://127.0.0.1:${toString cfg.settings.http_port}";
+    }
+    (lib.mkIf homelabCfg.enable {
+      homelab.ports.allocate = {
+        lldap-ldap = 3890;
+        lldap-http = 17170;
+      };
+
+      services.lldap = {
+        enable = true;
+        settings = {
+          ldap_base_dn = ldapBaseDn;
+
+          ldap_host = "127.0.0.1";
+          ldap_port = ports.lldap-ldap;
+
+          http_host = "127.0.0.1";
+          http_port = ports.lldap-http;
+
+          http_url = "https://${config.homelab.services.lldap.domain}";
+
+          jwt_secret_file = null; # these are set with credentials
+
+          force_ldap_user_pass_reset = "always";
+          ldap_user_pass_file = null; # these are set with credentials
+          ldap_user_email = "admin@${domain}";
+          ldap_user_dn = "admin";
+        };
+        environment = {
+          LLDAP_LDAP_USER_PASS_FILE = "/run/credentials/lldap.service/ldap_pass";
+          LLDAP_JWT_SECRET_FILE = "/run/credentials/lldap.service/jwt_secret";
+        };
+
+        enforceUsers = true;
+        enforceUserMemberships = true;
+        enforceGroups = true;
+
+        ensureUsers = {
+          "jasonbk" = {
+            firstName = "Jason";
+            lastName = "Bou Kheir";
+            displayName = "Jason Bou Kheir";
+            email = "jasonbk@sunnycareboo.com";
+            groups = [
+              cfg.ensureGroups."_pocket_id_admin".name
+              defaultGroups."lldap_admin".name
+            ];
+          };
+          "izmabk" = {
+            firstName = "Izma";
+            lastName = "Bou Kheir";
+            displayName = "Izma Bou Kheir";
+            email = "izmabk@sunnycareboo.com";
+            groups = [];
+          };
+        };
+        ensureGroups = {
+          "_pocket_id_admin" = {};
+        };
+        ensureUserFields = {};
+        ensureGroupFields = {};
+      };
+
+      age.secrets = {
+        "lldap/users/admin/pw".file = config.homelab.secretsDir + /lldap/users/admin/pw.age;
+        "lldap/jwt_secret".file = config.homelab.secretsDir + /lldap/jwt_secret.age;
+      };
+
+      systemd.services.lldap.serviceConfig = {
+        LoadCredential = [
+          "ldap_pass:${config.age.secrets."lldap/users/admin/pw".path}"
+          "jwt_secret:${config.age.secrets."lldap/jwt_secret".path}"
+        ];
+      };
+    })
+  ];
+}

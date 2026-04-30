@@ -1,17 +1,7 @@
 {...}: {
   imports = [
-    ./actual
-    ./coder
-    ./ezmtls
-    ./headscale
-    ./home-assistant
-    ./immich
-    ./mealie
-    ./open-webui
-    ./opencloud
     ./blocky.nix
     ./ddclient.nix
-    ./gonic.nix
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
@@ -19,14 +9,9 @@
     ./local-llm.nix
     ./local-stt.nix
     ./speaches.nix
-    ./lldap.nix
-    ./memos.nix
-    ./pocket-id.nix
     ./postgresql.nix
-    ./radicale.nix
     ./restic.nix
-    ./searx.nix
-    ./seerr.nix
+    ./storage.nix
     ./smtp.nix
     ./homelab.nix
     ./tailscale.nix
