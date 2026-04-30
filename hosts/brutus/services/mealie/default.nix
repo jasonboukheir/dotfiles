@@ -7,7 +7,10 @@
   oidcCfg = config.services.pocket-id.ensureClients.mealie;
   domain = config.sunnycareboo.services.meals.domain;
 
-  litellmModels = config.services.litellm.settings.model_list or [];
+  litellmCfg = config.services.litellm;
+  litellmBase = "http://${litellmCfg.host}:${toString litellmCfg.port}";
+
+  litellmModels = litellmCfg.settings.model_list or [];
   fastChatModel =
     (lib.findFirst
       (
@@ -37,7 +40,7 @@ in {
       "OIDC_ADMIN_GROUP" = "admin";
       "OIDC_PROVIDER_NAME" = "Pocket ID";
 
-      "OPENAI_BASE_URL" = "https://${config.sunnycareboo.services.llm.domain}";
+      "OPENAI_BASE_URL" = litellmBase;
       "OPENAI_MODEL" = fastChatModel;
     };
     database.createLocally = true;

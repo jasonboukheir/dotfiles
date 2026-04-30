@@ -24,6 +24,8 @@
       (toString cfg.gpuMemoryUtilization)
       "--max-model-len"
       (toString cfg.maxModelLen)
+      "--max-num-seqs"
+      (toString cfg.maxNumSeqs)
     ]
     ++ lib.optionals cfg.enforceEager ["--enforce-eager"]
     ++ cfg.extraArgs;
@@ -94,12 +96,29 @@ in {
 
     gpuMemoryUtilization = lib.mkOption {
       type = lib.types.float;
-      default = 0.10;
+      default = 0.07;
       description = ''
         Fraction of XPU VRAM vLLM may use. Sized for a 0.6B-class
-        embedding model coexisting with a chat vLLM on the same card —
-        chat takes ~0.80, embedding ~0.10, leaving ~10% headroom for
-        framework/level-zero overhead.
+        pooling-mode embedder (no KV cache) on a 32 GiB B70:
+        ~1.2 GiB FP16 weights + ~0.5 GiB profile-pass activations +
+        ~0.2 GiB level-zero/IPEX overhead ≈ 1.9 GiB, fits 0.07×32 =
+        2.24 GiB with a thin safety margin. Coexists with a chat vLLM
+        at ~0.80 → 0.87 of the card committed, 13% reserved for the
+        runtime. Bump in 0.01 increments if startup profiling OOMs.
+      '';
+    };
+
+    maxNumSeqs = lib.mkOption {
+      type = lib.types.int;
+      default = 8;
+      description = ''
+        Cap on concurrent sequences in a single forward
+        (`--max-num-seqs`). Bounds the activation footprint so the
+        profile pass at startup doesn't overshoot
+        `gpuMemoryUtilization`. vLLM's default (256) is sized for
+        bulk batch encoding; for an interactive embedding service
+        co-resident with a chat model 8 is plenty and keeps weights+
+        activations comfortably inside the 2.24 GiB envelope.
       '';
     };
 

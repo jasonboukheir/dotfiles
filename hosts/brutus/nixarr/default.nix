@@ -68,14 +68,6 @@ in {
       enable = true;
       openFirewall = false;
     };
-    readarr = {
-      enable = true;
-      openFirewall = false;
-    };
-    readarr-audiobook = {
-      enable = true;
-      openFirewall = false;
-    };
     sonarr = {
       enable = true;
       openFirewall = false;
@@ -92,8 +84,6 @@ in {
     radarr = lib.mkIf cfg.radarr.enable config.services.radarr.settings.server.port;
     prowlarr = lib.mkIf cfg.prowlarr.enable config.services.prowlarr.settings.server.port;
     lidarr = lib.mkIf cfg.lidarr.enable config.services.lidarr.settings.server.port;
-    readarr = lib.mkIf cfg.readarr.enable config.services.readarr.settings.server.port;
-    readarr-audiobook = lib.mkIf cfg.readarr-audiobook.enable config.services.readarr-audiobook.settings.server.port;
   };
 
   sunnycareboo.services = lib.mkIf config.nixarr.enable {
@@ -126,14 +116,6 @@ in {
     radarr = lib.mkIf config.nixarr.radarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.radarr.port}";
-    };
-    readarr = lib.mkIf config.nixarr.readarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.readarr.port}";
-    };
-    readarr-audiobook = lib.mkIf config.nixarr.readarr-audiobook.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.readarr-audiobook.port}";
     };
     sonarr = lib.mkIf config.nixarr.sonarr.enable {
       enable = true;

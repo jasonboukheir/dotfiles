@@ -6,11 +6,15 @@
 }: let
   cfg = config.services.open-webui;
   oidcCfg = config.services.pocket-id.ensureClients.open-webui;
-  proxyCfg = config.sunnycareboo.services.llm;
+  litellmCfg = config.services.litellm;
   domain = config.sunnycareboo.services.ai.domain;
   port = config.sunnycareboo.ports.values.open-webui;
 
-  litellmModels = config.services.litellm.settings.model_list or [];
+  # Bypass nginx for same-host LiteLLM traffic: avoids TLS/buffering overhead
+  # and keeps streaming responses unbuffered end-to-end.
+  litellmBase = "http://${litellmCfg.host}:${toString litellmCfg.port}";
+
+  litellmModels = litellmCfg.settings.model_list or [];
   modelByMode = mode: fallback:
     (lib.findFirst
       (m: (m.model_info.mode or null) == mode)
@@ -57,10 +61,10 @@ in {
 
           # audio via litellm proxy
           AUDIO_STT_ENGINE = "openai";
-          AUDIO_STT_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          AUDIO_STT_OPENAI_API_BASE_URL = "${litellmBase}/v1";
           AUDIO_STT_MODEL = sttModel;
           AUDIO_TTS_ENGINE = "openai";
-          AUDIO_TTS_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          AUDIO_TTS_OPENAI_API_BASE_URL = "${litellmBase}/v1";
           AUDIO_TTS_MODEL = ttsModel;
           AUDIO_TTS_VOICE = "alloy";
 
@@ -93,13 +97,13 @@ in {
           RAG_EMBEDDING_ENGINE = "openai";
           RAG_EMBEDDING_MODEL = embeddingModel;
           RAG_EMBEDDING_MODEL_AUTO_UPDATE = "False";
-          RAG_OPENAI_API_BASE_URL = "https://${proxyCfg.domain}/v1";
+          RAG_OPENAI_API_BASE_URL = "${litellmBase}/v1";
           RAG_EMBEDDING_BATCH_SIZE = "16";
         }
       ]
-      ++ (lib.optional proxyCfg.enable {
+      ++ (lib.optional litellmCfg.enable {
         # OPENAI API
-        OPENAI_API_BASE_URL = "https://${proxyCfg.domain}";
+        OPENAI_API_BASE_URL = litellmBase;
       }));
     credentials = {
       "OPENAI_API_KEY" = config.age.secrets."open-webui/openaiApiKey".path;
@@ -134,6 +138,17 @@ in {
     enable = true;
     isExternal = true;
     proxyPass = "http://${cfg.host}:${toString cfg.port}";
+    # Stream chat-completion SSE byte-by-byte; nginx's default buffering
+    # re-chunks the stream and breaks markdown tokens across boundaries
+    # (`**bold**` -> `**` + `bold` + `**`). Long timeouts cover slow first
+    # tokens from web-search / tool-use turns. Socket.IO upgrades go through
+    # the existing proxyWebsockets headers.
+    extraConfig = ''
+      proxy_buffering off;
+      proxy_cache off;
+      proxy_read_timeout 1d;
+      proxy_send_timeout 1d;
+    '';
   };
 
   # PostgreSQL

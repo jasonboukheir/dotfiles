@@ -41,7 +41,12 @@
     # historically brittle under follows overrides. Leave on its own pin until a
     # nixarr release documents follows compatibility.
     # https://github.com/rasmus-kirk/nixarr
-    nixarr.url = "github:rasmus-kirk/nixarr";
+    #
+    # Pinned: rev 7eae4e1 (Apr 29 2026) imports ./shelfmark, which sets
+    # services.shelfmark — an option not yet backported to nixos-25.11. Lift
+    # the pin once `nixos/modules/services/misc/shelfmark.nix` exists on the
+    # 25.11 branch.
+    nixarr.url = "github:rasmus-kirk/nixarr/077bb8a83d6d07b25e098638db50d0ac80456174";
 
     ezmtls = {
       url = "git+https://codeberg.org/jasonboukheir/ezmtls.git?ref=main";
