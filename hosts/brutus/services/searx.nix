@@ -34,6 +34,18 @@ in {
           name = "wikidata";
           disabled = "True";
         }
+        # scraping endpoint hits 429s under OWUI fan-out; route web search
+        # through the paid API instead.
+        {
+          name = "brave";
+          disabled = "True";
+        }
+        {
+          name = "braveapi";
+          engine = "braveapi";
+          shortcut = "brapi";
+          api_key = "$BRAVE_API_KEY";
+        }
       ];
     };
     uwsgiConfig = {
