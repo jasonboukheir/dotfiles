@@ -5,16 +5,18 @@
 }: let
   cfg = config.services.lldap;
   defaultGroups = cfg.defaultGroups;
-  ports = config.sunnycareboo.ports.values;
+  ports = config.homelab.ports.values;
+  domain = config.homelab.domain;
+  ldapBaseDn = lib.concatMapStringsSep "," (p: "dc=${p}") (lib.splitString "." domain);
 in {
-  sunnycareboo.ports.allocate = lib.mkIf cfg.enable {
+  homelab.ports.allocate = lib.mkIf cfg.enable {
     lldap-ldap = 3890;
     lldap-http = 17170;
   };
   services.lldap = {
     enable = true;
     settings = {
-      ldap_base_dn = "dc=sunnycareboo,dc=com";
+      ldap_base_dn = ldapBaseDn;
 
       ldap_host = "127.0.0.1";
       ldap_port = ports.lldap-ldap;
@@ -22,13 +24,13 @@ in {
       http_host = "127.0.0.1";
       http_port = ports.lldap-http;
 
-      http_url = "https://${config.sunnycareboo.services.lldap.domain}";
+      http_url = "https://${config.homelab.services.lldap.domain}";
 
       jwt_secret_file = null; # these are set with credentials
 
       force_ldap_user_pass_reset = "always";
       ldap_user_pass_file = null; # these are set with credentials
-      ldap_user_email = "admin@sunnycareboo.com";
+      ldap_user_email = "admin@${domain}";
       ldap_user_dn = "admin";
     };
     environment = {
@@ -82,7 +84,7 @@ in {
     ];
   };
 
-  sunnycareboo.services.lldap = lib.mkIf cfg.enable {
+  homelab.services.lldap = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://127.0.0.1:${toString cfg.settings.http_port}";
   };

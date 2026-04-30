@@ -11,7 +11,7 @@ in {
     package = pkgs-unstable.seerr;
   };
 
-  sunnycareboo.services.seer = lib.mkIf cfg.enable {
+  homelab.services.seer = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${toString cfg.port}";

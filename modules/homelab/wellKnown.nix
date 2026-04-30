@@ -4,9 +4,9 @@
   ...
 }:
 with lib; let
-  cfg = config.sunnycareboo;
+  cfg = config.homelab;
 in {
-  options.sunnycareboo.wellKnown = {
+  options.homelab.wellKnown = {
     caldav = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -25,9 +25,9 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.nginx.virtualHosts.${cfg.baseDomain} = {
+    services.nginx.virtualHosts.${cfg.domain} = {
       forceSSL = true;
-      useACMEHost = cfg.baseDomain;
+      useACMEHost = cfg.domain;
       locations = {
         "/.well-known/caldav" = mkIf (cfg.wellKnown.caldav != null) {
           return = "301 https://${cfg.wellKnown.caldav}";

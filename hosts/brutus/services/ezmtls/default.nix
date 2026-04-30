@@ -6,15 +6,15 @@
 }: let
   cfg = config.services.ezmtls;
   oidcCfg = config.services.pocket-id.ensureClients.ezmtls;
-  smtpCfg = config.sunnycareboo.smtp;
-  domain = config.sunnycareboo.services.certs.domain;
+  smtpCfg = config.homelab.smtp;
+  domain = config.homelab.services.certs.domain;
 in {
   services.ezmtls = {
     enable = true;
     url = "https://${domain}";
     oidc = {
       enable = true;
-      issuer = "https://${config.sunnycareboo.services.id.domain}";
+      issuer = "https://${config.homelab.services.id.domain}";
       clientId = oidcCfg.settings.id;
       clientSecretFile = oidcCfg.secretFile;
     };
@@ -37,9 +37,9 @@ in {
     ];
   };
 
-  sunnycareboo.mtls.caCertFile = lib.mkIf cfg.enable cfg.ensureCAs.mtls.certFile;
+  homelab.mtls.caCertFile = lib.mkIf cfg.enable cfg.ensureCAs.mtls.certFile;
 
-  sunnycareboo.services.certs = lib.mkIf cfg.enable {
+  homelab.services.certs = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://localhost:${toString cfg.port}";
   };

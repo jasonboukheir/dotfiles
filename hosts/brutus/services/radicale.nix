@@ -49,7 +49,7 @@ in {
     ensureUsers = {
       radicale = {
         displayName = "radicale";
-        email = "radicale@sunnycareboo.com";
+        email = "radicale@${config.homelab.domain}";
         password_file = config.ephemeral-secrets."radicale.ldap.pw".path;
         groups = [
           ldapCfg.defaultGroups."lldap_strict_readonly".name
@@ -58,13 +58,13 @@ in {
     };
   };
 
-  sunnycareboo = lib.mkIf cfg.enable {
+  homelab = lib.mkIf cfg.enable {
     services.radicale = {
       isExternal = true;
       enable = true;
       proxyPass = "http://127.0.0.1:${toString cfg.port}";
     };
-    wellKnown.caldav = config.sunnycareboo.services.radicale.domain;
-    wellKnown.carddav = config.sunnycareboo.services.radicale.domain;
+    wellKnown.caldav = config.homelab.services.radicale.domain;
+    wellKnown.carddav = config.homelab.services.radicale.domain;
   };
 }

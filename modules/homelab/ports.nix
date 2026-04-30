@@ -4,7 +4,7 @@
   ...
 }:
 with lib; let
-  cfg = config.sunnycareboo.ports;
+  cfg = config.homelab.ports;
 
   hexTable = listToAttrs (genList (i:
     nameValuePair (substring i 1 "0123456789abcdef") i)
@@ -38,7 +38,7 @@ with lib; let
     port = probe 0;
   in
     if port == null
-    then throw "sunnycareboo.ports: no free port in range [${toString cfg.range.from}, ${toString cfg.range.to}] for ${name}"
+    then throw "homelab.ports: no free port in range [${toString cfg.range.from}, ${toString cfg.range.to}] for ${name}"
     else {
       taken = state.taken ++ [port];
       result = state.result // {${name} = port;};
@@ -54,7 +54,7 @@ with lib; let
   allTaken = (attrValues final.result) ++ reservedPorts;
   duplicates = lib.subtractLists (lib.unique allTaken) allTaken;
 in {
-  options.sunnycareboo.ports = {
+  options.homelab.ports = {
     range = mkOption {
       description = "Inclusive port range from which auto-allocations are vended.";
       default = {};
@@ -77,7 +77,7 @@ in {
         Per-service port allocations. Set the value to an integer to pin a port
         (escape hatch for services with externally-fixed ports), or to "auto"
         to vend a deterministic port from the range based on a hash of the
-        attribute name. Reading config.sunnycareboo.ports.values.<name>
+        attribute name. Reading config.homelab.ports.values.<name>
         returns the resolved port.
       '';
       default = {};
@@ -124,17 +124,17 @@ in {
     };
   };
 
-  config = mkIf config.sunnycareboo.enable {
-    sunnycareboo.ports.values = final.result;
+  config = mkIf config.homelab.enable {
+    homelab.ports.values = final.result;
 
     assertions = [
       {
         assertion = cfg.range.from <= cfg.range.to;
-        message = "sunnycareboo.ports.range.from must be <= range.to";
+        message = "homelab.ports.range.from must be <= range.to";
       }
       {
         assertion = duplicates == [];
-        message = "sunnycareboo.ports has duplicate values: ${toString (lib.unique duplicates)}. Allocations: ${builtins.toJSON final.result}; Reserved: ${builtins.toJSON cfg.reserved}";
+        message = "homelab.ports has duplicate values: ${toString (lib.unique duplicates)}. Allocations: ${builtins.toJSON final.result}; Reserved: ${builtins.toJSON cfg.reserved}";
       }
     ];
   };

@@ -9,7 +9,7 @@ in {
     enable = true;
   };
 
-  sunnycareboo.services.blocky = lib.mkIf cfg.enable {
+  homelab.services.blocky = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://localhost:${toString cfg.settings.ports.http}";
   };

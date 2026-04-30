@@ -5,9 +5,9 @@
   ...
 }: let
   cfg = config.services.opencloud;
-  domain = config.sunnycareboo.services.cloud.domain;
+  domain = config.homelab.services.cloud.domain;
   url = "https://${domain}";
-  oidc_domain = config.sunnycareboo.services.id.domain;
+  oidc_domain = config.homelab.services.id.domain;
   oidc_url = "https://${oidc_domain}";
   oidcWebCfg = config.services.pocket-id.ensureClients.opencloud-web;
   oidcAndroidCfg = config.services.pocket-id.ensureClients.opencloud-android;
@@ -19,7 +19,7 @@ in {
 
     url = url;
     address = "0.0.0.0";
-    port = config.sunnycareboo.ports.values.opencloud;
+    port = config.homelab.ports.values.opencloud;
     stateDir = "/var/lib/opencloud";
 
     package = pkgs-unstable.opencloud;
@@ -78,7 +78,7 @@ in {
       "OC_INSECURE" = "true";
       "INSECURE" = "true";
       "INITIAL_ADMIN_PASSWORD" = "admin";
-      "OC_DOMAIN" = config.sunnycareboo.services.cloud.domain;
+      "OC_DOMAIN" = config.homelab.services.cloud.domain;
       "PROXY_TLS" = "false";
 
       "OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD" = "false";
@@ -98,7 +98,7 @@ in {
     };
   };
 
-  sunnycareboo = lib.mkIf cfg.enable {
+  homelab = lib.mkIf cfg.enable {
     ports.allocate.opencloud = 9200;
     services.cloud = {
       isExternal = true;

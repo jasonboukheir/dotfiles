@@ -11,7 +11,7 @@ in {
     package = pkgs-unstable.memos;
   };
 
-  sunnycareboo.services.memos = lib.mkIf cfg.enable {
+  homelab.services.memos = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${cfg.settings.MEMOS_PORT}";

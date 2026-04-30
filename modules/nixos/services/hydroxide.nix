@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.hydroxide;
-  scCfg = config.sunnycareboo;
+  scCfg = config.homelab;
 in {
   options.services.hydroxide = {
     enable = lib.mkEnableOption "hydroxide ProtonMail bridge";
@@ -42,7 +42,7 @@ in {
 
     certDomain = lib.mkOption {
       type = lib.types.str;
-      default = scCfg.baseDomain;
+      default = scCfg.domain;
       description = "Domain to use for TLS certificates";
     };
   };

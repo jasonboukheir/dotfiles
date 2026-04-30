@@ -7,8 +7,8 @@
   cfg = config.services.open-webui;
   oidcCfg = config.services.pocket-id.ensureClients.open-webui;
   litellmCfg = config.services.litellm;
-  domain = config.sunnycareboo.services.ai.domain;
-  port = config.sunnycareboo.ports.values.open-webui;
+  domain = config.homelab.services.ai.domain;
+  port = config.homelab.ports.values.open-webui;
 
   # Bypass nginx for same-host LiteLLM traffic: avoids TLS/buffering overhead
   # and keeps streaming responses unbuffered end-to-end.
@@ -25,7 +25,7 @@
   ttsModel = modelByMode "audio_speech" "tts-1";
   embeddingModel = modelByMode "embedding" "text-embedding-3-small";
 in {
-  sunnycareboo.ports.allocate.open-webui = lib.mkIf cfg.enable 3100;
+  homelab.ports.allocate.open-webui = lib.mkIf cfg.enable 3100;
   allowUnfreePackageNames = lib.optionals cfg.enable ["open-webui"];
   services.open-webui = {
     enable = true;
@@ -51,7 +51,7 @@ in {
           OFFLINE_MODE = "True";
 
           # pocket id oidc setup
-          OPENID_PROVIDER_URL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+          OPENID_PROVIDER_URL = "https://${config.homelab.services.id.domain}/.well-known/openid-configuration";
           OAUTH_CLIENT_ID = oidcCfg.settings.id;
           OAUTH_CODE_CHALLENGE_METHOD = "S256";
           OAUTH_PROVIDER_NAME = "Pocket ID";
@@ -84,7 +84,7 @@ in {
           # search settings
           ENABLE_WEB_SEARCH = "True";
           WEB_SEARCH_ENGINE = "searxng";
-          SEARXNG_QUERY_URL = "http://${config.sunnycareboo.services.search.domain}/search?q=<query>";
+          SEARXNG_QUERY_URL = "http://${config.homelab.services.search.domain}/search?q=<query>";
           WEB_SEARCH_RESULT_COUNT = "5";
           # bound SearXNG fan-out so upstream engines (Google/Bing/Brave)
           # don't rate-limit when OWUI splits a turn into multiple queries.
@@ -134,7 +134,7 @@ in {
   };
 
   # NGINX
-  sunnycareboo.services.ai = lib.mkIf cfg.enable {
+  homelab.services.ai = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://${cfg.host}:${toString cfg.port}";

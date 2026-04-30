@@ -5,7 +5,7 @@
 }: let
   cfg = config.services.mealie;
   oidcCfg = config.services.pocket-id.ensureClients.mealie;
-  domain = config.sunnycareboo.services.meals.domain;
+  domain = config.homelab.services.meals.domain;
 
   litellmCfg = config.services.litellm;
   litellmBase = "http://${litellmCfg.host}:${toString litellmCfg.port}";
@@ -24,10 +24,10 @@
       litellmModels)
     .model_name;
 in {
-  sunnycareboo.ports.allocate.mealie = lib.mkIf cfg.enable 9000;
+  homelab.ports.allocate.mealie = lib.mkIf cfg.enable 9000;
   services.mealie = {
     enable = true;
-    port = config.sunnycareboo.ports.values.mealie;
+    port = config.homelab.ports.values.mealie;
     credentials = {
       OIDC_CLIENT_SECRET = oidcCfg.secretFile;
       OPENAI_API_KEY = config.age.secrets."mealie/openaiApiKey".path;
@@ -35,7 +35,7 @@ in {
     settings = {
       "OIDC_AUTH_ENABLED" = "True";
       "OIDC_SIGNUP_ENABLED" = "True";
-      "OIDC_CONFIGURATION_URL" = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+      "OIDC_CONFIGURATION_URL" = "https://${config.homelab.services.id.domain}/.well-known/openid-configuration";
       "OIDC_CLIENT_ID" = oidcCfg.settings.id;
       "OIDC_ADMIN_GROUP" = "admin";
       "OIDC_PROVIDER_NAME" = "Pocket ID";
@@ -52,7 +52,7 @@ in {
     file = ../../secrets/mealie/openaiApiKey.age;
   };
 
-  sunnycareboo.services.meals = lib.mkIf cfg.enable {
+  homelab.services.meals = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${toString cfg.port}";

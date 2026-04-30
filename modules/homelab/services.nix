@@ -5,7 +5,7 @@
   ...
 }:
 with lib; let
-  cfg = config.sunnycareboo;
+  cfg = config.homelab;
 
   internalHttpListeners = [
     {
@@ -65,7 +65,7 @@ with lib; let
       mtls.enable = mkOption {
         type = types.bool;
         default = cfg.services.${name}.isExternal && cfg.mtls.caCertFile != null;
-        defaultText = literalExpression "isExternal && config.sunnycareboo.mtls.caCertFile != null";
+        defaultText = literalExpression "isExternal && config.homelab.mtls.caCertFile != null";
         description = "Enable mTLS client certificate verification for this service";
       };
 
@@ -124,14 +124,14 @@ with lib; let
         readOnly = true;
         default =
           if !cfg.services.${name}.isExternal
-          then "${name}.internal.${cfg.baseDomain}"
-          else "${name}.${cfg.baseDomain}";
+          then "${name}.internal.${cfg.domain}"
+          else "${name}.${cfg.domain}";
         description = "Computed full domain name for this service";
       };
     };
   });
 in {
-  options.sunnycareboo = {
+  options.homelab = {
     services = mkOption {
       type = types.attrsOf serviceModule;
       default = {};
@@ -150,7 +150,7 @@ in {
     assertions = [
       {
         assertion = !(any (svc: svc.enable && svc.mtls.enable) (attrValues cfg.services)) || cfg.mtls.caCertFile != null;
-        message = "sunnycareboo.mtls.caCertFile must be set when mTLS is enabled for any service";
+        message = "homelab.mtls.caCertFile must be set when mTLS is enabled for any service";
       }
     ];
 
@@ -210,7 +210,7 @@ in {
 
               primaryVhost = nameValuePair domain {
                 forceSSL = true;
-                useACMEHost = cfg.baseDomain;
+                useACMEHost = cfg.domain;
                 locations = allLocations;
                 listen = listenSpec;
                 extraConfig = svcCfg.extraConfig + mtlsExtra;
@@ -219,7 +219,7 @@ in {
               wildcardVhost = nameValuePair "${domain}-wildcard" {
                 serverName = "*.${domain}";
                 forceSSL = true;
-                useACMEHost = cfg.baseDomain;
+                useACMEHost = cfg.domain;
                 locations = allLocations;
                 listen = listenSpec;
                 extraConfig = svcCfg.extraConfig + mtlsExtra;
@@ -251,12 +251,12 @@ in {
 
     security.acme = {
       acceptTerms = true;
-      certs."${cfg.baseDomain}" = {
-        domain = cfg.baseDomain;
+      certs."${cfg.domain}" = {
+        domain = cfg.domain;
         extraDomainNames =
           (map (svc: svc.domain) (attrValues (filterAttrs (_: svc: svc.enable) cfg.services)))
           ++ (map (svc: "*.${svc.domain}") (attrValues (filterAttrs (_: svc: svc.enable && svc.wildcard) cfg.services)));
-        email = "postmaster@${cfg.baseDomain}";
+        email = "postmaster@${cfg.domain}";
       };
     };
 

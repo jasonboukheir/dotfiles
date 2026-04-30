@@ -13,6 +13,6 @@
     ./virtualization.nix
     ./../../modules
     ./../../modules/nixos
-    ./../../modules/sunnycareboo
+    ./../../modules/homelab
   ];
 }

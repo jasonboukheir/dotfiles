@@ -4,24 +4,24 @@
   ...
 }: let
   cfg = config.services.actual;
-  domain = config.sunnycareboo.services.budget.domain;
-  port = config.sunnycareboo.ports.values.actual;
+  domain = config.homelab.services.budget.domain;
+  port = config.homelab.ports.values.actual;
   url = "https://${domain}";
   oidcCfg = config.services.pocket-id.ensureClients.actual;
 in {
-  sunnycareboo.ports.allocate.actual = lib.mkIf cfg.enable 5007;
+  homelab.ports.allocate.actual = lib.mkIf cfg.enable 5007;
   services.actual = {
     enable = true;
     settings = {
       port = port;
       openId = {
-        discoveryURL = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+        discoveryURL = "https://${config.homelab.services.id.domain}/.well-known/openid-configuration";
         client_id = oidcCfg.settings.id;
         server_hostname = url;
       };
     };
   };
-  sunnycareboo.services.budget = lib.mkIf cfg.enable {
+  homelab.services.budget = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${toString port}";

@@ -4,17 +4,17 @@
   ...
 }: let
   cfg = config.services.headscale;
-  domain = config.sunnycareboo.services.headscale.domain;
-  baseDomain = config.sunnycareboo.baseDomain;
+  domain = config.homelab.services.headscale.domain;
+  baseDomain = config.homelab.domain;
   internalDomain = "internal.${baseDomain}";
   magicDomain = "ts.${internalDomain}";
-  issuerDomain = config.sunnycareboo.services.id.domain;
-  port = config.sunnycareboo.ports.values.headscale;
+  issuerDomain = config.homelab.services.id.domain;
+  port = config.homelab.ports.values.headscale;
   oidcCfg = config.services.pocket-id.ensureClients.headscale;
   brutusTailscaleIP = "100.64.0.7";
   litusTailscaleIP = "100.64.0.2";
 in {
-  sunnycareboo.ports.allocate.headscale = lib.mkIf cfg.enable 3400;
+  homelab.ports.allocate.headscale = lib.mkIf cfg.enable 3400;
   services.headscale = {
     enable = true;
     port = port;
@@ -35,10 +35,10 @@ in {
           name = svc.domain;
           type = "A";
           value = brutusTailscaleIP;
-        }) (lib.attrValues (lib.filterAttrs (_: svc: svc.enable) config.sunnycareboo.services));
+        }) (lib.attrValues (lib.filterAttrs (_: svc: svc.enable) config.homelab.services));
       };
       oidc = {
-        allowed_domains = [config.sunnycareboo.baseDomain];
+        allowed_domains = [baseDomain];
         pkce.enabled = true;
         issuer = "https://${issuerDomain}";
         client_id = oidcCfg.settings.id;
@@ -53,7 +53,7 @@ in {
     wants = ["nginx.service"];
   };
 
-  sunnycareboo.services.headscale = lib.mkIf cfg.enable {
+  homelab.services.headscale = lib.mkIf cfg.enable {
     enable = true;
     mtls.enable = false;
     isExternal = true;

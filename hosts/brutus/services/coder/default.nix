@@ -6,10 +6,10 @@
 }: let
   cfg = config.services.coder;
   oidcCfg = config.services.pocket-id.ensureClients.coder;
-  proxyCfg = config.sunnycareboo.services.code;
-  llmCfg = config.sunnycareboo.services.llm;
-  idCfg = config.sunnycareboo.services.id;
-  port = config.sunnycareboo.ports.values.coder;
+  proxyCfg = config.homelab.services.code;
+  llmCfg = config.homelab.services.llm;
+  idCfg = config.homelab.services.id;
+  port = config.homelab.ports.values.coder;
   podmanSocket = "/run/podman/podman.sock";
   workspaceImage = "ghcr.io/coder/coder-base:latest";
 
@@ -18,7 +18,7 @@
     litellmBaseUrl = "https://${llmCfg.domain}/v1";
   };
 in {
-  sunnycareboo.ports.allocate.coder = lib.mkIf cfg.enable "auto";
+  homelab.ports.allocate.coder = lib.mkIf cfg.enable "auto";
   allowUnfreePackageNames = lib.optionals cfg.enable ["terraform"];
 
   virtualisation.podman.dockerSocket.enable = lib.mkIf cfg.enable true;
@@ -69,7 +69,7 @@ in {
     };
   };
 
-  sunnycareboo.services.code = lib.mkIf cfg.enable {
+  homelab.services.code = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://${cfg.listenAddress}";

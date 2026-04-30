@@ -1,4 +1,8 @@
-{lib, ...}:
+{
+  config,
+  lib,
+  ...
+}:
 with lib; {
   imports = [
     ./ports.nix
@@ -6,13 +10,20 @@ with lib; {
     ./wellKnown.nix
   ];
 
-  options.sunnycareboo = {
-    enable = mkEnableOption "Sunnycareboo service management";
+  options.homelab = {
+    enable = mkEnableOption "Homelab service management";
 
-    baseDomain = mkOption {
+    domain = mkOption {
       type = types.str;
       default = "sunnycareboo.com";
       description = "Base domain for all services";
+    };
+
+    serviceEmail = mkOption {
+      type = types.str;
+      default = "noreply@${config.homelab.domain}";
+      defaultText = literalExpression ''"noreply@''${config.homelab.domain}"'';
+      description = "Default From address for service-account/system emails";
     };
 
     mtls.caCertFile = mkOption {

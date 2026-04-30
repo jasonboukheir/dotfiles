@@ -3,10 +3,10 @@
   lib,
   ...
 }: {
-  sunnycareboo.ports.allocate.speaches = lib.mkIf config.services.speaches.enable 3500;
+  homelab.ports.allocate.speaches = lib.mkIf config.services.speaches.enable 3500;
   services.speaches = {
     enable = true;
-    port = config.sunnycareboo.ports.values.speaches;
+    port = config.homelab.ports.values.speaches;
     # STT moved to GPU via services.local-stt (whisper.cpp SYCL).
     # Speaches now hosts only Kokoro TTS — fast enough on CPU at ~10x
     # realtime that GPU offload doesn't pay back the engineering cost.
