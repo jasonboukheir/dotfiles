@@ -3,13 +3,13 @@
   config,
   ...
 }: let
-  port = config.sunnycareboo.ports.values.pocket-id;
-  domain = config.sunnycareboo.services.id.domain;
-  smtpCfg = config.sunnycareboo.smtp;
+  port = config.homelab.ports.values.pocket-id;
+  domain = config.homelab.services.id.domain;
+  smtpCfg = config.homelab.smtp;
   lldapCfg = config.services.lldap;
 in {
-  sunnycareboo.ports.allocate.pocket-id = lib.mkIf config.services.pocket-id.enable 1411;
-  sunnycareboo.services.id = lib.mkIf config.services.pocket-id.enable {
+  homelab.ports.allocate.pocket-id = lib.mkIf config.services.pocket-id.enable 1411;
+  homelab.services.id = lib.mkIf config.services.pocket-id.enable {
     enable = true;
     proxyPass = "http://localhost:${toString port}";
     isExternal = true;

@@ -3,7 +3,7 @@
   config,
   ...
 }: let
-  cfg = config.sunnycareboo;
+  cfg = config.homelab;
 in {
   age.secrets."acme/env" = lib.mkIf cfg.enable {
     file = ../secrets/acme/env.age;
@@ -13,6 +13,6 @@ in {
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets."acme/env".path;
   };
-  sunnycareboo.enable = true;
-  sunnycareboo.baseDomain = "sunnycareboo.com";
+  homelab.enable = true;
+  homelab.domain = "sunnycareboo.com";
 }

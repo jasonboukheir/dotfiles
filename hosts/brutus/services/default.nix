@@ -28,7 +28,7 @@
     ./searx.nix
     ./seerr.nix
     ./smtp.nix
-    ./sunnycareboo.nix
+    ./homelab.nix
     ./tailscale.nix
     ./zfs.nix
   ];

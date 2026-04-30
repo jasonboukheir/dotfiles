@@ -4,14 +4,14 @@
   ...
 }: let
   cfg = config.services.immich;
-  domain = config.sunnycareboo.services.photos.domain;
-  smtpCfg = config.sunnycareboo.smtp;
+  domain = config.homelab.services.photos.domain;
+  smtpCfg = config.homelab.smtp;
   oidcCfg = config.services.pocket-id.ensureClients.immich;
 in {
-  sunnycareboo.ports.allocate.immich = lib.mkIf cfg.enable 2283;
+  homelab.ports.allocate.immich = lib.mkIf cfg.enable 2283;
   services.immich = {
     enable = true;
-    port = config.sunnycareboo.ports.values.immich;
+    port = config.homelab.ports.values.immich;
     database = {
       user = "immich";
       port = 5432;
@@ -194,7 +194,7 @@ in {
         clientSecret._secret = oidcCfg.secretFile;
         defaultStorageQuota = null;
         enabled = true;
-        issuerUrl = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+        issuerUrl = "https://${config.homelab.services.id.domain}/.well-known/openid-configuration";
         mobileOverrideEnabled = false;
         mobileRedirectUri = "";
         profileSigningAlgorithm = "none";
@@ -242,7 +242,7 @@ in {
     };
   };
 
-  sunnycareboo.services.photos = lib.mkIf cfg.enable {
+  homelab.services.photos = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://localhost:${toString cfg.port}";

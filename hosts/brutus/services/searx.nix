@@ -4,11 +4,11 @@
   ...
 }: let
   cfg = config.services.searx;
-  domain = config.sunnycareboo.services.search.domain;
-  port = config.sunnycareboo.ports.values.searx;
+  domain = config.homelab.services.search.domain;
+  port = config.homelab.ports.values.searx;
 in {
-  sunnycareboo.ports.allocate.searx = lib.mkIf cfg.enable 3300;
-  sunnycareboo.services.search = lib.mkIf cfg.enable {
+  homelab.ports.allocate.searx = lib.mkIf cfg.enable 3300;
+  homelab.services.search = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
   };

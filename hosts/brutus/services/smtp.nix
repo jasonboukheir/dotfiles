@@ -1,13 +1,13 @@
 {config, ...}: let
-  smtpCfg = config.sunnycareboo.smtp;
+  smtpCfg = config.homelab.smtp;
 in {
   age.secrets."smtp/password".file = ../secrets/smtp/password.age;
 
-  sunnycareboo.smtp = {
+  homelab.smtp = {
     host = "smtp.protonmail.ch";
     port = 587;
-    from = "noreply@sunnycareboo.com";
-    username = "noreply@sunnycareboo.com";
+    from = config.homelab.serviceEmail;
+    username = config.homelab.serviceEmail;
     passwordFile = config.age.secrets."smtp/password".path;
   };
 

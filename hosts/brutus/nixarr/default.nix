@@ -36,7 +36,7 @@ in {
       peerPort = 44176;
       vpn.enable = true;
       extraSettings = {
-        rpc-host-whitelist = config.sunnycareboo.services.transmission.domain;
+        rpc-host-whitelist = config.homelab.services.transmission.domain;
       };
       privateTrackers.cross-seed = {
         enable = false;
@@ -74,7 +74,7 @@ in {
     };
   };
 
-  sunnycareboo.ports.allocate = lib.mkIf cfg.enable {
+  homelab.ports.allocate = lib.mkIf cfg.enable {
     transmission-rpc = lib.mkIf cfg.transmission.enable transmissionPort;
     transmission-peer = lib.mkIf cfg.transmission.enable cfg.transmission.peerPort;
     jellyfin = lib.mkIf cfg.jellyfin.enable jellyfinPort;
@@ -86,7 +86,7 @@ in {
     lidarr = lib.mkIf cfg.lidarr.enable config.services.lidarr.settings.server.port;
   };
 
-  sunnycareboo.services = lib.mkIf config.nixarr.enable {
+  homelab.services = lib.mkIf config.nixarr.enable {
     transmission = lib.mkIf config.nixarr.transmission.enable {
       enable = true;
       proxyPass = "http://127.0.0.1:${toString transmissionPort}";

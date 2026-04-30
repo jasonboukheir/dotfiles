@@ -8,7 +8,7 @@
   localEmbedding = config.services.local-embedding;
   localStt = config.services.local-stt;
   speaches = config.services.speaches;
-  port = config.sunnycareboo.ports.values.litellm;
+  port = config.homelab.ports.values.litellm;
 
   localLlmBase = "http://${localLlm.host}:${toString localLlm.port}/v1";
   localEmbeddingBase = "http://${localEmbedding.host}:${toString localEmbedding.port}/v1";
@@ -36,7 +36,7 @@
     model_info = {mode = "chat";};
   };
 in {
-  sunnycareboo.ports.allocate.litellm = lib.mkIf cfg.enable 3200;
+  homelab.ports.allocate.litellm = lib.mkIf cfg.enable 3200;
   services.litellm = {
     enable = true;
     port = port;
@@ -111,7 +111,7 @@ in {
     ];
   };
 
-  sunnycareboo.services.llm = lib.mkIf cfg.enable {
+  homelab.services.llm = lib.mkIf cfg.enable {
     enable = true;
     proxyPass = "http://${cfg.host}:${toString cfg.port}";
   };

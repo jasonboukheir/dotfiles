@@ -6,7 +6,7 @@
 }: let
   cfg = config.services.home-assistant;
   oidcCfg = config.services.pocket-id.ensureClients.home-assistant;
-  domain = config.sunnycareboo.services.home.domain;
+  domain = config.homelab.services.home.domain;
   url = "https://${domain}";
   auth_oidc = pkgs.home-assistant-custom-components.auth_oidc.overridePythonAttrs (old: {
     version = "1.0.2";
@@ -24,7 +24,7 @@
     ];
   });
 in {
-  sunnycareboo.ports.allocate.home-assistant = lib.mkIf cfg.enable 8123;
+  homelab.ports.allocate.home-assistant = lib.mkIf cfg.enable 8123;
   services.home-assistant = {
     enable = true;
     extraComponents = [
@@ -56,7 +56,7 @@ in {
       };
       http = {
         server_host = "::1";
-        server_port = config.sunnycareboo.ports.values.home-assistant;
+        server_port = config.homelab.ports.values.home-assistant;
         trusted_proxies = ["::1"];
         use_x_forwarded_for = true;
       };
@@ -64,7 +64,7 @@ in {
 
       auth_oidc = {
         client_id = oidcCfg.settings.id;
-        discovery_url = "https://${config.sunnycareboo.services.id.domain}/.well-known/openid-configuration";
+        discovery_url = "https://${config.homelab.services.id.domain}/.well-known/openid-configuration";
         features = {
           automatic_user_linking = true;
           default_redirect = true;
@@ -104,7 +104,7 @@ in {
     };
   };
 
-  sunnycareboo.services.home = lib.mkIf cfg.enable {
+  homelab.services.home = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://[::1]:${toString cfg.config.http.server_port}";

@@ -21,7 +21,7 @@ in {
     "d ${gonicDataDir}/podcasts 0755 root root -"
   ];
 
-  sunnycareboo.services.gonic = lib.mkIf cfg.enable {
+  homelab.services.gonic = lib.mkIf cfg.enable {
     enable = true;
     isExternal = true;
     proxyPass = "http://${cfg.settings.listen-addr}";

@@ -5,7 +5,7 @@
 }: let
   cfg = config.services.local-embedding;
 in {
-  sunnycareboo.ports.allocate.local-embedding = lib.mkIf cfg.enable 8001;
+  homelab.ports.allocate.local-embedding = lib.mkIf cfg.enable 8001;
 
   # Qwen3-Embedding-0.6B BF16: ~1.2 GiB on disk, served by vLLM-XPU
   # in pooling-only mode. 1024-dim output, last-token pooling
@@ -17,7 +17,7 @@ in {
   services.local-embedding = {
     enable = true;
     host = "127.0.0.1";
-    port = lib.mkIf cfg.enable config.sunnycareboo.ports.values.local-embedding;
+    port = lib.mkIf cfg.enable config.homelab.ports.values.local-embedding;
 
     model = "Qwen/Qwen3-Embedding-0.6B";
     alias = "qwen3-embedding-0.6b";
