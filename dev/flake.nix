@@ -113,29 +113,29 @@
         name = "commands";
         runtimeInputs = [];
         text = ''
-          cat <<'EOF'
-        Dev shell commands:
+            cat <<'EOF'
+          Dev shell commands:
 
-          secret [host/]<path>     Edit an agenix secret
-                                   (host defaults to current hostname)
-          secret -r                Rekey current host's secrets
-          update-flakes            Bump flakes relevant to this host
-          rebuild [args...]        Switch system config
-                                   (nixos-rebuild / darwin-rebuild / home-manager)
-          bump [args...]           update-flakes + rebuild
-          format                   Run alejandra over the whole repo
-          check                    nix flake check on each relevant flake
-          commands                 Show this help
+            secret [host/]<path>     Edit an agenix secret
+                                     (host defaults to current hostname)
+            secret -r                Rekey current host's secrets
+            update-flakes            Bump flakes relevant to this host
+            rebuild [args...]        Switch system config
+                                     (nixos-rebuild / darwin-rebuild / home-manager)
+            bump [args...]           update-flakes + rebuild
+            format                   Run alejandra over the whole repo
+            check                    nix flake check on each relevant flake
+            commands                 Show this help
 
-        Per-host flake set:
-          brutus, litus, thebeast  → root + dev + nixos
-          work-devserver           → root + dev          (home-manager only)
-          *-macbook                → root + darwin
+          Per-host flake set:
+            brutus, litus, thebeast  → root + dev + nixos
+            work-devserver           → root + dev          (home-manager only)
+            *-macbook                → root + darwin
 
-        Env overrides:
-          SECRET_IDENTITY=<path>   Use a different SSH key for `secret`
+          Env overrides:
+            SECRET_IDENTITY=<path>   Use a different SSH key for `secret`
 
-        EOF
+          EOF
         '';
       };
 
