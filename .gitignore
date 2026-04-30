@@ -3,3 +3,4 @@ VaulTLS
 .claude/settings.local.json
 *.lock
 nix.conf
+result
