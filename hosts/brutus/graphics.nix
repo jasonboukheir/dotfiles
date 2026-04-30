@@ -1,8 +1,12 @@
-{ pkgs, pkgs-unstable, ... }: {
+{
+  pkgs,
+  pkgs-unstable,
+  ...
+}: {
   boot.kernelPackages = pkgs.linuxPackages_6_18;
   boot.zfs.package = pkgs.zfs_unstable;
 
-  boot.kernelParams = [ "xe.force_probe=e223" ];
+  boot.kernelParams = ["xe.force_probe=e223"];
 
   hardware.enableRedistributableFirmware = true;
 

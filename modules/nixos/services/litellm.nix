@@ -24,59 +24,60 @@
     };
   });
 
-  litellmWithPrisma = (py.withPackages (_: [
-    prismaPatched
-    (ps.litellm.overridePythonAttrs (old: {
-      nativeBuildInputs =
-        (old.nativeBuildInputs or [])
-        ++ [
-          prismaCli
-          prismaEngines
-          pkgs.nodejs
-          prismaPatched
-        ];
+  litellmWithPrisma =
+    (py.withPackages (_: [
+      prismaPatched
+      (ps.litellm.overridePythonAttrs (old: {
+        nativeBuildInputs =
+          (old.nativeBuildInputs or [])
+          ++ [
+            prismaCli
+            prismaEngines
+            pkgs.nodejs
+            prismaPatched
+          ];
 
-      postPatch =
-        (old.postPatch or "")
-        + ''
-          substituteInPlace litellm/proxy/schema.prisma \
-            --replace-fail '  provider = "prisma-client-py"' \
-            $'  provider = "prisma-client-py"\n  output = "../../prisma"'
-        '';
+        postPatch =
+          (old.postPatch or "")
+          + ''
+            substituteInPlace litellm/proxy/schema.prisma \
+              --replace-fail '  provider = "prisma-client-py"' \
+              $'  provider = "prisma-client-py"\n  output = "../../prisma"'
+          '';
 
-      postInstall =
-        (old.postInstall or "")
-        + ''
-          (
-            set -eo pipefail
-            export HOME="$TMPDIR"
-            export PATH="${prismaPatched}/bin:$PATH"
-            export PRISMA_EXPECTED_ENGINE_VERSION="$(grep -o '[0-9a-f]\{40\}' "${prismaCli}/lib/prisma/packages/fetch-engine/package.json" | head -1)"
-            export PRISMA_QUERY_ENGINE_BINARY="${prismaEngines}/bin/query-engine"
-            export PRISMA_QUERY_ENGINE_LIBRARY="${prismaEngines}/lib/libquery_engine.node"
-            export PRISMA_SCHEMA_ENGINE_BINARY="${prismaEngines}/bin/schema-engine"
-            export PRISMA_FMT_BINARY="${prismaEngines}/bin/prisma-fmt"
+        postInstall =
+          (old.postInstall or "")
+          + ''
+            (
+              set -eo pipefail
+              export HOME="$TMPDIR"
+              export PATH="${prismaPatched}/bin:$PATH"
+              export PRISMA_EXPECTED_ENGINE_VERSION="$(grep -o '[0-9a-f]\{40\}' "${prismaCli}/lib/prisma/packages/fetch-engine/package.json" | head -1)"
+              export PRISMA_QUERY_ENGINE_BINARY="${prismaEngines}/bin/query-engine"
+              export PRISMA_QUERY_ENGINE_LIBRARY="${prismaEngines}/lib/libquery_engine.node"
+              export PRISMA_SCHEMA_ENGINE_BINARY="${prismaEngines}/bin/schema-engine"
+              export PRISMA_FMT_BINARY="${prismaEngines}/bin/prisma-fmt"
 
-            sp="$out/${py.sitePackages}"
-            schema="$sp/litellm/proxy/schema.prisma"
+              sp="$out/${py.sitePackages}"
+              schema="$sp/litellm/proxy/schema.prisma"
 
-            mkdir -p "$sp/prisma"
-            chmod -R u+w "$sp" || true
-            ${prismaCli}/bin/prisma generate --schema "$schema"
+              mkdir -p "$sp/prisma"
+              chmod -R u+w "$sp" || true
+              ${prismaCli}/bin/prisma generate --schema "$schema"
+            )
+          '';
+
+        dependencies =
+          builtins.filter (p: (p.pname or "") != "prisma") (
+            (old.dependencies or [])
+            ++ (old.optional-dependencies.proxy or [])
+            ++ (old.optional-dependencies.extra_proxy or [])
           )
-        '';
-
-      dependencies =
-        builtins.filter (p: (p.pname or "") != "prisma") (
-          (old.dependencies or [])
-          ++ (old.optional-dependencies.proxy or [])
-          ++ (old.optional-dependencies.extra_proxy or [])
-        )
-        ++ [prismaPatched];
-    }))
-  ])).overrideAttrs (old: {
-    meta = (old.meta or {}) // {mainProgram = "litellm";};
-  });
+          ++ [prismaPatched];
+      }))
+    ])).overrideAttrs (old: {
+      meta = (old.meta or {}) // {mainProgram = "litellm";};
+    });
 in {
   config = lib.mkIf cfg.enable {
     services.litellm = {

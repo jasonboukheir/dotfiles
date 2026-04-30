@@ -17,6 +17,143 @@
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs-unstable {inherit system;};
       agenixPkg = agenix.packages.${system}.default;
+
+      # Shared snippet: prints, one per line, the flakes that should be
+      # operated on for the current host. Sourced by every wrapper that
+      # needs to walk the relevant flake set (update-flakes, check, ...).
+      hostFlakesSnippet = ''
+        repo_root=$(git rev-parse --show-toplevel)
+        host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
+
+        flakes=("$repo_root")
+
+        case "$(uname -s)" in
+          Linux)
+            flakes+=("$repo_root/dev")
+            # Include nixos only if the current host is declared as a
+            # nixosSystem in modules/flake/nixos.nix. work-devserver is
+            # Linux but home-manager-only, so it skips this branch.
+            if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
+                 "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
+              flakes+=("$repo_root/nixos")
+            fi
+            ;;
+          Darwin)
+            flakes+=("$repo_root/darwin")
+            ;;
+          *)
+            echo "unsupported OS $(uname -s)" >&2
+            exit 1
+            ;;
+        esac
+      '';
+
+      update-flakes = pkgs.writeShellApplication {
+        name = "update-flakes";
+        runtimeInputs = [pkgs.git pkgs.nix pkgs.nettools pkgs.gnugrep];
+        text = ''
+          ${hostFlakesSnippet}
+
+          for f in "''${flakes[@]}"; do
+            echo "==> $f"
+            nix flake update --flake "$f"
+          done
+        '';
+      };
+
+      rebuild = pkgs.writeShellApplication {
+        name = "rebuild";
+        runtimeInputs = [pkgs.git pkgs.nix pkgs.nettools];
+        text = ''
+          repo_root=$(git rev-parse --show-toplevel)
+          host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
+
+          case "$(uname -s)" in
+            Linux)
+              if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
+                   "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
+                echo "==> nixos-rebuild switch ($host)"
+                exec sudo nixos-rebuild switch --flake "$repo_root/nixos#$host" "$@"
+              fi
+              # Non-NixOS Linux (e.g. work-devserver): home-manager only.
+              echo "==> home-manager switch (jasonbk@$host)"
+              exec home-manager switch --flake "$repo_root#jasonbk@$host" "$@"
+              ;;
+            Darwin)
+              echo "==> darwin-rebuild switch ($host)"
+              exec darwin-rebuild switch --flake "$repo_root/darwin#$host" "$@"
+              ;;
+            *)
+              echo "rebuild: unsupported OS $(uname -s)" >&2
+              exit 1
+              ;;
+          esac
+        '';
+      };
+
+      bump = pkgs.writeShellApplication {
+        name = "bump";
+        runtimeInputs = [update-flakes rebuild];
+        text = ''
+          update-flakes
+          rebuild "$@"
+        '';
+      };
+
+      format = pkgs.writeShellApplication {
+        name = "format";
+        runtimeInputs = [pkgs.alejandra pkgs.git];
+        text = ''
+          repo_root=$(git rev-parse --show-toplevel)
+          exec alejandra "$@" "$repo_root"
+        '';
+      };
+
+      commands = pkgs.writeShellApplication {
+        name = "commands";
+        runtimeInputs = [];
+        text = ''
+          cat <<'EOF'
+        Dev shell commands:
+
+          secret [host/]<path>     Edit an agenix secret
+                                   (host defaults to current hostname)
+          secret -r                Rekey current host's secrets
+          update-flakes            Bump flakes relevant to this host
+          rebuild [args...]        Switch system config
+                                   (nixos-rebuild / darwin-rebuild / home-manager)
+          bump [args...]           update-flakes + rebuild
+          format                   Run alejandra over the whole repo
+          check                    nix flake check on each relevant flake
+          commands                 Show this help
+
+        Per-host flake set:
+          brutus, litus, thebeast  → root + dev + nixos
+          work-devserver           → root + dev          (home-manager only)
+          *-macbook                → root + darwin
+
+        Env overrides:
+          SECRET_IDENTITY=<path>   Use a different SSH key for `secret`
+
+        EOF
+        '';
+      };
+
+      check = pkgs.writeShellApplication {
+        name = "check";
+        runtimeInputs = [pkgs.git pkgs.nix pkgs.nettools pkgs.gnugrep];
+        text = ''
+          ${hostFlakesSnippet}
+
+          rc=0
+          for f in "''${flakes[@]}"; do
+            echo "==> nix flake check $f"
+            nix flake check "$f" "$@" || rc=$?
+          done
+          exit "$rc"
+        '';
+      };
+
       secret = pkgs.writeShellApplication {
         name = "secret";
         runtimeInputs = [agenixPkg pkgs.git pkgs.gawk pkgs.nettools];
@@ -113,6 +250,12 @@
           pkgs.alejandra
           agenixPkg
           secret
+          update-flakes
+          rebuild
+          bump
+          format
+          check
+          commands
         ];
       };
     });

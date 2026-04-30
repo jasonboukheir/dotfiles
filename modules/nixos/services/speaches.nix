@@ -12,9 +12,10 @@
   preloadScript = lib.optionalString (cfg.preloadModels != []) ''
     echo "Preloading ${toString (builtins.length cfg.preloadModels)} model(s)..."
     ${lib.concatMapStringsSep "\n" (model: ''
-      echo "Downloading ${model}..."
-      ${lib.getExe' cfg.package "huggingface-cli"} download "${model}" --quiet || echo "Warning: failed to download ${model}"
-    '') cfg.preloadModels}
+        echo "Downloading ${model}..."
+        ${lib.getExe' cfg.package "huggingface-cli"} download "${model}" --quiet || echo "Warning: failed to download ${model}"
+      '')
+      cfg.preloadModels}
   '';
 in {
   options.services.speaches = {

@@ -161,18 +161,16 @@ in {
       recommendedTlsSettings = true;
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
-      commonHttpConfig =
-        optionalString hasExternal ''
-          map "$server_port:$ssl_client_verify" $mtls_reject {
-            "~^8443:SUCCESS$"  0;
-            "~^8443:"          1;
-            default            0;
-          }
+      commonHttpConfig = optionalString hasExternal ''
+        map "$server_port:$ssl_client_verify" $mtls_reject {
+          "~^8443:SUCCESS$"  0;
+          "~^8443:"          1;
+          default            0;
+        }
 
-          access_log ${nginxLogDir}/access.log;
-          error_log ${nginxLogDir}/error.log warn;
-        ''
-        ;
+        access_log ${nginxLogDir}/access.log;
+        error_log ${nginxLogDir}/error.log warn;
+      '';
 
       virtualHosts = mkMerge [
         (listToAttrs (concatMap (
