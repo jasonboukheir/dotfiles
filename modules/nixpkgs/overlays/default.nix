@@ -6,6 +6,7 @@
     (import ./pocket-id.nix)
     (import ./zmx.nix)
     (import ./speaches.nix)
+    (import ./litellm.nix)
     (import ./intel-vllm-image.nix)
     (import ./intel-llm-scaler-vllm-image.nix)
     (import ./vllm-xpu-int4-tq-image.nix)

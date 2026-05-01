@@ -1,0 +1,37 @@
+From: Jason Elie Bou Kheir <jason.boukheir@gmail.com>
+Subject: [PATCH] streaming_handler: don't drop chunks with only delta.reasoning
+
+vLLM 0.20+ emits reasoning tokens on the bare `delta.reasoning` field
+(qwen3 / deepseek_r1 / etc. parsers). LiteLLM's CustomStreamWrapper
+silently drops those chunks because:
+
+  1. `handle_openai_chat_completion_chunk` reads only `delta.content`,
+     so `text` is empty for reasoning-only chunks.
+  2. `is_chunk_non_empty` then sees empty content + no tool calls + no
+     `delta.reasoning_content` (the OLD field name) and judges the
+     chunk empty, returning False. The proxy drops it before the
+     client (e.g. OWUI) ever sees it.
+
+Add the missing `delta.reasoning` check against the original upstream
+chunk so reasoning-only chunks are forwarded through the existing
+"copy original_chunk choices into model_response" path. The receiving
+choices preserve the `reasoning` field via Pydantic `extra="allow"`.
+
+--- a/litellm/litellm_core_utils/streaming_handler.py
++++ b/litellm/litellm_core_utils/streaming_handler.py
+@@ -737,6 +737,15 @@ class CustomStreamWrapper:
+                 "annotations" in model_response.choices[0].delta
+                 and model_response.choices[0].delta.annotations is not None
+             )
++            or (
++                # vLLM 0.20+ emits the reasoning stream on `delta.reasoning`
++                # (bare field, not `reasoning_content`). The original chunk
++                # is the only place this lives at gate-check time; the
++                # downstream copy-from-original_chunk branch preserves it.
++                response_obj.get("original_chunk") is not None
++                and len(getattr(response_obj["original_chunk"], "choices", []) or []) > 0
++                and getattr(response_obj["original_chunk"].choices[0].delta, "reasoning", None) is not None
++            )
+         ):
+             return True
+         else:
