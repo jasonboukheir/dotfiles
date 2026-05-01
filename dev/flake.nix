@@ -23,7 +23,7 @@
       # needs to walk the relevant flake set (update-flakes, check, ...).
       hostFlakesSnippet = ''
         repo_root=$(git rev-parse --show-toplevel)
-        host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
+        host=$(scutil --get LocalHostName 2>/dev/null || hostname -s 2>/dev/null || uname -n | cut -d. -f1)
 
         flakes=("$repo_root")
 
@@ -66,7 +66,7 @@
         runtimeInputs = [pkgs.git pkgs.nix pkgs.nettools];
         text = ''
           repo_root=$(git rev-parse --show-toplevel)
-          host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
+          host=$(scutil --get LocalHostName 2>/dev/null || hostname -s 2>/dev/null || uname -n | cut -d. -f1)
 
           # Meta devservers get per-allocation hostnames (devvm1234, devbig5,
           # devgpu9, ...); they all share the work-devserver home config.
@@ -96,7 +96,7 @@
               ;;
             Darwin)
               echo "==> darwin-rebuild switch ($host)"
-              exec darwin-rebuild switch --flake "$repo_root#$host" "$@"
+              exec sudo darwin-rebuild switch --flake "$repo_root#$host" "$@"
               ;;
             *)
               echo "rebuild: unsupported OS $(uname -s)" >&2
@@ -205,7 +205,7 @@
             done
           fi
           if [ -z "$target_host" ]; then
-            current_host=$(hostname -s 2>/dev/null || uname -n | cut -d. -f1)
+            current_host=$(scutil --get LocalHostName 2>/dev/null || hostname -s 2>/dev/null || uname -n | cut -d. -f1)
             for h in "''${known_hosts[@]}"; do
               [ "$h" = "$current_host" ] && target_host="$h" && break
             done
