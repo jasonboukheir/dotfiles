@@ -71,25 +71,30 @@ in {
       # The Qwen3.6 chat template prefills `<think>\n` for deep mode
       # (verified via /tokenize: prompt ends with `<|im_start|>assistant
       # \n<think>\n`) and `<think>\n\n</think>\n\n` for fast mode. The
-      # model is trained on those prefills, so it emits `</think>` and
-      # the rest of the response inline but NEVER an opening `<think>`
-      # tag in its output. That rules out the "no parser, let OWUI
-      # split inline tags" approach for deep mode — there's no `<think>`
-      # to anchor the split on.
+      # model emits `</think>` + answer inline in deep mode, and just
+      # the answer in fast mode — never an opening `<think>` tag in
+      # its output. So OWUI's inline tag splitter has nothing to anchor
+      # on for deep mode, and we need a server-side parser.
       #
-      # Bundled `qwen3` parser handles this correctly: emits the post-
-      # `<think>` text on `delta.reasoning` until `</think>`, then
-      # switches to `delta.content`. Fast mode is short-circuited via
-      # the serving layer's `prompt_is_reasoning_end` check (prompt
-      # already contains `</think>`), so the parser is bypassed and
-      # tokens flow as `delta.content`.
+      # vLLM 0.20.1rc1's bundled `qwen3` parser is supposed to short-
+      # circuit fast mode via the serving layer's `prompt_is_reasoning
+      # _end` check (prompt already contains `</think>`). Empirically
+      # the short-circuit doesn't fire for this Qwen3.6 build, so fast
+      # mode tokens all stream on `delta.reasoning` instead of
+      # `delta.content` — every fast-mode chat renders as one giant
+      # "Thinking…" block in OWUI with no answer text.
       #
-      # LiteLLM 1.75.5 drops chunks that have only `delta.reasoning`
-      # (its `is_chunk_non_empty` check looks for the older
-      # `delta.reasoning_content` field name only). Patched locally
-      # via a nixpkgs overlay on `python313Packages.litellm`; revisit
-      # once we bump to a LiteLLM that handles `delta.reasoning`.
-      reasoningParser = "qwen3";
+      # The custom `qwen3_aware` plugin reads
+      # `chat_template_kwargs.enable_thinking` at parser-init time and
+      # bypasses extraction entirely in fast mode (returns
+      # `DeltaMessage(content=delta_text)` directly). Deep mode falls
+      # through to normal `<think>...</think>` splitting.
+      #
+      # Pairs with the litellm overlay patch — without that patch,
+      # LiteLLM drops the deep-mode `delta.reasoning` chunks before
+      # they reach OWUI.
+      reasoningParser = "qwen3_aware";
+      reasoningParserPlugin = ../../../modules/nixos/services/local-llm/qwen3_aware_reasoning_parser.py;
       limitMmPerPrompt = {
         image = 0;
         video = 0;
