@@ -57,7 +57,14 @@ in {
       # kernel asserts `core_attn_out.size(0) == num_actual_tokens`
       # whenever the captured size > real batch (e.g. 3-way decode
       # padded to 4).
-      gpuMemoryUtilization = 0.80;
+      # Bumped from 0.80 (eager-era) to 0.85 because cudagraph memory
+      # profiling reserves ~0.74 GiB for the captured graphs; without
+      # the bump the engine fails KV-cache allocation at startup with
+      # "No available memory for the cache blocks". 0.85 is the
+      # minimum to maintain the same effective KV-cache size as before
+      # (vllm log: "equivalent to --gpu-memory-utilization=0.7538
+      # without CUDA graph memory profiling").
+      gpuMemoryUtilization = 0.85;
       enforceEager = false;
       enableXpuGraph = true;
       cudagraphCaptureSizes = [1 4];
