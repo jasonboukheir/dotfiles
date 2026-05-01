@@ -5,4 +5,5 @@
     gemini-cli.enable = true;
     zmx.enable = true;
   };
+  services.ssh-agent-switcher.enable = true;
 }
