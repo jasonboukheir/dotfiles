@@ -49,26 +49,21 @@ in {
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 32768;
-      # Compile + XPU graph capture costs ~5.4 GiB on top of the model:
-      # 1.4 GiB for the captured Level Zero command lists themselves
-      # (with cudagraphCaptureSizes = [1 2 4 8]) plus ~4 GiB of
-      # profiling/Inductor workspace. vLLM probes peak memory at
-      # max-num-seqs × max-num-batched-tokens to size that workspace,
-      # so capping max-num-seqs is what keeps it bounded — at the
-      # default it balloons and OOMs the KV budget at 32k ctx.
-      #
-      # Bumping gpu-mem-util 0.80 → 0.85 (embedding at 0.07 keeps
-      # total at 0.92, ~2.5 GiB headroom) and capping max-num-seqs at
-      # 8 (matches the largest captured graph size) makes everything
-      # fit and lifts single-stream from ~20 tok/s to ~58 tok/s
-      # — matching llama.cpp Q4_K_M's hand-tuned SYCL pipeline. See
-      # vllm-intel-arc/results/PERF-INVESTIGATION.md for the full
-      # bandwidth analysis and CPU-dispatch diagnosis.
-      gpuMemoryUtilization = 0.85;
-      enforceEager = false;
-      enableXpuGraph = true;
-      cudagraphCaptureSizes = [1 2 4 8];
-      extraArgs = ["--max-num-seqs" "8"];
+      # Single-stream perf opportunity: setting `enforceEager = false`
+      # + `enableXpuGraph = true` + `cudagraphCaptureSizes = [1 2 4 8]`
+      # would lift decode from ~20 tok/s to ~58 tok/s on dense models.
+      # On Qwen3.6-A3B (hybrid: 10 full-attn + 30 GDN linear-attn
+      # layers) the compiled path crashes the engine on real requests
+      # with `RuntimeError: Expected core_attn_out.size(0) ==
+      # num_actual_tokens to be true` from `torch.ops._xpu_C.gdn_attention`
+      # (vllm/_xpu_ops.py:124). Profiling/warmup runs the GDN kernel
+      # with dummy shapes that happen to match; chunked prefill in
+      # production hits a different shape that trips the assertion.
+      # Looks like a vllm-xpu-kernels GDN ↔ torch.compile interaction
+      # bug. Reverting to eager keeps Qwen3.6 hybrid serving stable
+      # at ~20 tok/s single-stream until that's fixed upstream.
+      gpuMemoryUtilization = 0.80;
+      enforceEager = true;
       # The Qwen3.6 chat template prefills the *prompt* differently
       # depending on `enable_thinking`: `<think>\n` for deep mode
       # (model emits `</think>` only), `<think>\n\n</think>\n\n` for
