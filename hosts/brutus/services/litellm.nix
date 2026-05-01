@@ -33,7 +33,10 @@
         };
       }
       // extra;
-    model_info = {mode = "chat";};
+    model_info = {
+      mode = "chat";
+      supports_reasoning = enableThinking;
+    };
   };
 in {
   homelab.ports.allocate.litellm = lib.mkIf cfg.enable 3200;

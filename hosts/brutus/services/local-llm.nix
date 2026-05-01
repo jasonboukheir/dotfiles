@@ -68,16 +68,27 @@ in {
       enforceEager = false;
       enableXpuGraph = true;
       cudagraphCaptureSizes = [1 4];
-      # The Qwen3.6 chat template prefills the *prompt* differently
-      # depending on `enable_thinking`: `<think>\n` for deep mode
-      # (model emits `</think>` only), `<think>\n\n</think>\n\n` for
-      # fast mode (model emits no tags). The bundled `qwen3` parser
-      # in vLLM 0.20+ handles both: it reads `enable_thinking` from
-      # chat_template_kwargs and the serving layer detects fast-mode
-      # via `prompt_is_reasoning_end` to route deltas as content
-      # without calling the streaming parser. Older vLLM (0.14) needed
-      # a custom plugin (qwen3_aware_reasoning_parser.py) — no longer
-      # needed.
+      # The Qwen3.6 chat template prefills `<think>\n` for deep mode
+      # (verified via /tokenize: prompt ends with `<|im_start|>assistant
+      # \n<think>\n`) and `<think>\n\n</think>\n\n` for fast mode. The
+      # model is trained on those prefills, so it emits `</think>` and
+      # the rest of the response inline but NEVER an opening `<think>`
+      # tag in its output. That rules out the "no parser, let OWUI
+      # split inline tags" approach for deep mode — there's no `<think>`
+      # to anchor the split on.
+      #
+      # Bundled `qwen3` parser handles this correctly: emits the post-
+      # `<think>` text on `delta.reasoning` until `</think>`, then
+      # switches to `delta.content`. Fast mode is short-circuited via
+      # the serving layer's `prompt_is_reasoning_end` check (prompt
+      # already contains `</think>`), so the parser is bypassed and
+      # tokens flow as `delta.content`.
+      #
+      # LiteLLM 1.75.5 drops chunks that have only `delta.reasoning`
+      # (its `is_chunk_non_empty` check looks for the older
+      # `delta.reasoning_content` field name only). Patched locally
+      # via a nixpkgs overlay on `python313Packages.litellm`; revisit
+      # once we bump to a LiteLLM that handles `delta.reasoning`.
       reasoningParser = "qwen3";
       limitMmPerPrompt = {
         image = 0;
