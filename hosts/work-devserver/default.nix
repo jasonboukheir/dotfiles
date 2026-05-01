@@ -45,6 +45,11 @@ in {
         identityFile = sshKeyPath;
         extraOptions.AddKeysToAgent = "yes";
       };
+      matchBlocks."ghe.oculus-rep.com" = {
+        proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
+        identityFile = sshKeyPath;
+        extraOptions.AddKeysToAgent = "yes";
+      };
     };
 
     git.settings.user.signingKey = "${sshKeyPath}.pub";
