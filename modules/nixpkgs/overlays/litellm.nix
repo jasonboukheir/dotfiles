@@ -5,13 +5,14 @@ final: prev:
 # https://github.com/BerriAI/litellm/issues/20246
 # https://github.com/BerriAI/litellm/pull/24020
 let
-  patchLiteLLM = py: py.override {
-    packageOverrides = pyFinal: pyPrev: {
-      litellm = pyPrev.litellm.overrideAttrs (old: {
-        patches = (old.patches or []) ++ [./litellm-streaming-reasoning.patch];
-      });
+  patchLiteLLM = py:
+    py.override {
+      packageOverrides = pyFinal: pyPrev: {
+        litellm = pyPrev.litellm.overrideAttrs (old: {
+          patches = (old.patches or []) ++ [./litellm-streaming-reasoning.patch];
+        });
+      };
     };
-  };
 in {
   python313 = patchLiteLLM prev.python313;
   python312 = patchLiteLLM prev.python312;
