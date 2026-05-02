@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   pkgs-unstable,
   ...
 }: {
@@ -27,6 +28,7 @@
         Description = "SSH agent switcher (proxies SSH_AUTH_SOCK to the freshest live forwarded agent socket)";
       };
       Service = {
+        ExecStartPre = "${pkgs.coreutils}/bin/rm -f ${config.services.ssh-agent-switcher.socketPath}";
         ExecStart = "${lib.getExe config.services.ssh-agent-switcher.package} --socket-path=${config.services.ssh-agent-switcher.socketPath}";
         Restart = "on-failure";
         RestartSec = 5;
