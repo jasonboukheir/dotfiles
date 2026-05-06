@@ -22,7 +22,7 @@ in {
       contextSize = 131072;
     };
 
-    # Validated 2026-04-30 against vllm-xpu-int4-tq:gdn-fix-ccd77bdf4
+    # Validated 2026-05-06 against vllm-xpu-int4-tq:spec-fix-b6a544b82
     # with palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 + turboquant_k3v4_nc +
     # torch.compile + XPU graph capture at [1, 4]: 20.15 GiB model,
     # ~65 tok/s single-stream, ~218 tok/s 4-way agg. KL vs FP16 KV at
@@ -47,27 +47,54 @@ in {
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 32768;
-      # XPU graph capture at decode batch sizes 1 and 4. Captured size
-      # 1 covers single-stream (the dominant case); captured size 4
-      # covers the 2-4 concurrent decodes that come from agentic tool
-      # calls / parallel sub-agents. Real batches between 2-3 pad up
-      # to size 4 (slight extra work per kernel, still net win vs
-      # eager). Required the GDN-input-slicing fix in image tag
-      # gdn-fix-ccd77bdf4 (vllm@ccd77bdf4) — without it, the SYCL GDN
+      # Caps the engine at 32 concurrent sequences. vLLM's startup
+      # memory-profile pass shapes a worst-case forward at
+      # max_num_seqs × max_num_batched_tokens to size activation peak;
+      # leaving max_num_seqs at the default 256 OOMs init when the B70
+      # is also hosting the Qwen3-Embedding-0.6B and whisper.cpp
+      # models. 32 covers single-stream + agentic sub-agent fan-out
+      # without inflating the profile peak; beyond that requests queue.
+      maxNumSeqs = 32;
+      # XPU graph capture at verify-pass token counts 4 and 16. With
+      # MTP-K3 enabled, vLLM rounds every capture size up to a multiple
+      # of (num_speculative_tokens + 1) = 4
+      # (`adjust_cudagraph_sizes_for_spec_decode`,
+      # vllm/config/compilation.py:1447), so listing 1 silently
+      # collapses to 4 anyway — the value of the list is in the larger
+      # shapes. Size 4 covers MTP-K3 single-stream verify (1 real + 3
+      # spec = 4 tokens through the target). Size 16 covers 4-way
+      # concurrent verify (4 seqs × 4 tokens) — the agentic
+      # tool-fanout case. Beyond 4 concurrent active spec decodes, the
+      # verify pass falls back to eager. Required the GDN-input-slicing
+      # fix in image tag gdn-fix-ccd77bdf4 — without it, the SYCL GDN
       # kernel asserts `core_attn_out.size(0) == num_actual_tokens`
-      # whenever the captured size > real batch (e.g. 3-way decode
-      # padded to 4).
-      # Bumped from 0.80 (eager-era) to 0.85 because cudagraph memory
-      # profiling reserves ~0.74 GiB for the captured graphs; without
-      # the bump the engine fails KV-cache allocation at startup with
-      # "No available memory for the cache blocks". 0.85 is the
-      # minimum to maintain the same effective KV-cache size as before
-      # (vllm log: "equivalent to --gpu-memory-utilization=0.7538
-      # without CUDA graph memory profiling").
+      # whenever the captured size > real batch. Updating K (=2 or =5)
+      # changes the round-up multiple and requires re-picking these
+      # numbers (e.g. K=2 → [3, 12]).
+      #
+      # 0.85 hands vLLM ~27.2 GiB on the 32 GiB B70, leaving ~1.9 GiB
+      # headroom after the co-resident embedding (~2.24 GiB at 0.07
+      # util) and whisper.cpp STT (~0.7 GiB). The MTP-K3 head
+      # (+1.57 GiB) sits inside vLLM's allocation and shrinks the KV
+      # pool — with turboquant_k3v4_nc the pool stays large enough for
+      # typical sessions. Going higher (0.93 from the original MTP
+      # checklist) over-commits when embedding+STT are loaded.
       gpuMemoryUtilization = 0.85;
+      # MTP-K3: 1.13–1.49x speedup vs no-spec baseline on B70 with
+      # the spec-decode dispatcher patch (vllm@b6a544b82, image tag
+      # spec-fix-b6a544b82). Per-position acceptance 85.6% / 71.0% /
+      # 58.6% on Qwen3.6-A3B (canonical MTP shape). The fused SYCL
+      # gdn_attention kernel has no spec-aware path; the dispatcher
+      # detects spec batches and routes them through the same FLA
+      # Triton flow that forward_cuda uses (non-spec batches keep the
+      # SYCL fast path).
+      speculativeConfig = {
+        method = "mtp";
+        num_speculative_tokens = 3;
+      };
       enforceEager = false;
       enableXpuGraph = true;
-      cudagraphCaptureSizes = [1 4];
+      cudagraphCaptureSizes = [4 16];
       # The Qwen3.6 chat template prefills `<think>\n` for deep mode
       # (verified via /tokenize: prompt ends with `<|im_start|>assistant
       # \n<think>\n`) and `<think>\n\n</think>\n\n` for fast mode. The
