@@ -84,10 +84,41 @@ in {
       description = "Maximum model context length. Reduces VRAM when set below model default.";
     };
 
+    maxNumSeqs = lib.mkOption {
+      type = lib.types.nullOr lib.types.int;
+      default = null;
+      description = ''
+        Pass `--max-num-seqs <n>`. Caps the engine's concurrent
+        sequence count, which bounds the worst-case shape used by
+        vLLM's startup memory-profile pass (max_num_seqs ×
+        max_num_batched_tokens). Lower values trade concurrency
+        ceiling for a smaller activation peak — the difference between
+        OOM at engine init and clean startup when GPU VRAM is shared
+        with other models. `null` keeps vLLM's default (256).
+      '';
+    };
+
     gpuMemoryUtilization = lib.mkOption {
       type = lib.types.float;
       default = 0.9;
       description = "Fraction of XPU VRAM vLLM may use.";
+    };
+
+    speculativeConfig = lib.mkOption {
+      type = lib.types.nullOr lib.types.attrs;
+      default = null;
+      description = ''
+        JSON attrset passed to `--speculative-config`. Enables
+        speculative decoding (MTP / EAGLE / draft-target). For MTP-K3
+        on a hybrid-GDN model, set
+        `{ method = "mtp"; num_speculative_tokens = 3; }` — the K
+        value must match `cudagraphCaptureSizes` (verify-pass shape =
+        1 + K, so K=3 wants `[1 4]`). Requires the GDN spec-decode
+        dispatcher patch (image tag `spec-fix-b6a544b82` or later) on
+        XPU; otherwise the SYCL `gdn_attention` kernel asserts on the
+        first verify pass.
+      '';
+      example = lib.literalExpression ''{ method = "mtp"; num_speculative_tokens = 3; }'';
     };
 
     enforceEager = lib.mkOption {
@@ -291,6 +322,14 @@ in {
           ++ lib.optionals (cfg.maxModelLen != null) [
             "--max-model-len"
             (toString cfg.maxModelLen)
+          ]
+          ++ lib.optionals (cfg.maxNumSeqs != null) [
+            "--max-num-seqs"
+            (toString cfg.maxNumSeqs)
+          ]
+          ++ lib.optionals (cfg.speculativeConfig != null) [
+            "--speculative-config"
+            (builtins.toJSON cfg.speculativeConfig)
           ]
           ++ lib.optionals (cfg.quantization != null) [
             "--quantization"
