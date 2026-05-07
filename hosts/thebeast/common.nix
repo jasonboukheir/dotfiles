@@ -15,6 +15,7 @@
     ./programs.nix
     ./stylix.nix
     ./secrets/radicale.nix
+    ./secrets/hf-token.nix
     ./../../modules
     ./../../modules/nixos
     ./../../modules/omarchy
