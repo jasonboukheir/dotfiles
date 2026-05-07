@@ -12,6 +12,7 @@
       ./hyprland
       ./btop.nix
       ./hypridle.nix
+      ./hyprlock.nix
       ./mako.nix
       ./waybar.nix
       ./wofi.nix

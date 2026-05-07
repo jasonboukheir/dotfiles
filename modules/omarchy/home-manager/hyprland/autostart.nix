@@ -6,6 +6,7 @@
       # "swaybg -i ~/.config/omarchy/current/background -m fill"
       "hyprsunset"
       "systemctl --user start hyprpolkitagent"
+      "blueman-applet"
       "wl-clip-persist --clipboard regular & clipse -listen"
       "sleep 3 && 1password --silent"
 
