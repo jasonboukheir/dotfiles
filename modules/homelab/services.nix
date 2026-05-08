@@ -290,6 +290,10 @@ in {
     services.fail2ban = mkIf hasExternal {
       enable = true;
       jails = {
+        sshd = {
+          enabled = true;
+          settings.maxretry = 5;
+        };
         nginx-botsearch = ''
           enabled  = true
           filter   = nginx-botsearch
