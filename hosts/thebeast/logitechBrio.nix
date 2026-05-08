@@ -5,7 +5,7 @@
 }: let
   vendorId = "046d";
   productId = "085e";
-  disableLpmQuirk = "l";
+  disableLpmQuirk = "k";
 in {
   options.logitech.brio.enableUsbLpm = lib.mkEnableOption "USB Link Power Management for the Logitech Brio 4K (046d:085e)";
 
