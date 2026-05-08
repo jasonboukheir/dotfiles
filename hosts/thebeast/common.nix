@@ -11,6 +11,7 @@
     ./networking.nix
     ./nixpkgs.nix
     ./logitechBrio.nix
+    ./kvmHubResume.nix
     ./printing.nix
     ./programs.nix
     ./stylix.nix
