@@ -50,8 +50,12 @@ in {
       type = lib.types.str;
       default = "float16";
       description = ''
-        Data type for model weights. `sym_int4` requires `float16`
-        (BF16 is rejected by the IPEX quant path).
+        Activation/compute dtype passed as `--dtype`. The legacy
+        intel/llm-scaler-vllm `sym_int4` path requires `float16`
+        (IPEX rejects BF16). The IPEX-free vllm-xpu-int4-tq image
+        accepts `bfloat16` with `quantization = "inc"` since the
+        compute kernels match what the GPTQv2 weights were
+        calibrated against.
       '';
     };
 
@@ -60,8 +64,16 @@ in {
       default = "sym_int4";
       description = ''
         vLLM `--quantization` flag value, or null to skip the flag.
-        `sym_int4` is the only XPU-MoE-capable INT4 path in this
-        image as of b8.2.
+        Image-dependent:
+        - `sym_int4` — IPEX online INT4 (GGML Q4_0) MoE path on the
+          legacy intel/llm-scaler-vllm image. Quantizes BF16 weights
+          at load. Forces eager mode (Dynamo trips on IPEX
+          C-extensions).
+        - `inc` — Intel Neural Compressor dispatch on the
+          vllm-xpu-int4-tq image. Loads pre-quantized GPTQv2 sym
+          int4 weights and routes the MoE through
+          vllm-xpu-kernels' `xpu_fused_moe(is_int4=True)`. Compatible
+          with torch.compile + XPU graph capture.
       '';
     };
 
@@ -69,19 +81,31 @@ in {
       type = lib.types.nullOr lib.types.str;
       default = "fp8";
       description = ''
-        vLLM `--kv-cache-dtype` value, or null to skip the flag.
-        Defaults to `fp8` — doubles KV-cache headroom (e.g. 103k →
-        207k tokens for Qwen3.6-35B-A3B at 32k context) for ~2–3%
-        per-stream throughput cost. Necessary headroom for
-        concurrent agentic workloads where context grows over time.
-        Set to null to fall back to model-precision KV cache.
+        vLLM `--kv-cache-dtype` value, or null to fall back to
+        model-precision KV cache. Image-dependent:
+        - `fp8` — universal, ~2x KV headroom for ~2–3% per-stream
+          throughput cost.
+        - `turboquant_k3v4_nc` (and siblings) — only on the
+          vllm-xpu-int4-tq image. Compresses K to 3-bit
+          MSE-Lloyd-Max + V to 4-bit. KL vs FP16 KV at 4096 ctx /
+          top-2000 measured at 0.0179 — functionally identical for
+          greedy decoding.
+        Tighter KV is the headroom that lets concurrent agentic
+        sessions accumulate context without evicting.
       '';
     };
 
     maxModelLen = lib.mkOption {
       type = lib.types.nullOr lib.types.int;
       default = 32768;
-      description = "Maximum model context length. Reduces VRAM when set below model default.";
+      description = ''
+        Pass `--max-model-len <n>`. Caps prompt + output tokens per
+        request and shapes the KV pool — the only knob that
+        meaningfully reclaims VRAM for KV at fixed
+        `gpuMemoryUtilization`. Note: Qwen3.6-35B-A3B's model card
+        recommends keeping at least 128k to preserve thinking
+        quality; values below that are a deliberate VRAM tradeoff.
+      '';
     };
 
     maxNumSeqs = lib.mkOption {
@@ -101,7 +125,14 @@ in {
     gpuMemoryUtilization = lib.mkOption {
       type = lib.types.float;
       default = 0.9;
-      description = "Fraction of XPU VRAM vLLM may use.";
+      description = ''
+        Pass `--gpu-memory-utilization <fraction>`. Fraction of XPU
+        VRAM vLLM claims for weights, activations, KV pool, and graph
+        capture buffers combined. Higher values grow the KV pool but
+        starve co-resident services (embedding, STT). On a 32 GiB B70
+        sharing with a ~2.2 GiB embedding model and ~0.7 GiB whisper,
+        0.85 leaves ~1.9 GiB headroom; 0.93 over-commits.
+      '';
     };
 
     speculativeConfig = lib.mkOption {
@@ -109,16 +140,21 @@ in {
       default = null;
       description = ''
         JSON attrset passed to `--speculative-config`. Enables
-        speculative decoding (MTP / EAGLE / draft-target). For MTP-K3
-        on a hybrid-GDN model, set
-        `{ method = "mtp"; num_speculative_tokens = 3; }` — the K
-        value must match `cudagraphCaptureSizes` (verify-pass shape =
-        1 + K, so K=3 wants `[1 4]`). Requires the GDN spec-decode
-        dispatcher patch (image tag `spec-fix-b6a544b82` or later) on
-        XPU; otherwise the SYCL `gdn_attention` kernel asserts on the
-        first verify pass.
+        speculative decoding (MTP / EAGLE / draft-target). Methods:
+        - `mtp` — generic MTP drafter, model-agnostic plumbing.
+        - `qwen3_next_mtp` — Qwen3-family-specific dispatcher; same
+          drafter, model-aware fast path. Use this for
+          Qwen3.6-35B-A3B (the model card's recommendation).
+        - `eagle` / `eagle3` — separate draft model.
+        The K value (`num_speculative_tokens`) must match
+        `cudagraphCaptureSizes` because vLLM rounds capture sizes up
+        to multiples of (K + 1) — verify-pass shape = 1 real + K spec.
+        K=2 wants `[3]`, K=3 wants `[4]`, etc. Requires the GDN
+        spec-decode dispatcher patch (image tag `spec-fix-b6a544b82`
+        or later) on XPU; otherwise the SYCL `gdn_attention` kernel
+        asserts on the first verify pass.
       '';
-      example = lib.literalExpression ''{ method = "mtp"; num_speculative_tokens = 3; }'';
+      example = lib.literalExpression ''{ method = "qwen3_next_mtp"; num_speculative_tokens = 2; }'';
     };
 
     enforceEager = lib.mkOption {
@@ -171,7 +207,15 @@ in {
     reasoningParser = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = "Pass `--reasoning-parser <value>` (e.g. `qwen3`).";
+      description = ''
+        Pass `--reasoning-parser <value>`. Splits the model's
+        `<think>...</think>` reasoning block off the user-visible
+        answer and emits it on `delta.reasoning` instead of
+        `delta.content`. Use the bundled `qwen3` for the standard
+        path, or set this to a parser registered by
+        `reasoningParserPlugin` for custom behavior (e.g. the
+        `qwen3_aware` plugin that bypasses extraction in fast mode).
+      '';
       example = "qwen3";
     };
 
@@ -187,6 +231,47 @@ in {
       '';
     };
 
+    enableAutoToolChoice = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Pass `--enable-auto-tool-choice`. Required for the OpenAI
+        tool-calling API (`tool_choice = "auto"`) to actually run the
+        parser configured via `toolCallParser` — without this flag,
+        vLLM passes the request through without parsing tool-call
+        markup, so clients see the raw `<tool_call>` text on
+        `message.content` instead of structured `tool_calls`. Enable
+        for agentic clients (Claude Code, Aider, OpenWebUI tools).
+      '';
+    };
+
+    toolCallParser = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Pass `--tool-call-parser <value>`. Selects the parser that
+        extracts tool calls from the model's emitted text into the
+        OpenAI `tool_calls` schema. For Qwen3.6-35B-A3B set
+        `"qwen3_coder"` (per the model card's recommended vLLM
+        command — the Qwen3-Coder family parser is also what this
+        MoE checkpoint was tuned against). Only effective when
+        `enableAutoToolChoice = true`.
+      '';
+      example = "qwen3_coder";
+    };
+
+    toolCallParserPlugin = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Path to a Python file implementing a custom tool-call parser,
+        bind-mounted read-only into the container and passed as
+        `--tool-parser-plugin`. The plugin must register itself via
+        `ToolParserManager.register_module("name")`; that name then
+        goes in `toolCallParser`.
+      '';
+    };
+
     limitMmPerPrompt = lib.mkOption {
       type = lib.types.nullOr lib.types.attrs;
       default = null;
@@ -197,9 +282,25 @@ in {
         `{ image = 0; video = 0; }` to skip the multimodal-budget
         init that otherwise calls
         `Qwen2VLImageProcessor.max_pixels` and crashes on newer
-        transformers.
+        transformers. Prefer `languageModelOnly = true` for the same
+        effect with less typing.
       '';
       example = lib.literalExpression ''{ image = 0; video = 0; }'';
+    };
+
+    languageModelOnly = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Pass `--language-model-only`. Sets every modality's
+        `limit_per_prompt` to 0 — equivalent to
+        `limitMmPerPrompt = { image = 0; video = 0; ... }` but
+        sweeping every registered modality rather than enumerating.
+        Use for text-only inference on VL-tagged checkpoints. Per
+        vLLM source (vllm/config/multimodal.py:315) this only changes
+        the runtime limit; vision-tower weights still load if present
+        in the checkpoint.
+      '';
     };
 
     extraArgs = lib.mkOption {
@@ -292,6 +393,9 @@ in {
         ]
         ++ lib.optionals (cfg.reasoningParserPlugin != null) [
           "${cfg.reasoningParserPlugin}:/etc/vllm/reasoning_parser.py:ro"
+        ]
+        ++ lib.optionals (cfg.toolCallParserPlugin != null) [
+          "${cfg.toolCallParserPlugin}:/etc/vllm/tool_call_parser.py:ro"
         ];
 
       ports = ["${topCfg.host}:${toString topCfg.port}:8000"];
@@ -352,10 +456,20 @@ in {
             "--reasoning-parser-plugin"
             "/etc/vllm/reasoning_parser.py"
           ]
+          ++ lib.optionals cfg.enableAutoToolChoice ["--enable-auto-tool-choice"]
+          ++ lib.optionals (cfg.toolCallParser != null) [
+            "--tool-call-parser"
+            cfg.toolCallParser
+          ]
+          ++ lib.optionals (cfg.toolCallParserPlugin != null) [
+            "--tool-parser-plugin"
+            "/etc/vllm/tool_call_parser.py"
+          ]
           ++ lib.optionals (cfg.limitMmPerPrompt != null) [
             "--limit-mm-per-prompt"
             (builtins.toJSON cfg.limitMmPerPrompt)
           ]
+          ++ lib.optionals cfg.languageModelOnly ["--language-model-only"]
           ++ cfg.extraArgs;
       in [
         "-lc"

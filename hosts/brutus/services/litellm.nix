@@ -36,6 +36,7 @@
     model_info = {
       mode = "chat";
       supports_reasoning = enableThinking;
+      supports_function_calling = true;
     };
   };
 in {

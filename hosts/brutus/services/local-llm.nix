@@ -22,110 +22,82 @@ in {
       contextSize = 131072;
     };
 
-    # Validated 2026-05-06 against vllm-xpu-int4-tq:spec-fix-b6a544b82
-    # with palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 + turboquant_k3v4_nc +
-    # torch.compile + XPU graph capture at [1, 4]: 20.15 GiB model,
-    # ~65 tok/s single-stream, ~218 tok/s 4-way agg. KL vs FP16 KV at
-    # 4096 ctx / top-2000: 0.0179 with top-1 100% / top-5 93% — k3v4 is
-    # functionally identical to FP16 for greedy decoding.
-    #
-    # Replaces the older intel/llm-scaler-vllm:0.14.0-b8.2 +
-    # sym_int4 path (19.01 GiB / 103k KV / 20 tok/s single).
-    # The new path uses pre-quantized GPTQv2 sym int4 weights (no
-    # IPEX online quantization, so torch.compile / Dynamo work),
-    # routes the MoE through vllm-xpu-kernels' xpu_fused_moe(is_int4=True)
-    # via INC, and compresses the K cache to 3-bit MSE-Lloyd-Max +
-    # 4-bit V. Single-stream win comes from XPU graph replay
-    # collapsing hundreds of per-kernel CPU dispatches into one per
-    # token.
     vllm = {
       containerImage = pkgs.vllm-xpu-int4-tq-image;
       workingDir = "/workspace/vllm";
       model = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
       alias = "qwen3.6-35b-a3b";
       dtype = "bfloat16";
+      # INC dispatches the MoE through xpu_fused_moe(is_int4=True) for
+      # the pre-quantized GPTQv2 weights — bypasses IPEX's online
+      # quantization so torch.compile / Dynamo work on XPU.
       quantization = "inc";
+      # 3-bit MSE-Lloyd-Max K + 4-bit V. KL vs FP16 KV at 4096 ctx is
+      # 0.0179 with top-1 100% / top-5 93% — functionally identical
+      # for greedy decoding.
       kvCacheDtype = "turboquant_k3v4_nc";
-      maxModelLen = 32768;
-      # Caps the engine at 32 concurrent sequences. vLLM's startup
-      # memory-profile pass shapes a worst-case forward at
-      # max_num_seqs × max_num_batched_tokens to size activation peak;
-      # leaving max_num_seqs at the default 256 OOMs init when the B70
-      # is also hosting the Qwen3-Embedding-0.6B and whisper.cpp
-      # models. 32 covers single-stream + agentic sub-agent fan-out
-      # without inflating the profile peak; beyond that requests queue.
+      maxModelLen = 65536;
+      # Default 256 OOMs vLLM's startup memory-profile pass (worst-case
+      # forward at max_num_seqs × max_num_batched_tokens) when the B70
+      # is co-hosting Qwen3-Embedding-0.6B and whisper.cpp. 32 covers
+      # single-stream + agentic sub-agent fan-out; beyond that, queue.
       maxNumSeqs = 32;
-      # XPU graph capture at verify-pass token counts 4 and 16. With
-      # MTP-K3 enabled, vLLM rounds every capture size up to a multiple
-      # of (num_speculative_tokens + 1) = 4
-      # (`adjust_cudagraph_sizes_for_spec_decode`,
-      # vllm/config/compilation.py:1447), so listing 1 silently
-      # collapses to 4 anyway — the value of the list is in the larger
-      # shapes. Size 4 covers MTP-K3 single-stream verify (1 real + 3
-      # spec = 4 tokens through the target). Size 16 covers 4-way
-      # concurrent verify (4 seqs × 4 tokens) — the agentic
-      # tool-fanout case. Beyond 4 concurrent active spec decodes, the
-      # verify pass falls back to eager. Required the GDN-input-slicing
-      # fix in image tag gdn-fix-ccd77bdf4 — without it, the SYCL GDN
-      # kernel asserts `core_attn_out.size(0) == num_actual_tokens`
-      # whenever the captured size > real batch. Updating K (=2 or =5)
-      # changes the round-up multiple and requires re-picking these
-      # numbers (e.g. K=2 → [3, 12]).
-      #
-      # 0.85 hands vLLM ~27.2 GiB on the 32 GiB B70, leaving ~1.9 GiB
-      # headroom after the co-resident embedding (~2.24 GiB at 0.07
-      # util) and whisper.cpp STT (~0.7 GiB). The MTP-K3 head
-      # (+1.57 GiB) sits inside vLLM's allocation and shrinks the KV
-      # pool — with turboquant_k3v4_nc the pool stays large enough for
-      # typical sessions. Going higher (0.93 from the original MTP
-      # checklist) over-commits when embedding+STT are loaded.
+      # 0.85 → ~27.2 GiB of the 32 GiB B70, leaving ~1.9 GiB headroom
+      # after co-resident embedding (~2.24 GiB at 0.07 util) and
+      # whisper.cpp STT (~0.7 GiB). The MTP head sits inside this
+      # allocation and shrinks the KV pool; turboquant_k3v4_nc keeps
+      # it large enough. 0.93 over-commits when embedding+STT load.
       gpuMemoryUtilization = 0.85;
-      # MTP-K3: 1.13–1.49x speedup vs no-spec baseline on B70 with
-      # the spec-decode dispatcher patch (vllm@b6a544b82, image tag
-      # spec-fix-b6a544b82). Per-position acceptance 85.6% / 71.0% /
-      # 58.6% on Qwen3.6-A3B (canonical MTP shape). The fused SYCL
-      # gdn_attention kernel has no spec-aware path; the dispatcher
-      # detects spec batches and routes them through the same FLA
-      # Triton flow that forward_cuda uses (non-spec batches keep the
-      # SYCL fast path).
-      speculativeConfig = {
-        method = "mtp";
-        num_speculative_tokens = 3;
-      };
+      # Model-specific MTP dispatcher (vs generic "mtp" — same drafter,
+      # model-aware plumbing). Requires the spec-decode dispatcher
+      # patch on XPU (vllm@b6a544b82, image tag spec-fix-b6a544b82):
+      # the fused SYCL gdn_attention kernel has no spec-aware path,
+      # so the dispatcher routes spec batches through the FLA Triton
+      # flow that forward_cuda uses. K=2 per Qwen's model-card sweet
+      # spot for this checkpoint.
+      # speculativeConfig = {
+      #   method = "qwen3_next_mtp";
+      #   num_speculative_tokens = 2;
+      # };
       enforceEager = false;
       enableXpuGraph = true;
-      cudagraphCaptureSizes = [4 16];
-      # The Qwen3.6 chat template prefills `<think>\n` for deep mode
-      # (verified via /tokenize: prompt ends with `<|im_start|>assistant
-      # \n<think>\n`) and `<think>\n\n</think>\n\n` for fast mode. The
-      # model emits `</think>` + answer inline in deep mode, and just
-      # the answer in fast mode — never an opening `<think>` tag in
-      # its output. So OWUI's inline tag splitter has nothing to anchor
-      # on for deep mode, and we need a server-side parser.
-      #
-      # vLLM 0.20.1rc1's bundled `qwen3` parser is supposed to short-
-      # circuit fast mode via the serving layer's `prompt_is_reasoning
-      # _end` check (prompt already contains `</think>`). Empirically
-      # the short-circuit doesn't fire for this Qwen3.6 build, so fast
-      # mode tokens all stream on `delta.reasoning` instead of
-      # `delta.content` — every fast-mode chat renders as one giant
-      # "Thinking…" block in OWUI with no answer text.
-      #
-      # The custom `qwen3_aware` plugin reads
-      # `chat_template_kwargs.enable_thinking` at parser-init time and
-      # bypasses extraction entirely in fast mode (returns
-      # `DeltaMessage(content=delta_text)` directly). Deep mode falls
-      # through to normal `<think>...</think>` splitting.
-      #
-      # Pairs with the litellm overlay patch — without that patch,
-      # LiteLLM drops the deep-mode `delta.reasoning` chunks before
-      # they reach OWUI.
-      reasoningParser = "qwen3_aware";
-      reasoningParserPlugin = ../../../modules/nixos/services/local-llm/qwen3_aware_reasoning_parser.py;
-      limitMmPerPrompt = {
-        image = 0;
-        video = 0;
-      };
+      # Single-stream verify only. With MTP-K2, vLLM rounds capture
+      # sizes up to multiples of (num_speculative_tokens + 1) = 3
+      # (`adjust_cudagraph_sizes_for_spec_decode`), so size 3 covers
+      # 1 real + 2 spec tokens; multi-stream verify falls back to
+      # eager. Adding size 12 (4-way concurrent verify) over-reserved
+      # the cudagraph estimator on top of 0.85 util and starved the KV
+      # pool. Updating K changes the round-up multiple (e.g. K=3 → [4]).
+      # Requires the GDN-input-slicing fix (image tag gdn-fix-ccd77bdf4)
+      # — without it the SYCL GDN kernel asserts
+      # `core_attn_out.size(0) == num_actual_tokens` whenever captured
+      # size > real batch.
+      cudagraphCaptureSizes = [1, 4];
+      # Custom variant of bundled `qwen3`. Two differences in the
+      # source:
+      #   (1) Adds an enable_thinking=False short-circuit inside
+      #       extract_reasoning_streaming. The bundled parser instead
+      #       relies on the serving layer's prompt_is_reasoning_end
+      #       check against the prompt's </think> token id; this
+      #       parser is defensive against chat-template tokenization
+      #       where </think> doesn't render as the single reserved id.
+      #   (2) Drops the bundled parser's implicit-reasoning-end logic
+      #       for unclosed <tool_call> inside thinking — a Qwen3.5
+      #       quirk not exhibited by this Qwen3.6 checkpoint.
+      # Pairs with the litellm overlay patch — without it LiteLLM
+      # drops deep-mode delta.reasoning chunks before they reach OWUI.
+      reasoningParser = "qwen3";
+      # Independent of the reasoning parser: thinking splits on
+      # </think> first, then tool-call extraction runs on the
+      # post-think content. Agentic flows: prefer the qwen3.6-fast
+      # LiteLLM variant — tool-using turns skip the think pass.
+      enableAutoToolChoice = true;
+      toolCallParser = "qwen3_coder";
+      # Text-only inference on a VL-tagged checkpoint. Sets every
+      # modality's per-prompt limit to 0 (config/multimodal.py:315).
+      # Vision-tower weights still load if present in the checkpoint;
+      # this only changes the runtime limit.
+      languageModelOnly = true;
     };
   };
 }
