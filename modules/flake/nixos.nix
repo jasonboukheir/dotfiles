@@ -32,6 +32,7 @@
             inputs.nixarr.nixosModules.default
             inputs.stylix-nixos.nixosModules.stylix
             inputs.ezmtls.nixosModules.default
+            inputs.vllm-xpu-nix.nixosModules.default
           ];
         };
 

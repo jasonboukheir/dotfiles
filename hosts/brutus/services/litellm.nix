@@ -4,15 +4,15 @@
   ...
 }: let
   cfg = config.services.litellm;
-  localLlm = config.services.local-llm;
-  localEmbedding = config.services.local-embedding;
-  localStt = config.services.local-stt;
+  chatLlm = config.services.vllm-xpu.instances.chat;
+  embedding = config.services.vllm-xpu.instances.embedding;
+  stt = config.services.vllm-xpu.instances.stt;
   speaches = config.services.speaches;
   port = config.homelab.ports.values.litellm;
 
-  localLlmBase = "http://${localLlm.host}:${toString localLlm.port}/v1";
-  localEmbeddingBase = "http://${localEmbedding.host}:${toString localEmbedding.port}/v1";
-  localSttBase = "http://${localStt.host}:${toString localStt.port}/v1";
+  chatLlmBase = "http://${chatLlm.host}:${toString chatLlm.port}/v1";
+  embeddingBase = "http://${embedding.host}:${toString embedding.port}/v1";
+  sttBase = "http://${stt.host}:${toString stt.port}/v1";
   speachesBase = "http://${speaches.host}:${toString speaches.port}/v1";
 
   qwenVariant = {
@@ -23,8 +23,8 @@
     model_name = name;
     litellm_params =
       {
-        model = "openai/${localLlm.alias}";
-        api_base = localLlmBase;
+        model = "openai/${chatLlm.servedName}";
+        api_base = chatLlmBase;
         api_key = "sk-noop";
         extra_body = {
           chat_template_kwargs = {
@@ -50,7 +50,7 @@ in {
     environmentFile = config.age.secrets."litellm/env".path;
 
     settings.model_list =
-      lib.optionals localLlm.enable [
+      lib.optionals chatLlm.enable [
         (qwenVariant {
           name = "qwen3.6-fast";
           enableThinking = false;
@@ -61,12 +61,12 @@ in {
           extra.max_tokens = 16384;
         })
       ]
-      ++ lib.optionals localEmbedding.enable [
+      ++ lib.optionals embedding.enable [
         {
           model_name = "text-embedding-qwen3";
           litellm_params = {
-            model = "openai/${localEmbedding.alias}";
-            api_base = localEmbeddingBase;
+            model = "openai/${embedding.servedName}";
+            api_base = embeddingBase;
             api_key = "sk-noop";
           };
           model_info = {
@@ -75,12 +75,12 @@ in {
           };
         }
       ]
-      ++ lib.optionals localStt.enable [
+      ++ lib.optionals stt.enable [
         {
           model_name = "whisper-1";
           litellm_params = {
-            model = "openai/whisper-1";
-            api_base = localSttBase;
+            model = "openai/${stt.servedName}";
+            api_base = sttBase;
             api_key = "sk-noop";
           };
           model_info = {mode = "audio_transcription";};

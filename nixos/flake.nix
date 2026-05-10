@@ -57,6 +57,15 @@
       url = "github:terranix/terranix";
       inputs.nixpkgs.follows = "nixos";
     };
+
+    # Native vLLM-XPU build (torch+xpu, triton-xpu, vllm-xpu-kernels, vllm)
+    # plus a NixOS module exposing services.vllm-xpu.instances.<name>.
+    # Tracks nixos-unstable because the closure depends on
+    # pkgs.intel-oneapi.base which only landed there.
+    vllm-xpu-nix = {
+      url = "github:jasonboukheir/vllm-xpu-nix";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
   };
 
   outputs = _: {};
