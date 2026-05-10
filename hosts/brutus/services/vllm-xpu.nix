@@ -61,7 +61,13 @@ in {
     # Track the jasonboukheir/vllm fork — carries the GDN graph-capture
     # fix (ccd77bdf4) and the GDN spec-decode FLA fallback (b6a544b82)
     # required for the kvCacheDtype + speculativeConfig combos below.
-    package = pkgs.vllm-xpu-unstable;
+    # withTorchvision: Qwen3.6's qwen3_5 model module unconditionally
+    # imports its qwen3_vl sibling, which pulls in transformers'
+    # Qwen2VLImageProcessor → torchvision at registry-inspection time.
+    # `--language-model-only` only mutes runtime per-prompt modality
+    # caps; the import path runs before that flag takes effect.
+    # https://github.com/jasonboukheir/vllm-xpu-nix/issues/37
+    package = pkgs.vllm-xpu-unstable.withTorchvision true;
 
     attnKernelSet = "auto";
 
@@ -199,5 +205,17 @@ in {
       # https://github.com/jasonboukheir/vllm-xpu-nix/issues/22
       extraEnvironment.VLLM_ATTENTION_BACKEND = "TRITON_ATTN";
     };
+  };
+
+  # Shared HF cache (defaults to /var/cache/huggingface, group
+  # `huggingface`) — services.vllm-xpu created the dir setgid +
+  # group-writable. Add jasonbk to the group so dev shells can
+  # write to the same content-addressed store the services pull
+  # into, and point HF_HOME at it host-wide so `huggingface-cli`
+  # / transformers / datasets land there by default.
+  users.users.jasonbk.extraGroups =
+    lib.optional (cfg.sharedHfCache != null) cfg.sharedHfCacheGroup;
+  environment.sessionVariables = lib.mkIf (cfg.sharedHfCache != null) {
+    HF_HOME = cfg.sharedHfCache;
   };
 }
