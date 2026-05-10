@@ -43,9 +43,9 @@ for src in "$SRC"/lib*.so.*.*; do
     strip --strip-unneeded "$DEST/$base" || true
 done
 
-# Recreate the symlink chain that the runtime linker walks (mirrors
-# refresh-llamacpp-binary.sh — DT_SONAME is the source of truth so this
-# handles both 3-part libfoo.so.X.Y.Z and 2-part libdnnl.so.3.9 shapes).
+# Recreate the symlink chain that the runtime linker walks. DT_SONAME
+# is the source of truth so this handles both 3-part libfoo.so.X.Y.Z
+# and 2-part libdnnl.so.3.9 shapes.
 cd "$DEST"
 shopt -s nullglob
 for full in lib*.so.*.*; do

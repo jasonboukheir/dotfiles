@@ -94,11 +94,11 @@
     "cachyos-kernel": {
       "flake": false,
       "locked": {
-        "lastModified": 1778178024,
-        "narHash": "sha256-RpzKUH+IaU1kwP9TyzYDcr3kx4ntATWz5FSm0YUVEFw=",
+        "lastModified": 1778227630,
+        "narHash": "sha256-IZIpCvjTLn6dzgFa6vOB6rUkMp3gktQy8suVXkPfvSg=",
         "owner": "CachyOS",
         "repo": "linux-cachyos",
-        "rev": "633675209cb11d50c5bb05283dbbdd9aa1872aec",
+        "rev": "24da68625ce48a4ea1b28996050f1229e7bc78a2",
         "type": "github"
       },
       "original": {
@@ -389,6 +389,24 @@
         "type": "github"
       }
     },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems_5"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "fromYaml": {
       "flake": false,
       "locked": {
@@ -476,11 +494,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1778248595,
-        "narHash": "sha256-dhFgEjoeJMYN/7OY6xfxS799YB4IjbbYXTjyGIJyLpc=",
+        "lastModified": 1778365864,
+        "narHash": "sha256-ImoT/wqmgMImf2dAC+E0MverAdA4QXsedOeES9B7Ezw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "fdb2ccba9d5e1238d32e0c4a3ec1a277efa80c1d",
+        "rev": "2f419037039a152448c5f4ae9494154753d1b399",
         "type": "github"
       },
       "original": {
@@ -579,11 +597,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1778181525,
-        "narHash": "sha256-U+P5tE3OwxR0j41HABzpi2po3LAiJJ9kBv7jOjoGdhg=",
+        "lastModified": 1778370407,
+        "narHash": "sha256-f0Koom8xI1sMLZZXc3XwO8YzH6QhF1LpL5DdZMFUYuo=",
         "owner": "xddxdd",
         "repo": "nix-cachyos-kernel",
-        "rev": "0bbe21311da577d356ee096a03e379d17cf07279",
+        "rev": "de4bf344b26f355b5d92071503f7a8fd18bc7f6b",
         "type": "github"
       },
       "original": {
@@ -745,11 +763,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1778157832,
-        "narHash": "sha256-KDidG68ivbHpI9mwl9NK4gARAROxEy3bZPe2BBo5ZyM=",
+        "lastModified": 1778228972,
+        "narHash": "sha256-L34YTBob9sdjnc+rd7nMC2X8ddw0LT4RfufnlFyArRU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ec299c6a33eee9baf5b4d72881ca2f15c06b4f01",
+        "rev": "1c5503ba41146fb6b49ed9706823b30de7f3a78f",
         "type": "github"
       },
       "original": {
@@ -839,7 +857,8 @@
         "nixos-unstable": "nixos-unstable",
         "nvf-nixos-unstable": "nvf-nixos-unstable",
         "stylix-nixos-unstable": "stylix-nixos-unstable",
-        "terranix": "terranix"
+        "terranix": "terranix",
+        "vllm-xpu-nix": "vllm-xpu-nix"
       }
     },
     "stylix-nixos-unstable": {
@@ -873,6 +892,23 @@
         "owner": "nix-community",
         "ref": "master",
         "repo": "stylix",
+        "type": "github"
+      }
+    },
+    "sycl-tla-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773801054,
+        "narHash": "sha256-F69uPgmeQ1fpkCMYZujq0JG2uhmIgf3L+BK29//gxig=",
+        "owner": "intel",
+        "repo": "sycl-tla",
+        "rev": "cd763790ad2f74d7294435ecf77682bac0062c3a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "intel",
+        "repo": "sycl-tla",
+        "rev": "cd763790ad2f74d7294435ecf77682bac0062c3a",
         "type": "github"
       }
     },
@@ -922,6 +958,21 @@
       }
     },
     "systems_4": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_5": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
@@ -1020,6 +1071,100 @@
         "owner": "tinted-theming",
         "repo": "base16-zed",
         "type": "github"
+      }
+    },
+    "vllm-xpu-kernels-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778228941,
+        "narHash": "sha256-9bXCO13jV4Hl/XUBSCDiXVd/yJTCmijcjEXzalS8Vx0=",
+        "ref": "refs/heads/main",
+        "rev": "024cb45970cfe8cdbc064505087c367c28086081",
+        "revCount": 222,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/vllm-project/vllm-xpu-kernels.git"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/vllm-project/vllm-xpu-kernels.git"
+      }
+    },
+    "vllm-xpu-kernels-unstable-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778263946,
+        "narHash": "sha256-5MlHv1yjlPBwo/SVjALldIsu7ylFxwykwozc9tVUDSw=",
+        "ref": "refs/heads/main",
+        "rev": "99e9a4ab562cf7de0c25d711425981b96a04b97d",
+        "revCount": 224,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/jasonboukheir/vllm-xpu-kernels.git"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/jasonboukheir/vllm-xpu-kernels.git"
+      }
+    },
+    "vllm-xpu-nix": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixos-unstable"
+        ],
+        "sycl-tla-src": "sycl-tla-src",
+        "vllm-xpu-kernels-src": "vllm-xpu-kernels-src",
+        "vllm-xpu-kernels-unstable-src": "vllm-xpu-kernels-unstable-src",
+        "vllm-xpu-src": "vllm-xpu-src",
+        "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
+      },
+      "locked": {
+        "lastModified": 1778393330,
+        "narHash": "sha256-fiLR850ZaLXJNV0ABBZoCytvSvbO3uj1NlB9zNPljWo=",
+        "owner": "jasonboukheir",
+        "repo": "vllm-xpu-nix",
+        "rev": "e7474bf28d20d252ba4da77e5d496d92c7e2c228",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jasonboukheir",
+        "repo": "vllm-xpu-nix",
+        "type": "github"
+      }
+    },
+    "vllm-xpu-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778332126,
+        "narHash": "sha256-jpe7XL+RNJu4xeQskncWNDirkDQ7hA/AeUj5e4x7NAE=",
+        "ref": "refs/heads/main",
+        "rev": "adb6d96516cb0cd6d1dec985cb5e5cdc20ed418b",
+        "revCount": 16445,
+        "type": "git",
+        "url": "https://github.com/vllm-project/vllm.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/vllm-project/vllm.git"
+      }
+    },
+    "vllm-xpu-unstable-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778266231,
+        "narHash": "sha256-jyGEn3GIDcv7OTBFMGEa6Q94Hl6Toz1pyZFrOxAoId0=",
+        "ref": "refs/heads/main",
+        "rev": "ee8e4c3b85c019690cc712f9a1af2ce05d222042",
+        "revCount": 16452,
+        "type": "git",
+        "url": "https://github.com/jasonboukheir/vllm.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/jasonboukheir/vllm.git"
       }
     },
     "vpnconfinement": {

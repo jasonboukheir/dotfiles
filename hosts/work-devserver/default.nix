@@ -38,6 +38,8 @@ in {
   programs = {
     nvf.meta.enable = true;
 
+    claude-code.settings.permissions.defaultMode = "acceptEdits";
+
     ssh = {
       enable = true;
       matchBlocks."github.com" = {

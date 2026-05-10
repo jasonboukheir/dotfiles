@@ -5,9 +5,7 @@
     ./hydroxide.nix
     ./libation.nix
     ./litellm.nix
-    ./local-embedding.nix
-    ./local-llm.nix
-    ./local-stt.nix
+    ./vllm-xpu.nix
     ./speaches.nix
     ./postgresql.nix
     ./restic.nix

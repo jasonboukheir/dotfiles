@@ -15,7 +15,7 @@ in {
       settings = {
         effortLevel = "high";
         permissions = {
-          defaultMode = "acceptEdits";
+          defaultMode = lib.mkDefault "auto";
         };
       };
     }
