@@ -140,6 +140,9 @@
             bump [args...]           update-flakes + rebuild
             format                   Run alejandra over the whole repo
             check                    nix flake check on each relevant flake
+            disk <subcmd>            Drive health, SMART tests, pool drive
+                                     replacement walkthrough. `disk help` for
+                                     full usage. Linux-only.
             commands                 Show this help
 
           Per-host flake set:
@@ -168,6 +171,8 @@
           exit "$rc"
         '';
       };
+
+      disk = import ./disk.nix {inherit pkgs;};
 
       secret = pkgs.writeShellApplication {
         name = "secret";
@@ -260,18 +265,23 @@
       };
     in {
       default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.nixd
-          pkgs.alejandra
-          agenixPkg
-          secret
-          update-flakes
-          rebuild
-          bump
-          format
-          check
-          commands
-        ];
+        buildInputs =
+          [
+            pkgs.nixd
+            pkgs.alejandra
+            agenixPkg
+            secret
+            update-flakes
+            rebuild
+            bump
+            format
+            check
+            commands
+          ]
+          # disk pulls smartmontools, memtester, cryptsetup, zfs userspace —
+          # all Linux-only and only useful against a NixOS host that owns
+          # real disks. Skip on darwin so the dev shell still evaluates.
+          ++ nixpkgs-unstable.lib.optional pkgs.stdenv.isLinux disk;
       };
     });
   };

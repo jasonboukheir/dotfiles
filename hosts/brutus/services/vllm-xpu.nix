@@ -69,8 +69,6 @@ in {
     # https://github.com/jasonboukheir/vllm-xpu-nix/issues/37
     package = pkgs.vllm-xpu-unstable.withTorchvision true;
 
-    attnKernelSet = "auto";
-
     modelMetadata =
       lib.mapAttrs' (
         _: m:
