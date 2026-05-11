@@ -203,7 +203,7 @@ in {
       # recommend for transcription instances.
       # TODO: drop once IPEX attention covers Whisper cross-attn on XPU.
       # https://github.com/jasonboukheir/vllm-xpu-nix/issues/22
-      extraEnvironment.VLLM_ATTENTION_BACKEND = "TRITON_ATTN";
+      attentionBackend = "TRITON_ATTN";
     };
   };
 
