@@ -1122,11 +1122,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1778476440,
-        "narHash": "sha256-xKT4oFYaDBD0RY6Fm67HKKolzrxPHcitR2Ce2erL1v8=",
+        "lastModified": 1778480517,
+        "narHash": "sha256-t3Xl6WZzmeOHZLqDSTELiaXCQVLaGO9U/GELYhXpPEA=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "c9ef714e9f00e64243160fbfac3efe33b8d91c69",
+        "rev": "b06dc3777b76bef19145c902c9df474dbb57e084",
         "type": "github"
       },
       "original": {

@@ -132,4 +132,16 @@ in {
     fsType = "none";
     options = ["bind"];
   };
+
+  # nixarr (and the upstream nixos transmission module) declare
+  # RequiresMountsFor for the default /var/lib/transmission paths, but we
+  # relocate everything under cfg.mediaDir (a bind mount on top of a ZFS
+  # dataset). Without a mount dep on the real path, a nixos-rebuild can
+  # unmount /var/lib/nixarr, restart transmission against the empty rootfs
+  # mountpoint, and then remount /var/lib/nixarr on top -- leaving
+  # transmission in a stale mount namespace with no visible state. Bind the
+  # service to the actual mount so it waits for the dataset.
+  systemd.services.transmission.unitConfig = lib.mkIf cfg.transmission.enable {
+    RequiresMountsFor = cfg.mediaDir;
+  };
 }
