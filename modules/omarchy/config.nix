@@ -57,6 +57,13 @@ in {
         description = "SDR maximum luminance for SDR→HDR brightness (80–400, typically 200–250)";
       };
     };
+    waybar = {
+      hasBattery = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Host has a system battery — when false, the waybar battery module is omitted (avoids crashes on desktops where only peripheral HID++ batteries exist)";
+      };
+    };
     macKeybindings = {
       enable = lib.mkEnableOption "macOS-style keybindings via keyd";
       capsLockAsCmd = lib.mkEnableOption "remap Caps Lock to act as Cmd (Meta)";

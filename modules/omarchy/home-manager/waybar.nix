@@ -1,6 +1,13 @@
-{lib, ...}: {
+{
+  lib,
+  systemConfig,
+  ...
+}: let
+  hasBattery = systemConfig.omarchy.waybar.hasBattery;
+in {
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
     style = lib.mkAfter ''
       .modules-right > widget > * {
         padding: 0 8px;
@@ -18,15 +25,16 @@
         modules-center = [
           "clock"
         ];
-        modules-right = [
-          "tray"
-          "bluetooth"
-          "network"
-          "wireplumber"
-          "cpu"
-          "power-profiles-daemon"
-          "battery"
-        ];
+        modules-right =
+          [
+            "tray"
+            "bluetooth"
+            "network"
+            "wireplumber"
+            "cpu"
+            "power-profiles-daemon"
+          ]
+          ++ lib.optional hasBattery "battery";
         "hyprland/workspaces" = {
           on-click = "activate";
           format = "{icon}";

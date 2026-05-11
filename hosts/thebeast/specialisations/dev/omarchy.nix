@@ -11,6 +11,7 @@
     sdrMaxLuminance = 203;
   };
   omarchy.pim = "gnome";
+  omarchy.waybar.hasBattery = false;
   omarchy.macKeybindings = {
     enable = true;
   };
