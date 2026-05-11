@@ -14,7 +14,7 @@
   # and the kernel OOM-killer murders icpx mid-compile. Cap to 4
   # concurrent drvs and back it with zram so transient peaks don't
   # cascade into a system-wide OOM.
-  nix.settings.max-jobs = 12;
+  nix.settings.max-jobs = 18;
   # ca-derivations: hash drv outputs by their content rather than by input
   # closure. Lets vllm-xpu-nix's per-TU dyn-drv .o files survive nixpkgs /
   # torch-xpu store-path bumps that don't actually change what icpx
