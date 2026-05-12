@@ -1,6 +1,6 @@
 .direnv
 VaulTLS
 .claude/settings.local.json
-*.lock
+.claude/**/*.lock
 nix.conf
 result

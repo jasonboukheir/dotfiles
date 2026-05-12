@@ -23,6 +23,11 @@ in {
   options = {
     programs._1password = {
       enable = lib.mkEnableOption "1Password";
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs._1password-gui;
+        description = "The 1Password GUI package to use";
+      };
       agentPath = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = onePassAgentPath;
@@ -39,7 +44,7 @@ in {
 
   config = lib.mkIf config.programs._1password.enable {
     home.packages = [
-      pkgs._1password-gui
+      config.programs._1password.package
       pkgs._1password-cli
     ];
     home.sessionVariables = let
