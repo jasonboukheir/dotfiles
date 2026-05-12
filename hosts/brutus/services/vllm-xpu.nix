@@ -20,7 +20,6 @@
   # Bump by setting `rev` to a new HF commit and re-running:
   #   nix-prefetch-url "https://huggingface.co/$repo/resolve/$rev/config.json"
   #   nix hash convert --hash-algo sha256 --to sri <hash>
-  hfFromConfig = inputs.vllm-xpu-nix.lib.${pkgs.stdenv.hostPlatform.system}.fromHfConfig;
   models = {
     chat = {
       repo = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
@@ -68,13 +67,6 @@ in {
     # caps; the import path runs before that flag takes effect.
     # https://github.com/jasonboukheir/vllm-xpu-nix/issues/37
     package = pkgs.vllm-xpu-unstable.withTorchvision true;
-
-    modelMetadata =
-      lib.mapAttrs' (
-        _: m:
-          lib.nameValuePair m.repo (hfFromConfig {inherit (m) repo rev hash;})
-      )
-      models;
 
     instances.chat = {
       enable = true;
