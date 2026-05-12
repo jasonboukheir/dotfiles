@@ -68,6 +68,12 @@ in {
         source /etc/bashrc
         source /usr/facebook/ops/rc/master.bashrc
       '';
+      initExtra = ''
+        if [[ -z "''${BASH_EXECED_FISH:-}" && $- == *i* ]] && command -v fish >/dev/null; then
+          export BASH_EXECED_FISH=1
+          exec fish
+        fi
+      '';
     };
 
     zsh = {

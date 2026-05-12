@@ -37,6 +37,9 @@
                  "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
               flakes+=("$repo_root/nixos")
             fi
+            if grep -q "nixgl" "$repo_root/hosts/''${host}/default.nix" 2>/dev/null; then
+              flakes+=("$repo_root/fedora")
+            fi
             ;;
           Darwin)
             flakes+=("$repo_root/darwin")
@@ -148,6 +151,7 @@
           Per-host flake set:
             brutus, litus, thebeast  → root + dev + nixos
             work-devserver           → root + dev          (home-manager only)
+            jasonbk-fedora-MZ0319NF  → root + dev          (home-manager only)
             *-macbook                → root + darwin
 
           Env overrides:
