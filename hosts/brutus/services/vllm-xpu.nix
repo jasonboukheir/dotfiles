@@ -12,8 +12,8 @@
 
   models = {
     chat = {
-      repo = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
-      rev = "d1fef185160f938fca00c3c664f21250dd544d63";
+      repo = "Lorbus/Qwen3.6-27B-int4-AutoRound";
+      rev = "c3aea2d531678621989e5e2db034e32b22536e79";
       hash = "sha256-zV62kIKjIDOWpQ6I6z0ll5n0+QIJEEMTrDP/rhml+1Y=";
     };
     embedding = {
@@ -47,11 +47,11 @@ in {
       host = "127.0.0.1";
 
       model = models.chat.repo;
-      servedName = "qwen3.6-35b-a3b";
+      servedName = "qwen3.6-27b";
       dtype = "bfloat16";
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
-      maxModelLen = 65536;
+      maxModelLen = 131072;
       maxNumSeqs = 24;
       gpuMemoryUtilization = 0.77;
       speculativeConfig = {
@@ -63,7 +63,7 @@ in {
       cudagraphCaptureSizes = [3 9];
       reasoningParser = "qwen3";
       enableAutoToolChoice = true;
-      toolCallParser = "qwen3_coder";
+      toolCallParser = "qwen3_xml";
       languageModelOnly = true;
     };
 
