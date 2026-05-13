@@ -126,9 +126,9 @@ in {
   fileSystems."${cfg.mediaDir}" = lib.mkIf cfg.enable {
     depends = [
       "/"
-      "/ssd_pool"
+      "/hdd_pool1"
     ];
-    device = "/ssd_pool/var/lib/nixarr";
+    device = "/hdd_pool1/var/lib/nixarr";
     fsType = "none";
     options = ["bind"];
   };
