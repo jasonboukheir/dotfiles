@@ -159,6 +159,8 @@ in {
     };
 
     systemd.services.coder = {
+      wants = ["network-online.target"];
+      after = ["network-online.target"];
       serviceConfig = {
         LoadCredential = credHelpers.loadList;
         ExecStart = mkForce (pkgs.writeShellScript "coder-start" ''
