@@ -1,5 +1,6 @@
 {...}: {
   omarchy.enable = true;
+  omarchy.homeManagerUsers = ["jasonbk"];
   omarchy.monitor = {
     mode = "5120x1440@120";
     vrr = 1;
