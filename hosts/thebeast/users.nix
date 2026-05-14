@@ -23,6 +23,9 @@ in {
       group = "${gameUser}";
       home = "/home/${gameUser}";
       isNormalUser = true;
+      # Passwordless: greetd's PAM service has allowNullPassword=true, so the
+      # tuigreet user-menu can switch into the gamer console without a prompt.
+      hashedPassword = "";
     };
     users.jasonbk.extraGroups = lib.optionals gamingEnabled ["gamemode" "input"];
   };
