@@ -81,15 +81,6 @@
             Linux)
               if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
                    "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
-                # thebeast lives in its `dev` specialisation day-to-day
-                # (gaming disabled). `switch` would activate the parent
-                # config; instead stage it as the next boot default and
-                # re-activate dev so we stay in the working environment.
-                if [ "$host" = "thebeast" ]; then
-                  echo "==> nixos-rebuild boot ($host) + switch to dev specialisation"
-                  sudo nixos-rebuild boot --flake "$repo_root#$host" "$@"
-                  exec sudo /nix/var/nix/profiles/system/specialisation/dev/bin/switch-to-configuration switch
-                fi
                 echo "==> nixos-rebuild switch ($host)"
                 exec sudo nixos-rebuild switch --flake "$repo_root#$host" "$@"
               fi
