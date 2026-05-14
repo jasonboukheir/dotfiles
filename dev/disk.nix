@@ -266,6 +266,7 @@ pkgs.writeShellApplication {
       ''${CYAN}pools''${RST}                List ZFS pools with health summary
       ''${CYAN}drives''${RST}               Physical drives: model, serial, pool, SMART verdict
       ''${CYAN}health''${RST} [DEV]         SMART overall health for one drive (or all)
+      ''${CYAN}temps''${RST}                Current temperature for every drive
       ''${CYAN}test''${RST} DEV [long]      Start the drive's firmware self-test
                            (default ''${BOLD}short''${RST} ~2 min; ''${BOLD}long''${RST} hours, full surface scan)
       ''${CYAN}report''${RST} DEV           Show the drive's last firmware self-test result
@@ -342,6 +343,45 @@ pkgs.writeShellApplication {
             echo "''${BOLD}''${CYAN}== $d ==''${RST}"
             sudo_cmd smartctl -H -i "$d" || true
             echo
+          done < <(all_disks)
+        }
+
+        cmd_temps() {
+          printf "''${BOLD}%-12s %-8s %-22s %-20s %-12s %-8s''${RST}\n" \
+            DEVICE SIZE MODEL SERIAL POOL TEMP
+          local dev size model serial pool temp temp_color
+          while read -r dev; do
+            size=$(lsblk -dn -o SIZE "$dev" 2>/dev/null | head -n1)
+            model=$(lsblk -dn -o MODEL "$dev"  2>/dev/null | tr -s ' ' | sed 's/ *$//')
+            serial=$(lsblk -dn -o SERIAL "$dev" 2>/dev/null | tr -s ' ' | sed 's/ *$//')
+            [ -z "$model" ]  && model="-"
+            [ -z "$serial" ] && serial="-"
+            pool=$(drive_pool_assignment "$dev")
+            [ -z "$pool" ] && pool="-"
+            # smartctl -A format varies by transport:
+            #   SATA:  "194 Temperature_Celsius ... <raw>"   (raw is field 10;
+            #          some drives report "35 (Min/Max 25/45)" — $10 still 35)
+            #   NVMe:  "Temperature:        35 Celsius"      (composite sensor)
+            #   SAS:   "Current Drive Temperature:     30 C"
+            # Some HDDs only expose 190 (Airflow_Temperature_Cel) — accept it.
+            temp=$(sudo_cmd smartctl -A "$dev" 2>/dev/null \
+              | awk '
+                  $1 ~ /^(190|194)$/ && $2 ~ /Temperature/ { print $10; exit }
+                  /^Temperature:/                          { print $2;  exit }
+                  /Current Drive Temperature:/             { print $4;  exit }
+                ') || true
+            if [[ "$temp" =~ ^[0-9]+$ ]]; then
+              if   [ "$temp" -ge 50 ]; then temp_color="$RED"
+              elif [ "$temp" -ge 40 ]; then temp_color="$YELLOW"
+              else                          temp_color="$GREEN"
+              fi
+              temp="''${temp}C"
+            else
+              temp="n/a"
+              temp_color="$DIM"
+            fi
+            printf "%-12s %-8s %-22.22s %-20.20s %-12s ''${temp_color}%-8s''${RST}\n" \
+              "$dev" "$size" "$model" "$serial" "$pool" "$temp"
           done < <(all_disks)
         }
 
@@ -761,6 +801,7 @@ pkgs.writeShellApplication {
           pools)          cmd_pools "$@" ;;
           drives|list)    cmd_drives "$@" ;;
           health)         cmd_health "$@" ;;
+          temps|temp)     cmd_temps "$@" ;;
           test)           cmd_test "$@" ;;
           report)         cmd_report "$@" ;;
           free|absorbable) cmd_free "$@" ;;
