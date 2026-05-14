@@ -18,7 +18,6 @@
     ./secrets/radicale.nix
     ./secrets/hf-token.nix
     ./gaming
-    ./greetd.nix
     ./omarchy.nix
     ./../../modules
     ./../../modules/nixos

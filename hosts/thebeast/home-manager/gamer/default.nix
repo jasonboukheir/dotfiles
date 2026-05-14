@@ -67,8 +67,65 @@
   };
 
   parsers = map mkParser cfg.systems;
+
+  maliitDesktop = "${pkgs.maliit-keyboard}/share/applications/com.github.maliit.keyboard.desktop";
 in {
   home.stateVersion = "25.11";
+
+  # Force the virtual keyboard to pop on every text-input focus event, ignoring
+  # KWin's "real keyboard plugged in" heuristic — without this the OSK stays
+  # hidden whenever a USB keyboard is attached to the dock.
+  home.sessionVariables.KWIN_IM_SHOW_ALWAYS = "1";
+
+  # Pre-seed kwinrc so maliit is the active virtual keyboard from first login.
+  # kwriteconfig6 merges into any existing file, so this is safe to re-run.
+  home.activation.plasmaVirtualKeyboard = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    run ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 \
+      --file kwinrc --group Wayland \
+      --key InputMethod "${maliitDesktop}"
+    run ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 \
+      --file kwinrc --group Wayland --type bool \
+      --key VirtualKeyboardEnabled true
+  '';
+
+  # Auto-start Steam so Steam Input's Desktop Layout maps the paired controller
+  # to mouse + keyboard — the same trick SteamOS Desktop Mode relies on.
+  xdg.configFile."autostart/steam.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Steam
+    Exec=steam -silent
+    Icon=steam
+    Terminal=false
+    X-GNOME-Autostart-enabled=true
+  '';
+
+  # System-wide menu entry (auto-trusted by Plasma because it's in
+  # XDG_DATA_DIRS) plus a clickable Desktop tile for one-click access.
+  # steamosctl writes /etc/sddm.conf.d/zzt-steamos-temp-login.conf and stops
+  # graphical-session.target; SDDM autoLogin re-fires into gamescope-wayland.
+  xdg.dataFile."applications/return-to-gaming-mode.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Return to Gaming Mode
+    Comment=Drop Plasma and relaunch Steam in Gaming Mode
+    Exec=steamosctl switch-to-game-mode
+    Icon=steam
+    Terminal=false
+    Categories=System;
+  '';
+
+  home.file."Desktop/return-to-gaming-mode.desktop" = {
+    executable = true;
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Return to Gaming Mode
+      Exec=steamosctl switch-to-game-mode
+      Icon=steam
+      Terminal=false
+    '';
+  };
 
   programs.retroarch = lib.mkIf (retroarchSystems != []) {
     enable = true;

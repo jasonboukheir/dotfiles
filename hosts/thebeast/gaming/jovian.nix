@@ -9,10 +9,10 @@ in
     gaming.user = "gamer";
 
     jovian.steam.enable = true;
-    # autoStart wires up steamos-manager, the "Switch to Desktop" hook, the
-    # gamescope-session user-unit env (PATH/XKB), and xdg-desktop-portal config.
-    # The SDDM/autoLogin bits it also enables are overridden by ../greetd.nix
-    # so greetd owns the display manager seat.
+    # autoStart wires up SDDM with autoLogin to gamer, the temporary-session
+    # mechanism Steam uses to round-trip into Plasma, steamos-manager, and
+    # xdg-desktop-portal config. Plasma's "Switch User" action drops to the
+    # SDDM greeter on a fresh VT, which is how jasonbk gets into dev.
     jovian.steam.autoStart = true;
     jovian.steam.user = cfg.user;
     jovian.steam.desktopSession = "plasma";

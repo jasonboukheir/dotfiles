@@ -23,8 +23,9 @@ in {
       group = "${gameUser}";
       home = "/home/${gameUser}";
       isNormalUser = true;
-      # Passwordless: greetd's PAM service has allowNullPassword=true, so the
-      # tuigreet user-menu can switch into the gamer console without a prompt.
+      # Passwordless. SDDM autoLogin (via jovian.steam.autoStart) bypasses PAM
+      # entirely for the gamer seat, so this just keeps the account unusable
+      # as a manual login target.
       hashedPassword = "";
     };
     users.jasonbk.extraGroups = lib.optionals gamingEnabled ["gamemode" "input"];
