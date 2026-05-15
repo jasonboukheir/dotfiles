@@ -22,5 +22,7 @@ in
       localNetworkGameTransfers.openFirewall = true;
     };
 
+    programs.gamemode.enable = true;
+
     services.desktopManager.plasma6.enable = true;
   }
