@@ -9,9 +9,7 @@ in
     gaming.user = "gamer";
 
     jovian.steam.enable = true;
-    jovian.steam.autoStart = true;
     jovian.steam.user = cfg.user;
-    jovian.steam.desktopSession = "plasma";
     jovian.steamos.useSteamOSConfig = false;
     jovian.devices.steamdeck.enable = false;
     jovian.hardware.has.amd.gpu = true;
@@ -23,6 +21,4 @@ in
     };
 
     programs.gamemode.enable = true;
-
-    services.desktopManager.plasma6.enable = true;
   }

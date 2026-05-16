@@ -1,5 +1,8 @@
 {...}: {
-  imports = [./switch.nix];
+  imports = [
+    ./greetd.nix
+    ./switch.nix
+  ];
 
   specialisation.dev.configuration = {
     system.nixos.tags = ["dev"];

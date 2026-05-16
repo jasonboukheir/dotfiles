@@ -25,64 +25,74 @@
     fi
   '';
 
-  # NixOS' switch-to-configuration preserves display-manager.service
-  # across activations to avoid yanking the running session. That's
-  # the wrong UX for a deliberate spec swap — "Switch to Dev Mode"
-  # needs to actually tear down Plasma/Steam and hand VT 1 to greetd.
-  # The wrappers explicitly stop the *other* mode's entrypoint before
-  # activating, and start the new one after.
+  # Both specs share a single greetd display manager (autologin gamer
+  # in gaming, tuigreet → jasonbk in dev). The wrappers therefore do
+  # nothing more than activate the new toplevel: switch-to-configuration
+  # diffs greetd's config, restarts it (we force restartIfChanged in
+  # greetd.nix), and the new initial_session/default_session takes over.
   #
-  # Exit 4 from switch-to-configuration means system activation
-  # succeeded but a user-instance reload failed (stale dbus/gamescope
-  # user units pointing at the old toplevel). We tolerate it.
-  switchToGameMode = pkgs.writeShellApplication {
-    name = "switch-to-game-mode";
-    text = ''
-      ${resolveTarget "/bin/switch-to-configuration"}
-      systemctl stop greetd.service 2>/dev/null || true
-      status=0
-      "$target" test || status=$?
-      if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
-        exit "$status"
-      fi
-      systemctl start display-manager.service 2>/dev/null || true
-    '';
-  };
+  # Exit 4 means system activation succeeded but a user-instance reload
+  # failed — typically gamer's user units pointing at the old toplevel.
+  # The system half is what matters for the swap; tolerate it.
+  swapWrapper = name: target:
+    pkgs.writeShellApplication {
+      inherit name;
+      text = ''
+        ${resolveTarget target}
+        status=0
+        "$target" test || status=$?
+        if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
+          exit "$status"
+        fi
+      '';
+    };
 
-  switchToDevMode = pkgs.writeShellApplication {
-    name = "switch-to-dev-mode";
-    text = ''
-      ${resolveTarget "/specialisation/dev/bin/switch-to-configuration"}
-      systemctl stop display-manager.service 2>/dev/null || true
-      loginctl terminate-user ${cfg.user} 2>/dev/null || true
-      status=0
-      "$target" test || status=$?
-      if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
-        exit "$status"
-      fi
-      systemctl start greetd.service 2>/dev/null || true
-    '';
-  };
+  switchToGameMode = swapWrapper "switch-to-game-mode" "/bin/switch-to-configuration";
+  switchToDevMode = swapWrapper "switch-to-dev-mode" "/specialisation/dev/bin/switch-to-configuration";
 
+  # The user-facing entrypoints have to handle two distinct cases. The
+  # spec swap (dev <-> gaming) reconfigures the whole DM/session graph
+  # and needs root; the gamescope <-> plasma toggle inside the gaming
+  # spec is steamos-manager's job and runs in the user session against
+  # its DBus. A single desktop entry per direction dispatches to the
+  # right one based on /run/current-system.
   switchToGameModeUser = pkgs.writeShellApplication {
     name = "switch-to-game-mode-user";
-    text = ''exec sudo -n ${switchToGameMode}/bin/switch-to-game-mode "$@"'';
-  };
-  switchToDevModeUser = pkgs.writeShellApplication {
-    name = "switch-to-dev-mode-user";
-    text = ''exec sudo -n ${switchToDevMode}/bin/switch-to-dev-mode "$@"'';
+    runtimeInputs = [pkgs.coreutils pkgs.steamos-manager];
+    text = ''
+      current=$(readlink -f /run/current-system 2>/dev/null || true)
+      case "$current" in
+        */specialisation/*)
+          exec sudo -n ${switchToGameMode}/bin/switch-to-game-mode "$@"
+          ;;
+        *)
+          exec steamosctl switch-to-game-mode "$@"
+          ;;
+      esac
+    '';
   };
 
-  returnToSteam = pkgs.writeShellApplication {
-    name = "return-to-steam-bigpicture";
-    runtimeInputs = [pkgs.steam];
-    text = ''exec steam -gamepadui "$@"'';
+  switchToDevModeUser = pkgs.writeShellApplication {
+    name = "switch-to-dev-mode-user";
+    runtimeInputs = [pkgs.coreutils];
+    text = ''
+      current=$(readlink -f /run/current-system 2>/dev/null || true)
+      case "$current" in
+        */specialisation/dev*)
+          echo "Already in dev mode" >&2
+          exit 0
+          ;;
+        *)
+          exec sudo -n ${switchToDevMode}/bin/switch-to-dev-mode "$@"
+          ;;
+      esac
+    '';
   };
 
   gameModeDesktop = pkgs.makeDesktopItem {
     name = "switch-to-game-mode";
     desktopName = "Switch to Game Mode";
-    comment = "Activate the gaming specialisation (Plasma + Steam)";
+    comment = "Activate the gaming specialisation (gamescope + Steam)";
     exec = "${switchToGameModeUser}/bin/switch-to-game-mode-user";
     icon = "applications-games";
     categories = ["System"];
@@ -99,16 +109,6 @@
     terminal = false;
   };
 
-  returnToSteamDesktop = pkgs.makeDesktopItem {
-    name = "return-to-steam-bigpicture";
-    desktopName = "Return to Steam";
-    comment = "Re-open Steam in Big Picture mode";
-    exec = "${returnToSteam}/bin/return-to-steam-bigpicture";
-    icon = "steam";
-    categories = ["Game"];
-    terminal = false;
-  };
-
   gamerDesktopDir = "/home/${cfg.user}/Desktop";
 in {
   environment.systemPackages = [
@@ -116,10 +116,8 @@ in {
     switchToDevMode
     switchToGameModeUser
     switchToDevModeUser
-    returnToSteam
     gameModeDesktop
     devModeDesktop
-    returnToSteamDesktop
   ];
 
   security.sudo.extraRules = [
@@ -147,8 +145,8 @@ in {
     "${gamerDesktopDir}/switch-to-dev-mode.desktop"."L+" = {
       argument = "${devModeDesktop}/share/applications/switch-to-dev-mode.desktop";
     };
-    "${gamerDesktopDir}/return-to-steam-bigpicture.desktop"."L+" = {
-      argument = "${returnToSteamDesktop}/share/applications/return-to-steam-bigpicture.desktop";
+    "${gamerDesktopDir}/switch-to-game-mode.desktop"."L+" = {
+      argument = "${gameModeDesktop}/share/applications/switch-to-game-mode.desktop";
     };
   };
 }
