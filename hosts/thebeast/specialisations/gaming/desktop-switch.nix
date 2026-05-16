@@ -123,8 +123,9 @@ in {
     # tear it down — which makes switch-to-dev-mode block in the swap
     # wrapper's `systemctl stop user@1000.service` precondition. Cap the
     # graceful window so SIGKILL kicks in fast.
-    # TODO: drop once upstream landswith a sensible default
-    # (https://gitlab.steamos.cloud/jovian/jovian-nixos / steamos-manager).
+    # TODO: drop once upstream lands a sensible default — either the daemon
+    # exits cleanly on SIGTERM or its packaged unit gains TimeoutStopSec
+    # (https://gitlab.steamos.cloud/holo/steamos-manager).
     systemd.user.services.steamos-manager = {
       overrideStrategy = "asDropin";
       serviceConfig.TimeoutStopSec = "5s";
