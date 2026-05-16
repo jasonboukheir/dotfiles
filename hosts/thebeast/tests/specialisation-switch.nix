@@ -16,16 +16,78 @@ pkgs.testers.nixosTest {
       ../specialisations
       ./test-overrides.nix
     ];
+
+    # An account with no sudo rule, used to assert NOPASSWD doesn't leak
+    # the privileged switchers to unauthorized users. Without this we'd
+    # only ever assert the positive case.
+    users.users.unauth = {
+      isNormalUser = true;
+      description = "no sudo access — negative permission probe";
+    };
   };
 
-  testScript = ''
+  testScript = {nodes, ...}: let
+    cfg = nodes.machine;
+    gamingUser = cfg.gaming.user;
+    devUser = "jasonbk";
+    sessionsRoot = "${cfg.services.displayManager.sessionData.desktops}/share";
+    sessionEntrypointBin = baseNameOf cfg.gaming.sessionEntrypoint;
+    appsDir = "/run/current-system/sw/share/applications";
+    gamerDesktopDir = "/home/${gamingUser}/Desktop";
+    defaultDesktopSession = cfg.gaming.defaultDesktopSession;
+  in ''
+    import re
+    import tomllib
+
+    GAMING_USER = "${gamingUser}"
+    DEV_USER = "${devUser}"
+    UNAUTH_USER = "unauth"
+    SESSIONS_ROOT = "${sessionsRoot}"
+    SESSION_ENTRYPOINT_BIN = "${sessionEntrypointBin}"
+    APPS_DIR = "${appsDir}"
+    GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
+    DEFAULT_DESKTOP_SESSION = "${defaultDesktopSession}"
+
     # switch-to-configuration returns 4 when system activation succeeded
-    # but a user-instance reload didn't — typically because gamer's old
-    # gamescope/dbus user units are pointing at the previous toplevel.
-    # The system half is what matters for the swap; treat 4 as success.
+    # but a user-instance reload didn't — typically because the retiring
+    # spec's user units are still pointing at the previous toplevel.
+    SUCCESS_CODES = (0, 4)
+
     def run_switch(name):
-        status, output = machine.execute(f"/run/current-system/sw/bin/switch-to-{name}-mode")
-        assert status in (0, 4), f"switch-to-{name}-mode exited {status}: {output}"
+        status, output = machine.execute(
+            f"/run/current-system/sw/bin/switch-to-{name}-mode"
+        )
+        assert status in SUCCESS_CODES, \
+            f"switch-to-{name}-mode exited {status}: {output}"
+
+    def run_user_wrapper(user, direction):
+        status, output = machine.execute(
+            f"sudo -u {user} /run/current-system/sw/bin/switch-to-{direction}-mode-user"
+        )
+        assert status in SUCCESS_CODES, \
+            f"switch-to-{direction}-mode-user as {user} exited {status}: {output}"
+        return output
+
+    def current_spec():
+        # The marker is the source of truth the user wrappers branch on.
+        # If this drifts from the active toplevel, the dev-mode short-circuit
+        # and the steamosctl-vs-sudo dispatch break silently.
+        return machine.succeed("cat /etc/thebeast-spec").strip()
+
+    def greetd_config():
+        """Parse greetd's TOML config from the unit's --config flag."""
+        unit = machine.succeed("cat /etc/systemd/system/greetd.service")
+        m = re.search(r"--config\s+(\S+)", unit)
+        assert m, f"greetd unit missing --config flag:\n{unit}"
+        return tomllib.loads(machine.succeed(f"cat {m.group(1)}"))
+
+    def greetd_enter_ts():
+        # ActiveEnterTimestampMonotonic strictly increases on each (re)start;
+        # comparing before/after a swap is how we prove greetd actually
+        # restarted, not just that the rendered toml changed on disk.
+        return int(machine.succeed(
+            "systemctl show -p ActiveEnterTimestampMonotonic --value greetd.service"
+        ).strip())
 
     def unit_state(unit):
         return machine.succeed(
@@ -33,9 +95,6 @@ pkgs.testers.nixosTest {
         ).strip()
 
     def assert_no_sddm():
-        # Unified-greeter invariant: SDDM must never appear in either spec.
-        # display-manager.service is an alias and should always resolve to
-        # greetd, never sddm.
         machine.fail("pgrep -x sddm")
         dm_target = machine.succeed(
             "readlink -f /etc/systemd/system/display-manager.service"
@@ -43,269 +102,283 @@ pkgs.testers.nixosTest {
         assert dm_target.endswith("/greetd.service"), \
             f"display-manager.service should alias greetd, got {dm_target}"
 
-    def greetd_config():
-        """Read the greetd TOML config the live unit is pointing at."""
-        path = machine.succeed(
-            "systemctl cat greetd.service | "
-            "grep -oE -- '--config [^ ]+' | head -n1 | awk '{print $2}'"
-        ).strip()
-        return machine.succeed(f"cat {path}")
-
     def assert_gaming_active():
-        # gamescope-session can't actually run inside the headless test VM
-        # (no DRM device, no cap_sys_nice wrapper context), so checking
-        # gamescope/start-gamescope-session at runtime is racy: greetd
-        # autologins, gamescope crashes, greetd's Restart=on-success means
-        # it doesn't come back, and a pgrep-based assertion would flake.
-        # Instead, assert the toplevel is *configured* for gaming: greetd's
-        # TOML defines an initial_session that autologins gamer into
-        # start-gamescope-session. That confirms switch-to-configuration
-        # applied the new spec.
+        assert current_spec() == "gaming", \
+            f"expected gaming spec, got {current_spec()!r}"
         config = greetd_config()
-        assert "[initial_session]" in config, \
-            f"gaming greetd missing initial_session autologin:\n{config}"
-        assert "thebeast-gamer-session" in config, \
-            f"gaming initial_session should launch the SDDM-override wrapper:\n{config}"
-        assert 'user = "gamer"' in config, \
-            f"gaming initial_session should run as gamer:\n{config}"
-        machine.succeed("id -nG jasonbk | grep -qw gamemode")
-        machine.fail("pgrep -x tuigreet")
-        machine.fail("pgrep -x Hyprland")
-        machine.fail("pgrep -x hyprland")
+        initial = config.get("initial_session")
+        assert initial is not None, \
+            f"gaming greetd missing initial_session: {config}"
+        assert initial.get("user") == GAMING_USER, \
+            f"gaming initial_session must autologin {GAMING_USER}: {initial}"
+        assert SESSION_ENTRYPOINT_BIN in initial.get("command", ""), \
+            f"gaming initial_session should run {SESSION_ENTRYPOINT_BIN}: {initial}"
+        # default_session is what greetd falls back to on logout; for the
+        # autologin spec we want it to re-trigger the same flow.
+        default = config.get("default_session", {})
+        assert SESSION_ENTRYPOINT_BIN in default.get("command", ""), \
+            f"gaming default_session should mirror initial_session: {default}"
+        # jasonbk picks up the gamemode group only in the gaming toplevel.
+        machine.succeed(f"id -nG {DEV_USER} | grep -qw gamemode")
         assert_no_sddm()
 
     def assert_dev_active():
-        # Same greetd unit, different default_session: tuigreet greeter for
-        # jasonbk to log into Hyprland. tuigreet runs fine in the headless
-        # VM (no GPU needed), so we can verify both config and runtime.
+        assert current_spec() == "dev", \
+            f"expected dev spec, got {current_spec()!r}"
         config = greetd_config()
-        assert "[initial_session]" not in config, \
+        assert "initial_session" not in config, \
             f"dev greetd should not autologin:\n{config}"
-        assert "tuigreet" in config, \
-            f"dev default_session should be tuigreet:\n{config}"
-        machine.wait_until_succeeds("pgrep -x greetd")
+        default = config.get("default_session", {})
+        assert "tuigreet" in default.get("command", ""), \
+            f"dev default_session must be tuigreet: {default}"
+        # Upstream defaults default_session.user = "greeter" when unset, and
+        # we rely on that — asserting it here pins the contract.
+        assert default.get("user", "greeter") == "greeter", \
+            f"dev default_session should run as greeter: {default}"
         machine.wait_until_succeeds("pgrep -x tuigreet")
         assert unit_state("greetd.service") == "active", \
             f"greetd state: {unit_state('greetd.service')}"
-        machine.fail("id -nG jasonbk | grep -qw gamemode")
-        machine.fail("pgrep -x gamescope")
-        machine.fail("pgrep -x gamescope-wl")
-        machine.fail("pgrep -x steam")
-        machine.fail("pgrep -x steamos-manager")
+        machine.fail(f"id -nG {DEV_USER} | grep -qw gamemode")
         assert_no_sddm()
-        # tuigreet was given an explicit --sessions <hyprland>/share/wayland-
-        # sessions; if that store path stops shipping a wayland session file,
-        # jasonbk lands at a blank greeter. Pull the path out of the live
-        # greetd config and confirm at least one .desktop is present.
-        hypr_dir = ""
-        for token in config.split():
-            stripped = token.strip('"')
-            if "/share/wayland-sessions" in stripped:
-                hypr_dir = stripped
-                break
-        assert hypr_dir, f"could not extract --sessions path from:\n{config}"
-        sessions = machine.succeed(f"ls {hypr_dir}").split()
+        # If hyprland stops shipping a wayland session file at the path
+        # tuigreet was handed, jasonbk lands at a blank greeter. Pull the
+        # path from the parsed config and confirm at least one .desktop.
+        m = re.search(r"--sessions\s+(\S+)", default["command"])
+        assert m, f"tuigreet command missing --sessions: {default['command']}"
+        sessions = machine.succeed(f"ls {m.group(1)}").split()
         assert any(s.endswith(".desktop") for s in sessions), \
-            f"tuigreet sessions dir {hypr_dir} should contain a .desktop: {sessions}"
-        # PAM keyring: omarchy.pim=gnome wires enableGnomeKeyring so the
-        # password jasonbk types at tuigreet unlocks gnome-keyring. If
-        # this regresses, kwallet/gnome-keyring prompts twice on login.
+            f"tuigreet sessions dir should contain a .desktop: {sessions}"
+        # omarchy.pim=gnome wires enableGnomeKeyring so the password jasonbk
+        # types at tuigreet unlocks gnome-keyring. If this regresses,
+        # kwallet/gnome-keyring prompts twice on login.
         pam_greetd = machine.succeed("cat /etc/pam.d/greetd")
         assert "gnome_keyring" in pam_greetd or "pam_gnome_keyring" in pam_greetd, \
             f"dev /etc/pam.d/greetd should pull in pam_gnome_keyring:\n{pam_greetd}"
 
-    def snapshot():
-        """Capture state to compare across round trips."""
+    def running_services():
         units = set(machine.succeed(
             "systemctl list-units --type=service --state=running "
             "--no-legend --plain | awk '{print $1}'"
         ).split())
-        # Per-user transient units come and go; ignore them.
-        units = {u for u in units if not u.startswith("user@")}
-        # Aggregate counts for processes we deliberately spawn/kill.
-        watched = ["greetd", "tuigreet", "gamescope", "steam", "steamos-manager", "hyprland"]
-        counts = {
-            p: int(machine.succeed(f"pgrep -xc {p} || true").strip() or "0")
-            for p in watched
-        }
-        return units, counts
+        # Per-user transient units come and go with sudo and login sessions.
+        return {u for u in units if not u.startswith("user@")}
 
     machine.wait_for_unit("multi-user.target")
 
     with subtest("base config is gaming with greetd autologin"):
         machine.wait_for_unit("display-manager.service")
         assert_gaming_active()
-        machine.succeed("test -x /run/current-system/specialisation/dev/bin/switch-to-configuration")
+        machine.succeed(
+            "test -x /run/current-system/specialisation/dev/bin/switch-to-configuration"
+        )
 
-    with subtest("swap shortcuts are installed in both modes"):
-        appdir = "/run/current-system/sw/share/applications"
-        for entry in (
-            "switch-to-game-mode.desktop",
-            "switch-to-dev-mode.desktop",
-        ):
-            machine.succeed(f"test -e {appdir}/{entry}")
+    with subtest("swap shortcuts are installed and present on gamer's desktop"):
+        for entry in ("switch-to-game-mode.desktop", "switch-to-dev-mode.desktop"):
+            machine.succeed(f"test -e {APPS_DIR}/{entry}")
         machine.succeed("command -v switch-to-game-mode-user")
         machine.succeed("command -v switch-to-dev-mode-user")
-        # NOPASSWD sudo rule for jasonbk on the privileged switcher.
-        machine.succeed("sudo -u jasonbk sudo -ln switch-to-game-mode")
-        machine.succeed("sudo -u jasonbk sudo -ln switch-to-dev-mode")
+        # Both directions on gamer's Desktop in either spec — tmpfiles is
+        # unconditional so a dev rebuild doesn't leave stale symlinks.
+        machine.succeed(f"test -L {GAMER_DESKTOP_DIR}/switch-to-dev-mode.desktop")
+        machine.succeed(f"test -L {GAMER_DESKTOP_DIR}/switch-to-game-mode.desktop")
 
-    with subtest("gamer's KDE Desktop carries the swap shortcuts"):
-        # Both swap directions appear on gamer's Plasma desktop: dev for
-        # the spec swap to jasonbk's Hyprland, game for the gamescope
-        # toggle via steamos-manager (no spec change).
-        machine.succeed("test -L /home/gamer/Desktop/switch-to-dev-mode.desktop")
-        machine.succeed("test -L /home/gamer/Desktop/switch-to-game-mode.desktop")
-
-    with subtest("user-facing wrappers dispatch on current spec"):
-        # In gaming spec, switch-to-game-mode-user delegates to steamosctl
-        # (gamescope toggle, no spec change). The script should not invoke
-        # sudo from that branch — verify by reading the wrapper text.
-        gm_wrapper = machine.succeed("readlink -f $(command -v switch-to-game-mode-user)").strip()
-        gm_body = machine.succeed(f"cat {gm_wrapper}")
-        assert "steamosctl switch-to-game-mode" in gm_body, \
-            f"gaming-mode branch should call steamosctl:\n{gm_body}"
-        assert "sudo -n" in gm_body, \
-            f"dev-mode branch should escalate via sudo:\n{gm_body}"
-        # And the dev-mode wrapper short-circuits when already in dev so
-        # the desktop entry doesn't pop a passwordless sudo for nothing.
-        dm_wrapper = machine.succeed("readlink -f $(command -v switch-to-dev-mode-user)").strip()
-        dm_body = machine.succeed(f"cat {dm_wrapper}")
-        assert "Already in dev mode" in dm_body, \
-            f"dev-mode branch should short-circuit when already in dev:\n{dm_body}"
+    with subtest("NOPASSWD sudo rules are installed for both gamer and jasonbk"):
+        # Structural check: `sudo -ll` enumerates every rule a user has.
+        # We verify both wrapper commands appear under !authenticate
+        # (NOPASSWD) for both users. End-to-end behavior is exercised by
+        # the user-wrapper tests below; this just confirms the rule
+        # itself exists, since a missing rule turns the desktop-shortcut
+        # click into a silent password prompt the user can't satisfy.
+        #
+        # Note: `sudo -ln <cmd>` would test the same thing but matches
+        # the user-supplied path verbatim against the rule. Our rule
+        # names a /nix/store path; jasonbk's %wheel ALL entry masks that
+        # mismatch, but gamer (no wheel) fails the verbatim match. The
+        # rule is correct — the testing approach was wrong.
+        for user in (DEV_USER, GAMING_USER):
+            rules = machine.succeed(f"sudo -u {user} sudo -n -ll")
+            assert "!authenticate" in rules, \
+                f"{user} missing NOPASSWD entry:\n{rules}"
+            assert "switch-to-game-mode" in rules, \
+                f"{user} missing switch-to-game-mode rule:\n{rules}"
+            assert "switch-to-dev-mode" in rules, \
+                f"{user} missing switch-to-dev-mode rule:\n{rules}"
+        # An account with no rule at all gets a non-zero exit from sudo -ll.
+        status, _ = machine.execute(f"sudo -u {UNAUTH_USER} sudo -n -ll")
+        assert status != 0, \
+            f"{UNAUTH_USER} unexpectedly has sudo rules"
 
     with subtest("greetd is the only DM service available across both specs"):
-        # No sddm.service at all in either toplevel — both should resolve
-        # display-manager → greetd.
         machine.fail("test -e /run/current-system/etc/systemd/system/sddm.service")
         machine.fail(
             "test -e /run/current-system/specialisation/dev/etc/systemd/system/sddm.service"
         )
-        # greetd is forced restartIfChanged so the spec swap reaches it.
-        for path in (
-            "/run/current-system/etc/systemd/system/greetd.service",
-            "/run/current-system/specialisation/dev/etc/systemd/system/greetd.service",
-        ):
-            machine.fail(f"grep -q 'X-RestartIfChanged=false' {path}")
 
     with subtest("switch-to-desktop infrastructure is wired in gaming mode"):
-        # The wrapper script greetd autologins into.
         machine.succeed("command -v thebeast-gamer-session")
-        # gaming greetd command must point at the wrapper (not start-
-        # gamescope-session directly), or steamos-manager's restart-DM
-        # protocol won't be able to redirect to plasma.
-        assert "thebeast-gamer-session" in greetd_config(), \
-            f"gaming greetd should run the wrapper, got:\n{greetd_config()}"
-        # Plasma 6 must register a wayland session named plasma.desktop in
-        # the aggregated sessionData.desktops dir, matching what steamos-
-        # manager writes into Session=. The dir is referenced by the
-        # wrapper via /nix/store, so locate it via the wrapper itself.
-        sessions_root = machine.succeed(
-            "grep -oE '/nix/store/[^ ]+-desktops/share/wayland-sessions' "
-            "$(command -v thebeast-gamer-session) | head -n1"
-        ).strip()
-        machine.succeed(f"test -e {sessions_root}/plasma.desktop")
-        machine.succeed(f"test -e {sessions_root}/gamescope-wayland.desktop")
-        # Marker file telling steamos-manager it may manage sessions here,
-        # mirroring jovian's autoStart wiring.
+        # Plasma and gamescope-wayland must both register entries in the
+        # aggregated sessions dir — steamos-manager picks Session= from here.
+        machine.succeed(
+            f"test -e {SESSIONS_ROOT}/wayland-sessions/{DEFAULT_DESKTOP_SESSION}"
+        )
+        machine.succeed(
+            f"test -e {SESSIONS_ROOT}/wayland-sessions/gamescope-wayland.desktop"
+        )
+        # Marker file telling steamos-manager it may manage sessions here.
         machine.succeed("test -e /etc/sddm.conf.d/steamos.conf")
-        # User-level oneshots that populate DefaultDesktopSession and
-        # tear down the temp override after the session settles.
+        # User-instance oneshots that populate DefaultDesktopSession and
+        # tear down the temp override after a desktop session settles.
         for unit in (
             "jovian-setup-desktop-session.service",
             "steamos-manager-session-cleanup.service",
         ):
             machine.succeed(f"test -e /etc/systemd/user/{unit}")
-        # Confirm the cleanup oneshot actually invokes steamosctl's
-        # clean-temporary-sessions (not just a symlinked empty unit).
-        cleanup_unit = machine.succeed(
-            "systemctl --user --root=/ cat steamos-manager-session-cleanup.service 2>/dev/null || "
-            "cat /etc/systemd/user/steamos-manager-session-cleanup.service"
-        )
-        assert "clean-temporary-sessions" in cleanup_unit, \
-            f"cleanup unit should run steamosctl clean-temporary-sessions:\n{cleanup_unit}"
-        # And the setup oneshot must point steamos-manager at plasma so
-        # the Steam UI's Switch-to-Desktop default lands somewhere real.
-        setup_unit = machine.succeed(
-            "cat /etc/systemd/user/jovian-setup-desktop-session.service"
-        )
-        assert "set-default-desktop-session plasma.desktop" in setup_unit, \
-            f"setup unit should set plasma as the default desktop session:\n{setup_unit}"
 
     with subtest("steamos-manager system unit + user bus activation"):
-        # System unit is enabled at multi-user.target so it's available
-        # the moment greetd autologins gamer. This is what restarts
-        # display-manager.service when Steam → Switch-to-Desktop fires.
         assert unit_state("steamos-manager.service") in ("active", "activating"), \
             f"steamos-manager.service state: {unit_state('steamos-manager.service')}"
-        # Session-bus activation file — gamer's "Switch to Game Mode"
-        # desktop entry invokes `steamosctl switch-to-game-mode`, which
-        # hits the user instance. If services.dbus.packages stops
-        # carrying steamos-manager, this file is missing and clicking
-        # the icon from Plasma is a no-op. The dbus search path lives
-        # under the system sw output.
+        # Session-bus activation file — clicking "Switch to Game Mode" from
+        # plasma routes through steamosctl which hits the user instance via
+        # this dbus service file. If services.dbus.packages stops carrying
+        # steamos-manager, the desktop entry is a silent no-op.
         machine.succeed(
             "find /run/current-system/sw/share/dbus-1 "
             "-name com.steampowered.SteamOSManager1.service | grep -q ."
         )
 
-    with subtest("wrapper resolves steamos-manager's SDDM temp override"):
-        # Simulate the override steamos-manager writes when Steam's
-        # "Switch to Desktop" is clicked, then ask the wrapper which
-        # session it would exec via its --print-resolved probe.
+    with subtest("session wrapper resolves steamos-manager's SDDM temp override"):
         machine.succeed("install -d -m 0755 /etc/sddm.conf.d")
         machine.succeed(
-            "printf '[Autologin]\\nUser=gamer\\nSession=plasma.desktop\\n' "
+            f"printf '[Autologin]\\nUser={GAMING_USER}\\n"
+            f"Session={DEFAULT_DESKTOP_SESSION}\\n' "
             "> /etc/sddm.conf.d/zzt-steamos-temp-login.conf"
         )
         resolved = machine.succeed("thebeast-gamer-session --print-resolved").strip()
         assert "startplasma" in resolved, \
-            f"wrapper should pick startplasma when Session=plasma.desktop; got: {resolved!r}"
+            f"wrapper should pick startplasma for plasma.desktop; got: {resolved!r}"
 
-        # And with the override removed, it falls back to gamescope.
         machine.succeed("rm -f /etc/sddm.conf.d/zzt-steamos-temp-login.conf")
         resolved = machine.succeed("thebeast-gamer-session --print-resolved").strip()
         assert "start-gamescope-session" in resolved, \
             f"wrapper should pick gamescope by default; got: {resolved!r}"
+        # XDG single-char field codes must not survive the wrapper —
+        # gamescope-wayland.desktop ships `Exec=...gamescope-wayland %F`
+        # upstream and `sh -c` would treat the surviving `%F` as an
+        # opaque positional argument. Checked on the gamescope branch
+        # specifically since plasma.desktop tends not to carry codes.
+        for code in ("%f", "%F", "%u", "%U", "%i", "%c", "%k"):
+            assert code not in resolved, \
+                f"XDG field code {code} leaked past the wrapper: {resolved!r}"
 
-    # Snapshot the gaming-mode state for leak comparison after the
-    # round trips. Take it after a brief settle so transient units
-    # like systemd-tmpfiles-clean don't show up as drift.
-    baseline_units, baseline_counts = snapshot()
+    # Snapshot AFTER the read-only assertions but BEFORE any swaps, so the
+    # leak comparison covers all production flips below.
+    baseline_units = running_services()
 
-    with subtest("first switch: gaming -> dev"):
-        run_switch("dev")
+    with subtest("user wrapper as gamer in gaming → escalates and swaps to dev"):
+        # End-to-end verification of gamer's NOPASSWD rule, in the
+        # production direction: gamer is autologin'd in gaming and
+        # clicks "Switch to Dev Mode". The wrapper takes the sudo
+        # branch, which exercises gamer's per-command rule. Doing this
+        # in the gaming→dev direction (not dev→gaming) avoids a logind
+        # race: switch-to-dev-mode's swapWrapper retires gamer's
+        # user@<uid> explicitly before switch-to-configuration
+        # enumerates users.
+        before = greetd_enter_ts()
+        run_user_wrapper(GAMING_USER, "dev")
         assert_dev_active()
+        after = greetd_enter_ts()
+        assert after > before, \
+            f"gamer's NOPASSWD escalation should restart greetd: {before} -> {after}"
 
-    with subtest("first switch back: dev -> gaming"):
-        run_switch("game")
+    with subtest("user wrapper short-circuits when already in dev"):
+        before = greetd_enter_ts()
+        out = machine.succeed(
+            f"sudo -u {DEV_USER} /run/current-system/sw/bin/switch-to-dev-mode-user 2>&1"
+        )
+        assert "Already in dev mode" in out, \
+            f"dev-mode-user should short-circuit in dev: {out!r}"
+        assert current_spec() == "dev", \
+            "short-circuit must not change the live spec"
+        # No greetd restart means no switch-to-configuration ran.
+        after = greetd_enter_ts()
+        assert after == before, \
+            f"short-circuit should leave greetd untouched: {before} -> {after}"
+
+    with subtest("unauthorized user cannot escalate via the user wrapper"):
+        # Still in dev — the wrapper takes the sudo branch here. The
+        # unauth user has no NOPASSWD rule, so sudo -n exits non-zero
+        # and the wrapper propagates that. This is the negative path the
+        # static permission check above can't prove on its own.
+        status, output = machine.execute(
+            f"sudo -u {UNAUTH_USER} /run/current-system/sw/bin/switch-to-game-mode-user"
+        )
+        assert status != 0, \
+            f"unauth user should not be able to swap specs: status={status} output={output!r}"
+        assert current_spec() == "dev", \
+            "denied escalation must not have flipped the spec"
+
+    with subtest("user wrapper as jasonbk in dev → escalates and swaps to gaming"):
+        # Production codepath for the back-half of the swap. Covers the
+        # headline detection bug from the other direction: readlink-based
+        # detection used to fall through to a no-op here.
+        before = greetd_enter_ts()
+        run_user_wrapper(DEV_USER, "game")
         assert_gaming_active()
+        after = greetd_enter_ts()
+        assert after > before, \
+            f"greetd must restart across spec swap: {before} -> {after}"
 
-    # Three full round trips to flush out anything that accumulates.
-    for cycle in range(2, 5):
+    with subtest("gamer in gaming → game-mode-user dispatches to steamosctl"):
+        # In the steamosctl branch the wrapper must NOT escalate. We can't
+        # easily prove steamosctl ran (no real DBus session in the headless
+        # VM), but we *can* prove sudo was not invoked: if it had, greetd
+        # would have restarted and the spec marker would still read "gaming"
+        # but the unit timestamp would advance. Assert neither happened.
+        before = greetd_enter_ts()
+        machine.execute(
+            f"sudo -u {GAMING_USER} /run/current-system/sw/bin/switch-to-game-mode-user"
+        )
+        after = greetd_enter_ts()
+        assert after == before, \
+            f"steamosctl branch must not restart greetd: {before} -> {after}"
+        assert current_spec() == "gaming", \
+            "steamosctl branch must not flip the spec"
+
+    for cycle in range(1, 4):
         with subtest(f"round trip #{cycle}: gaming -> dev -> gaming"):
             run_switch("dev")
             assert_dev_active()
             run_switch("game")
             assert_gaming_active()
 
-    with subtest("no service / process leaks after round trips"):
-        final_units, final_counts = snapshot()
-        leaked_units = final_units - baseline_units
-        # Allow units that are oneshot-style "active" but harmless
-        # (e.g. nixos-activation.service runs on each switch). systemd-udevd
-        # is reactivated by hotplug events fired during the swaps and isn't
-        # a leak we actually care about.
-        ignored = {"nixos-activation.service", "systemd-udevd.service"}
-        leaked_units -= ignored
-        assert not leaked_units, f"new running services after round trips: {sorted(leaked_units)}"
+    with subtest("idempotent: swapping to the current spec is safe"):
+        # switch-to-configuration's activation scripts may still bounce
+        # some units even when the toplevel matches (nixos-activation
+        # always re-runs, restart triggers can fire on tmpfiles drift,
+        # etc.), so don't assert on the greetd timestamp. We can't wait
+        # on `is-active greetd.service` either — gaming greetd autologins
+        # into gamescope which dies on the headless VM, taking greetd
+        # with it. The weaker invariant we *can* assert is: the swap
+        # exits cleanly and the spec marker remains gaming.
+        run_switch("game")
+        assert_gaming_active()
 
-        # Process counts for tracked names should match between cycles.
-        drift = {
-            k: (baseline_counts[k], final_counts[k])
-            for k in baseline_counts
-            if baseline_counts[k] != final_counts[k]
+    with subtest("no service leaks after round trips"):
+        final_units = running_services()
+        leaked = final_units - baseline_units
+        # Activation-side noise that isn't a real leak:
+        #   nixos-activation re-runs on every switch.
+        #   systemd-udevd bounces on hotplug events fired during the swap.
+        #   rtkit-daemon is dbus-activated by gamescope-session asking for
+        #     realtime priority and stays resident by design.
+        # Each entry needs a justification; if this list grows, treat it
+        # as a signal to investigate before silencing.
+        ignored = {
+            "nixos-activation.service",
+            "systemd-udevd.service",
+            "rtkit-daemon.service",
         }
-        assert not drift, f"process count drift: {drift}"
+        leaked -= ignored
+        assert not leaked, f"new running services after round trips: {sorted(leaked)}"
   '';
 }

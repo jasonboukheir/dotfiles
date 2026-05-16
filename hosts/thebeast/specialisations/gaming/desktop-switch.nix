@@ -53,6 +53,11 @@
         [ -r "$candidate" ] || continue
         execLine=$(sed -n 's/^Exec=//p' "$candidate" | head -n1)
         if [ -n "$execLine" ]; then
+          # Drop XDG single-char field codes (%f %F %u %U %i %c %k %d %D %n %N %v %m)
+          # before handing to sh; we have no files/URLs/icons to substitute and
+          # gamescope-wayland.desktop ships them. %% (literal %) survives the
+          # single-char pass and gets unescaped after.
+          execLine=$(printf '%s' "$execLine" | sed -E 's/%[fFuUickdDnNvm]//g; s/%%/%/g')
           # Probe path used by the VM test to inspect resolution without
           # actually launching a wayland session.
           if [ "''${1:-}" = "--print-resolved" ]; then
@@ -108,7 +113,7 @@ in {
       after = ["steamos-manager.service"];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.steamos-manager}/bin/steamosctl set-default-desktop-session plasma.desktop";
+        ExecStart = "${pkgs.steamos-manager}/bin/steamosctl set-default-desktop-session ${cfg.defaultDesktopSession}";
       };
       wantedBy = ["graphical-session.target"];
     };

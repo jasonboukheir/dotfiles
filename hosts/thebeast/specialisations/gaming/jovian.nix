@@ -6,8 +6,6 @@
   cfg = config.gaming;
 in
   lib.mkIf config.gaming.enable {
-    gaming.user = "gamer";
-
     jovian.steam.enable = true;
     jovian.steam.user = cfg.user;
     jovian.steamos.useSteamOSConfig = false;

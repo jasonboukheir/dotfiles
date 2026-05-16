@@ -6,6 +6,14 @@
 }: let
   cfg = config.gaming;
 
+  specMarker = "/etc/thebeast-spec";
+  activeSpec =
+    if cfg.enable
+    then "gaming"
+    else "dev";
+
+  sudo = "/run/wrappers/bin/sudo";
+
   # /nix/var/nix/profiles/system is the canonical "latest staged
   # toplevel": nixos-rebuild updates it but specialisation switches
   # don't, so it always names the parent (gaming) regardless of which
@@ -85,15 +93,22 @@
   # and needs root; the gamescope <-> plasma toggle inside the gaming
   # spec is steamos-manager's job and runs in the user session against
   # its DBus. A single desktop entry per direction dispatches to the
-  # right one based on /run/current-system.
+  # right one based on the spec marker installed alongside the toplevel
+  # — readlink /run/current-system can't tell us this because a resolved
+  # toplevel is `/nix/store/...-nixos-system-...` regardless of which
+  # spec is live.
+  readSpec = ''
+    spec=$(cat ${specMarker} 2>/dev/null || true)
+  '';
+
   switchToGameModeUser = pkgs.writeShellApplication {
     name = "switch-to-game-mode-user";
     runtimeInputs = [pkgs.coreutils pkgs.steamos-manager];
     text = ''
-      current=$(readlink -f /run/current-system 2>/dev/null || true)
-      case "$current" in
-        */specialisation/*)
-          exec sudo -n ${switchToGameMode}/bin/switch-to-game-mode "$@"
+      ${readSpec}
+      case "$spec" in
+        dev)
+          exec ${sudo} -n ${switchToGameMode}/bin/switch-to-game-mode "$@"
           ;;
         *)
           exec steamosctl switch-to-game-mode "$@"
@@ -106,14 +121,14 @@
     name = "switch-to-dev-mode-user";
     runtimeInputs = [pkgs.coreutils];
     text = ''
-      current=$(readlink -f /run/current-system 2>/dev/null || true)
-      case "$current" in
-        */specialisation/dev*)
+      ${readSpec}
+      case "$spec" in
+        dev)
           echo "Already in dev mode" >&2
           exit 0
           ;;
         *)
-          exec sudo -n ${switchToDevMode}/bin/switch-to-dev-mode "$@"
+          exec ${sudo} -n ${switchToDevMode}/bin/switch-to-dev-mode "$@"
           ;;
       esac
     '';
@@ -150,6 +165,12 @@ in {
     devModeDesktop
   ];
 
+  # The marker is the spec-detection signal the user wrappers read.
+  # It must change between the parent toplevel and the dev specialisation
+  # — environment.etc.* is per-toplevel, so the two write different
+  # contents and switch-to-configuration installs the right one.
+  environment.etc."thebeast-spec".text = activeSpec;
+
   security.sudo.extraRules = [
     {
       users = ["jasonbk" cfg.user];
@@ -166,7 +187,10 @@ in {
     }
   ];
 
-  systemd.tmpfiles.settings."10-thebeast-gamer-desktop-shortcuts" = lib.mkIf cfg.enable {
+  # Unconditional: a dev rebuild must refresh these symlinks too, or
+  # they keep pointing at the previous gaming generation's store paths
+  # until the next swap.
+  systemd.tmpfiles.settings."10-thebeast-gamer-desktop-shortcuts" = {
     ${gamerDesktopDir}.d = {
       mode = "0755";
       user = cfg.user;

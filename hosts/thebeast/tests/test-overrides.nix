@@ -1,5 +1,5 @@
 {lib, ...}: {
-  system.stateVersion = "25.11";
+  imports = [../state-version.nix];
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # The real host puts /games on a dedicated ext4 partition declared in
