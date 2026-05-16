@@ -27,6 +27,7 @@
       hash = "sha256-xbUms+PNZM2JQNq7Rei6cmYp4i2O04nCm1UvkUDa8Eo=";
     };
   };
+  vllm-enable = true;
 in {
   homelab.ports.allocate = {
     local-llm = lib.mkIf chat.enable 8000;
@@ -42,7 +43,7 @@ in {
     package = pkgs.vllm-xpu-unstable.withTorchvision true;
 
     instances.chat = {
-      enable = true;
+      enable = vllm-enable;
       port = lib.mkIf chat.enable ports.local-llm;
       host = "127.0.0.1";
 
@@ -68,7 +69,7 @@ in {
     };
 
     instances.embedding = {
-      enable = true;
+      enable = vllm-enable;
       port = lib.mkIf embedding.enable ports.local-embedding;
       host = "127.0.0.1";
 
@@ -82,7 +83,7 @@ in {
     };
 
     instances.stt = {
-      enable = true;
+      enable = vllm-enable;
       port = lib.mkIf stt.enable ports.local-stt;
       host = "127.0.0.1";
 
