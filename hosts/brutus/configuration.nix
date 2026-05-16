@@ -14,8 +14,11 @@
   ];
   nix.settings.extra-sandbox-paths = ["/var/cache/ccache"];
   systemd.tmpfiles.rules = [
-    "d /var/cache/ccache 0777 root root -"
+    "d /var/cache/ccache 0770 root nixbld -"
   ];
+  environment.etc."ccache.conf".text = ''
+    max_size = 100G
+  '';
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
