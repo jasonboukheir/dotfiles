@@ -11,12 +11,10 @@
   nix.settings.experimental-features = [
     "ca-derivations"
     "dynamic-derivations"
-    "configurable-impure-env"
   ];
-  nix.settings.impure-env = "SCCACHE_DIR=/var/cache/sccache";
-  nix.settings.extra-sandbox-paths = ["/var/cache/sccache"];
+  nix.settings.extra-sandbox-paths = ["/var/cache/ccache"];
   systemd.tmpfiles.rules = [
-    "d /var/cache/sccache 0777 root root -"
+    "d /var/cache/ccache 0777 root root -"
   ];
 
   # This value determines the NixOS release from which the default
