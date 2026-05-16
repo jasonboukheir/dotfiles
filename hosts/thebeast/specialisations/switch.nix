@@ -65,11 +65,17 @@
         if uid=$(id -u ${lib.escapeShellArg retireUser} 2>/dev/null) \
             && systemctl is-active --quiet "user@$uid.service"; then
           # systemctl stop blocks until user@$uid.service reaches inactive,
-          # which is when logind unregisters the user object.
-          systemctl stop "user@$uid.service" || :
+          # which is when logind unregisters the user object. If stop itself
+          # fails (dbus/permissions/timeout), the logind race the comment
+          # block above describes is back — abort instead of papering over.
+          systemctl stop "user@$uid.service"
         fi
 
         status=0
+        # `test`, not `switch`: activate the target toplevel without
+        # overwriting the boot default. Specialisations are sibling boot
+        # entries by design; a `switch` here would silently make every
+        # spec flip the new default-on-reboot.
         "$target" test || status=$?
         if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
           exit "$status"

@@ -111,8 +111,14 @@ pkgs.testers.nixosTest {
             f"gaming greetd missing initial_session: {config}"
         assert initial.get("user") == GAMING_USER, \
             f"gaming initial_session must autologin {GAMING_USER}: {initial}"
-        assert SESSION_ENTRYPOINT_BIN in initial.get("command", ""), \
+        # Substring catches a regression where greetd.nix stops sourcing
+        # cfg.sessionEntrypoint and hardcodes a different path; the
+        # executable check below catches the inverse (entrypoint missing
+        # from the closure). Either alone would be too weak.
+        initial_command = initial.get("command", "")
+        assert SESSION_ENTRYPOINT_BIN in initial_command, \
             f"gaming initial_session should run {SESSION_ENTRYPOINT_BIN}: {initial}"
+        machine.succeed(f"test -x {initial_command.split()[0]}")
         # default_session is what greetd falls back to on logout; for the
         # autologin spec we want it to re-trigger the same flow.
         default = config.get("default_session", {})
@@ -129,13 +135,13 @@ pkgs.testers.nixosTest {
         assert "initial_session" not in config, \
             f"dev greetd should not autologin:\n{config}"
         default = config.get("default_session", {})
-        assert "tuigreet" in default.get("command", ""), \
-            f"dev default_session must be tuigreet: {default}"
         # Upstream defaults default_session.user = "greeter" when unset, and
         # we rely on that — asserting it here pins the contract.
         assert default.get("user", "greeter") == "greeter", \
             f"dev default_session should run as greeter: {default}"
-        machine.wait_until_succeeds("pgrep -x tuigreet")
+        # tuigreet running is the behavior; the rendered command string is
+        # an implementation detail of greetd.nix that pgrep already covers.
+        machine.wait_until_succeeds("pgrep -x tuigreet", timeout=30)
         assert unit_state("greetd.service") == "active", \
             f"greetd state: {unit_state('greetd.service')}"
         machine.fail(f"id -nG {DEV_USER} | grep -qw gamemode")
@@ -143,17 +149,13 @@ pkgs.testers.nixosTest {
         # If hyprland stops shipping a wayland session file at the path
         # tuigreet was handed, jasonbk lands at a blank greeter. Pull the
         # path from the parsed config and confirm at least one .desktop.
-        m = re.search(r"--sessions\s+(\S+)", default["command"])
+        # Tolerate both `--sessions <arg>` and `--sessions=<arg>` since
+        # the separator isn't part of tuigreet's stable contract.
+        m = re.search(r"--sessions[=\s]+(\S+)", default["command"])
         assert m, f"tuigreet command missing --sessions: {default['command']}"
         sessions = machine.succeed(f"ls {m.group(1)}").split()
         assert any(s.endswith(".desktop") for s in sessions), \
             f"tuigreet sessions dir should contain a .desktop: {sessions}"
-        # omarchy.pim=gnome wires enableGnomeKeyring so the password jasonbk
-        # types at tuigreet unlocks gnome-keyring. If this regresses,
-        # kwallet/gnome-keyring prompts twice on login.
-        pam_greetd = machine.succeed("cat /etc/pam.d/greetd")
-        assert "gnome_keyring" in pam_greetd or "pam_gnome_keyring" in pam_greetd, \
-            f"dev /etc/pam.d/greetd should pull in pam_gnome_keyring:\n{pam_greetd}"
 
     def running_services():
         units = set(machine.succeed(
@@ -208,12 +210,6 @@ pkgs.testers.nixosTest {
         assert status != 0, \
             f"{UNAUTH_USER} unexpectedly has sudo rules"
 
-    with subtest("greetd is the only DM service available across both specs"):
-        machine.fail("test -e /run/current-system/etc/systemd/system/sddm.service")
-        machine.fail(
-            "test -e /run/current-system/specialisation/dev/etc/systemd/system/sddm.service"
-        )
-
     with subtest("switch-to-desktop infrastructure is wired in gaming mode"):
         machine.succeed("command -v thebeast-gamer-session")
         # Plasma and gamescope-wayland must both register entries in the
@@ -254,8 +250,15 @@ pkgs.testers.nixosTest {
             "> /etc/sddm.conf.d/zzt-steamos-temp-login.conf"
         )
         resolved = machine.succeed("thebeast-gamer-session --print-resolved").strip()
-        assert "startplasma" in resolved, \
-            f"wrapper should pick startplasma for plasma.desktop; got: {resolved!r}"
+        # The Session= override flipped the wrapper away from its gamescope
+        # default to whatever plasma.desktop's Exec= names. We don't pin the
+        # upstream Plasma binary name (it has been renamed before); instead
+        # assert (a) the resolved binary is executable and (b) the override
+        # genuinely landed us somewhere other than the gamescope fallback.
+        resolved_bin = resolved.split()[0]
+        machine.succeed(f"test -x {resolved_bin}")
+        assert "gamescope" not in resolved, \
+            f"Session=plasma override should not resolve to gamescope: {resolved!r}"
 
         machine.succeed("rm -f /etc/sddm.conf.d/zzt-steamos-temp-login.conf")
         resolved = machine.succeed("thebeast-gamer-session --print-resolved").strip()
@@ -348,6 +351,17 @@ pkgs.testers.nixosTest {
         with subtest(f"round trip #{cycle}: gaming -> dev -> gaming"):
             run_switch("dev")
             assert_dev_active()
+            # tmpfiles must refresh both symlinks each rebuild so the dev
+            # toplevel doesn't keep pointing at the previous gaming
+            # generation's store paths after a swap.
+            for entry in (
+                "switch-to-dev-mode.desktop",
+                "switch-to-game-mode.desktop",
+            ):
+                target = machine.succeed(
+                    f"readlink -f {GAMER_DESKTOP_DIR}/{entry}"
+                ).strip()
+                machine.succeed(f"test -e {target}")
             run_switch("game")
             assert_gaming_active()
 

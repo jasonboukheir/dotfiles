@@ -22,6 +22,8 @@
   # logout naturally falls back to gamescope.
   sessionWrapper = pkgs.writeShellApplication {
     name = "thebeast-gamer-session";
+    # gamescope-session is injected by the jovian overlay; nothing in this
+    # file pulls jovian in directly, so the dependency is invisible to grep.
     runtimeInputs = with pkgs; [gawk gnused coreutils gamescope-session];
     text = ''
       tempConf=${lib.escapeShellArg tempConf}
@@ -51,7 +53,10 @@
       for dir in "''${sessionDirs[@]}"; do
         candidate="$dir/$session"
         [ -r "$candidate" ] || continue
-        execLine=$(sed -n 's/^Exec=//p' "$candidate" | head -n1)
+        # awk in a single pass so pipefail can't trip on SIGPIPE when head
+        # closes the pipe after the first match (rare in practice but a
+        # latent flake under writeShellApplication's strict mode).
+        execLine=$(awk '/^Exec=/ { sub(/^Exec=/, ""); print; exit }' "$candidate")
         if [ -n "$execLine" ]; then
           # Drop XDG single-char field codes (%f %F %u %U %i %c %k %d %D %n %N %v %m)
           # before handing to sh; we have no files/URLs/icons to substitute and
@@ -92,8 +97,11 @@ in {
     # the wrapper hands off to when steamos-manager sets the override.
     services.desktopManager.plasma6.enable = true;
 
-    # steamos-manager probes this directory to know whether it's allowed
-    # to manage sessions; jovian installs the same marker under autoStart.
+    # steamos-manager probes for an sddm config file to decide whether
+    # session management is available; jovian installs the same empty
+    # marker under jovian.steam.autoStart for the same reason. The file
+    # has no content — it exists purely as a presence check.
+    # https://gitlab.steamos.cloud/holo/steamos-manager
     environment.etc."sddm.conf.d/steamos.conf".text = "";
 
     # Failsafe: if the system rebooted while a temp override was staged

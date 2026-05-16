@@ -39,9 +39,17 @@ in {
       };
   };
 
-  # NixOS defaults greetd to X-RestartIfChanged=false so rebuilds don't yank
-  # the user out of their session. The dev/gaming swap has the opposite
-  # need: switch-to-configuration must restart greetd to apply the new
-  # default_session, otherwise the spec flip is silent until reboot.
+  # NixOS defaults greetd to X-RestartIfChanged=false so routine rebuilds
+  # don't yank the greeter out from under a queued login. The spec swap
+  # has the opposite need: switch-to-configuration must restart greetd to
+  # pick up the new default_session, otherwise the spec flip is silent
+  # until reboot. greetd has no in-place reload (no SIGHUP config re-read),
+  # so a unit restart is the only knob.
+  #
+  # Tradeoff: this restart fires on *any* rebuild whose closure touches
+  # greetd's inputs, not just spec swaps. Acceptable here because greetd's
+  # session command exec()s a separate process (hyprland or the gaming
+  # wrapper) that survives greetd's restart — the running user session is
+  # not killed, only the greeter itself.
   systemd.services.greetd.restartIfChanged = lib.mkForce true;
 }
