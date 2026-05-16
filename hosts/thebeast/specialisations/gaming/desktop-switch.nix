@@ -117,5 +117,19 @@ in {
       overrideStrategy = "asDropin";
       wantedBy = ["graphical-session.target"];
     };
+
+    # Upstream steamos-manager has no TimeoutStopSec and doesn't always exit
+    # promptly on SIGTERM, so user@1000 takes the systemd default 90s to
+    # tear it down — which makes switch-to-dev-mode block in the swap
+    # wrapper's `systemctl stop user@1000.service` precondition. Cap the
+    # graceful window so SIGKILL kicks in fast.
+    # TODO: drop once upstream landswith a sensible default
+    # (https://gitlab.steamos.cloud/jovian/jovian-nixos / steamos-manager).
+    systemd.user.services.steamos-manager = {
+      overrideStrategy = "asDropin";
+      serviceConfig.TimeoutStopSec = "5s";
+    };
+
+    xdg.portal.configPackages = lib.mkDefault [pkgs.gamescope-session];
   };
 }

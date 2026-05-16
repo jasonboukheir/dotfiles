@@ -93,6 +93,26 @@ pkgs.testers.nixosTest {
         machine.fail("pgrep -x steam")
         machine.fail("pgrep -x steamos-manager")
         assert_no_sddm()
+        # tuigreet was given an explicit --sessions <hyprland>/share/wayland-
+        # sessions; if that store path stops shipping a wayland session file,
+        # jasonbk lands at a blank greeter. Pull the path out of the live
+        # greetd config and confirm at least one .desktop is present.
+        hypr_dir = ""
+        for token in config.split():
+            stripped = token.strip('"')
+            if "/share/wayland-sessions" in stripped:
+                hypr_dir = stripped
+                break
+        assert hypr_dir, f"could not extract --sessions path from:\n{config}"
+        sessions = machine.succeed(f"ls {hypr_dir}").split()
+        assert any(s.endswith(".desktop") for s in sessions), \
+            f"tuigreet sessions dir {hypr_dir} should contain a .desktop: {sessions}"
+        # PAM keyring: omarchy.pim=gnome wires enableGnomeKeyring so the
+        # password jasonbk types at tuigreet unlocks gnome-keyring. If
+        # this regresses, kwallet/gnome-keyring prompts twice on login.
+        pam_greetd = machine.succeed("cat /etc/pam.d/greetd")
+        assert "gnome_keyring" in pam_greetd or "pam_gnome_keyring" in pam_greetd, \
+            f"dev /etc/pam.d/greetd should pull in pam_gnome_keyring:\n{pam_greetd}"
 
     def snapshot():
         """Capture state to compare across round trips."""
@@ -196,6 +216,38 @@ pkgs.testers.nixosTest {
             "steamos-manager-session-cleanup.service",
         ):
             machine.succeed(f"test -e /etc/systemd/user/{unit}")
+        # Confirm the cleanup oneshot actually invokes steamosctl's
+        # clean-temporary-sessions (not just a symlinked empty unit).
+        cleanup_unit = machine.succeed(
+            "systemctl --user --root=/ cat steamos-manager-session-cleanup.service 2>/dev/null || "
+            "cat /etc/systemd/user/steamos-manager-session-cleanup.service"
+        )
+        assert "clean-temporary-sessions" in cleanup_unit, \
+            f"cleanup unit should run steamosctl clean-temporary-sessions:\n{cleanup_unit}"
+        # And the setup oneshot must point steamos-manager at plasma so
+        # the Steam UI's Switch-to-Desktop default lands somewhere real.
+        setup_unit = machine.succeed(
+            "cat /etc/systemd/user/jovian-setup-desktop-session.service"
+        )
+        assert "set-default-desktop-session plasma.desktop" in setup_unit, \
+            f"setup unit should set plasma as the default desktop session:\n{setup_unit}"
+
+    with subtest("steamos-manager system unit + user bus activation"):
+        # System unit is enabled at multi-user.target so it's available
+        # the moment greetd autologins gamer. This is what restarts
+        # display-manager.service when Steam → Switch-to-Desktop fires.
+        assert unit_state("steamos-manager.service") in ("active", "activating"), \
+            f"steamos-manager.service state: {unit_state('steamos-manager.service')}"
+        # Session-bus activation file — gamer's "Switch to Game Mode"
+        # desktop entry invokes `steamosctl switch-to-game-mode`, which
+        # hits the user instance. If services.dbus.packages stops
+        # carrying steamos-manager, this file is missing and clicking
+        # the icon from Plasma is a no-op. The dbus search path lives
+        # under the system sw output.
+        machine.succeed(
+            "find /run/current-system/sw/share/dbus-1 "
+            "-name com.steampowered.SteamOSManager1.service | grep -q ."
+        )
 
     with subtest("wrapper resolves steamos-manager's SDDM temp override"):
         # Simulate the override steamos-manager writes when Steam's

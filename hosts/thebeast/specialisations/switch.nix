@@ -34,11 +34,33 @@
   # Exit 4 means system activation succeeded but a user-instance reload
   # failed — typically gamer's user units pointing at the old toplevel.
   # The system half is what matters for the swap; tolerate it.
-  swapWrapper = name: target:
+  #
+  # `retireUser` names the user whose session belongs to the outgoing
+  # spec and must be torn down before switch-to-configuration enumerates
+  # logged-in users via logind.ListUsers. Without that, the snapshot
+  # includes user@$uid for the retiring user, the per-user activation
+  # blocks waiting for its services to stop, logind GCs the user object
+  # in the meantime, and the next loop iteration trips
+  # `Failed to get GID for <name> / Unknown object login1/user/_<uid>`,
+  # which exits 1.
+  swapWrapper = {
+    name,
+    target,
+    retireUser,
+  }:
     pkgs.writeShellApplication {
       inherit name;
+      runtimeInputs = [pkgs.coreutils pkgs.systemd];
       text = ''
         ${resolveTarget target}
+
+        if uid=$(id -u ${lib.escapeShellArg retireUser} 2>/dev/null) \
+            && systemctl is-active --quiet "user@$uid.service"; then
+          # systemctl stop blocks until user@$uid.service reaches inactive,
+          # which is when logind unregisters the user object.
+          systemctl stop "user@$uid.service" || :
+        fi
+
         status=0
         "$target" test || status=$?
         if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
@@ -47,8 +69,16 @@
       '';
     };
 
-  switchToGameMode = swapWrapper "switch-to-game-mode" "/bin/switch-to-configuration";
-  switchToDevMode = swapWrapper "switch-to-dev-mode" "/specialisation/dev/bin/switch-to-configuration";
+  switchToGameMode = swapWrapper {
+    name = "switch-to-game-mode";
+    target = "/bin/switch-to-configuration";
+    retireUser = "greeter";
+  };
+  switchToDevMode = swapWrapper {
+    name = "switch-to-dev-mode";
+    target = "/specialisation/dev/bin/switch-to-configuration";
+    retireUser = cfg.user;
+  };
 
   # The user-facing entrypoints have to handle two distinct cases. The
   # spec swap (dev <-> gaming) reconfigures the whole DM/session graph
