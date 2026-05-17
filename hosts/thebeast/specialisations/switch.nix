@@ -166,6 +166,13 @@
 
   gamerDesktopDir = "/home/${cfg.user}/Desktop";
 in {
+  # switchToGameModeUser threads pkgs.steamos-manager onto PATH for the
+  # gamescope-side branch. The wrappers ship in both specs (you need them
+  # to swap back from dev), so the jovian closure they pull in is reachable
+  # even when gaming.enable is false — the gaming spec's own allowlist
+  # (specialisations/gaming/jovian.nix) can't cover this one.
+  allowUnfreePackageNames = ["steam-jupiter-unwrapped"];
+
   environment.systemPackages = [
     switchToGameMode
     switchToDevMode
