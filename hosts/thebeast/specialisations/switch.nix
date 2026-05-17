@@ -107,6 +107,10 @@
     spec=$(cat ${specMarker} 2>/dev/null || true)
   '';
 
+  # The privileged switchers ignore positional args (their body is a fixed
+  # `switch-to-configuration test` recipe). Don't forward `"$@"` from the
+  # user wrappers — there's no callsite that wants to pass args, and the
+  # surface only shows up in audit logs / process tables.
   switchToGameModeUser = pkgs.writeShellApplication {
     name = "switch-to-game-mode-user";
     runtimeInputs = [pkgs.coreutils pkgs.steamos-manager];
@@ -114,10 +118,10 @@
       ${readSpec}
       case "$spec" in
         dev)
-          exec ${sudo} -n ${switchToGameMode}/bin/switch-to-game-mode "$@"
+          exec ${sudo} -n ${switchToGameMode}/bin/switch-to-game-mode
           ;;
         *)
-          exec steamosctl switch-to-game-mode "$@"
+          exec steamosctl switch-to-game-mode
           ;;
       esac
     '';
@@ -134,7 +138,7 @@
           exit 0
           ;;
         *)
-          exec ${sudo} -n ${switchToDevMode}/bin/switch-to-dev-mode "$@"
+          exec ${sudo} -n ${switchToDevMode}/bin/switch-to-dev-mode
           ;;
       esac
     '';

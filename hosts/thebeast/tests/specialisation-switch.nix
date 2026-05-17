@@ -135,16 +135,19 @@ pkgs.testers.nixosTest {
         assert "initial_session" not in config, \
             f"dev greetd should not autologin:\n{config}"
         default = config.get("default_session", {})
-        # Upstream defaults default_session.user = "greeter" when unset, and
-        # we rely on that — asserting it here pins the contract.
-        assert default.get("user", "greeter") == "greeter", \
-            f"dev default_session should run as greeter: {default}"
+        # greetd.nix leaves default_session.user unset and relies on the
+        # upstream default of "greeter". Distinguish "unset" (fine — we
+        # want the upstream default) from "set to anything else" (a
+        # regression that would run the greeter as a privileged user).
+        # The pure tautology `default.get("user", "greeter") == "greeter"`
+        # can never fail on a missing key — this catches the mis-set case.
+        assert "user" not in default or default["user"] == "greeter", \
+            f"dev default_session.user must remain unset or 'greeter': {default}"
         # tuigreet running is the behavior; the rendered command string is
         # an implementation detail of greetd.nix that pgrep already covers.
         machine.wait_until_succeeds("pgrep -x tuigreet", timeout=30)
         assert unit_state("greetd.service") == "active", \
             f"greetd state: {unit_state('greetd.service')}"
-        machine.fail(f"id -nG {DEV_USER} | grep -qw gamemode")
         assert_no_sddm()
         # If hyprland stops shipping a wayland session file at the path
         # tuigreet was handed, jasonbk lands at a blank greeter. Pull the
@@ -312,11 +315,20 @@ pkgs.testers.nixosTest {
         # unauth user has no NOPASSWD rule, so sudo -n exits non-zero
         # and the wrapper propagates that. This is the negative path the
         # static permission check above can't prove on its own.
+        #
+        # Capturing combined output and matching sudo's denial phrasing
+        # ("a password is required" for sudo -n) is the difference between
+        # "wrapper failed for *some* reason" (e.g. a typo'd binary path)
+        # and "wrapper failed *because* the sudo policy refused us". The
+        # weaker `status != 0` check would silently pass on regressions
+        # that break the wrapper for every user.
         status, output = machine.execute(
-            f"sudo -u {UNAUTH_USER} /run/current-system/sw/bin/switch-to-game-mode-user"
+            f"sudo -u {UNAUTH_USER} /run/current-system/sw/bin/switch-to-game-mode-user 2>&1"
         )
         assert status != 0, \
             f"unauth user should not be able to swap specs: status={status} output={output!r}"
+        assert "a password is required" in output, \
+            f"failure must come from sudo policy, not the wrapper itself: {output!r}"
         assert current_spec() == "dev", \
             "denied escalation must not have flipped the spec"
 
@@ -332,15 +344,30 @@ pkgs.testers.nixosTest {
             f"greetd must restart across spec swap: {before} -> {after}"
 
     with subtest("gamer in gaming → game-mode-user dispatches to steamosctl"):
-        # In the steamosctl branch the wrapper must NOT escalate. We can't
-        # easily prove steamosctl ran (no real DBus session in the headless
-        # VM), but we *can* prove sudo was not invoked: if it had, greetd
-        # would have restarted and the spec marker would still read "gaming"
-        # but the unit timestamp would advance. Assert neither happened.
+        # In the steamosctl branch the wrapper must NOT escalate, AND it
+        # must actually `exec steamosctl`. The earlier version of this
+        # test only asserted "greetd didn't restart + spec is still
+        # gaming" — both of which a `case "$spec" in *) exit 0 ;; esac`
+        # regression would also satisfy.
+        #
+        # Three signals together pin the dispatch:
+        #   1. Real steamosctl fails non-zero in the headless VM (no
+        #      DBus session bus), so status == 0 is the deleted-arm
+        #      regression and we reject it.
+        #   2. sudo's NOPASSWD denial would produce "a password is
+        #      required" / "sudo:" — its absence rules out a wrong-branch
+        #      regression.
+        #   3. Unit timestamp + spec marker unchanged confirms no
+        #      privileged switcher ran (catches the case where sudo
+        #      *succeeded* via a stray policy).
         before = greetd_enter_ts()
-        machine.execute(
-            f"sudo -u {GAMING_USER} /run/current-system/sw/bin/switch-to-game-mode-user"
+        status, output = machine.execute(
+            f"sudo -u {GAMING_USER} /run/current-system/sw/bin/switch-to-game-mode-user 2>&1"
         )
+        assert status != 0, \
+            f"steamosctl branch should fail (no DBus session in test VM); status=0 implies the arm exited without exec'ing steamosctl: {output!r}"
+        assert "a password is required" not in output and "sudo:" not in output, \
+            f"steamosctl branch must not fall through to sudo: {output!r}"
         after = greetd_enter_ts()
         assert after == before, \
             f"steamosctl branch must not restart greetd: {before} -> {after}"

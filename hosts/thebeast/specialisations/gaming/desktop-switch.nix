@@ -35,16 +35,26 @@
 
       requested=""
       if [ -r "$tempConf" ]; then
+        # SDDM treats the .conf as INI (last key wins). awk scans the
+        # whole file and keeps the final match so we agree with SDDM
+        # when a hand-edit appends an override after steamos-manager's.
         requested=$(awk -F= '
           /^Session=/ {
             sub(/^[[:space:]]+/, "", $2)
             sub(/[[:space:]]+$/, "", $2)
-            print $2
-            exit
-          }' "$tempConf")
+            last = $2
+          }
+          END { if (last != "") print last }' "$tempConf")
       fi
 
       session=''${requested:-$defaultSession}
+      # Reject anything that looks like a path. steamos-manager only ever
+      # writes a bare desktop-id, and the loop below joins `session` onto
+      # each sessions dir; a `Session=../../etc/shadow` (or absolute path)
+      # would escape the intended search roots. Fall back to gamescope.
+      case "$session" in
+        */* | .*) session="$defaultSession" ;;
+      esac
       case "$session" in
         *.desktop) ;;
         *) session="$session.desktop" ;;
@@ -60,9 +70,10 @@
         if [ -n "$execLine" ]; then
           # Drop XDG single-char field codes (%f %F %u %U %i %c %k %d %D %n %N %v %m)
           # before handing to sh; we have no files/URLs/icons to substitute and
-          # gamescope-wayland.desktop ships them. %% (literal %) survives the
-          # single-char pass and gets unescaped after.
-          execLine=$(printf '%s' "$execLine" | sed -E 's/%[fFuUickdDnNvm]//g; s/%%/%/g')
+          # gamescope-wayland.desktop ships them. Stash `%%` (literal `%`)
+          # first so the field-code drop can't eat the second `%` of a pair
+          # like `%%F` and leave a stray `F`.
+          execLine=$(printf '%s' "$execLine" | sed -E $'s/%%/\x01/g; s/%[fFuUickdDnNvm]//g; s/\x01/%/g')
           # Probe path used by the VM test to inspect resolution without
           # actually launching a wayland session.
           if [ "''${1:-}" = "--print-resolved" ]; then
