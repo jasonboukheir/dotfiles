@@ -148,6 +148,17 @@ pkgs.testers.nixosTest {
         machine.wait_until_succeeds("pgrep -x tuigreet", timeout=30)
         assert unit_state("greetd.service") == "active", \
             f"greetd state: {unit_state('greetd.service')}"
+        # steamos-manager.service is jovian-only and must be torn down
+        # by switch-to-configuration on the swap to dev. The baseline-
+        # leak check at the bottom of this test can't see this miss
+        # because steamos-manager is in `baseline_units` (we snapshot
+        # while in gaming). Catching it here also detects the headline
+        # bug from a different angle: if the privileged switcher
+        # reaped itself before running switch-to-configuration, no
+        # units were torn down — steamos-manager stays "active" even
+        # though we believe we're in dev.
+        assert unit_state("steamos-manager.service") != "active", \
+            f"steamos-manager.service should be inactive in dev, got: {unit_state('steamos-manager.service')}"
         assert_no_sddm()
         # If hyprland stops shipping a wayland session file at the path
         # tuigreet was handed, jasonbk lands at a blank greeter. Pull the
@@ -314,7 +325,40 @@ pkgs.testers.nixosTest {
         machine.wait_until_succeeds("systemctl is-active fake-plasma.service")
 
         before = greetd_enter_ts()
-        run_user_wrapper(GAMING_USER, "dev")
+
+        # The headline production bug: the desktop-entry click spawns
+        # `switch-to-dev-mode-user` inside plasma's session-N.scope —
+        # itself a child of user-{uid}.slice. The wrapper `exec sudo -n
+        # switch-to-dev-mode`, but sudo does NOT migrate the process
+        # out of the caller's cgroup, so the sudo'd root switcher is
+        # still in user-{uid}.slice. The moment it calls
+        # `systemctl stop user-{uid}.slice` systemd SIGTERMs every PID
+        # in the slice (the switcher included) before
+        # switch-to-configuration ever runs. plasma dies, the
+        # framebuffer reverts to the kernel console ("just a tty"),
+        # the spec marker stays gaming, steamos-manager never gets
+        # stopped (visible as a shutdown-time log line at the next
+        # reboot).
+        #
+        # `machine.execute("sudo -u {GAMING_USER} …")` would invoke
+        # the wrapper from the test harness's own cgroup (outside the
+        # slice) and silently bypass this — see the prior shape of
+        # this subtest. Drive the wrapper through systemd-run so the
+        # entire chain (wrapper → sudo → switcher → systemctl) is
+        # parented to user-{uid}.slice exactly like production. `--wait
+        # --collect --pipe` blocks for the result and surfaces stderr;
+        # a self-reap exits 143 (128+SIGTERM) which is neither 0 nor
+        # the tolerated 4.
+        status, output = machine.execute(
+            f"systemd-run --quiet --uid={GAMING_USER} "
+            f"--slice=user-{uid}.slice --wait --collect --pipe -- "
+            f"/run/current-system/sw/bin/switch-to-dev-mode-user"
+        )
+        assert status in SUCCESS_CODES, (
+            f"switcher was reaped by its own `systemctl stop "
+            f"user-{uid}.slice` before switch-to-configuration ran "
+            f"(status={status}): {output!r}"
+        )
         assert_dev_active()
         after = greetd_enter_ts()
         assert after > before, \
