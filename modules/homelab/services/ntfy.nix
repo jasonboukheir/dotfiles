@@ -35,6 +35,19 @@ in {
           base-url = "https://${domain}";
           listen-http = "127.0.0.1:${toString port}";
           behind-proxy = true;
+          # Default-deny so a freshly deployed server is not open-write
+          # to the public internet. Family accounts + the anonymous
+          # write-only grant on `up*` (for UnifiedPush) are layered on
+          # imperatively via `ntfy user add` / `ntfy access` — there is
+          # no LDAP/OIDC integration upstream (binwiederhier/ntfy#296,
+          # #1596), so the user.db is the source of truth.
+          auth-default-access = "deny-all";
+          # Charge rate-limit quota to the subscriber instead of the
+          # publisher. Without this, an upstream that POSTs to a stale
+          # UnifiedPush endpoint (subscriber-less topic) burns the
+          # server-wide visitor budget; with it set, the topic returns
+          # 507 and the publisher backs off.
+          visitor-subscriber-rate-limiting = true;
         };
       };
     })

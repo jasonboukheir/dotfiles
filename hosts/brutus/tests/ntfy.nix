@@ -55,19 +55,33 @@ pkgs.testers.nixosTest {
         assert "behind-proxy: true" in yaml, \
             f"behind-proxy must be set so ntfy trusts X-Forwarded-For from nginx:\n{yaml}"
 
-    with subtest("publish + subscribe round-trips a message"):
-        # Proves the auth-file / cache-file state dirs are writable under
-        # DynamicUser+StateDirectory and that the JSON subscribe stream
-        # actually delivers — the bit users care about. Subscribe in the
-        # background with a short poll deadline, publish, then drain.
-        machine.succeed(
-            f"curl -fsS -X POST -d 'hello-from-test' "
-            f"http://127.0.0.1:{NTFY_PORT}/test-topic"
+    with subtest("rendered server.yml is locked down by default"):
+        # The server is exposed to the public internet on port 8443 and
+        # ntfy has no LDAP/OIDC integration upstream — a regression that
+        # flipped auth-default-access back to read-write would silently
+        # turn brutus into an open relay until someone noticed traffic.
+        # visitor-subscriber-rate-limiting is the matched safety net for
+        # UnifiedPush's anonymous-write pattern.
+        yaml = machine.succeed(f"cat {SERVER_YML}")
+        assert "auth-default-access: deny-all" in yaml, \
+            f"auth-default-access must default-deny:\n{yaml}"
+        assert "visitor-subscriber-rate-limiting: true" in yaml, \
+            f"visitor-subscriber-rate-limiting must be on to charge subscribers:\n{yaml}"
+
+    with subtest("anonymous publish is denied under deny-all"):
+        # The actual safety contract: with no ACL rows yet, an
+        # unauthenticated POST to a random topic must be rejected. This
+        # is what stops a freshly deployed server from being a public
+        # write-only mailbox before the operator runs `ntfy user add`.
+        # 401 (Unauthorized) is the documented response; we check for
+        # the family rather than the exact code so a future bump that
+        # switches to 403 doesn't silently break the test.
+        rc, body = machine.execute(
+            f"curl -sS -o /dev/null -w '%{{http_code}}' "
+            f"-X POST -d 'should-not-deliver' "
+            f"http://127.0.0.1:{NTFY_PORT}/anon-publish-probe"
         )
-        delivered = machine.succeed(
-            f"curl -fsS 'http://127.0.0.1:{NTFY_PORT}/test-topic/json?poll=1'"
-        )
-        assert "hello-from-test" in delivered, \
-            f"published message did not round-trip through /poll: {delivered!r}"
+        assert body.strip() in ("401", "403"), \
+            f"anonymous POST under deny-all must 401/403, got {body!r}"
   '';
 }
