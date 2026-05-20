@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  homelabCfg = config.homelab.services.chat;
+  homelabCfg = config.homelab.services.synapse;
   port = config.homelab.ports.values.matrix-synapse;
   domain = homelabCfg.domain;
   serverName = config.homelab.domain;
@@ -13,12 +13,16 @@
   idDomain = config.homelab.services.id.domain;
   secretsFile = "${config.services.matrix-synapse.dataDir}/secrets.yaml";
 
+  # `.well-known/matrix/*` lives on the apex (sunnycareboo.com) and steers
+  # both federation peers and client autodiscovery to whichever subdomain
+  # synapse currently listens on — decoupled from `server_name`, so user
+  # IDs (`@you:sunnycareboo.com`) stay stable when synapse moves URLs.
   wellKnownServer = builtins.toJSON {"m.server" = "${domain}:443";};
   wellKnownClient = builtins.toJSON {"m.homeserver" = {base_url = "https://${domain}";};};
 in {
   config = lib.mkMerge [
     {
-      homelab.services.chat = {
+      homelab.services.synapse = {
         isExternal = true;
         proxyPass = "http://127.0.0.1:${toString port}";
         extraConfig = ''
@@ -140,6 +144,8 @@ in {
 
       services.pocket-id.ensureClients.matrix-synapse = {
         dependentServices = [config.systemd.services.matrix-synapse.name];
+        logo = ./matrix-synapse-light.svg;
+        darkLogo = ./matrix-synapse-dark.svg;
         settings = {
           name = "Matrix";
           launchURL = "https://${domain}";

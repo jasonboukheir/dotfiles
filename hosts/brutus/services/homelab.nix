@@ -21,6 +21,7 @@ in {
     budget.enable = true;
     certs.enable = true;
     chat.enable = true;
+    synapse.enable = true;
     cloud.enable = true;
     code.enable = true;
     gonic.enable = true;
