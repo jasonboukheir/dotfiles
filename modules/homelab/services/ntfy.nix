@@ -32,6 +32,13 @@ in {
       services.ntfy-sh = {
         enable = true;
         settings = {
+          # base-url has a second job beyond UnifiedPush endpoint
+          # construction: ntfy's built-in Matrix Push Gateway (always-on,
+          # served at /_matrix/push/v1/notify) uses it to validate the
+          # `pushkey` Synapse posts to. Pushkeys that don't start with
+          # `${base-url}/` are bounced back to Synapse in the
+          # `rejected_pushkeys` array, which deletes the pusher. There
+          # is no `matrix-gateway-enabled` flag — base-url is the gate.
           base-url = "https://${domain}";
           listen-http = "127.0.0.1:${toString port}";
           behind-proxy = true;
