@@ -18,14 +18,20 @@
       pkgs = import nixpkgs-unstable {inherit system;};
       agenixPkg = agenix.packages.${system}.default;
 
-      # Shared snippet: prints, one per line, the flakes that should be
-      # operated on for the current host. Sourced by every wrapper that
-      # needs to walk the relevant flake set (update-flakes, check, ...).
+      # Shared snippet: populates two bash arrays for the current host —
+      #   flakes=(...)       the flake roots to walk (update-flakes, check)
+      #   host_tests=(...)   attr names under flake.checks.<system> that
+      #                      apply to this host (consumed by `test`)
+      # Sourced by every wrapper that needs host-aware dispatch. Arrays are
+      # kept as shell-local state rather than exported env vars so the same
+      # snippet can be evaluated from any subshell without leaking stale
+      # host metadata across `nix develop` sessions.
       hostFlakesSnippet = ''
         repo_root=$(git rev-parse --show-toplevel)
         host=$(scutil --get LocalHostName 2>/dev/null || hostname -s 2>/dev/null || uname -n | cut -d. -f1)
 
         flakes=("$repo_root")
+        host_tests=()
 
         case "$(uname -s)" in
           Linux)
@@ -47,6 +53,14 @@
           *)
             echo "unsupported OS $(uname -s)" >&2
             exit 1
+            ;;
+        esac
+
+        # Host-specific nixosTest attrs. Each name resolves to
+        # flake.checks.<system>.<name> in the root flake.
+        case "$host" in
+          thebeast)
+            host_tests+=("thebeast-specialisation-switch")
             ;;
         esac
       '';
@@ -143,6 +157,11 @@
             bump [args...]           update-flakes + rebuild
             format                   Run alejandra over the whole repo
             check                    nix flake check on each relevant flake
+                                     (eval + builds every flake.checks.* attr,
+                                      including nixosTest VMs — slow)
+            vm-test                  Build only this host's nixosTest checks
+                                     under flake.checks.<system>.*. No-op on
+                                     hosts without declared tests.
             disk <subcmd>            Drive health, SMART tests, pool drive
                                      replacement walkthrough. `disk help` for
                                      full usage. Linux-only.
@@ -153,6 +172,9 @@
             work-devserver           → root + dev          (home-manager only)
             jasonbk-fedora-MZ0319NF  → root + dev          (home-manager only)
             *-macbook                → root + darwin
+
+          Per-host nixosTest checks (consumed by `vm-test`):
+            thebeast                 thebeast-specialisation-switch
 
           Env overrides:
             SECRET_IDENTITY=<path>   Use a different SSH key for `secret`
@@ -171,6 +193,29 @@
           for f in "''${flakes[@]}"; do
             echo "==> nix flake check $f"
             nix flake check "$f" "$@" || rc=$?
+          done
+          exit "$rc"
+        '';
+      };
+
+      vm-test = pkgs.writeShellApplication {
+        name = "vm-test";
+        runtimeInputs = [pkgs.git pkgs.nix pkgs.nettools];
+        text = ''
+          ${hostFlakesSnippet}
+
+          if [ "''${#host_tests[@]}" -eq 0 ]; then
+            echo "vm-test: no nixosTest checks declared for $host" >&2
+            exit 0
+          fi
+
+          system=$(nix eval --impure --raw --expr 'builtins.currentSystem')
+
+          rc=0
+          for t in "''${host_tests[@]}"; do
+            attr="checks.''${system}.''${t}"
+            echo "==> nix build $repo_root#$attr"
+            nix build "$repo_root#$attr" -L "$@" || rc=$?
           done
           exit "$rc"
         '';
@@ -280,6 +325,7 @@
             bump
             format
             check
+            vm-test
             commands
           ]
           # disk pulls smartmontools, memtester, cryptsetup, zfs userspace —

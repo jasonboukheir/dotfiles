@@ -1,5 +1,13 @@
 {...}: {
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  # ca-derivations + dynamic-derivations: brutus's vllm-xpu-nix input produces
+  # content-addressed derivations, so any host running `nix flake check`
+  # against the repo needs these features to evaluate brutus's toplevel.
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+    "ca-derivations"
+    "dynamic-derivations"
+  ];
   nix.settings.trusted-users = ["jasonbk"];
 
   # Bootloader.
