@@ -61,6 +61,9 @@
           checks.thebeast-specialisation-switch = import ../../hosts/thebeast/tests/specialisation-switch.nix {
             inherit pkgs inputs;
           };
+          checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {
+            inherit pkgs inputs;
+          };
         };
     };
   };

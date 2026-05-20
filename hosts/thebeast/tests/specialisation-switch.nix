@@ -280,21 +280,68 @@ pkgs.testers.nixosTest {
     # leak comparison covers all production flips below.
     baseline_units = running_services()
 
-    with subtest("user wrapper as gamer in gaming → escalates and swaps to dev"):
+    with subtest("user wrapper as gamer in gaming → escalates, swaps to dev, and reaps the slice"):
         # End-to-end verification of gamer's NOPASSWD rule, in the
         # production direction: gamer is autologin'd in gaming and
         # clicks "Switch to Dev Mode". The wrapper takes the sudo
         # branch, which exercises gamer's per-command rule. Doing this
         # in the gaming→dev direction (not dev→gaming) avoids a logind
         # race: switch-to-dev-mode's swapWrapper retires gamer's
-        # user@<uid> explicitly before switch-to-configuration
-        # enumerates users.
+        # cgroup explicitly before switch-to-configuration enumerates
+        # users.
+        #
+        # The headline regression here was that in production gamer's
+        # plasma session lives in a session-N.scope under
+        # user-<uid>.slice — a *sibling* of user@<uid>.service, not a
+        # child. Stopping only user@<uid>.service leaves the plasma
+        # session alive, which holds tty1 and prevents the new greetd
+        # from spawning tuigreet (the user sees a blinking underscore
+        # on tty1 after plasma quits and never gets the dev greeter).
+        # Reproduce by parking a unit in the slice that is NOT under
+        # user@<uid>.service, and assert the swap kills it.
+        uid = machine.succeed(f"id -u {GAMING_USER}").strip()
+        machine.succeed(f"loginctl enable-linger {GAMING_USER}")
+        machine.succeed(f"systemctl start user@{uid}.service")
+        machine.wait_until_succeeds(f"systemctl is-active user@{uid}.service")
+        # systemd-run resolves --uid by name and uses the user's
+        # primary group automatically; passing a numeric --gid risks
+        # a UID/GID mismatch we hit on this host (gamer's GID != UID).
+        machine.succeed(
+            f"systemd-run --uid={GAMING_USER} "
+            f"--slice=user-{uid}.slice --unit=fake-plasma "
+            f"--no-block -- sleep 600"
+        )
+        machine.wait_until_succeeds("systemctl is-active fake-plasma.service")
+
         before = greetd_enter_ts()
         run_user_wrapper(GAMING_USER, "dev")
         assert_dev_active()
         after = greetd_enter_ts()
         assert after > before, \
             f"gamer's NOPASSWD escalation should restart greetd: {before} -> {after}"
+
+        # The swap must have torn down everything in gamer's slice —
+        # the transient (mimicking a session scope) AND the user
+        # manager. `is-active --quiet` exits 0 only when the unit is
+        # active, so a non-zero exit covers every "reaped" state
+        # (inactive, failed, gone) without parsing the printed line.
+        fake_status, _ = machine.execute(
+            "systemctl is-active --quiet fake-plasma.service"
+        )
+        assert fake_status != 0, \
+            "fake-plasma should be reaped by the swap but is still active"
+        slice_status, _ = machine.execute(
+            f"systemctl is-active --quiet user-{uid}.slice"
+        )
+        assert slice_status != 0, \
+            f"user-{uid}.slice should be inactive after swap but is still active"
+        # No leftover processes owned by gamer. ps -u prints nothing on
+        # success (no headers, no rows) when the user has no procs.
+        survivors = machine.succeed(
+            f"ps -o pid,comm --no-headers -u {GAMING_USER} 2>/dev/null || true"
+        ).strip()
+        assert not survivors, \
+            f"gamer-owned processes survived the swap: {survivors!r}"
 
     with subtest("user wrapper short-circuits when already in dev"):
         before = greetd_enter_ts()

@@ -51,6 +51,14 @@
   # in the meantime, and the next loop iteration trips
   # `Failed to get GID for <name> / Unknown object login1/user/_<uid>`,
   # which exits 1.
+  #
+  # We stop user-$uid.slice rather than user@$uid.service: plasma and
+  # the rest of the desktop session live in session-<n>.scope, a
+  # *sibling* of user@$uid.service inside user-$uid.slice. Stopping
+  # only user@$uid.service leaves plasma alive, which holds tty1 and
+  # blocks tuigreet from claiming it after greetd restarts — the user
+  # is left staring at a blinking underscore on tty1 instead of the
+  # dev greeter.
   swapWrapper = {
     name,
     target,
@@ -63,12 +71,14 @@
         ${resolveTarget target}
 
         if uid=$(id -u ${lib.escapeShellArg retireUser} 2>/dev/null) \
-            && systemctl is-active --quiet "user@$uid.service"; then
-          # systemctl stop blocks until user@$uid.service reaches inactive,
-          # which is when logind unregisters the user object. If stop itself
-          # fails (dbus/permissions/timeout), the logind race the comment
-          # block above describes is back — abort instead of papering over.
-          systemctl stop "user@$uid.service"
+            && systemctl is-active --quiet "user-$uid.slice"; then
+          # systemctl stop on the slice blocks until every unit inside
+          # (user@$uid.service + every session-<n>.scope) reaches
+          # inactive, at which point logind unregisters the user. If
+          # stop itself fails (dbus/permissions/timeout), the logind
+          # race described above is back — abort instead of papering
+          # over.
+          systemctl stop "user-$uid.slice"
         fi
 
         status=0
