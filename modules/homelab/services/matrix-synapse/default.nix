@@ -8,30 +8,33 @@
   port = config.homelab.ports.values.matrix-synapse;
   domain = homelabCfg.domain;
   serverName = config.homelab.domain;
-  apexVhost = serverName;
-  oidcCfg = config.services.pocket-id.ensureClients.matrix-synapse;
-  idDomain = config.homelab.services.id.domain;
+  authDomain = config.homelab.services.matrix-auth.domain;
   secretsFile = "${config.services.matrix-synapse.dataDir}/secrets.yaml";
 
-  # `.well-known/matrix/*` lives on the apex (sunnycareboo.com) and steers
-  # both federation peers and client autodiscovery to whichever subdomain
-  # synapse currently listens on — decoupled from `server_name`, so user
-  # IDs (`@you:sunnycareboo.com`) stay stable when synapse moves URLs.
-  wellKnownServer = builtins.toJSON {"m.server" = "${domain}:443";};
-  wellKnownClient = builtins.toJSON {"m.homeserver" = {base_url = "https://${domain}";};};
+  # MAS↔synapse share two values: the client_secret for synapse's OIDC
+  # client registration inside MAS, and the admin token MAS hands to
+  # synapse for the /_synapse/admin endpoints. The matrix-auth module
+  # writes these here; we LoadCredential them in so synapse never reads
+  # the on-disk paths directly under its sandbox.
+  masSharedDir = "/var/lib/matrix-mas-shared";
+
+  # MAS listens on this loopback port for token introspection (every
+  # authed request). Synapse also discovers MAS's OIDC metadata at
+  # startup from `${masPublicBase}/.well-known/openid-configuration`;
+  # MAS shares the host so this is effectively a loopback hop through
+  # the local nginx, but it does mean MAS must be running and MAS's
+  # vhost reachable before synapse will come up.
+  masPort = config.homelab.ports.values.matrix-auth;
+  masPublicBase = "https://${authDomain}";
 in {
   config = lib.mkMerge [
     {
       homelab.services.synapse = {
         isExternal = true;
-        # Federation peers + remote Matrix clients (Element mobile, etc.)
-        # hit synapse.sunnycareboo.com without a homelab client cert in
-        # hand; the framework's default of `isExternal → mtls.enable`
-        # would 403 them on port 8443 and silently drop us off the
-        # federation. The chat (element-web) vhost keeps mtls on at the
-        # default since its only role is hosting the SPA UI for our
-        # already-credentialed users — authentication itself still goes
-        # browser → synapse → pocket-id.
+        # Federation peers + Element X clients arrive without a homelab
+        # client cert; the framework's default of `isExternal →
+        # mtls.enable` would 403 them on 8443. Auth still gates the
+        # server because /_matrix/client/v3/login delegates to MAS.
         mtls.enable = false;
         proxyPass = "http://127.0.0.1:${toString port}";
         extraConfig = ''
@@ -45,8 +48,11 @@ in {
 
       services.matrix-synapse = {
         enable = true;
-        extras = ["oidc"];
         extraConfigFiles = [secretsFile];
+        # The module only auto-adds `oidc` (authlib) when settings.oidc_providers
+        # is set; MSC3861 delegation uses experimental_features instead, so we
+        # have to pull authlib in by hand or synapse refuses to start.
+        extras = ["oidc"];
         settings = {
           server_name = serverName;
           public_baseurl = "https://${domain}";
@@ -80,30 +86,35 @@ in {
             };
           };
 
+          # Registration + password live entirely in MAS. Synapse must
+          # have these closed so a misconfig can't accidentally open a
+          # parallel login path that bypasses MAS's policies.
           enable_registration = false;
           password_config.enabled = false;
 
           max_upload_size = "100M";
           url_preview_enabled = true;
 
-          oidc_providers = [
-            {
-              idp_id = "pocketid";
-              idp_name = "Pocket ID";
-              idp_brand = "oauth";
-              issuer = "https://${idDomain}";
-              client_id = oidcCfg.settings.id;
-              client_secret_path = "/run/credentials/matrix-synapse.service/oidc_client_secret";
-              discover = true;
-              scopes = ["openid" "profile" "email"];
-              user_mapping_provider.config = {
-                localpart_template = "{{ user.preferred_username }}";
-                display_name_template = "{{ user.name }}";
-                email_template = "{{ user.email }}";
-              };
-              backchannel_logout_enabled = true;
-            }
-          ];
+          # MSC3861 delegates all authentication (login, registration,
+          # account management) to MAS at auth.sunnycareboo.com. MAS in
+          # turn federates to pocket-id, so the user-facing flow is:
+          # Element → synapse → MAS → pocket-id. Element X requires this
+          # delegation; legacy `oidc_providers` only spoke `m.login.sso`
+          # which Element X explicitly rejects.
+          experimental_features.msc3861 = {
+            enabled = true;
+            issuer = "${masPublicBase}/";
+            # Hot path: every authed request goes through introspection.
+            # Loopback bypasses the public DNS/TLS hop entirely (synapse
+            # only uses the public issuer URL for one-shot OIDC metadata
+            # discovery at startup).
+            introspection_endpoint = "http://127.0.0.1:${toString masPort}/oauth2/introspect";
+            client_id = "0000000000000000000SYNAPSE";
+            client_auth_method = "client_secret_basic";
+            client_secret_path = "/run/credentials/matrix-synapse.service/mas_synapse_client_secret";
+            admin_token_path = "/run/credentials/matrix-synapse.service/mas_admin_token";
+            account_management_url = "${masPublicBase}/account";
+          };
         };
       };
 
@@ -118,10 +129,26 @@ in {
       };
 
       systemd.services.matrix-synapse = {
-        after = ["postgresql.service" "matrix-synapse-secrets.service" "pocket-id-provisioner.service"];
-        requires = ["postgresql.service" "matrix-synapse-secrets.service"];
+        after = [
+          "postgresql.service"
+          "matrix-synapse-secrets.service"
+          "matrix-authentication-service-secrets.service"
+          # MAS itself must be reachable: synapse fetches MAS's OIDC
+          # discovery doc at startup (no static issuer_metadata).
+          "matrix-authentication-service.service"
+        ];
+        requires = [
+          "postgresql.service"
+          "matrix-synapse-secrets.service"
+          "matrix-authentication-service-secrets.service"
+        ];
+        # MAS itself isn't `Requires=` — a transient MAS restart shouldn't
+        # cascade-stop synapse. `Wants=` keeps it pulled in at boot but
+        # tolerates flaps.
+        wants = ["matrix-authentication-service.service"];
         serviceConfig.LoadCredential = [
-          "oidc_client_secret:${oidcCfg.secretFile}"
+          "mas_synapse_client_secret:${masSharedDir}/synapse_client_secret"
+          "mas_admin_token:${masSharedDir}/admin_token"
         ];
       };
 
@@ -149,36 +176,6 @@ in {
             mv "$tmp" "${secretsFile}"
           fi
         '';
-      };
-
-      services.pocket-id.ensureClients.matrix-synapse = {
-        dependentServices = [config.systemd.services.matrix-synapse.name];
-        logo = ./matrix-synapse-light.svg;
-        darkLogo = ./matrix-synapse-dark.svg;
-        settings = {
-          name = "Matrix";
-          launchURL = "https://${domain}";
-          callbackURLs = [
-            "https://${domain}/_synapse/client/oidc/callback"
-          ];
-        };
-      };
-
-      services.nginx.virtualHosts.${apexVhost}.locations = {
-        "= /.well-known/matrix/server" = {
-          extraConfig = ''
-            default_type application/json;
-            add_header Access-Control-Allow-Origin *;
-            return 200 '${wellKnownServer}';
-          '';
-        };
-        "= /.well-known/matrix/client" = {
-          extraConfig = ''
-            default_type application/json;
-            add_header Access-Control-Allow-Origin *;
-            return 200 '${wellKnownClient}';
-          '';
-        };
       };
     })
   ];

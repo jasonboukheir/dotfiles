@@ -52,6 +52,13 @@
   # agenix-backed secrets we don't carry in the test path). Tests that
   # actually exercise pocket-id can override with `enable = true;`.
   homelab.services.id = {};
+  # matrix-synapse delegates auth to MAS and references
+  # `config.homelab.services.matrix-auth.domain` to build its MSC3861
+  # issuer URL. The MAS module itself is heavier than the synapse test
+  # cares about (it pulls in mas-cli runs + the secrets oneshot), so
+  # stub the submodule so the domain option resolves without bringing
+  # MAS along.
+  homelab.services.matrix-auth = {};
 
   # nginx + ACME are out of scope for service-startup smoke tests (no
   # DNS-01, no certs) and the homelab service framework forces both on.
