@@ -46,6 +46,7 @@ in {
     lldap.enable = true;
     meals.enable = true;
     memos.enable = true;
+    ntfy.enable = true;
     photos.enable = true;
     radicale.enable = true;
     search.enable = true;
