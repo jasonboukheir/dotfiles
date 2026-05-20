@@ -35,8 +35,18 @@ pkgs.testers.nixosTest {
     appsDir = "/run/current-system/sw/share/applications";
     gamerDesktopDir = "/home/${gamingUser}/Desktop";
     defaultDesktopSession = cfg.gaming.defaultDesktopSession;
+    # Stubborn payload for the planted session scopes: the trap makes
+    # it immune to SIGTERM so the test reaches the production code
+    # path where wayland clients ignore SIGTERM and the slice/scope
+    # stop blocks on its TimeoutStopSec. (`'''` is the Nix indented-
+    # string escape for a literal `''`.)
+    stubbornSleep = pkgs.writeShellScript "stubborn-sleep" ''
+      trap ''' TERM
+      exec ${pkgs.coreutils}/bin/sleep 600
+    '';
   in ''
     import re
+    import time
     import tomllib
 
     GAMING_USER = "${gamingUser}"
@@ -47,6 +57,7 @@ pkgs.testers.nixosTest {
     APPS_DIR = "${appsDir}"
     GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
     DEFAULT_DESKTOP_SESSION = "${defaultDesktopSession}"
+    STUBBORN_SLEEP = "${stubbornSleep}"
 
     # switch-to-configuration returns 4 when system activation succeeded
     # but a user-instance reload didn't — typically because the retiring
@@ -80,6 +91,15 @@ pkgs.testers.nixosTest {
         return int(machine.succeed(
             "systemctl show -p ActiveEnterTimestampMonotonic --value greetd.service"
         ).strip())
+
+    def unit_enter_ts(unit):
+        # Generalised version of greetd_enter_ts for any unit. 0 means the
+        # unit has never been entered active (or was reset). Used to prove
+        # critical units (logind, dbus) did NOT restart across a swap.
+        out = machine.succeed(
+            f"systemctl show -p ActiveEnterTimestampMonotonic --value {unit}"
+        ).strip()
+        return int(out) if out else 0
 
     def unit_state(unit):
         return machine.succeed(
@@ -149,8 +169,20 @@ pkgs.testers.nixosTest {
         # reaped itself before running switch-to-configuration, no
         # units were torn down — steamos-manager stays "active" even
         # though we believe we're in dev.
-        assert unit_state("steamos-manager.service") != "active", \
-            f"steamos-manager.service should be inactive in dev, got: {unit_state('steamos-manager.service')}"
+        #
+        # Wait for the SIGTERM-driven stop to settle rather than
+        # sampling once: with the session-scope-only swap the wrapper
+        # returns as soon as switch-to-configuration completes, and
+        # steamos-manager's TimeoutStopSec drain may still be in
+        # flight (its drop-in caps the user-instance unit at 5s, but
+        # the system-instance unit uses the default). A 30s ceiling
+        # is well under that and still catches the "wrapper never ran
+        # activation" regression — the unit would be permanently
+        # active in that case.
+        machine.wait_until_fails(
+            "systemctl is-active --quiet steamos-manager.service",
+            timeout=30,
+        )
         assert_no_sddm()
         # If hyprland stops shipping a wayland session file at the path
         # tuigreet was handed, jasonbk lands at a blank greeter. Pull the
@@ -162,6 +194,19 @@ pkgs.testers.nixosTest {
         sessions = machine.succeed(f"ls {m.group(1)}").split()
         assert any(s.endswith(".desktop") for s in sessions), \
             f"tuigreet sessions dir should contain a .desktop: {sessions}"
+
+    def spec_switch_holdouts(scope):
+        # Pull the wrapper's SIGTERM-holdout log lines from journald.
+        # The wrapper emits them via `systemd-cat -t spec-switch` between
+        # SIGTERM and SIGKILL, so any planted stubborn-sleep scope must
+        # show up here. If this returns empty after a real swap, either
+        # the logging code regressed or the test fake started honouring
+        # SIGTERM (in which case the test isn't reaching the production
+        # code path any more).
+        return machine.succeed(
+            f"journalctl -t spec-switch --no-pager --output=cat | "
+            f"grep -F {scope!r} || true"
+        ).strip()
 
     def running_services():
         units = set(machine.succeed(
@@ -330,17 +375,34 @@ pkgs.testers.nixosTest {
         machine.succeed(f"loginctl enable-linger {GAMING_USER}")
         machine.succeed(f"systemctl start user@{uid}.service")
         machine.wait_until_succeeds(f"systemctl is-active user@{uid}.service")
-        # systemd-run resolves --uid by name and uses the user's
-        # primary group automatically; passing a numeric --gid risks
-        # a UID/GID mismatch we hit on this host (gamer's GID != UID).
+        # Plant a SIGTERM-resistant session scope under gamer's slice,
+        # mirroring how logind sets up real plasma sessions (under
+        # session-<N>.scope, with wayland clients inside). The payload
+        # ignores SIGTERM so the test reaches the production code path
+        # — without this, a plain `sleep 600` exits instantly on
+        # SIGTERM and the slow-scope-stop bug stays hidden.
+        # `systemd-run --scope` blocks for the lifetime of the
+        # supervised command, so wrap it in `( ... & )` to fully
+        # detach: the subshell forks the systemd-run into a new
+        # process group, redirects its stdio away, then exits — the
+        # outer machine.succeed returns instantly while the scope
+        # keeps running in the background. The scope name follows
+        # logind's session-<N>.scope pattern so the wrapper's session-
+        # scope filter picks it up exactly like a real session.
         machine.succeed(
-            f"systemd-run --uid={GAMING_USER} "
-            f"--slice=user-{uid}.slice --unit=fake-plasma "
-            f"--no-block -- sleep 600"
+            f"( systemd-run --scope --uid={GAMING_USER} "
+            f"--slice=user-{uid}.slice --unit=session-901.scope "
+            f"--collect --quiet -- {STUBBORN_SLEEP} "
+            f"</dev/null >/dev/null 2>&1 & )"
         )
-        machine.wait_until_succeeds("systemctl is-active fake-plasma.service")
+        machine.wait_until_succeeds("systemctl is-active session-901.scope")
 
         before = greetd_enter_ts()
+        # Same wallclock bound as the dev → gaming direction. The
+        # swapWrapper is shared, so a regression in either direction
+        # shows up here too.
+        SWAP_BUDGET_S = 45.0
+        swap_started = time.monotonic()
 
         # The headline production bug: the desktop-entry click spawns
         # `switch-to-dev-mode-user` inside plasma's session-N.scope —
@@ -370,38 +432,65 @@ pkgs.testers.nixosTest {
             f"--slice=user-{uid}.slice --wait --collect --pipe -- "
             f"/run/current-system/sw/bin/switch-to-dev-mode-user"
         )
+        swap_elapsed = time.monotonic() - swap_started
         assert status in SUCCESS_CODES, (
             f"switcher was reaped by its own `systemctl stop "
             f"user-{uid}.slice` before switch-to-configuration ran "
-            f"(status={status}): {output!r}"
+            f"(status={status}, elapsed={swap_elapsed:.1f}s): {output!r}"
+        )
+        assert swap_elapsed < SWAP_BUDGET_S, (
+            f"gaming → dev swap took {swap_elapsed:.1f}s (budget {SWAP_BUDGET_S}s); "
+            "a SIGTERM-resistant process in the user slice should be force-killed, "
+            "not waited out for TimeoutStopSec"
+        )
+        # Regression guard for the EACCES failure mode we hit during
+        # bringup: status=4 alone is tolerated by the wrapper (legit
+        # cases include "user not logged in to reload"), but if a
+        # future refactor reintroduces the slice-stop pattern it will
+        # tear down /run/user/<uid> mid-activation and switch-to-
+        # configuration's user-unit reload will EACCES on
+        # /run/user/<uid>/nixos. Catch that string directly so the
+        # regression doesn't ride in under a tolerated exit code.
+        assert "/run/user/" not in output and "Permission denied" not in output, (
+            "switch-to-configuration touched a torn-down /run/user/<uid>; "
+            f"the session-scope-only wrapper must keep user-runtime-dir alive:\n{output}"
         )
         assert_dev_active()
         after = greetd_enter_ts()
         assert after > before, \
             f"gamer's NOPASSWD escalation should restart greetd: {before} -> {after}"
 
-        # The swap must have torn down everything in gamer's slice —
-        # the transient (mimicking a session scope) AND the user
-        # manager. `is-active --quiet` exits 0 only when the unit is
-        # active, so a non-zero exit covers every "reaped" state
-        # (inactive, failed, gone) without parsing the printed line.
-        fake_status, _ = machine.execute(
-            "systemctl is-active --quiet fake-plasma.service"
+        # The wrapper must have torn down the planted session scope
+        # (this is what holds tty1/DRM in production). `is-active
+        # --quiet` exits 0 only when the unit is active, so a non-zero
+        # exit covers every "reaped" state (inactive, failed, gone)
+        # without parsing the printed line.
+        scope_status, _ = machine.execute(
+            "systemctl is-active --quiet session-901.scope"
         )
-        assert fake_status != 0, \
-            "fake-plasma should be reaped by the swap but is still active"
-        slice_status, _ = machine.execute(
-            f"systemctl is-active --quiet user-{uid}.slice"
-        )
-        assert slice_status != 0, \
-            f"user-{uid}.slice should be inactive after swap but is still active"
-        # No leftover processes owned by gamer. ps -u prints nothing on
-        # success (no headers, no rows) when the user has no procs.
+        assert scope_status != 0, \
+            "session-901.scope should be reaped by the swap but is still active"
+        # No leftover wayland-client processes owned by gamer. The
+        # user manager (user@<uid>.service) is allowed to stay alive
+        # — switch-to-configuration needs it to reload user units —
+        # so we filter the stubborn-sleep PIDs specifically rather
+        # than asserting an empty `ps -u`. `pgrep` exits 1 with no
+        # matches, which would trip the harness's `set -e`; the `||
+        # true` collapses that to a clean empty stdout.
         survivors = machine.succeed(
-            f"ps -o pid,comm --no-headers -u {GAMING_USER} 2>/dev/null || true"
+            f"pgrep -u {GAMING_USER} -f stubborn-sleep || true"
         ).strip()
         assert not survivors, \
-            f"gamer-owned processes survived the swap: {survivors!r}"
+            f"stubborn-sleep survivors after swap: {survivors!r}"
+        # The planted SIGTERM-resistant payload must have been logged as a
+        # holdout. This is the diagnostic trail future debugging will pull
+        # via `journalctl -t spec-switch -b` to find which real-world
+        # clients (electron, browsers) routinely need SIGKILL.
+        holdouts = spec_switch_holdouts("session-901.scope")
+        assert holdouts, (
+            "wrapper should have logged the stubborn-sleep as a SIGTERM "
+            "holdout under tag spec-switch; nothing found for session-901.scope"
+        )
 
     with subtest("dev-spec shortcuts: game-mode only, no dev-mode, no big-picture"):
         # In hyprland the only swap that makes sense is to gaming —
@@ -473,51 +562,133 @@ pkgs.testers.nixosTest {
         machine.succeed(f"loginctl enable-linger {DEV_USER}")
         machine.succeed(f"systemctl start user@{uid}.service")
         machine.wait_until_succeeds(f"systemctl is-active user@{uid}.service")
+
+        # Plant a SIGTERM-resistant session scope under jasonbk's slice.
+        # Production Hyprland sessions live in session-<N>.scope under
+        # user-<uid>.slice (logind-created) and carry wayland clients
+        # (electron apps, xwayland, pipewire helpers, web browsers)
+        # that don't always exit on SIGTERM. `systemctl stop` honours
+        # the scope's TimeoutStopSec — systemd default is 90s — before
+        # escalating to SIGKILL, so the slowest holdout sets the floor
+        # on swap latency. That is the "blinking caret then minutes of
+        # black screen" symptom on dev → gaming: tty1 reverts to the
+        # kernel console (caret) the moment Hyprland's compositor
+        # dies, then everything sits there until the scope finally
+        # drains and switch-to-configuration can restart greetd into
+        # gaming.
+        #
+        # The prior `sleep 600` fake exited instantly on SIGTERM,
+        # hiding this. The stubborn-sleep helper traps SIGTERM so the
+        # holdout is immune. Wrap systemd-run --scope in `( ... & )`
+        # to fully detach (the systemd-run blocks for the lifetime of
+        # the supervised command otherwise). The scope name matches
+        # logind's `session-<N>.scope` so the wrapper's session-scope
+        # filter picks it up exactly like a real session.
         machine.succeed(
-            f"systemd-run --uid={DEV_USER} "
-            f"--slice=user-{uid}.slice --unit=fake-hyprland "
-            f"--no-block -- sleep 600"
+            f"( systemd-run --scope --uid={DEV_USER} "
+            f"--slice=user-{uid}.slice --unit=session-902.scope "
+            f"--collect --quiet -- {STUBBORN_SLEEP} "
+            f"</dev/null >/dev/null 2>&1 & )"
         )
-        machine.wait_until_succeeds("systemctl is-active fake-hyprland.service")
+        machine.wait_until_succeeds("systemctl is-active session-902.scope")
 
         before = greetd_enter_ts()
+        # Snapshot logind/dbus enter timestamps. The activation script of
+        # the gaming toplevel must not restart these — if it does, every
+        # existing logind session enters `closing` and the new gaming
+        # autologin queues behind PAM cleanup. The user perceives this as
+        # a black screen of indeterminate duration.
+        logind_before = unit_enter_ts("systemd-logind.service")
+        dbus_before = unit_enter_ts("dbus.service")
+        # The headline production bound: real users report "3s caret then
+        # ~2 minutes of black". The dominant component is the user slice's
+        # default 90s TimeoutStopSec. With the SIGKILL fast-path that this
+        # test will drive, the entire swap should complete well under 30s.
+        # Pick 45s as a generous-but-still-failing-the-bug budget — the
+        # production symptom would blow well past this.
+        SWAP_BUDGET_S = 45.0
+        swap_started = time.monotonic()
 
         status, output = machine.execute(
             f"systemd-run --quiet --uid={DEV_USER} "
             f"--slice=user-{uid}.slice --wait --collect --pipe -- "
             f"/run/current-system/sw/bin/switch-to-game-mode-user"
         )
+        swap_elapsed = time.monotonic() - swap_started
         assert status in SUCCESS_CODES, (
             f"switcher was reaped or failed before switch-to-configuration "
-            f"completed (status={status}): {output!r}"
+            f"completed (status={status}, elapsed={swap_elapsed:.1f}s): {output!r}"
         )
+        # Wallclock budget reproduces the production "2 minutes of black"
+        # symptom directly: a slice with a SIGTERM-resistant holdout takes
+        # ~90s to stop via plain `systemctl stop`. If this assertion fires
+        # at ~90s it points squarely at the slice-stop TimeoutStopSec.
+        assert swap_elapsed < SWAP_BUDGET_S, (
+            f"dev → gaming swap took {swap_elapsed:.1f}s (budget {SWAP_BUDGET_S}s); "
+            "a SIGTERM-resistant process in the user slice should be force-killed, "
+            "not waited out for TimeoutStopSec"
+        )
+        # Regression guard against the EACCES on /run/user/<uid> failure
+        # we hit during bringup — see the symmetric assertion in the
+        # gaming → dev subtest above for the rationale.
+        assert "/run/user/" not in output and "Permission denied" not in output, (
+            "switch-to-configuration touched a torn-down /run/user/<uid>; "
+            f"the session-scope-only wrapper must keep user-runtime-dir alive:\n{output}"
+        )
+
         assert_gaming_active()
         after = greetd_enter_ts()
         assert after > before, \
             f"jasonbk's NOPASSWD escalation should restart greetd: {before} -> {after}"
 
-        # The swap must have torn down everything in jasonbk's slice —
-        # both the transient (mimicking a session scope) and the user
-        # manager. Without this teardown the new greetd can't claim
-        # tty1, which is the visible-black-screen symptom on real
-        # hardware. `is-active --quiet` exits 0 only when the unit is
-        # active, so a non-zero exit covers every "reaped" state
-        # (inactive, failed, gone) without parsing the printed line.
-        fake_status, _ = machine.execute(
-            "systemctl is-active --quiet fake-hyprland.service"
+        # logind/dbus must survive the swap untouched. A restart here
+        # forces every active session into `closing`, and the new gaming
+        # autologin can't open a PAM session until cleanup completes —
+        # which is itself bounded by user-runtime-dir@.service's stop
+        # timeout. Either restart explains "minutes of black".
+        logind_after = unit_enter_ts("systemd-logind.service")
+        dbus_after = unit_enter_ts("dbus.service")
+        assert logind_after == logind_before, (
+            f"systemd-logind restarted across dev → gaming "
+            f"({logind_before} -> {logind_after}); active sessions would "
+            "enter `closing` and block the gaming autologin"
         )
-        assert fake_status != 0, \
-            "fake-hyprland should be reaped by the swap but is still active"
-        slice_status, _ = machine.execute(
-            f"systemctl is-active --quiet user-{uid}.slice"
+        assert dbus_after == dbus_before, (
+            f"dbus.service restarted across dev → gaming "
+            f"({dbus_before} -> {dbus_after}); session-bus clients lose "
+            "connections and reconnects stall the new session"
         )
-        assert slice_status != 0, \
-            f"user-{uid}.slice should be inactive after swap but is still active"
+
+        # The wrapper must have torn down the planted session scope
+        # (this is what holds tty1/DRM in production). The user manager
+        # (user@<uid>.service) and runtime dir intentionally survive —
+        # switch-to-configuration needs them to reload user units, and
+        # killing them abruptly produced the EACCES on /run/user/<uid>
+        # that motivated the session-scope-only design.
+        scope_status, _ = machine.execute(
+            "systemctl is-active --quiet session-902.scope"
+        )
+        assert scope_status != 0, \
+            "session-902.scope should be reaped by the swap but is still active"
+        # No leftover wayland-client processes: assert the stubborn-
+        # sleep helper PIDs are gone. user@<uid>.service workers
+        # (systemd, dbus, etc.) are allowed to remain. `pgrep` exits 1
+        # with no matches; `|| true` collapses that into clean empty
+        # stdout so the harness `set -e` doesn't trip.
         survivors = machine.succeed(
-            f"ps -o pid,comm --no-headers -u {DEV_USER} 2>/dev/null || true"
+            f"pgrep -u {DEV_USER} -f stubborn-sleep || true"
         ).strip()
         assert not survivors, \
-            f"jasonbk-owned processes survived the swap: {survivors!r}"
+            f"stubborn-sleep survivors after swap: {survivors!r}"
+        # Same diagnostic-trail guarantee as the gaming → dev direction:
+        # the planted holdout must show up under tag spec-switch so future
+        # debugging on real hardware (where the real offenders are
+        # electron/chromium/steamwebhelper) has a journal to grep.
+        holdouts = spec_switch_holdouts("session-902.scope")
+        assert holdouts, (
+            "wrapper should have logged the stubborn-sleep as a SIGTERM "
+            "holdout under tag spec-switch; nothing found for session-902.scope"
+        )
 
     with subtest("gamer in gaming → big-picture wrapper does not escalate or flip the spec"):
         # The plasma shortcut must launch Big Picture in-place; it must

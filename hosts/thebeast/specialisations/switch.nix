@@ -57,10 +57,11 @@
   swapWrapper = {
     name,
     target,
+    targetSpec,
   }:
     pkgs.writeShellApplication {
       inherit name;
-      runtimeInputs = [pkgs.coreutils pkgs.systemd pkgs.gawk];
+      runtimeInputs = [pkgs.coreutils pkgs.systemd pkgs.gawk pkgs.plymouth];
       text = ''
         # The desktop-entry click path spawns this script (after a sudo
         # hop) inside the calling user's session-N.scope under
@@ -83,22 +84,120 @@
             -- "$0" "$@"
         fi
 
+        targetSpec="${targetSpec}"
+
+        # Best-effort plymouth handoff. plymouthd-as-shutdown-splash is
+        # the standard pattern for painting status during teardown:
+        # systemd's shutdown.target uses the same mode for `Stopping
+        # Plymouth boot screen` → splash redraw. We don't gate the swap
+        # on success — if plymouthd can't acquire DRM (compositor still
+        # holds master, or the host has no plymouth theme configured),
+        # the messages go nowhere and the swap proceeds silently.
+        plymouth_active=0
+        if plymouth --ping 2>/dev/null; then
+          plymouth_active=1
+        elif plymouthd --mode=shutdown 2>/dev/null && plymouth show-splash 2>/dev/null; then
+          plymouth_active=1
+        fi
+        say() {
+          if [ "$plymouth_active" = 1 ]; then
+            plymouth display-message --text "$1" 2>/dev/null || true
+            plymouth update --status="$1" 2>/dev/null || true
+          fi
+          echo "$1"
+        }
+        say "Switching to $targetSpec mode..."
+
         ${resolveTarget target}
 
-        # `systemctl stop` on the slice blocks until every unit inside
-        # (user@$uid.service + every session-<n>.scope) reaches
-        # inactive, at which point logind unregisters the user. If
-        # stop itself fails (dbus/permissions/timeout), we'd race
-        # logind during switch-to-configuration's ListUsers call —
-        # abort instead of papering over.
-        mapfile -t userSlices < <(
-          systemctl list-units --type=slice --state=active --no-legend --plain \
-            | awk '$1 ~ /^user-[0-9]+\.slice$/ { print $1 }'
+        # Drain every active session scope before activation. Session
+        # scopes (session-N.scope under user-<uid>.slice) hold tty1, the
+        # DRM master, and every wayland client of the outgoing desktop.
+        # On dev → gaming with real Hyprland sessions these scopes
+        # contain electron apps, xwayland, pipewire helpers, and a web
+        # browser or two that don't reliably exit on SIGTERM — the
+        # slowest holdout sets the floor on swap latency. systemd's
+        # default TimeoutStopSec is 90s, and the visible production
+        # symptom is a blinking caret on tty1 followed by 1-2 minutes
+        # of black screen while we wait the scope out.
+        #
+        # Three-phase drain: SIGTERM → 3s grace → SIGKILL. Well-behaved
+        # clients (hyprland, steam, browsers, editors) save state and
+        # exit during the grace window; misbehaving ones get force-
+        # killed when it expires. 3s is comfortably above the worst
+        # polite-exit I've measured in practice and well under the
+        # user-perceptible "is this hung?" threshold. (A `systemctl
+        # set-property --runtime TimeoutStopSec=…` override would be
+        # the systemd-native form, but the property is fixed at scope
+        # creation time and the runtime override silently no-ops.)
+        #
+        # Critically, we do NOT stop the parent user-<uid>.slice or
+        # user@<uid>.service / user-runtime-dir@<uid>.service. An
+        # abrupt slice kill leaves /run/user/<uid> torn down while
+        # logind still lists the user; switch-to-configuration's
+        # "reloading user units for <user>" pass then EACCES on
+        # /run/user/<uid>/nixos. By keeping the user manager and
+        # runtime dir intact we hand activation a coherent user
+        # instance and the reload pass runs cleanly. The wrapper's
+        # own invocation chain (the privileged switcher → systemd-run
+        # in user-<uid>.slice/run-XXXXX.service) is in the slice too;
+        # leaving the slice alone keeps the chain alive long enough
+        # to propagate the activation exit code back to the caller.
+        #
+        # Known collateral: name-based filtering catches every active
+        # session scope including non-seat0 logind sessions (e.g. a
+        # concurrent ssh login). If that ever bites, switch the filter
+        # to `loginctl list-sessions | awk '$4 == "seat0"'`; the test
+        # harness plants a transient session-<N>.scope outside logind
+        # and relies on name-based matching to find it, so a seat-only
+        # filter would need a matching test redesign.
+        mapfile -t sessionScopes < <(
+          systemctl list-units --type=scope --state=active --no-legend --plain \
+            | awk '$1 ~ /^session-[0-9]+\.scope$/ { print $1 }'
         )
-        for slice in "''${userSlices[@]}"; do
-          systemctl stop "$slice"
+        say "Terminating ''${#sessionScopes[@]} session(s)..."
+        for scope in "''${sessionScopes[@]}"; do
+          systemctl kill --kill-whom=all --signal=SIGTERM "$scope" 2>/dev/null || true
+        done
+        sleep 3
+        # Anything still alive after the 3s grace is a SIGTERM holdout:
+        # an Electron app, browser, steamwebhelper, or other client that
+        # doesn't honour SIGTERM cleanly. Log pid/comm/cmdline per
+        # surviving process to journald under tag `spec-switch` BEFORE
+        # SIGKILL so /proc/<pid>/{comm,cmdline} is still readable. A few
+        # swaps' worth of these entries identifies the routine offenders
+        # so they can be patched (KillSignal=, TimeoutStopSec= drop-ins)
+        # rather than relying on the 3s SIGKILL backstop forever. Pull
+        # via: `journalctl -t spec-switch -b`.
+        {
+          for scope in "''${sessionScopes[@]}"; do
+            cg=$(systemctl show -p ControlGroup --value "$scope" 2>/dev/null)
+            procs="/sys/fs/cgroup''${cg}/cgroup.procs"
+            [ -n "$cg" ] && [ -r "$procs" ] || continue
+            while read -r pid; do
+              [ -z "$pid" ] && continue
+              comm=$(cat "/proc/$pid/comm" 2>/dev/null || echo "?")
+              cmdline=$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || echo "?")
+              printf 'SIGTERM holdout in %s: pid=%s comm=%s cmdline=%s\n' \
+                "$scope" "$pid" "$comm" "''${cmdline:-?}"
+              say "Force-killing $comm (pid $pid)..."
+            done < "$procs"
+          done
+        } | systemd-cat -t spec-switch -p warning
+        for scope in "''${sessionScopes[@]}"; do
+          systemctl kill --kill-whom=all --signal=SIGKILL "$scope" 2>/dev/null || true
+        done
+        # Stop tolerates `Unit not loaded` (exit 5): after SIGKILL the
+        # cgroup empties and systemd auto-deactivates the transient
+        # scope (with --collect, it unloads too) before this call
+        # reaches it. A real stop failure (dbus down, permissions)
+        # would surface on the very next systemctl call; aborting
+        # here under set -e would only leave the spec marker stale.
+        for scope in "''${sessionScopes[@]}"; do
+          systemctl stop "$scope" 2>/dev/null || true
         done
 
+        say "Activating $targetSpec configuration..."
         status=0
         # `test`, not `switch`: activate the target toplevel without
         # overwriting the boot default. Specialisations are sibling boot
@@ -106,18 +205,27 @@
         # spec flip the new default-on-reboot.
         "$target" test || status=$?
         if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then
+          # Leave the splash up on failure so the user can read it;
+          # the new spec's greetd never came up, so there's no
+          # session-restart race to win.
+          say "Activation failed (status=$status)"
           exit "$status"
         fi
+        # Drop plymouth before greetd restarts — greetd needs the TTY,
+        # and a lingering plymouth holds DRM master.
+        [ "$plymouth_active" = 1 ] && plymouth quit 2>/dev/null || true
       '';
     };
 
   switchToGameMode = swapWrapper {
     name = "switch-to-game-mode";
     target = "/bin/switch-to-configuration";
+    targetSpec = "gaming";
   };
   switchToDevMode = swapWrapper {
     name = "switch-to-dev-mode";
     target = "/specialisation/dev/bin/switch-to-configuration";
+    targetSpec = "dev";
   };
 
   # The user-facing entrypoints are spec-asymmetric on purpose:
