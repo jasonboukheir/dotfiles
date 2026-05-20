@@ -17,7 +17,7 @@
       };
       gpus."1002:7550-1DA2:E490-0000:03:00.0" = {
         power_cap = 334.0;
-        voltage_offset = -80;
+        voltage_offset = -50;
       };
     };
   };
