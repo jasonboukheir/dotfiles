@@ -20,6 +20,7 @@ in {
     ai.enable = true;
     budget.enable = true;
     certs.enable = true;
+    chat.enable = true;
     cloud.enable = true;
     code.enable = true;
     gonic.enable = true;
