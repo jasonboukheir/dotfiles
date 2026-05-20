@@ -641,6 +641,33 @@ pkgs.testers.nixosTest {
         assert after > before, \
             f"jasonbk's NOPASSWD escalation should restart greetd: {before} -> {after}"
 
+        # Regression guard for the "switch-to-desktop hangs on the second
+        # round-trip" bug. jovian's 60-steam-input.rules tags /dev/uinput
+        # and /dev/hidraw* with TAG+="uaccess" so logind ACLs them to the
+        # current session user. switch-to-configuration's `udevadm control
+        # --reload-rules` only changes how *future* uevents are processed;
+        # /dev/uinput exists from the boot-time module load and never
+        # re-fires "add", so the new spec's rules don't reach the existing
+        # node. Without the wrapper's `udevadm trigger`, gamer's next
+        # gamescope-session brings up the user-instance steamos-manager,
+        # which fails "Starting udev-monitor → Permission denied" opening
+        # /dev/uinput, crash-loops under TimeoutStartSec for ~3 minutes,
+        # and the subsequent Steam "Switch to Desktop" hangs because
+        # steamosctl can't reach the daemon. Assert the tag is present in
+        # /run/udev/data after the swap. `/dev/uinput` may not exist in
+        # the test VM if the kernel module isn't loadable; gate the check
+        # on its presence rather than failing on infrastructure gaps.
+        if machine.execute("test -e /dev/uinput")[0] == 0:
+            tags = machine.succeed(
+                "udevadm info --query=property /dev/uinput | "
+                "awk -F= '/^(CURRENT_)?TAGS=/ { print $2 }' || true"
+            )
+            assert "uaccess" in tags, (
+                "after dev → gaming the wrapper must `udevadm trigger` "
+                "existing nodes so jovian's 60-steam-input.rules re-tags "
+                f"/dev/uinput with uaccess; got tags={tags!r}"
+            )
+
         # logind/dbus must survive the swap untouched. A restart here
         # forces every active session into `closing`, and the new gaming
         # autologin can't open a PAM session until cleanup completes —
