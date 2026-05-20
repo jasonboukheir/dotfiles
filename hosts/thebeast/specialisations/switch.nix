@@ -211,6 +211,34 @@
           say "Activation failed (status=$status)"
           exit "$status"
         fi
+        # Re-evaluate udev rules against existing /dev nodes. The
+        # gaming and dev specs ship different udev rule sets — jovian's
+        # 60-steam-input.rules tags /dev/uinput, /dev/hidraw* and
+        # Valve-vendor /dev/input/event* with TAG+="uaccess", which
+        # logind reads on session creation to ACL the device to the
+        # logged-in user. switch-to-configuration's `udevadm control
+        # --reload-rules` only affects *future* uevents; the kernel
+        # never re-fires "add" for /dev/uinput (created once by the
+        # uinput module load at boot) or for already-plugged hidraw/
+        # input devices, so they sit on the previous spec's tags. The
+        # new gamer/jasonbk session then opens without uaccess; the
+        # production symptom is the user-instance steamos-manager
+        # failing "Starting udev-monitor → Encountered error running:
+        # Permission denied" trying to open /dev/uinput, looping
+        # under TimeoutStartSec (default 90s × StartLimitBurst=5) for
+        # ~3 minutes, during which jovian-setup-desktop-session's
+        # `steamosctl set-default-desktop-session` dbus call hangs and
+        # Steam's "Switch to Desktop" eventually times out.
+        # `--action=change` (not "add") because logind reapplies uaccess
+        # on "change" without surprising the kernel module. `settle
+        # --timeout=5` is best-effort; we don't gate the swap on it.
+        udevadm trigger \
+          --action=change \
+          --subsystem-match=misc \
+          --subsystem-match=input \
+          --subsystem-match=hidraw 2>/dev/null || true
+        udevadm settle --timeout=5 2>/dev/null || true
+
         # Drop plymouth before greetd restarts — greetd needs the TTY,
         # and a lingering plymouth holds DRM master.
         [ "$plymouth_active" = 1 ] && plymouth quit 2>/dev/null || true
