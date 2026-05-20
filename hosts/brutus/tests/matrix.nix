@@ -17,17 +17,28 @@ pkgs.testers.nixosTest {
 
     homelab.services.synapse.enable = true;
 
-    # Stand-in for the file that pocket-id-provisioner would normally drop
-    # at /run/pocket-id-secrets/<client_id>. The headline fix changed
-    # matrix-synapse's `client_secret_path` from this raw path (synapse
-    # can't read it under PrivateTmp/ProtectSystem) to the LoadCredential
-    # bind-mount target. Stub the source file so the LoadCredential copy
-    # actually happens and we can confirm the bind-mount path is populated.
-    #
-    # Distinctive payload makes the round-trip assertion below precise.
+    # The matrix-auth module owns these in production; tests don't run
+    # MAS, so stand in for the secrets oneshot's output. Distinctive
+    # payloads catch a regression that silently aliased synapse's
+    # LoadCredential to the wrong file.
     systemd.tmpfiles.rules = [
-      "f /run/pocket-id-secrets/matrix-synapse 0600 root root - test-stub-oidc-secret-payload"
+      "d /var/lib/matrix-mas-shared 0750 root root - -"
+      "f /var/lib/matrix-mas-shared/synapse_client_secret 0600 root root - test-stub-mas-synapse-client-secret"
+      "f /var/lib/matrix-mas-shared/admin_token 0600 root root - test-stub-mas-admin-token"
     ];
+
+    # matrix-synapse's unit `Requires=` matrix-authentication-service-secrets,
+    # which would otherwise fail-the-job since MAS isn't in scope here.
+    # Stub it as a no-op so the dependency resolves and synapse can start.
+    systemd.services.matrix-authentication-service-secrets = {
+      description = "stub for matrix-synapse test (MAS not in scope)";
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.coreutils}/bin/true";
+      };
+    };
   };
 
   testScript = {nodes, ...}: let
@@ -84,29 +95,39 @@ pkgs.testers.nixosTest {
         assert before == after, \
             "matrix-synapse-secrets regenerated secrets on rerun — must be idempotent"
 
-    with subtest("matrix-synapse LoadCredential names the oidc secret, not smtp"):
-        # The pre-fix LoadCredential carried `smtp_password:<path>` left
-        # over from an email block synapse no longer uses. The post-fix
-        # version must load `oidc_client_secret` from pocket-id-provisioner's
-        # output dir. Assert both halves to pin both directions of drift.
+    with subtest("matrix-synapse LoadCredentials the two MAS-shared values"):
+        # The MSC3861 cutover replaced the single pocket-id oidc secret
+        # with two values shared from the matrix-auth module:
+        # synapse's client_secret inside MAS, and the admin token MAS
+        # hands to synapse for /_synapse/admin. Both must LoadCredential
+        # from /var/lib/matrix-mas-shared/ — never from the raw pocket-id
+        # secrets path the legacy oidc_providers config used.
         unit = machine.succeed("systemctl cat matrix-synapse.service")
-        assert "LoadCredential=oidc_client_secret:/run/pocket-id-secrets/matrix-synapse" in unit, \
-            f"matrix-synapse unit must LoadCredential oidc_client_secret:\n{unit}"
-        assert "smtp_password" not in unit, \
-            f"stale smtp_password LoadCredential lingering in unit:\n{unit}"
+        assert "LoadCredential=mas_synapse_client_secret:/var/lib/matrix-mas-shared/synapse_client_secret" in unit, \
+            f"matrix-synapse unit must LoadCredential mas_synapse_client_secret:\n{unit}"
+        assert "LoadCredential=mas_admin_token:/var/lib/matrix-mas-shared/admin_token" in unit, \
+            f"matrix-synapse unit must LoadCredential mas_admin_token:\n{unit}"
+        for stale in ("oidc_client_secret", "smtp_password", "/run/pocket-id-secrets/matrix-synapse"):
+            assert stale not in unit, \
+                f"stale credential reference '{stale}' lingering in unit:\n{unit}"
 
-    with subtest("rendered homeserver.yaml points client_secret_path at the bind-mount"):
-        # The headline of `fix oidc load credential`: synapse reads the
-        # client secret from the credentials bind-mount, NOT from the raw
-        # /run/pocket-id-secrets path (which synapse's sandbox can't reach).
-        # If this regresses, oidc login fails at startup with an opaque
-        # "could not load client secret" — easier to catch here than in
-        # prod.
+    with subtest("rendered homeserver.yaml delegates auth via MSC3861 (not legacy oidc_providers)"):
+        # Element X requires MAS-delegated auth — the legacy `oidc_providers`
+        # block only advertises `m.login.sso` which Element X rejects. The
+        # cutover must produce an `experimental_features.msc3861` block
+        # pointing at MAS and the bind-mount paths LoadCredential lands.
         yaml = machine.succeed(f"cat {SYNAPSE_CONFIG}")
-        assert (
-            "client_secret_path: "
-            "/run/credentials/matrix-synapse.service/oidc_client_secret"
-        ) in yaml, f"client_secret_path drift:\n{yaml}"
+        assert "oidc_providers" not in yaml, \
+            f"legacy oidc_providers must be gone — MSC3861 fully replaces it:\n{yaml}"
+        for needle in (
+            "experimental_features:",
+            "msc3861:",
+            "client_id: 0000000000000000000SYNAPSE",
+            "client_secret_path: /run/credentials/matrix-synapse.service/mas_synapse_client_secret",
+            "admin_token_path: /run/credentials/matrix-synapse.service/mas_admin_token",
+        ):
+            assert needle in yaml, \
+                f"{needle!r} missing from synapse config (MSC3861 delegation broken):\n{yaml}"
 
     with subtest("allow_unsafe_locale sits on database, not database.args"):
         # `fixup matrix` moved this key out of database.args (where synapse
@@ -148,23 +169,28 @@ pkgs.testers.nixosTest {
         assert '"versions"' in response, \
             f"/_matrix/client/versions should return a versions list, got: {response!r}"
 
-    with subtest("oidc_client_secret round-trips into synapse's credentials dir"):
+    with subtest("MAS-shared secrets round-trip into synapse's credentials dir"):
         # The LoadCredential bind-mount is private to matrix-synapse.service,
         # but root on the host can read it via /proc/<pid>/root which
         # preserves the unit's mount namespace. This proves synapse can
-        # actually read the secret at the path its config points to, not
-        # just that the unit setting names the right key.
+        # actually read the secrets at the paths the MSC3861 config
+        # points to, not just that the unit setting names the right keys.
         #
-        # The stubbed payload is distinctive on purpose so the assertion
+        # The stubbed payloads are distinctive on purpose so the assertion
         # fails loudly if the bind-mount silently aliased to the wrong
-        # file (e.g., a regression that swapped back to smtp_password).
+        # file (e.g., a regression that swapped the two credentials).
         pid = machine.succeed(
             "systemctl show -p MainPID --value matrix-synapse.service"
         ).strip()
-        payload = machine.succeed(
-            f"cat /proc/{pid}/root/run/credentials/matrix-synapse.service/oidc_client_secret"
+        client_secret = machine.succeed(
+            f"cat /proc/{pid}/root/run/credentials/matrix-synapse.service/mas_synapse_client_secret"
         ).strip()
-        assert payload == "test-stub-oidc-secret-payload", \
-            f"oidc credential did not round-trip into the unit's bind-mount: {payload!r}"
+        assert client_secret == "test-stub-mas-synapse-client-secret", \
+            f"mas_synapse_client_secret credential did not round-trip: {client_secret!r}"
+        admin_token = machine.succeed(
+            f"cat /proc/{pid}/root/run/credentials/matrix-synapse.service/mas_admin_token"
+        ).strip()
+        assert admin_token == "test-stub-mas-admin-token", \
+            f"mas_admin_token credential did not round-trip: {admin_token!r}"
   '';
 }

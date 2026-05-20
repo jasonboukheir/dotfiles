@@ -29,6 +29,7 @@ in {
     {
       homelab.services.chat = {
         isExternal = true;
+        mtls.enable = false;
         # element-web is a static SPA — no backend to proxyPass to. Leaving
         # proxyPass null tells the homelab framework to skip its implicit
         # `/` location so the static-root config below takes over cleanly.
@@ -42,7 +43,11 @@ in {
       # forceSSL/useACMEHost/listen wiring.
       services.nginx.virtualHosts.${homelabCfg.domain} = {
         root = "${elementWeb}";
-        locations."/".tryFiles = "$uri /index.html =404";
+        # `$uri/` lets nginx resolve `/mobile_guide` to its directory index;
+        # without it the mobile-detect redirect lands on a blank page because
+        # try_files falls through to the SPA root, which redirects back.
+        # Element Web uses hash routing, so no SPA fallback is needed.
+        locations."/".tryFiles = "$uri $uri/ =404";
       };
     })
   ];

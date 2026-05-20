@@ -16,8 +16,23 @@ in {
   homelab.enable = true;
   homelab.domain = "sunnycareboo.com";
   homelab.secretsDir = ../secrets;
+
+  # `.well-known/matrix/*` lives on the apex so `@user:sunnycareboo.com`
+  # IDs keep resolving even if synapse/MAS move URLs. Setting all four
+  # here (rather than as side effects of individual service modules)
+  # keeps the public Matrix discovery surface visible in one place; the
+  # synapse and MAS modules just expose `.domain` outputs that this
+  # block composes.
+  homelab.wellKnown.matrix = {
+    server = "${config.homelab.services.synapse.domain}:443";
+    client = "https://${config.homelab.services.synapse.domain}";
+    issuer = "https://${config.homelab.services.matrix-auth.domain}/";
+    account = "https://${config.homelab.services.matrix-auth.domain}/account";
+  };
+
   homelab.services = {
     ai.enable = true;
+    matrix-auth.enable = true;
     budget.enable = true;
     certs.enable = true;
     chat.enable = true;

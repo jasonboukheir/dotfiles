@@ -9,6 +9,7 @@
     ./home-assistant
     ./immich
     ./lldap.nix
+    ./matrix-auth
     ./matrix-synapse
     ./mealie
     ./memos.nix
