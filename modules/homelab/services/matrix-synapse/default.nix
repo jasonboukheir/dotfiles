@@ -24,6 +24,15 @@ in {
     {
       homelab.services.synapse = {
         isExternal = true;
+        # Federation peers + remote Matrix clients (Element mobile, etc.)
+        # hit synapse.sunnycareboo.com without a homelab client cert in
+        # hand; the framework's default of `isExternal → mtls.enable`
+        # would 403 them on port 8443 and silently drop us off the
+        # federation. The chat (element-web) vhost keeps mtls on at the
+        # default since its only role is hosting the SPA UI for our
+        # already-credentialed users — authentication itself still goes
+        # browser → synapse → pocket-id.
+        mtls.enable = false;
         proxyPass = "http://127.0.0.1:${toString port}";
         extraConfig = ''
           client_max_body_size 100M;
