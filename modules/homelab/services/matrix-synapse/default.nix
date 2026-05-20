@@ -95,6 +95,46 @@ in {
           max_upload_size = "100M";
           url_preview_enabled = true;
 
+          # Synapse's stock rate limits (rc_joins.local: burst=10, then
+          # 0.1/sec) are tuned for a public-registration homeserver
+          # defending against join-flood spam. On this single-tenant
+          # instance the limiter mostly just throttles the mautrix
+          # bridges as they back-fill portal rooms — joining 50+ chats
+          # after a fresh WhatsApp pairing reliably 429s. The mautrix
+          # appservice users are already exempt via `rate_limited: false`
+          # in their registration files, but the *human* user joins the
+          # invites under their own quota. Bumping the per-user caps
+          # high enough to absorb a bridge backfill without making this
+          # a fully open relay.
+          rc_joins.local = {
+            per_second = 10.0;
+            burst_count = 500;
+          };
+          rc_joins.remote = {
+            per_second = 1.0;
+            burst_count = 100;
+          };
+          rc_joins_per_room = {
+            per_second = 10.0;
+            burst_count = 100;
+          };
+          rc_invites.per_room = {
+            per_second = 5.0;
+            burst_count = 100;
+          };
+          rc_invites.per_user = {
+            per_second = 5.0;
+            burst_count = 100;
+          };
+          rc_invites.per_issuer = {
+            per_second = 5.0;
+            burst_count = 100;
+          };
+          rc_message = {
+            per_second = 10.0;
+            burst_count = 100;
+          };
+
           # MSC3861 delegates all authentication (login, registration,
           # account management) to MAS at auth.sunnycareboo.com. MAS in
           # turn federates to pocket-id, so the user-facing flow is:
@@ -115,6 +155,38 @@ in {
             admin_token_path = "/run/credentials/matrix-synapse.service/mas_admin_token";
             account_management_url = "${masPublicBase}/account";
           };
+
+          # MSC3202 appservice-mode E2EE: lets the mautrix bridges
+          # encrypt events as each puppet ghost using a per-puppet
+          # device, instead of every ghost masquerading through the
+          # bridge bot's single device (which trips Element's
+          # "sender doesn't match device owner" shield). The bridges
+          # opt in via `encryption.appservice = true` in their config;
+          # synapse has to expose four companion endpoints for that
+          # to work end-to-end:
+          #   - msc3202_transaction_extensions: push device-list /
+          #     OTK-count / fallback-key updates for AS users in
+          #     /transactions so the bridge knows when to top up keys.
+          #   - msc2409_to_device_messages_enabled: include to-device
+          #     events in AS transactions. Without this, the bridge
+          #     can't receive Megolm session-key shares directed at
+          #     its puppets, can't complete the per-puppet device
+          #     handshake, and silently falls back to encrypting
+          #     puppet events with the bot's single device — i.e. the
+          #     exact bug `appservice = true` is meant to fix.
+          #     (mau.fi docs list this alongside msc3202 as a hard
+          #     requirement for appservice-mode encryption.)
+          #   - msc3983_appservice_otk_claims: forward /keys/claim
+          #     requests for the bridge's exclusive ghost namespace
+          #     to the bridge instead of failing with "no OTKs".
+          #   - msc3984_appservice_key_query: forward /keys/query
+          #     similarly so other users can fetch ghost device keys.
+          # These are orthogonal to MSC3861 — AS-token auth doesn't
+          # go through MAS at all.
+          experimental_features.msc3202_transaction_extensions = true;
+          experimental_features.msc2409_to_device_messages_enabled = true;
+          experimental_features.msc3983_appservice_otk_claims = true;
+          experimental_features.msc3984_appservice_key_query = true;
         };
       };
 

@@ -10,6 +10,7 @@
     ./immich
     ./lldap.nix
     ./matrix-auth
+    ./matrix-bridges
     ./matrix-synapse
     ./mealie
     ./memos.nix

@@ -29,6 +29,31 @@ in {
     (lib.mkIf homelabCfg.enable {
       homelab.ports.allocate.ntfy = "auto";
 
+      # On this host the public name `ntfy.sunnycareboo.com` resolves to the
+      # tailnet IP (100.64.0.7) via MagicDNS. Synapse's default
+      # `ip_range_blacklist` covers the entire 100.64.0.0/10 CGNAT range as
+      # an SSRF guard, so its push gateway POSTs to ntfy fail with a
+      # `DNSLookupError no results for hostname lookup` (the IP is found
+      # then dropped). Pinning the name to loopback for *local* lookups
+      # makes Synapse hit nginx on this box directly — TLS still validates
+      # because nginx serves the LE cert keyed off SNI, not the dest IP —
+      # without having to widen the SSRF guard across CGNAT or split the
+      # ntfy `base-url` (which has to keep matching the public pushkey, or
+      # the Matrix Push Gateway will reject every pusher).
+      networking.hosts."127.0.0.1" = [domain];
+
+      # The hosts override above is necessary but not sufficient: synapse's
+      # default `ip_range_blacklist` *also* covers 127.0.0.0/8, so once DNS
+      # resolves to loopback the request is still dropped with the same
+      # "DNSLookupError no results for hostname lookup" (Twisted reports it
+      # as a DNS failure rather than a connect-time deny). Whitelisting the
+      # specific /32 carves out exactly the dest we just pinned and nothing
+      # else — narrower than `127.0.0.0/8`, which would also unblock any
+      # other localhost service a hostile pusher URL could probe. Scoped
+      # into the ntfy module rather than synapse's so the SSRF relaxation
+      # disappears the moment ntfy does.
+      services.matrix-synapse.settings.ip_range_whitelist = lib.mkIf config.services.matrix-synapse.enable ["127.0.0.1/32"];
+
       services.ntfy-sh = {
         enable = true;
         settings = {
