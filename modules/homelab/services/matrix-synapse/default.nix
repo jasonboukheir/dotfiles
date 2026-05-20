@@ -80,7 +80,7 @@ in {
               idp_brand = "oauth";
               issuer = "https://${idDomain}";
               client_id = oidcCfg.settings.id;
-              client_secret_path = oidcCfg.secretFile;
+              client_secret_path = "/run/credentials/matrix-synapse.service/oidc_client_secret";
               discover = true;
               scopes = ["openid" "profile" "email"];
               user_mapping_provider.config = {
@@ -91,15 +91,6 @@ in {
               backchannel_logout_enabled = true;
             }
           ];
-
-          email = {
-            smtp_host = config.homelab.smtp.host;
-            smtp_port = config.homelab.smtp.port;
-            smtp_user = config.homelab.smtp.username;
-            require_transport_security = true;
-            notif_from = "Matrix <${config.homelab.smtp.from}>";
-            app_name = "Matrix";
-          };
         };
       };
 
@@ -114,10 +105,10 @@ in {
       };
 
       systemd.services.matrix-synapse = {
-        after = ["postgresql.service" "matrix-synapse-secrets.service"];
+        after = ["postgresql.service" "matrix-synapse-secrets.service" "pocket-id-provisioner.service"];
         requires = ["postgresql.service" "matrix-synapse-secrets.service"];
         serviceConfig.LoadCredential = [
-          "smtp_password:${config.homelab.smtp.passwordFile}"
+          "oidc_client_secret:${oidcCfg.secretFile}"
         ];
       };
 
