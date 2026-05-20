@@ -8,6 +8,7 @@
     ./home-assistant
     ./immich
     ./lldap.nix
+    ./matrix-synapse
     ./mealie
     ./memos.nix
     ./open-webui
