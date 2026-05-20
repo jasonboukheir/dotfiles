@@ -13,6 +13,7 @@
     ./matrix-synapse
     ./mealie
     ./memos.nix
+    ./ntfy.nix
     ./open-webui
     ./opencloud
     ./pocket-id.nix

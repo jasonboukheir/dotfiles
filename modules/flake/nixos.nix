@@ -76,6 +76,10 @@
             pkgs = brutusPkgs;
             inherit inputs;
           };
+          checks.brutus-ntfy = import ../../hosts/brutus/tests/ntfy.nix {
+            pkgs = brutusPkgs;
+            inherit inputs;
+          };
         };
     };
   };
