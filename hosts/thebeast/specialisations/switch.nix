@@ -68,6 +68,30 @@
       inherit name;
       runtimeInputs = [pkgs.coreutils pkgs.systemd];
       text = ''
+        # The desktop-entry click path spawns this script (after a sudo
+        # hop) inside the calling user's session-N.scope under
+        # user-$uid.slice. sudo doesn't migrate cgroups, so when we
+        # reach `systemctl stop user-$uid.slice` below, PID1 SIGTERMs
+        # every process in the slice — us included — before
+        # switch-to-configuration runs. Plasma dies, the framebuffer
+        # reverts to the kernel console, the spec marker stays put.
+        #
+        # Re-exec ourselves as a transient root service in system.slice
+        # via systemd-run, with an env-var sentinel as the loop guard.
+        # Sentinel-over-cgroup-introspection because the env var is one
+        # bit of state we own, while /proc/self/cgroup format and the
+        # post-migration cgroup path are implementation details that
+        # have changed across systemd majors. --pipe --wait propagates
+        # stdio + exit status; --collect tidies the unit on completion
+        # regardless of result.
+        if [ -z "''${_THEBEAST_SPEC_DETACHED:-}" ]; then
+          exec systemd-run \
+            --quiet --pipe --wait --collect \
+            --slice=system.slice \
+            --setenv=_THEBEAST_SPEC_DETACHED=1 \
+            -- "$0" "$@"
+        fi
+
         ${resolveTarget target}
 
         if uid=$(id -u ${lib.escapeShellArg retireUser} 2>/dev/null) \
