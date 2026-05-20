@@ -40,50 +40,41 @@
   # greetd.nix), and the new initial_session/default_session takes over.
   #
   # Exit 4 means system activation succeeded but a user-instance reload
-  # failed — typically gamer's user units pointing at the old toplevel.
-  # The system half is what matters for the swap; tolerate it.
+  # failed — typically a retiring user's units pointing at the old
+  # toplevel. The system half is what matters for the swap; tolerate it.
   #
-  # `retireUser` names the user whose session belongs to the outgoing
-  # spec and must be torn down before switch-to-configuration enumerates
-  # logged-in users via logind.ListUsers. Without that, the snapshot
-  # includes user@$uid for the retiring user, the per-user activation
-  # blocks waiting for its services to stop, logind GCs the user object
-  # in the meantime, and the next loop iteration trips
-  # `Failed to get GID for <name> / Unknown object login1/user/_<uid>`,
-  # which exits 1.
-  #
-  # We stop user-$uid.slice rather than user@$uid.service: plasma and
-  # the rest of the desktop session live in session-<n>.scope, a
-  # *sibling* of user@$uid.service inside user-$uid.slice. Stopping
-  # only user@$uid.service leaves plasma alive, which holds tty1 and
-  # blocks tuigreet from claiming it after greetd restarts — the user
-  # is left staring at a blinking underscore on tty1 instead of the
-  # dev greeter.
+  # Every active user-<uid>.slice gets stopped before activation runs.
+  # Whichever direction we're going, the outgoing session sits in some
+  # user-<uid>.slice as session-N.scope (a *sibling* of user@<uid>.service
+  # inside the slice). Stopping only user@<uid>.service leaves the
+  # session alive — it keeps holding tty1, and greetd's restart can't
+  # reclaim the TTY for the new spec's initial_session. Iterating over
+  # the slice list (rather than naming one user up front) covers
+  # gamer→dev (kills gamer + greeter), dev→gaming (kills jasonbk +
+  # greeter), and any future operator user without per-spec config.
+  # The visible production symptom of getting this wrong is a black,
+  # cursorless framebuffer after the swap.
   swapWrapper = {
     name,
     target,
-    retireUser,
   }:
     pkgs.writeShellApplication {
       inherit name;
-      runtimeInputs = [pkgs.coreutils pkgs.systemd];
+      runtimeInputs = [pkgs.coreutils pkgs.systemd pkgs.gawk];
       text = ''
         # The desktop-entry click path spawns this script (after a sudo
         # hop) inside the calling user's session-N.scope under
         # user-$uid.slice. sudo doesn't migrate cgroups, so when we
-        # reach `systemctl stop user-$uid.slice` below, PID1 SIGTERMs
-        # every process in the slice — us included — before
-        # switch-to-configuration runs. Plasma dies, the framebuffer
-        # reverts to the kernel console, the spec marker stays put.
-        #
-        # Re-exec ourselves as a transient root service in system.slice
-        # via systemd-run, with an env-var sentinel as the loop guard.
-        # Sentinel-over-cgroup-introspection because the env var is one
-        # bit of state we own, while /proc/self/cgroup format and the
-        # post-migration cgroup path are implementation details that
-        # have changed across systemd majors. --pipe --wait propagates
-        # stdio + exit status; --collect tidies the unit on completion
-        # regardless of result.
+        # reach the slice-stop loop below, PID1 SIGTERMs every process
+        # in the slice — us included — before switch-to-configuration
+        # runs. Re-exec ourselves as a transient root service in
+        # system.slice via systemd-run, with an env-var sentinel as the
+        # loop guard. Sentinel-over-cgroup-introspection because the
+        # env var is one bit of state we own, while /proc/self/cgroup
+        # format and the post-migration cgroup path are implementation
+        # details that have changed across systemd majors. --pipe
+        # --wait propagates stdio + exit status; --collect tidies the
+        # unit on completion regardless of result.
         if [ -z "''${_THEBEAST_SPEC_DETACHED:-}" ]; then
           exec systemd-run \
             --quiet --pipe --wait --collect \
@@ -94,16 +85,19 @@
 
         ${resolveTarget target}
 
-        if uid=$(id -u ${lib.escapeShellArg retireUser} 2>/dev/null) \
-            && systemctl is-active --quiet "user-$uid.slice"; then
-          # systemctl stop on the slice blocks until every unit inside
-          # (user@$uid.service + every session-<n>.scope) reaches
-          # inactive, at which point logind unregisters the user. If
-          # stop itself fails (dbus/permissions/timeout), the logind
-          # race described above is back — abort instead of papering
-          # over.
-          systemctl stop "user-$uid.slice"
-        fi
+        # `systemctl stop` on the slice blocks until every unit inside
+        # (user@$uid.service + every session-<n>.scope) reaches
+        # inactive, at which point logind unregisters the user. If
+        # stop itself fails (dbus/permissions/timeout), we'd race
+        # logind during switch-to-configuration's ListUsers call —
+        # abort instead of papering over.
+        mapfile -t userSlices < <(
+          systemctl list-units --type=slice --state=active --no-legend --plain \
+            | awk '$1 ~ /^user-[0-9]+\.slice$/ { print $1 }'
+        )
+        for slice in "''${userSlices[@]}"; do
+          systemctl stop "$slice"
+        done
 
         status=0
         # `test`, not `switch`: activate the target toplevel without
@@ -120,44 +114,28 @@
   switchToGameMode = swapWrapper {
     name = "switch-to-game-mode";
     target = "/bin/switch-to-configuration";
-    retireUser = "greeter";
   };
   switchToDevMode = swapWrapper {
     name = "switch-to-dev-mode";
     target = "/specialisation/dev/bin/switch-to-configuration";
-    retireUser = cfg.user;
   };
 
-  # The user-facing entrypoints have to handle two distinct cases. The
-  # spec swap (dev <-> gaming) reconfigures the whole DM/session graph
-  # and needs root; the gamescope <-> plasma toggle inside the gaming
-  # spec is steamos-manager's job and runs in the user session against
-  # its DBus. A single desktop entry per direction dispatches to the
-  # right one based on the spec marker installed alongside the toplevel
-  # — readlink /run/current-system can't tell us this because a resolved
-  # toplevel is `/nix/store/...-nixos-system-...` regardless of which
-  # spec is live.
-  readSpec = ''
-    spec=$(cat ${specMarker} 2>/dev/null || true)
-  '';
-
-  # The privileged switchers ignore positional args (their body is a fixed
-  # `switch-to-configuration test` recipe). Don't forward `"$@"` from the
-  # user wrappers — there's no callsite that wants to pass args, and the
-  # surface only shows up in audit logs / process tables.
+  # The user-facing entrypoints are spec-asymmetric on purpose:
+  #   - In dev (hyprland), the only swap that makes sense is to gaming.
+  #     A dev-mode wrapper would be a no-op short-circuit and shows up
+  #     in app launchers as user-confusing dead weight.
+  #   - In gaming (plasma/gamescope), the only spec swap is to dev. The
+  #     in-place "go to big picture" flow is a separate workflow served
+  #     by switchToBigPicture below — it never swaps specs.
+  # The wrappers ignore positional args (the privileged switchers'
+  # bodies are fixed recipes). Don't forward "$@" — there's no callsite
+  # that wants to pass args, and the surface only shows up in audit
+  # logs / process tables.
   switchToGameModeUser = pkgs.writeShellApplication {
     name = "switch-to-game-mode-user";
-    runtimeInputs = [pkgs.coreutils pkgs.steamos-manager];
+    runtimeInputs = [pkgs.coreutils];
     text = ''
-      ${readSpec}
-      case "$spec" in
-        dev)
-          exec ${sudo} -n ${switchToGameMode}/bin/switch-to-game-mode
-          ;;
-        *)
-          exec steamosctl switch-to-game-mode
-          ;;
-      esac
+      exec ${sudo} -n ${switchToGameMode}/bin/switch-to-game-mode
     '';
   };
 
@@ -165,16 +143,35 @@
     name = "switch-to-dev-mode-user";
     runtimeInputs = [pkgs.coreutils];
     text = ''
-      ${readSpec}
-      case "$spec" in
-        dev)
-          echo "Already in dev mode" >&2
-          exit 0
-          ;;
-        *)
-          exec ${sudo} -n ${switchToDevMode}/bin/switch-to-dev-mode
-          ;;
-      esac
+      exec ${sudo} -n ${switchToDevMode}/bin/switch-to-dev-mode
+    '';
+  };
+
+  # Plasma's shortcut used to call steamosctl switch-to-game-mode, which
+  # tears down the desktop session and starts gamescope — the wrong
+  # behaviour when the user just wants to relaunch Steam into Big
+  # Picture without leaving plasma. The new flow: shut down any running
+  # Steam cleanly, wait for it to actually exit (the single-instance
+  # lock survives the IPC quit briefly), force-kill if it hangs, then
+  # exec `steam -gamepadui` which is the modern Steam Deck-style Big
+  # Picture UI inside the current X/wayland session.
+  switchToBigPicture = pkgs.writeShellApplication {
+    name = "switch-to-big-picture";
+    runtimeInputs = [pkgs.coreutils pkgs.procps];
+    text = ''
+      if pgrep -x steam >/dev/null 2>&1; then
+        steam -shutdown 2>/dev/null || true
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+          pgrep -x steam >/dev/null 2>&1 || break
+          sleep 1
+        done
+        if pgrep -x steam >/dev/null 2>&1; then
+          pkill -TERM -x steam || true
+          sleep 1
+          pkill -KILL -x steam || true
+        fi
+      fi
+      exec steam -gamepadui
     '';
   };
 
@@ -198,60 +195,93 @@
     terminal = false;
   };
 
+  bigPictureDesktop = pkgs.makeDesktopItem {
+    name = "switch-to-big-picture";
+    desktopName = "Switch to Big Picture";
+    comment = "Close Steam and re-launch it directly into Big Picture (SteamOS UI)";
+    exec = "${switchToBigPicture}/bin/switch-to-big-picture";
+    icon = "steam";
+    categories = ["Game"];
+    terminal = false;
+  };
+
   gamerDesktopDir = "/home/${cfg.user}/Desktop";
+
+  # Privileged switchers ship in both specs: a dev rebuild still needs
+  # switch-to-game-mode on PATH so the user can swap back, and vice
+  # versa. The user-facing layer is asymmetric on purpose:
+  #   - In dev (hyprland), only the swap-to-gaming entry makes sense.
+  #     A dev-mode shortcut would be a no-op when already in dev.
+  #   - In gaming (plasma), ship the swap-to-dev entry and the
+  #     in-place Big Picture launcher — distinct workflows the user
+  #     wants surfaced separately. No game-mode shortcut: we're
+  #     already there, and the old "Switch to Game Mode" desktop
+  #     entry's behaviour (steamosctl → gamescope) was the wrong fit
+  #     for a plasma session that just wants Steam's gamepad UI.
+  modePackages =
+    [switchToGameMode switchToDevMode]
+    ++ (
+      if cfg.enable
+      then [
+        switchToDevModeUser
+        switchToBigPicture
+        devModeDesktop
+        bigPictureDesktop
+      ]
+      else [
+        switchToGameModeUser
+        gameModeDesktop
+      ]
+    );
+
+  # NOPASSWD only covers the outgoing direction per spec; the other
+  # privileged binary is still on PATH (so run_switch's idempotent
+  # checks can call it as root) but unprivileged users have no rule
+  # to escalate through it. Defense in depth — removes the entire
+  # other-direction surface from the sudo policy.
+  modeSudoRule =
+    if cfg.enable
+    then {
+      command = "${switchToDevMode}/bin/switch-to-dev-mode";
+      options = ["NOPASSWD"];
+    }
+    else {
+      command = "${switchToGameMode}/bin/switch-to-game-mode";
+      options = ["NOPASSWD"];
+    };
 in {
-  # switchToGameModeUser threads pkgs.steamos-manager onto PATH for the
-  # gamescope-side branch. The wrappers ship in both specs (you need them
-  # to swap back from dev), so the jovian closure they pull in is reachable
-  # even when gaming.enable is false — the gaming spec's own allowlist
-  # (specialisations/gaming/jovian.nix) can't cover this one.
-  allowUnfreePackageNames = ["steam-jupiter-unwrapped"];
+  environment.systemPackages = modePackages;
 
-  environment.systemPackages = [
-    switchToGameMode
-    switchToDevMode
-    switchToGameModeUser
-    switchToDevModeUser
-    gameModeDesktop
-    devModeDesktop
-  ];
-
-  # The marker is the spec-detection signal the user wrappers read.
-  # It must change between the parent toplevel and the dev specialisation
-  # — environment.etc.* is per-toplevel, so the two write different
-  # contents and switch-to-configuration installs the right one.
+  # The marker is the spec-detection signal external scripts (and the
+  # tests) read. environment.etc.* is per-toplevel, so the two specs
+  # write different contents and switch-to-configuration installs the
+  # right one.
   environment.etc."thebeast-spec".text = activeSpec;
 
   security.sudo.extraRules = [
     {
       users = ["jasonbk" cfg.user];
-      commands = [
-        {
-          command = "${switchToGameMode}/bin/switch-to-game-mode";
-          options = ["NOPASSWD"];
-        }
-        {
-          command = "${switchToDevMode}/bin/switch-to-dev-mode";
-          options = ["NOPASSWD"];
-        }
-      ];
+      commands = [modeSudoRule];
     }
   ];
 
-  # Unconditional: a dev rebuild must refresh these symlinks too, or
-  # they keep pointing at the previous gaming generation's store paths
-  # until the next swap.
-  systemd.tmpfiles.settings."10-thebeast-gamer-desktop-shortcuts" = {
-    ${gamerDesktopDir}.d = {
-      mode = "0755";
-      user = cfg.user;
-      group = cfg.user;
-    };
-    "${gamerDesktopDir}/switch-to-dev-mode.desktop"."L+" = {
-      argument = "${devModeDesktop}/share/applications/switch-to-dev-mode.desktop";
-    };
-    "${gamerDesktopDir}/switch-to-game-mode.desktop"."L+" = {
-      argument = "${gameModeDesktop}/share/applications/switch-to-game-mode.desktop";
+  # gamer's Desktop is only meaningful in gaming spec (gamer is autologin
+  # then; in dev, gamer isn't logged in at all). Keep the symlinks
+  # gaming-only so a dev rebuild doesn't leave dangling shortcuts to
+  # store paths that aren't even in the dev closure.
+  systemd.tmpfiles.settings = lib.mkIf cfg.enable {
+    "10-thebeast-gamer-desktop-shortcuts" = {
+      ${gamerDesktopDir}.d = {
+        mode = "0755";
+        user = cfg.user;
+        group = cfg.user;
+      };
+      "${gamerDesktopDir}/switch-to-dev-mode.desktop"."L+" = {
+        argument = "${devModeDesktop}/share/applications/switch-to-dev-mode.desktop";
+      };
+      "${gamerDesktopDir}/switch-to-big-picture.desktop"."L+" = {
+        argument = "${bigPictureDesktop}/share/applications/switch-to-big-picture.desktop";
+      };
     };
   };
 }
