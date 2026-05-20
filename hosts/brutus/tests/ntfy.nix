@@ -67,6 +67,25 @@ pkgs.testers.nixosTest {
             f"auth-default-access must default-deny:\n{yaml}"
         assert "visitor-subscriber-rate-limiting: true" in yaml, \
             f"visitor-subscriber-rate-limiting must be on to charge subscribers:\n{yaml}"
+        assert "web-root: disable" in yaml, \
+            f"web-root must be disabled so the SPA is not served publicly:\n{yaml}"
+
+    with subtest("web UI is not served, but the API still answers"):
+        # The SPA at / and the /static assets are the only operator-
+        # facing surface; with web-root: disable they must 404 (no app
+        # shell, no bundled JS), while pure-API paths keep responding.
+        # /v1/health is the canonical liveness probe and proves the
+        # daemon is still up; the Matrix Push Gateway is covered in its
+        # own subtest below. Together these pin "UI gone, API intact"
+        # so a future flip back to web-root: app fails loudly here.
+        for path in ("/", "/app", "/static/css/app.css"):
+            rc, code = machine.execute(
+                "curl -sS -o /dev/null -w '%{http_code}' "
+                f"http://127.0.0.1:{NTFY_PORT}{path}"
+            )
+            assert code.strip() == "404", \
+                f"{path} must 404 with web-root disabled, got HTTP {code!r}"
+        machine.succeed(f"curl -fsS http://127.0.0.1:{NTFY_PORT}/v1/health")
 
     with subtest("anonymous publish is denied under deny-all"):
         # The actual safety contract: with no ACL rows yet, an
