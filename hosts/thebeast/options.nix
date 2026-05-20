@@ -11,6 +11,15 @@
       description = "Username for the gaming account";
     };
 
+    defaultDesktopSession = lib.mkOption {
+      type = lib.types.str;
+      default = "plasma.desktop";
+      description = ''
+        Desktop session steamos-manager hands to "Switch to Desktop" by default.
+        Must match a .desktop file under services.displayManager.sessionData.desktops.
+      '';
+    };
+
     romDir = lib.mkOption {
       type = lib.types.str;
       default = "/games/roms";

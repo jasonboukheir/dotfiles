@@ -47,8 +47,27 @@
           ];
         };
       };
+
+      perSystem = {system, ...}:
+        # nixosTest only runs on Linux; gate so darwin systems still evaluate.
+        if system != "x86_64-linux"
+        then {}
+        else let
+          pkgs = import inputs.nixos-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in {
+          checks.thebeast-specialisation-switch = import ../../hosts/thebeast/tests/specialisation-switch.nix {
+            inherit pkgs inputs;
+          };
+          checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {
+            inherit pkgs inputs;
+          };
+        };
     };
   };
 
   partitionedAttrs.nixosConfigurations = "nixos";
+  partitionedAttrs.checks = "nixos";
 }

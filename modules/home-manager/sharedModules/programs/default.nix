@@ -11,6 +11,7 @@
     ./fish.nix
     ./gemini-cli.nix
     ./ghostty.nix
+    ./kvantum.nix
     ./zmx.nix
     ./ssh.nix
     ./starship.nix
