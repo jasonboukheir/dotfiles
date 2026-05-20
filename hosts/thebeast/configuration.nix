@@ -18,6 +18,14 @@
   # CachyOS kernel with BORE scheduler
   boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
 
+  # Plymouth gives the spec-switch wrapper a place to paint
+  # "Switching to <spec>…" / "Force-killing <comm>…" while the outgoing
+  # compositor's session scope drains and greetd reclaims tty1. Without
+  # quiet+splash the kernel log scrolls over the splash and the
+  # diagnostic text gets shoved off-screen.
+  boot.plymouth.enable = true;
+  boot.kernelParams = ["quiet" "splash"];
+
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
