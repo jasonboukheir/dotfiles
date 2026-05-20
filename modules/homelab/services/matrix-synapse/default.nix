@@ -57,13 +57,13 @@ in {
 
           database = {
             name = "psycopg2";
+            allow_unsafe_locale = true;
             args = {
               user = "matrix-synapse";
               database = "matrix-synapse";
               host = "/run/postgresql";
               cp_min = 5;
               cp_max = 10;
-              allow_unsafe_locale = true;
             };
           };
 
