@@ -57,12 +57,24 @@
             inherit system;
             config.allowUnfree = true;
           };
+          # brutus pins inputs.nixos (the stable channel), so its tests must
+          # run on the same nixpkgs the host evaluates under — otherwise the
+          # rendered homeserver.yaml / unit files in the test diverge from
+          # what we'd actually ship.
+          brutusPkgs = import inputs.nixos {
+            inherit system;
+            config.allowUnfree = true;
+          };
         in {
           checks.thebeast-specialisation-switch = import ../../hosts/thebeast/tests/specialisation-switch.nix {
             inherit pkgs inputs;
           };
           checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {
             inherit pkgs inputs;
+          };
+          checks.brutus-matrix = import ../../hosts/brutus/tests/matrix.nix {
+            pkgs = brutusPkgs;
+            inherit inputs;
           };
         };
     };
