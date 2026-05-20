@@ -42,6 +42,14 @@ in {
           base-url = "https://${domain}";
           listen-http = "127.0.0.1:${toString port}";
           behind-proxy = true;
+          # No web UI: this server exists for UnifiedPush + the Matrix
+          # Push Gateway, both of which are pure-API flows. Serving the
+          # SPA at / only advertises the service to the public internet
+          # and creates a regression surface if an upstream default flip
+          # (enable-signup, enable-login) ever turns the bundled client
+          # into a self-serve account-creation page. The API stays
+          # reachable; only / and /static stop responding.
+          web-root = "disable";
           # Default-deny so a freshly deployed server is not open-write
           # to the public internet. Family accounts + the anonymous
           # write-only grant on `up*` (for UnifiedPush) are layered on
