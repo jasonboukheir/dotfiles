@@ -1,4 +1,4 @@
-{config, ...}: {
-  stylix.enable = !config.gaming.enable;
+{...}: {
+  stylix.enable = true;
   stylix.fonts.sizes.desktop = 12;
 }
