@@ -15,7 +15,7 @@ pkgs.testers.nixosTest {
     # VM regularly OOMs at the default 1024 MiB.
     virtualisation.memorySize = 2048;
 
-    homelab.services.chat.enable = true;
+    homelab.services.synapse.enable = true;
 
     # Stand-in for the file that pocket-id-provisioner would normally drop
     # at /run/pocket-id-secrets/<client_id>. The headline fix changed

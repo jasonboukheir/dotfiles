@@ -2,6 +2,7 @@
   imports = [
     ./actual
     ./coder
+    ./element-web
     ./ezmtls
     ./gonic.nix
     ./headscale
