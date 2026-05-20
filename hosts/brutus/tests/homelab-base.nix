@@ -59,6 +59,12 @@
   # stub the submodule so the domain option resolves without bringing
   # MAS along.
   homelab.services.matrix-auth = {};
+  # MAS's own module guards its `ports.allocate.matrix-auth = "auto"`
+  # behind its enable flag, but matrix-synapse reads
+  # `ports.values.matrix-auth` unconditionally to build the introspection
+  # endpoint URL. Pre-allocate it here so synapse-only tests don't have
+  # to drag MAS into scope.
+  homelab.ports.allocate.matrix-auth = "auto";
 
   # nginx + ACME are out of scope for service-startup smoke tests (no
   # DNS-01, no certs) and the homelab service framework forces both on.
