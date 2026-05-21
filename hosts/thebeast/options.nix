@@ -1,10 +1,5 @@
 {lib, ...}: {
   options.gaming = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Whether to enable gaming mode with Steam, emulators, and gaming packages";
-    };
     user = lib.mkOption {
       type = lib.types.str;
       default = "gamer";
@@ -13,10 +8,11 @@
 
     defaultDesktopSession = lib.mkOption {
       type = lib.types.str;
-      default = "plasma.desktop";
+      default = "plasma";
       description = ''
-        Desktop session steamos-manager hands to "Switch to Desktop" by default.
-        Must match a .desktop file under services.displayManager.sessionData.desktops.
+        Desktop session jovian.steam hands to "Switch to Desktop".
+        Must match a session name under services.displayManager.sessionData.sessionNames
+        (jovian appends `.desktop` when writing the SDDM override).
       '';
     };
 

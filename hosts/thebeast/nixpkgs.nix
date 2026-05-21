@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}:
-lib.mkIf config.gaming.enable {
+{...}: {
   allowUnfreePackageNames = [
     "libretro-beetle-psx-hw"
     "libretro-gambatte"
