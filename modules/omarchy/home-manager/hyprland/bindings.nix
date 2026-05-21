@@ -39,7 +39,7 @@ in {
         "CTRL ALT, ESCAPE, exec, reboot"
         "CTRL SHIFT ALT, ESCAPE, exec, systemctl poweroff"
 
-        "CTRL, J, togglesplit,"
+        "CTRL, J, layoutmsg, togglesplit"
 
         "CTRL, left, movefocus, l"
         "CTRL, right, movefocus, r"

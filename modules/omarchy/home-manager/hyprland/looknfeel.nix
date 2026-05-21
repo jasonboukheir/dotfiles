@@ -20,7 +20,6 @@
         enabled = false;
         range = 30;
         render_power = 3;
-        ignore_window = true;
       };
 
       blur = {
@@ -62,7 +61,6 @@
     };
 
     dwindle = {
-      pseudotile = true;
       preserve_split = true;
       force_split = 2;
     };
