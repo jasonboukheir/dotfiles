@@ -12,6 +12,7 @@ let
     "litellm/env.age"
     "lldap/jwt_secret.age"
     "lldap/users/admin/pw.age"
+    "mautrix-telegram/env.age"
     "mealie/openaiApiKey.age"
     "nixarr/wgconf.age"
     "open-webui/openaiApiKey.age"
