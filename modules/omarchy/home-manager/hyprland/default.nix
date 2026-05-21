@@ -20,7 +20,12 @@
   ];
 
   config = lib.mkIf config.omarchy.enable {
-    wayland.windowManager.hyprland.enable = true;
+    wayland.windowManager.hyprland = {
+      enable = true;
+      # TODO: migrate settings to the Lua API and drop this pin.
+      # https://github.com/jasonboukheir/dotfiles/issues/25
+      configType = "hyprlang";
+    };
     services.hyprpolkitagent.enable = true;
   };
 }
