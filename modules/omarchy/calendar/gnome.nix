@@ -17,10 +17,7 @@ in {
     services.gnome = {
       evolution-data-server.enable = true;
       gnome-online-accounts.enable = true;
-      gnome-keyring.enable = true;
     };
-    security.pam.services.greetd.enableGnomeKeyring =
-      lib.mkIf config.services.greetd.enable true;
     omarchy.defaultApps = {
       calendar = lib.mkDefault "gnome-calendar";
       contacts = lib.mkDefault "gnome-contacts";
