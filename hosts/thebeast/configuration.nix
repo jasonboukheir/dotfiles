@@ -71,6 +71,26 @@
   # every interactive account.
   system.etc.overlay.enable = true;
 
+  # SSH host keys must live outside /etc, otherwise the overlay hides
+  # the existing ed25519 key the agenix recipients in secrets.nix are
+  # encrypted to, sshd-keygen generates a fresh non-matching pair into
+  # the upper layer, and agenix decryption fails during stage-2
+  # activation — which leaves hashedPasswordFile empty and locks login.
+  # age.identityPaths defaults from services.openssh.hostKeys so this
+  # one override propagates.
+  systemd.tmpfiles.rules = ["d /var/ssh 0755 root root -"];
+  services.openssh.hostKeys = [
+    {
+      type = "ed25519";
+      path = "/var/ssh/ssh_host_ed25519_key";
+    }
+    {
+      type = "rsa";
+      bits = 4096;
+      path = "/var/ssh/ssh_host_rsa_key";
+    }
+  ];
+
   # 30GiB of RAM with no swap gives the kernel no elasticity — brave
   # leaks pushed it to global_oom on 2026-05-21, taking down half the
   # user session. A disk swapfile is preferred over zram on this host
