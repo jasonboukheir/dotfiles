@@ -64,7 +64,11 @@
   # /etc gets hidden after the first disable); see networking.nix for the
   # /run-based unit that handles that specific call path. Requires
   # boot.initrd.systemd.enable (set above) and kernel >= 6.6.
-  system.etc.overlay.enable = true;
+  #
+  # Phase 2: re-enable once declarative hashedPasswordFile is verified
+  # working without overlay — otherwise the overlay's fresh upper layer
+  # shadows the rootfs /etc/shadow and locks jasonbk out.
+  system.etc.overlay.enable = false;
 
   # 30GiB of RAM with no swap gives the kernel no elasticity — brave
   # leaks pushed it to global_oom on 2026-05-21, taking down half the

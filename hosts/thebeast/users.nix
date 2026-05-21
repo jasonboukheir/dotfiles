@@ -6,6 +6,11 @@ in {
   ];
 
   users = {
+    # Declarative passwords are a prerequisite for system.etc.overlay —
+    # without them the overlay's fresh upper layer shadows the rootfs
+    # /etc/shadow on first boot and locks every interactive account.
+    mutableUsers = false;
+
     groups.${gameUser} = {
       name = "${gameUser}";
     };
@@ -17,6 +22,9 @@ in {
       home = "/home/${gameUser}";
       isNormalUser = true;
     };
-    users.jasonbk.extraGroups = ["gamemode" "input"];
+    users.jasonbk = {
+      extraGroups = ["gamemode" "input"];
+      hashedPasswordFile = config.age.secrets."users/jasonbk/password".path;
+    };
   };
 }

@@ -5,6 +5,7 @@ let
   files = [
     "radicale/jasonbk/password.age"
     "hf/token.age"
+    "users/jasonbk/password.age"
   ];
 in
   builtins.listToAttrs (map (file: {
