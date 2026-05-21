@@ -55,11 +55,19 @@
   # initialisation that shaves ~1s off initrd time on this host.
   boot.initrd.systemd.enable = true;
 
-  # systemd-oomd is on by default in NixOS and needs a swap-pressure
-  # signal to do anything useful — without it, it logs "No swap; memory
-  # pressure usage will be degraded" and effectively never fires on a
-  # large-RAM box. zram gives it a working signal with no disk cost.
-  zramSwap.enable = true;
+  # 30GiB of RAM with no swap gives the kernel no elasticity — brave
+  # leaks pushed it to global_oom on 2026-05-21, taking down half the
+  # user session. A disk swapfile is preferred over zram on this host
+  # because zram steals RAM and CPU from games; at swappiness=10 the
+  # kernel only spills under real pressure, so a game's working set
+  # stays resident.
+  swapDevices = [
+    {
+      device = "/var/swapfile";
+      size = 32768;
+    }
+  ];
+  boot.kernel.sysctl."vm.swappiness" = 10;
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
