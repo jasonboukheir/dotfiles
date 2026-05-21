@@ -26,10 +26,6 @@ pkgs.testers.nixosTest {
     ];
 
     nixpkgs.hostPlatform = "x86_64-linux";
-    # testers.nixosTest injects nixpkgs.pkgs externally and rejects
-    # further config knobs; modules/nixpkgs sets allowUnfreePredicate
-    # so we have to clear it for the test path.
-    nixpkgs.config = lib.mkForce {};
 
     users.users.testuser = {
       isNormalUser = true;

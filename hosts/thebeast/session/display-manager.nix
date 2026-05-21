@@ -7,14 +7,14 @@
   preselectSession = "${dmCfg.greeterDefaultSession}.desktop";
   usePlasmaLoginManager = dmCfg.displayManager == "plasma-login-manager";
 in {
-  # Jovian's autoStart sets [General].DefaultSession = gamescope-wayland
-  # because gamer is the autologin user. mkForce: when the greeter
-  # actually appears (only after explicit logout — see relogin=false
-  # in session/jovian-steam.nix) jasonbk is the only one looking at it,
-  # and they want the session highlighted to be Hyprland rather than
-  # gamescope.
-  services.displayManager.sddm.settings.General.DefaultSession =
-    lib.mkForce preselectSession;
+  # Jovian sets services.displayManager.defaultSession = "gamescope-wayland",
+  # which NixOS' sddm module folds into a computed default for
+  # General.DefaultSession and then merges *under* sddm.settings via
+  # recursiveUpdate. Writing settings.General.DefaultSession directly wins
+  # without needing an override priority. The greeter only appears after an
+  # explicit logout (see relogin=false in session/jovian-steam.nix), and at
+  # that point the only user looking at it is jasonbk.
+  services.displayManager.sddm.settings.General.DefaultSession = preselectSession;
 
   # Opt-in path: replace SDDM with KDE's new Plasma Login Manager.
   # Jovian also forces sddm.enable=true, so the override has to be

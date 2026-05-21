@@ -55,6 +55,12 @@
   # initialisation that shaves ~1s off initrd time on this host.
   boot.initrd.systemd.enable = true;
 
+  # systemd-oomd is on by default in NixOS and needs a swap-pressure
+  # signal to do anything useful — without it, it logs "No swap; memory
+  # pressure usage will be degraded" and effectively never fires on a
+  # large-RAM box. zram gives it a working signal with no disk cost.
+  zramSwap.enable = true;
+
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
