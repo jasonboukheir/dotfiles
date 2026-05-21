@@ -7,5 +7,6 @@
     ./hardware-configuration.nix
     ./secrets/radicale.nix
     ./secrets/hf-token.nix
+    ./secrets/users.nix
   ];
 }
