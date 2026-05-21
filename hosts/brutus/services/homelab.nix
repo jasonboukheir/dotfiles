@@ -30,14 +30,25 @@ in {
     client = "https://${config.homelab.services.synapse.domain}";
     issuer = "https://${config.homelab.services.matrix-auth.domain}/";
     account = "https://${config.homelab.services.matrix-auth.domain}/account";
+    # MSC4143 — pointing Element Call clients at the lk-jwt-service
+    # endpoint of our matrix-rtc vhost. lk-jwt-service mints the JWT
+    # the client then uses to dial the SFU advertised under it.
+    rtcFoci = [
+      {
+        type = "livekit";
+        livekit_service_url = "https://${config.homelab.services.matrix-rtc.domain}/livekit/jwt";
+      }
+    ];
   };
 
   homelab.services = {
     ai.enable = true;
     matrix-auth.enable = true;
     budget.enable = true;
+    call.enable = true;
     certs.enable = true;
     chat.enable = true;
+    matrix-rtc.enable = true;
     synapse.enable = true;
     cloud.enable = true;
     code.enable = true;

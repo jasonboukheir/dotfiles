@@ -76,6 +76,10 @@
             pkgs = brutusPkgs;
             inherit inputs;
           };
+          checks.brutus-matrix-rtc = import ../../hosts/brutus/tests/matrix-rtc.nix {
+            pkgs = brutusPkgs;
+            inherit inputs;
+          };
           checks.brutus-ntfy = import ../../hosts/brutus/tests/ntfy.nix {
             pkgs = brutusPkgs;
             inherit inputs;

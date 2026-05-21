@@ -156,6 +156,36 @@ in {
             account_management_url = "${masPublicBase}/account";
           };
 
+          # MatrixRTC / Element Call needs the room-summary API
+          # (MSC3266) so federated knock-to-join works for unjoined
+          # rooms, and the sync-v2 state_after extension (MSC4222) so
+          # group-call clients can reconstruct call membership state
+          # without racing against the live event stream. Both are
+          # cheap feature flags on synapse's side — the cost lives in
+          # the clients that opt into them.
+          experimental_features.msc3266_enabled = true;
+          experimental_features.msc4222_enabled = true;
+
+          # MSC4140 delayed events: Element Call participants schedule
+          # a self-eviction "I left the call" event with a future
+          # delay; the heartbeat reaches in and bumps the timer while
+          # they're still present. Without raising the cap synapse
+          # rejects the delay as too large and clients can't keep the
+          # call membership state alive past the default 5min window —
+          # the user-visible symptom is "stuck calls" where the
+          # participant grid never empties after everyone leaves.
+          max_event_delay_duration = "24h";
+
+          # The delayed-event heartbeat fires every ~5s per call
+          # participant; stock `rc_message` (0.2/s, burst 10) throttles
+          # a single user in a multi-call session within seconds. The
+          # element-call docs spell these out as the floor for stable
+          # operation.
+          rc_delayed_event_mgmt = {
+            per_second = 1.0;
+            burst_count = 20;
+          };
+
           # MSC3202 appservice-mode E2EE: lets the mautrix bridges
           # encrypt events as each puppet ghost using a per-puppet
           # device, instead of every ghost masquerading through the

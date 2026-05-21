@@ -2,6 +2,7 @@
   imports = [
     ./actual
     ./coder
+    ./element-call
     ./element-web
     ./ezmtls
     ./gonic.nix
@@ -11,6 +12,7 @@
     ./lldap.nix
     ./matrix-auth
     ./matrix-bridges
+    ./matrix-rtc
     ./matrix-synapse
     ./mealie
     ./memos.nix
