@@ -2,6 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 {
+  lib,
   pkgs,
   inputs,
   ...
@@ -23,6 +24,25 @@
   # suppress the journal text the kernel would otherwise paint over it.
   boot.plymouth.enable = true;
   boot.kernelParams = ["quiet" "splash"];
+
+  # `plymouth quit` tears the splash down the moment graphical.target is
+  # reached, which on this host leaves a black framebuffer for the ~20s
+  # while gamescope-session boots Steam Big Picture. --retain-splash
+  # keeps the splash image painted on the framebuffer until gamescope
+  # claims the DRM master and draws its first frame.
+  systemd.services.plymouth-quit.serviceConfig.ExecStart = [
+    ""
+    "-${pkgs.plymouth}/bin/plymouth quit --retain-splash"
+  ];
+
+  # asus_armoury loads on this board but its power-limit DMI table
+  # covers ASUS laptops only (FA*, GA*, GU*, ...); on a B650E-I it just
+  # logs "No matching power limits found" and exposes no useful
+  # firmware-attributes. Fan/RGB on this board go through nct6775 and
+  # asusctl/openrgb, not asus_armoury, so blacklisting loses nothing.
+  # TODO: drop once the driver DMI-gates itself —
+  # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/platform/x86/asus-armoury.c
+  boot.blacklistedKernelModules = ["asus_armoury"];
 
   # systemd-boot defaults to a 5s menu timeout. Keep it short enough
   # that boot doesn't visibly stall, long enough that holding space
