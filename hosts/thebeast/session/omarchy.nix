@@ -1,4 +1,6 @@
 {...}: {
+  # jasonbk's omarchy/Hyprland session. Part of the desktop-session
+  # surface SDDM/plasma-login-manager hands off to.
   omarchy.enable = true;
   omarchy.monitor = {
     mode = "5120x1440@120";
@@ -12,7 +14,4 @@
   };
   omarchy.pim = "gnome";
   omarchy.waybar.hasBattery = false;
-  omarchy.macKeybindings = {
-    enable = true;
-  };
 }

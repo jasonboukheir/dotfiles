@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  systemd.user.services._1password = lib.mkIf config.programs._1password.enable {
+  systemd.user.services._1password = lib.mkIf (config.omarchy.enable && config.programs._1password.enable) {
     Unit = {
       Description = "1Password GUI (silent autostart)";
       After = ["graphical-session.target"];

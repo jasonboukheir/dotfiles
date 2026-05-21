@@ -1,7 +1,6 @@
 {...}: {
   imports = [
-    ./specialisations/gaming
     ./common.nix
-    ./specialisations
+    ./session.nix
   ];
 }

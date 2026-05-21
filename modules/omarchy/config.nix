@@ -64,15 +64,6 @@ in {
         description = "Host has a system battery — when false, the waybar battery module is omitted (avoids crashes on desktops where only peripheral HID++ batteries exist)";
       };
     };
-    macKeybindings = {
-      enable = lib.mkEnableOption "macOS-style keybindings via keyd";
-      capsLockAsCmd = lib.mkEnableOption "remap Caps Lock to act as Cmd (Meta)";
-      terminalApps = lib.mkOption {
-        default = ["ghostty"];
-        type = lib.types.listOf lib.types.str;
-        description = "WM_CLASS names of terminal apps that need Ctrl+Shift for copy/paste instead of Ctrl";
-      };
-    };
     defaultApps = {
       calendar = lib.mkOption {
         default = "";
