@@ -2,61 +2,70 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  wpaSupplicantUnit = pkgs.writeText "wpa_supplicant.service" ''
+    [Unit]
+    Description=WPA supplicant
+    After=dbus.service
+    Before=network.target
+    Wants=network.target
+
+    [Service]
+    Type=dbus
+    BusName=fi.w1.wpa_supplicant1
+    ExecStart=${pkgs.wpa_supplicant}/sbin/wpa_supplicant -u
+  '';
+in {
   networking = {
     hostName = "thebeast";
     networkmanager = {
       enable = true;
       # iwd matches Steam Deck upstream and is the default backend. A
-      # static wpa_supplicant.service is also shipped below so Big
+      # wpa_supplicant.service is also shipped (in /run, see below) so Big
       # Picture's SetWifiBackend D-Bus call can no-op on the "other"
       # backend without erroring out the switch.
       wifi.backend = "iwd";
     };
   };
 
-  # Ship wpa_supplicant alongside iwd, matching SteamOS upstream. iwd stays
-  # the active backend; this is only here so steamos-manager's Big-Picture-
-  # launched SetWifiBackend(iwd) D-Bus call has the "other" unit to operate
-  # on without error.
+  # Ship wpa_supplicant.service via /run/systemd/system instead of through
+  # NixOS's normal /etc/systemd/system path. iwd stays the active backend;
+  # this unit only exists so steamos-manager's Big-Picture-launched
+  # SetWifiBackend(iwd) D-Bus call has the "other" unit to operate on
+  # without error.
   #
-  # steamos-manager v26.1.0 wifi.rs:359 unconditionally calls
-  # `wpa_supplicant.service`.disable() via systemd's DisableUnitFiles
-  # before stopping NetworkManager. Two NixOS-specific failure modes:
+  # steamos-manager v26.1.0 wifi.rs:359 calls `disable_unit_files(
+  # ["wpa_supplicant.service"], runtime=false)` before restarting
+  # NetworkManager. On NixOS, anything declared via `systemd.services` or
+  # `systemd.packages` ends up symlinked under /etc/systemd/system, which
+  # is itself a symlink through /etc/static into the read-only
+  # system-units derivation in /nix/store. systemd reports the unit as
+  # `UnitFileState=linked` and tries to unlink the symlink to disable it;
+  # the unlink resolves into /nix/store and fails with EROFS, aborting
+  # the D-Bus call before NM is restarted, leaving wifi down.
   #
-  # 1. Without the unit at all: NoSuchUnit, the D-Bus call aborts before
-  #    NM is restarted, wifi stays down.
-  # 2. With `systemd.packages = [pkgs.wpa_supplicant]`: the package ships
-  #    an [Install] section (WantedBy=multi-user.target,
-  #    Alias=dbus-fi.w1.wpa_supplicant1.service) but NixOS doesn't honor it
-  #    (no matching .wants symlink), so systemd reports
-  #    `UnitFileState=linked` and DisableUnitFiles tries to unlink the
-  #    symlink at /etc/systemd/system/wpa_supplicant.service itself. That
-  #    path resolves through /etc/systemd/system -> /etc/static/... -> the
-  #    read-only system-units derivation in /nix/store, so the unlink
-  #    fails with EROFS and the D-Bus call again aborts mid-switch.
-  #
-  # Defining the unit via `systemd.services` with no wantedBy emits no
-  # [Install] section (see nixos/lib/systemd-lib.nix:738), giving the
-  # `static` state that stock SteamOS ships — DisableUnitFiles becomes a
-  # no-op (no install info to remove, no symlink to unlink), the switch
-  # completes, and NM comes back up. The actual `stop()` that follows the
-  # disable still runs, and nothing in this config ever enables the unit,
-  # so the loss of the disable side-effect is harmless.
-  # TODO: drop if steamos-manager learns to tolerate EROFS / static units
-  # on the "other backend" — https://github.com/Jovian-Experiments/steamos-manager/blob/main/steamos-manager/src/wifi.rs
-  systemd.services.wpa_supplicant = {
-    description = "WPA supplicant";
-    before = ["network.target"];
-    after = ["dbus.service"];
-    wants = ["network.target"];
-    serviceConfig = {
-      Type = "dbus";
-      BusName = "fi.w1.wpa_supplicant1";
-      ExecStart = "${pkgs.wpa_supplicant}/sbin/wpa_supplicant -u";
-    };
-  };
+  # Writing the unit into /run/systemd/system (tmpfs) as a regular file at
+  # activation time keeps it in systemd's search path but makes it
+  # `UnitFileState=static` (no [Install] section, no symlink to unlink), so
+  # DisableUnitFiles becomes a no-op success. The activation script runs
+  # in stage-2 before systemd is exec'd on boot, and again on every
+  # `nixos-rebuild switch`, so the file is in place before any unit scan.
+  # The dbus activation file ships SystemdService=wpa_supplicant.service,
+  # so NetworkManager can still pull this unit via D-Bus if the user ever
+  # toggles the backend.
+  # TODO: drop if steamos-manager learns to tolerate EROFS on the other
+  # backend — https://github.com/Jovian-Experiments/steamos-manager/blob/main/steamos-manager/src/wifi.rs
+  system.activationScripts.wpaSupplicantRuntimeUnit = ''
+    mkdir -p /run/systemd/system
+    install -m 0644 ${wpaSupplicantUnit} /run/systemd/system/wpa_supplicant.service
+  '';
   services.dbus.packages = [pkgs.wpa_supplicant];
+
+  # dbus-broker logs a warning at startup because the wpa_supplicant dbus
+  # policy file references `group="wpa_supplicant"` for an extra send/own
+  # allowance. The group isn't required (the service runs as root) but
+  # creating it silences the noise and matches what Debian/Arch ship.
+  users.groups.wpa_supplicant = {};
 
   # steamos-manager's GetWifiBackend scans /etc/NetworkManager/conf.d/*.conf
   # for `[device] wifi.backend=...` and errors on every D-Bus call when
