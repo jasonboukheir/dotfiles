@@ -5,6 +5,9 @@
   ...
 }: let
   cfg = config.gaming;
+  dmCfg = config.thebeast;
+  preselectSession = "${dmCfg.greeterDefaultSession}.desktop";
+  usePlasmaLoginManager = dmCfg.displayManager == "plasma-login-manager";
 
   # Plasma's shortcut used to call steamosctl switch-to-game-mode, which
   # tears down the desktop session and starts gamescope — the wrong
@@ -69,9 +72,31 @@ in {
   # assignment so SDDM relogins gamer on logout, never showing a greeter.
   # mkForce false: on logout (Switch User → Logout from inside gamer's
   # plasma, or `loginctl terminate-session` from gamescope) we want
-  # SDDM's greeter back so jasonbk can pick the Hyprland session.
+  # the greeter back so jasonbk can pick the Hyprland session.
   # Tradeoff: a Switch-to-Desktop round-trip costs one password prompt.
   services.displayManager.sddm.autoLogin.relogin = lib.mkForce false;
+
+  # Jovian's autoStart sets [General].DefaultSession = gamescope-wayland
+  # because gamer is the autologin user. mkForce: when the greeter
+  # actually appears (only after explicit logout — see relogin=false
+  # above) jasonbk is the only one looking at it, and they want the
+  # session highlighted to be Hyprland rather than gamescope.
+  services.displayManager.sddm.settings.General.DefaultSession =
+    lib.mkForce preselectSession;
+
+  # Opt-in path: replace SDDM with KDE's new Plasma Login Manager.
+  # Jovian also forces sddm.enable=true, so the override has to be
+  # mkForce. Both DMs read services.displayManager.autoLogin, so the
+  # gamer→gamescope autologin keeps working untouched.
+  services.displayManager.sddm.enable = lib.mkIf usePlasmaLoginManager (lib.mkForce false);
+  services.displayManager.plasma-login-manager = lib.mkIf usePlasmaLoginManager {
+    enable = true;
+    # PreselectedSession is the plasmalogin.conf equivalent of SDDM's
+    # General.DefaultSession — same per-user-default caveat applies
+    # (the value is global, not per-user; harmless here because gamer
+    # never reaches the greeter).
+    settings.Greeter.PreselectedSession = preselectSession;
+  };
 
   environment.systemPackages =
     [switchToBigPicture bigPictureDesktop]
@@ -197,6 +222,13 @@ in {
   systemd.tmpfiles.rules =
     ["d ${cfg.romDir} 0775 ${cfg.user} users -"]
     ++ map (s: "d ${cfg.romDir}/${s.dir} 0775 ${cfg.user} users -") cfg.systems;
+
+  # KDE's new SDDM-replacement (Plasma 6.6, landed in nixos-unstable
+  # Jan 2026). Still upstream-experimental ("works for me" per KDE),
+  # but the autoLogin contract is identical to SDDM so the jovian
+  # gamer→gamescope autoStart path is unaffected. Flip back to "sddm"
+  # if the greeter regresses.
+  thebeast.displayManager = "plasma-login-manager";
 
   # jasonbk's omarchy/Hyprland session. Lives here because it's part of
   # the desktop-session surface SDDM hands off to.

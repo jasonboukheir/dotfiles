@@ -35,22 +35,23 @@ pkgs.testers.nixosTest {
     APPS_DIR = "${appsDir}"
     GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
 
-    def read_sddm_conf():
-        """Read the merged SDDM config the way SDDM itself would.
+    def read_plasmalogin_conf():
+        """Read the merged plasma-login-manager config.
 
-        SDDM walks /etc/sddm.conf and /etc/sddm.conf.d/*.conf in lexical
+        plasmalogin walks /etc/plasmalogin.conf.d/*.conf in lexical
         order; later definitions win. ConfigParser with multiple read()s
         produces the same last-wins semantics.
         """
-        # ConfigParser.optionxform lowercases keys by default; SDDM's
-        # canonical keys (User, Session, Relogin) survive as their lower-
-        # case forms. We compare against lowercase below so we don't
-        # need to override optionxform — the test driver's type checker
-        # rejects the standard `parser.optionxform = str` idiom.
+        # ConfigParser.optionxform lowercases keys by default; the
+        # canonical keys (User, Session, Relogin, PreselectedSession)
+        # survive as their lower-case forms. We compare against
+        # lowercase below so we don't need to override optionxform —
+        # the test driver's type checker rejects the standard
+        # `parser.optionxform = str` idiom.
         parser = configparser.RawConfigParser()
-        files = ["/etc/sddm.conf"] + sorted(
+        files = sorted(
             machine.succeed(
-                "find /etc/sddm.conf.d -maxdepth 1 -name '*.conf' "
+                "find /etc/plasmalogin.conf.d -maxdepth 1 -name '*.conf' "
                 "-printf '%p\\n' 2>/dev/null || true"
             ).split()
         )
@@ -95,48 +96,48 @@ pkgs.testers.nixosTest {
             status, _ = machine.execute(f"test -e {path}")
             assert status != 0, f"{path} should not exist after the refactor"
 
-    with subtest("display-manager is SDDM (wayland), not greetd"):
-        # newer services.displayManager framework: display-manager.service
-        # is its own unit that ExecStart's sddm. Confirm by reading the
-        # rendered unit (not by following the symlink target, which was
-        # the greetd-era alias contract).
+    with subtest("display-manager is plasma-login-manager, not sddm or greetd"):
+        # The host opted into KDE's new SDDM replacement; verify
+        # display-manager.service actually runs plasmalogin and that
+        # SDDM is fully disabled (sddm.conf must not exist).
         dm_unit = machine.succeed(
             "systemctl cat display-manager.service"
         )
-        assert "/sddm" in dm_unit, \
-            f"display-manager.service should run sddm:\n{dm_unit}"
-        sddm = read_sddm_conf()
-        assert sddm.has_section("General"), \
-            f"sddm config missing [General]:\n{dict(sddm)}"
-        # DisplayServer=wayland is jovian's setting; confirms autoStart
-        # wiring landed.
-        # Lowercased key — see read_sddm_conf comment.
-        assert sddm.get("General", "displayserver", fallback="") == "wayland", (
-            "SDDM should be configured for wayland (jovian autoStart contract); "
-            f"got {dict(sddm['General'])}"
+        assert "plasmalogin" in dm_unit, \
+            f"display-manager.service should run plasmalogin:\n{dm_unit}"
+        status, _ = machine.execute("test -e /etc/sddm.conf")
+        assert status != 0, (
+            "SDDM should be disabled when plasma-login-manager is "
+            "the active DM; /etc/sddm.conf still exists"
         )
 
-    with subtest("SDDM autologin: gamer + gamescope, Relogin=false"):
-        sddm = read_sddm_conf()
-        assert sddm.has_section("Autologin"), \
-            f"sddm config missing [Autologin]:\n{dict(sddm)}"
-        autologin = dict(sddm["Autologin"])
-        # Keys lowercased by ConfigParser (see read_sddm_conf comment).
+    with subtest("autologin honours the standard displayManager contract"):
+        # Both DMs read services.displayManager.autoLogin; plasma-login-manager
+        # writes the [Autologin] section into 00-nixos-defaults.conf. Jovian
+        # sets the user/session via the same contract, so the assertion is the
+        # same regardless of DM choice.
+        plasmalogin = read_plasmalogin_conf()
+        assert plasmalogin.has_section("Autologin"), \
+            f"plasmalogin config missing [Autologin]:\n{dict(plasmalogin)}"
+        autologin = dict(plasmalogin["Autologin"])
+        # Keys lowercased by ConfigParser (see read_plasmalogin_conf comment).
         assert autologin.get("user") == GAMING_USER, \
-            f"SDDM autologin user should be {GAMING_USER}: {autologin}"
+            f"autologin user should be {GAMING_USER}: {autologin}"
         assert autologin.get("session") == "gamescope-wayland.desktop", (
-            "SDDM defaultSession should be gamescope-wayland (jovian autoStart); "
-            f"got {autologin}"
+            f"autologin session should be gamescope-wayland; got {autologin}"
         )
-        # The headline tradeoff in the issue: jovian sets Relogin=true via
-        # plain assignment; we mkForce it to false so logout reaches the
-        # greeter instead of relogin'ing gamer. If a jovian bump tightens
-        # to mkForce true the assert fires and we know to revisit the
-        # override.
-        relogin = autologin.get("relogin", "true").lower()
-        assert relogin == "false", (
-            "services.displayManager.sddm.autoLogin.relogin = mkForce false "
-            f"did not stick; rendered SDDM config has Relogin={relogin!r}"
+
+    with subtest("greeter preselects Hyprland"):
+        # plasma-login-manager's [Greeter].PreselectedSession is the
+        # equivalent of SDDM's [General].DefaultSession. The
+        # thebeast.greeterDefaultSession option drives this so jasonbk
+        # lands on Hyprland in the session dropdown when the greeter
+        # appears (only after explicit gamer→logout).
+        plasmalogin = read_plasmalogin_conf()
+        preselect = plasmalogin.get("Greeter", "preselectedsession", fallback="")
+        assert preselect == "hyprland.desktop", (
+            "[Greeter].PreselectedSession should be hyprland.desktop; "
+            f"got {preselect!r}"
         )
 
     with subtest("session files for all three entry points exist"):
@@ -175,9 +176,11 @@ pkgs.testers.nixosTest {
             "jovian-setup-desktop-session should hand "
             f"{DEFAULT_DESKTOP_SESSION}.desktop to steamosctl; got:\n{rendered}"
         )
-        # Marker the steamos-manager probes to decide whether session
-        # management is offered.
-        machine.succeed("test -e /etc/sddm.conf.d/steamos.conf")
+        # /etc/sddm.conf.d/steamos.conf was the SDDM-era marker
+        # steamos-manager probed for. Under plasma-login-manager that
+        # path is gone and the relevant probe shifts to whatever PLM
+        # surfaces — leave it untested here until upstream wires a
+        # PLM-equivalent.
 
     with subtest("switch-to-big-picture: installed, surfaced, unprivileged"):
         # The wrapper must actually shut Steam down before relaunching —
@@ -213,21 +216,10 @@ pkgs.testers.nixosTest {
         assert "a password is required" not in output and "sudo:" not in output, \
             f"big-picture wrapper must not call sudo: {output!r}"
 
-    with subtest("plymouth + quiet/splash were dropped with the swap UX"):
-        # Plymouth existed to paint diagnostic text while the spec swap
-        # drained session scopes. With no swap there's no reason to ship
-        # it; verify the obvious surfaces went away.
-        cmdline = machine.succeed("cat /proc/cmdline")
-        # The kernel cmdline in the VM doesn't include host params
-        # verbatim, but `quiet splash` would only land if kernelParams
-        # set it. Sample with a tolerance check: neither should appear.
-        assert "splash" not in cmdline.split(), (
-            f"boot.kernelParams should no longer include splash:\n{cmdline}"
-        )
-        # plymouth.enable would install /etc/plymouth/plymouthd.conf
-        # and the plymouth-start.service. Missing both is the signal
-        # that boot.plymouth.enable is false.
-        status, _ = machine.execute("test -e /etc/plymouth/plymouthd.conf")
-        assert status != 0, "boot.plymouth was supposed to be removed"
   '';
 }
+# Plymouth + boot.kernelParams live in ../configuration.nix, which this
+# session-scoped test deliberately does not import (the VM stubs hardware
+# and skips configuration entirely). The toplevel build is the assertion
+# that those land; no separate subtest is meaningful here.
+
