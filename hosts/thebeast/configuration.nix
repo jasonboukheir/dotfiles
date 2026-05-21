@@ -55,6 +55,17 @@
   # initialisation that shaves ~1s off initrd time on this host.
   boot.initrd.systemd.enable = true;
 
+  # overlayfs /etc with a persistent writable upperdir at /.rw-etc/upper,
+  # mirroring what stock SteamOS does. steamos-manager assumes a writable
+  # /etc — wifi-debug-mode toggles drop an iwd dropin under
+  # /etc/systemd/system/iwd.service.d/, future versions may want more.
+  # On its own this doesn't fix the Big-Picture wpa_supplicant.service
+  # disable (whiteouts persist across rebuilds, so a unit shipped via
+  # /etc gets hidden after the first disable); see networking.nix for the
+  # /run-based unit that handles that specific call path. Requires
+  # boot.initrd.systemd.enable (set above) and kernel >= 6.6.
+  system.etc.overlay.enable = true;
+
   # 30GiB of RAM with no swap gives the kernel no elasticity — brave
   # leaks pushed it to global_oom on 2026-05-21, taking down half the
   # user session. A disk swapfile is preferred over zram on this host
