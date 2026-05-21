@@ -24,17 +24,18 @@
     features.feature_use_device_session_member_events = true;
   };
 
-  elementCall = pkgs.runCommand "element-call-wrapped" {
-    inherit (pkgs.element-call) version;
-    passthru = {inherit conf;};
-  } ''
-    mkdir -p $out
-    cp -r ${pkgs.element-call}/* $out/
-    chmod u+w $out
-    cat > $out/config.json <<EOF
-    ${builtins.toJSON conf}
-    EOF
-  '';
+  elementCall =
+    pkgs.runCommand "element-call-wrapped" {
+      inherit (pkgs.element-call) version;
+      passthru = {inherit conf;};
+    } ''
+      mkdir -p $out
+      cp -r ${pkgs.element-call}/* $out/
+      chmod u+w $out
+      cat > $out/config.json <<EOF
+      ${builtins.toJSON conf}
+      EOF
+    '';
 in {
   config = lib.mkMerge [
     {
