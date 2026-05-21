@@ -21,9 +21,11 @@
           inherit inputs;
           pkgs-unstable = linuxPkgsUnstable;
         };
-        modules = [
-          ../../hosts/work-devserver
-        ] ++ commonModules;
+        modules =
+          [
+            ../../hosts/work-devserver
+          ]
+          ++ commonModules;
       };
 
       flake.homeConfigurations."jasonbk@jasonbk-fedora-MZ0319NF" = inputs.home-manager-nixos.lib.homeManagerConfiguration {
@@ -33,9 +35,11 @@
           pkgs-unstable = linuxPkgsUnstable;
           nixgl = inputs.nixgl.packages.x86_64-linux;
         };
-        modules = [
-          ../../hosts/jasonbk-fedora-MZ0319NF
-        ] ++ commonModules;
+        modules =
+          [
+            ../../hosts/jasonbk-fedora-MZ0319NF
+          ]
+          ++ commonModules;
       };
     };
   };

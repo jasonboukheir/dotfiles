@@ -49,7 +49,7 @@
       };
 
       perSystem = {system, ...}:
-        # nixosTest only runs on Linux; gate so darwin systems still evaluate.
+      # nixosTest only runs on Linux; gate so darwin systems still evaluate.
         if system != "x86_64-linux"
         then {}
         else let
@@ -66,7 +66,7 @@
             config.allowUnfree = true;
           };
         in {
-          checks.thebeast-specialisation-switch = import ../../hosts/thebeast/tests/specialisation-switch.nix {
+          checks.thebeast-session = import ../../hosts/thebeast/tests/session.nix {
             inherit pkgs inputs;
           };
           checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {

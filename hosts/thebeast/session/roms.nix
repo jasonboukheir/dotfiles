@@ -4,9 +4,15 @@
   ...
 }: let
   cfg = config.gaming;
-in
-  lib.mkIf config.gaming.enable {
-    gaming.romDir = "/games/roms";
+in {
+  options.gaming.roms.enable =
+    lib.mkEnableOption "Retro ROM directories + RetroArch/standalone system list for SRM and home-manager wiring";
+
+  # ROM systems drive RetroArch core selection and SRM parser generation
+  # in home-manager/gamer/default.nix. Adding a new system here gives it
+  # a romDir, an SRM parser, and (for retroarch entries) a libretro core
+  # without further plumbing.
+  config = lib.mkIf cfg.roms.enable {
     gaming.systems = [
       {
         name = "NES";
@@ -101,4 +107,5 @@ in
     systemd.tmpfiles.rules =
       ["d ${cfg.romDir} 0775 ${cfg.user} users -"]
       ++ map (s: "d ${cfg.romDir}/${s.dir} 0775 ${cfg.user} users -") cfg.systems;
-  }
+  };
+}
