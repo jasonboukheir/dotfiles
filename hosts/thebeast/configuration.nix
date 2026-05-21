@@ -65,10 +65,11 @@
   # /run-based unit that handles that specific call path. Requires
   # boot.initrd.systemd.enable (set above) and kernel >= 6.6.
   #
-  # Phase 2: re-enable once declarative hashedPasswordFile is verified
-  # working without overlay — otherwise the overlay's fresh upper layer
-  # shadows the rootfs /etc/shadow and locks jasonbk out.
-  system.etc.overlay.enable = false;
+  # Requires users.mutableUsers = false with a declarative
+  # hashedPasswordFile (see hosts/thebeast/users.nix) — otherwise the
+  # overlay's fresh upper layer shadows the rootfs /etc/shadow and locks
+  # every interactive account.
+  system.etc.overlay.enable = true;
 
   # 30GiB of RAM with no swap gives the kernel no elasticity — brave
   # leaks pushed it to global_oom on 2026-05-21, taking down half the
