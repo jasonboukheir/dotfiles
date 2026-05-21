@@ -14,9 +14,10 @@ with lib; let
     return 200 '${builtins.toJSON body}';
   '';
 
-  # `.well-known/matrix/client` carries both homeserver discovery and
-  # (under MSC2965) auth-provider discovery in a single JSON doc, so
-  # both keys are assembled here and emitted together.
+  # `.well-known/matrix/client` carries homeserver discovery, (MSC2965)
+  # auth-provider discovery, and (MSC4143) MatrixRTC backend discovery
+  # in a single JSON doc, so all three keys are assembled here and
+  # emitted together.
   clientWellKnownBody = let
     homeserver =
       if matrix.client != null
@@ -31,8 +32,12 @@ with lib; let
         };
       }
       else {};
+    rtcFoci =
+      if matrix.rtcFoci != []
+      then {"org.matrix.msc4143.rtc_foci" = matrix.rtcFoci;}
+      else {};
   in
-    homeserver // authentication;
+    homeserver // authentication // rtcFoci;
 
   # Mirrors the listener pairs in modules/homelab/services.nix. The apex
   # vhost takes both sets so federation peers and off-LAN Matrix clients
@@ -142,6 +147,20 @@ in {
           Clients open this when the user picks "Account settings" so they
           land at the auth service's account page rather than a Matrix one
           synapse can't honor under delegated auth.
+        '';
+      };
+      rtcFoci = mkOption {
+        type = types.listOf (types.attrsOf types.anything);
+        default = [];
+        example = literalExpression ''
+          [{ type = "livekit"; livekit_service_url = "https://matrix-rtc.example.com/livekit/jwt"; }]
+        '';
+        description = ''
+          MatrixRTC focus list advertised at `.well-known/matrix/client`
+          as `org.matrix.msc4143.rtc_foci`. Element X / Element Web's
+          group-call code reads this to discover the SFU + JWT auth
+          backend; without it MatrixRTC silently falls back to a single
+          hard-coded public SFU (or refuses to start a call).
         '';
       };
     };
