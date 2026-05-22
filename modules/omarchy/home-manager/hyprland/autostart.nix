@@ -1,11 +1,6 @@
 {...}: {
-  wayland.windowManager.hyprland.settings = {
-    exec-once = [
-      # "dropbox-cli start"  # Uncomment to run Dropbox
-    ];
-
-    exec = [
-      # "pkill -SIGUSR2 waybar || waybar"
-    ];
-  };
+  # Add startup commands by appending entries that produce
+  # `hl.on("hyprland.start", function() hl.exec_cmd("...") end)`.
+  # See https://wiki.hypr.land/Configuring/Basics/Autostart for examples.
+  wayland.windowManager.hyprland.settings = {};
 }

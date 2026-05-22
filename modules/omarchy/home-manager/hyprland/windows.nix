@@ -1,43 +1,53 @@
 {...}: {
   wayland.windowManager.hyprland.settings = {
-    windowrule = [
-      # See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
-      "suppress_event maximize, match:class .*"
+    # See https://wiki.hypr.land/Configuring/Window-Rules for more
+    window_rule = [
+      {match = {class = ".*";}; suppress_event = "maximize";}
 
       # Force chromium into a tile to deal with --app bug
-      "tile on, match:class ^(chromium)$"
+      {match = {class = "^(chromium)$";}; tile = true;}
 
       # Settings management
-      "float on, match:class ^(org.pulseaudio.pavucontrol|blueberry.py)$"
+      {match = {class = "^(org.pulseaudio.pavucontrol|blueberry.py)$";}; float = true;}
 
       # Float Steam, fullscreen RetroArch
-      "float on, match:class ^(steam)$"
-      "center on, match:class ^(steam)$"
-      "fullscreen on, match:class ^(com.libretro.RetroArch)$"
+      {match = {class = "^(steam)$";}; float = true;}
+      {match = {class = "^(steam)$";}; center = true;}
+      {match = {class = "^(com.libretro.RetroArch)$";}; fullscreen = true;}
 
       # Just dash of transparency
-      "opacity 1 0.97, match:class .*"
+      {match = {class = ".*";}; opacity = "1 0.97";}
       # Normal chrome Youtube tabs
-      "opacity 1 1, match:class ^(chromium|google-chrome|google-chrome-unstable|helium)$, match:title .*[Yy]ou[Tt]ube.*"
-      "opacity 1 0.97, match:class ^(chromium|google-chrome|google-chrome-unstable)$"
-      "opacity 1 0.97, match:initial_class ^(chrome-.*-Default)$ # web apps"
-      "opacity 1 1, match:initial_class ^(chrome-[Yy]ou[Tt]ube.*-Default)$ # Youtube"
-      "opacity 1 1, match:class ^(zoom|vlc|org.kde.kdenlive|com.obsproject.Studio)$"
-      "opacity 1 1, match:class ^(com.libretro.RetroArch|steam)$"
+      {match = {class = "^(chromium|google-chrome|google-chrome-unstable|helium)$"; title = ".*[Yy]ou[Tt]ube.*";}; opacity = "1 1";}
+      {match = {class = "^(chromium|google-chrome|google-chrome-unstable)$";}; opacity = "1 0.97";}
+      {match = {initial_class = "^(chrome-.*-Default)$";}; opacity = "1 0.97";} # web apps
+      {match = {initial_class = "^(chrome-[Yy]ou[Tt]ube.*-Default)$";}; opacity = "1 1";} # YouTube
+      {match = {class = "^(zoom|vlc|org.kde.kdenlive|com.obsproject.Studio)$";}; opacity = "1 1";}
+      {match = {class = "^(com.libretro.RetroArch|steam)$";}; opacity = "1 1";}
 
       # Fix some dragging issues with XWayland
-      "no_focus on,match:class ^$,match:title ^$,match:xwayland 1,match:float 1,match:fullscreen 0,match:pin 0"
+      {
+        match = {
+          class = "^$";
+          title = "^$";
+          xwayland = true;
+          float = true;
+          fullscreen = false;
+          pin = false;
+        };
+        no_focus = true;
+      }
 
       # Float in the middle for clipse clipboard manager
-      "float on, match:class (clipse)"
-      "size 622 652, match:class (clipse)"
-      "stay_focused on, match:class (clipse)"
+      {match = {class = "(clipse)";}; float = true;}
+      {match = {class = "(clipse)";}; size = "622 652";}
+      {match = {class = "(clipse)";}; stay_focused = true;}
     ];
 
-    layerrule = [
+    layer_rule = [
       # Proper background blur for wofi
-      "blur on, match:namespace wofi"
-      "blur on, match:namespace waybar"
+      {match = {namespace = "wofi";}; blur = true;}
+      {match = {namespace = "waybar";}; blur = true;}
     ];
   };
 }
