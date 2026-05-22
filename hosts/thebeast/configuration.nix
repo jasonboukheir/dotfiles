@@ -58,11 +58,13 @@
   # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/platform/x86/asus-armoury.c
   boot.blacklistedKernelModules = ["asus_armoury"];
 
-  # systemd-boot defaults to a 5s menu timeout. Keep it short enough
-  # that boot doesn't visibly stall, long enough that holding space
-  # still gets us into the menu when we want to pick an older
-  # generation as a recovery path.
-  boot.loader.timeout = 2;
+  # systemd-boot menu timeout. 2s was too brief to react to before
+  # plymouth covered the firmware framebuffer — the menu was technically
+  # painted but gone before the eye could register it, making older
+  # generations effectively inaccessible without blind-typing space.
+  # 5s matches the systemd-boot default and stays well below perceptible
+  # boot stall while leaving a real window to pick a recovery generation.
+  boot.loader.timeout = 5;
 
   # Initrd via systemd lets plymouth start before stage 2 instead of
   # flashing the console first; also gets us the parallel device

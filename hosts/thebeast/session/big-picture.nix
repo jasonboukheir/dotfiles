@@ -15,10 +15,24 @@
   # lock survives the IPC quit briefly), force-kill if it hangs, then
   # exec `steam -gamepadui` which is the modern Steam Deck-style Big
   # Picture UI inside the current wayland session.
+  # Guard against accidental invocation from the wrong user. The .desktop
+  # entry intentionally only lives on gamer's desktop, but a global app
+  # launcher (e.g. wofi --show drun in jasonbk's hyprland) will pick up
+  # anything in /run/current-system/sw/share/applications/ — so we don't
+  # ship the desktop entry through systemPackages, and the script itself
+  # bails if launched as anyone other than the gaming user, which would
+  # otherwise spin up a fresh Steam install under the invoking user.
+  # TODO: build a real "switch session" entry point for jasonbk's hyprland
+  # that activates gamer's existing seat via `loginctl activate` rather
+  # than launching Steam in-place.
   switchToBigPicture = pkgs.writeShellApplication {
     name = "switch-to-big-picture";
     runtimeInputs = [pkgs.coreutils pkgs.procps];
     text = ''
+      if [[ "''${USER:-}" != "${cfg.user}" ]]; then
+        echo "switch-to-big-picture must run as ${cfg.user} (got ''${USER:-unknown})" >&2
+        exit 1
+      fi
       if pgrep -x steam >/dev/null 2>&1; then
         steam -shutdown 2>/dev/null || true
         for _ in 1 2 3 4 5 6 7 8 9 10; do
@@ -49,8 +63,15 @@ in {
     lib.mkEnableOption "Switch-to-Big-Picture launcher on gamer's plasma desktop";
 
   config = lib.mkIf cfg.bigPicture.enable {
-    environment.systemPackages = [switchToBigPicture bigPictureDesktop];
-
+    # Deliberately NOT installed in environment.systemPackages: doing so
+    # exposes the .desktop file system-wide and global app launchers
+    # (wofi --show drun in jasonbk's hyprland, KRunner, etc.) surface a
+    # "Switch to Big Picture" entry that, when activated, runs the script
+    # as the invoking user — i.e. spins up a fresh Steam under jasonbk
+    # instead of switching to gamer's session. The tmpfiles entry below
+    # references bigPictureDesktop directly via its store path, which
+    # retains both derivations through the system closure.
+    #
     # gamer's plasma session surfaces the Big Picture launcher on the
     # desktop. tmpfiles' L+ overwrites any existing symlink so a closure
     # bump (new store path for switchToBigPicture) doesn't leave the entry

@@ -18,9 +18,15 @@
       libnotify
       nautilus
       clipse
+      # `hyprctl dispatch exit` alone leaves the session in a half-torn-down
+      # state on hosts running plasma-login-manager: hyprland's wayland
+      # compositor exits, but logind still has the user session open and the
+      # greeter never repaints, leaving a black framebuffer. Going straight
+      # through logind closes the session cleanly so display-manager.service
+      # (Restart=always) brings the greeter back. terminate-user kills hyprland
+      # as a side effect, so no explicit dispatch is needed.
       (writeShellScriptBin "hyprexit" ''
-        ${hyprland}/bin/hyprctl dispatch exit
-        ${systemd}/bin/loginctl terminate-user "''$USER"
+        exec ${systemd}/bin/loginctl terminate-user "''$USER"
       '')
       beeper
       supersonic-wayland
