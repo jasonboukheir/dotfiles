@@ -7,5 +7,6 @@
     (import ./zmx.nix)
     (import ./speaches.nix)
     (import ./litellm.nix)
+    (import ./waybar.nix)
   ];
 }
