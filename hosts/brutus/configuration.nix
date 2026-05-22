@@ -7,7 +7,7 @@
   ];
 
   nix.settings.max-jobs = 12;
-  nix.settings.cores = 12;
+  nix.settings.cores = 24;
   nix.settings.experimental-features = [
     "ca-derivations"
     "dynamic-derivations"
