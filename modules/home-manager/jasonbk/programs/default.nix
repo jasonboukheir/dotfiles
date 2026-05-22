@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./brave.nix
     ./direnv.nix
     ./fish.nix
     ./gh.nix
