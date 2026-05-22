@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   imports = [../state-version.nix];
   nixpkgs.hostPlatform = "x86_64-linux";
 
@@ -23,4 +27,15 @@
   # allowUnfreePredicate, so we clear it here — the test's pkgs is
   # already created with `config.allowUnfree = true`.
   nixpkgs.config = lib.mkForce {};
+
+  # users.nix dereferences config.age.secrets."users/jasonbk/password".path
+  # for hashedPasswordFile. The test pulls in the agenix module so the
+  # option exists, but the corresponding .age file isn't in the test
+  # path (hosts/thebeast/secrets/secrets.nix is host-only). Declare a
+  # stub secret pointing at an in-tree placeholder so activation can
+  # resolve the path without actually decrypting anything.
+  age.secrets."users/jasonbk/password" = {
+    file = pkgs.writeText "jasonbk-password.age" "stub";
+    path = "/etc/test-jasonbk-password";
+  };
 }
