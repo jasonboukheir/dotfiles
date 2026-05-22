@@ -24,27 +24,6 @@
     '';
   };
 
-  options.thebeast.sessionsByUser = lib.mkOption {
-    type = with lib.types; attrsOf (listOf str);
-    default = {};
-    example = lib.literalExpression ''
-      {
-        jasonbk = [ "hyprland" ];
-        gamer = [ "plasma" "gamescope-wayland" ];
-      }
-    '';
-    description = ''
-      Per-user allowlist of session basenames (no `.desktop` suffix)
-      surfaced in the SDDM greeter dropdown. Drives theme.conf for
-      the thebeast SDDM theme, which filters sessionModel at display
-      time. The underlying session files in wayland-sessions/ stay
-      intact, so `steamosctl set-default-desktop-session`,
-      `autoLogin.Session`, and jovian's gamescope handoff are
-      unaffected. Users not listed here see every installed session
-      (safe default for new accounts before this attrset is updated).
-    '';
-  };
-
   options.gaming = {
     user = lib.mkOption {
       type = lib.types.str;
