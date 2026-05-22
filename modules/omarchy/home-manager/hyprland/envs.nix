@@ -1,36 +1,38 @@
 {
   config,
-  lib,
   ...
 }: let
   cursorSize = toString config.stylix.cursor.size;
+  envPair = name: value: {_args = [name value];};
 in {
   wayland.windowManager.hyprland.settings = {
     env = [
-      "XCURSOR_SIZE,${cursorSize}"
-      "HYPRCURSOR_SIZE,${cursorSize}"
+      (envPair "XCURSOR_SIZE" cursorSize)
+      (envPair "HYPRCURSOR_SIZE" cursorSize)
 
-      "GDK_BACKEND,wayland"
-      "QT_QPA_PLATFORM,wayland"
-      "QT_STYLE_OVERRIDE,kvantum"
-      "SDL_VIDEODRIVER,wayland"
-      "MOZ_ENABLE_WAYLAND,1"
-      "ELECTRON_OZONE_PLATFORM_HINT,wayland"
-      "OZONE_PLATFORM,wayland"
+      (envPair "GDK_BACKEND" "wayland")
+      (envPair "QT_QPA_PLATFORM" "wayland")
+      (envPair "QT_STYLE_OVERRIDE" "kvantum")
+      (envPair "SDL_VIDEODRIVER" "wayland")
+      (envPair "MOZ_ENABLE_WAYLAND" "1")
+      (envPair "ELECTRON_OZONE_PLATFORM_HINT" "wayland")
+      (envPair "OZONE_PLATFORM" "wayland")
 
-      "XDG_DATA_DIRS,$XDG_DATA_DIRS:$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share"
+      (envPair "XDG_DATA_DIRS" "$XDG_DATA_DIRS:$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share")
 
-      "XCOMPOSEFILE,~/.XCompose"
-      "EDITOR,nvim"
+      (envPair "XCOMPOSEFILE" "~/.XCompose")
+      (envPair "EDITOR" "nvim")
     ];
 
-    xwayland = {
-      force_zero_scaling = true;
-    };
+    config = {
+      xwayland = {
+        force_zero_scaling = true;
+      };
 
-    # Don't show update on first launch
-    ecosystem = {
-      no_update_news = true;
+      # Don't show update on first launch
+      ecosystem = {
+        no_update_news = true;
+      };
     };
   };
 }

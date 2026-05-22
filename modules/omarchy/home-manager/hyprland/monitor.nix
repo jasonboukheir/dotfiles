@@ -26,7 +26,7 @@
   // lib.optionalAttrs (hdrCfg.maxLuminance != null) {max_luminance = hdrCfg.maxLuminance;}
   // lib.optionalAttrs (hdrCfg.maxAvgLuminance != null) {max_avg_luminance = hdrCfg.maxAvgLuminance;});
 in {
-  wayland.windowManager.hyprland.settings.monitorv2 = [
+  wayland.windowManager.hyprland.settings.monitor = [
     (baseSettings // hdrSettings)
   ];
 }

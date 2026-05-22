@@ -63,16 +63,16 @@ in {
   };
   config = {
     wayland.windowManager.hyprland.settings = {
-      "$calendar" = cfg.defaultApps.calendar;
-      "$reminders" = cfg.defaultApps.reminders;
-      "$terminal" = cfg.defaultApps.terminal;
-      "$editor" = cfg.defaultApps.editor;
-      "$fileManager" = cfg.defaultApps.fileManager;
-      "$browser" = cfg.defaultApps.browser;
-      "$music" = cfg.defaultApps.music;
-      "$passwordManager" = cfg.defaultApps.passwordManager;
-      "$messenger" = cfg.defaultApps.messenger;
-      "$webapp" = cfg.defaultApps.webapp;
+      calendar = {_var = cfg.defaultApps.calendar;};
+      reminders = {_var = cfg.defaultApps.reminders;};
+      terminal = {_var = cfg.defaultApps.terminal;};
+      editor = {_var = cfg.defaultApps.editor;};
+      fileManager = {_var = cfg.defaultApps.fileManager;};
+      browser = {_var = cfg.defaultApps.browser;};
+      music = {_var = cfg.defaultApps.music;};
+      passwordManager = {_var = cfg.defaultApps.passwordManager;};
+      messenger = {_var = cfg.defaultApps.messenger;};
+      webapp = {_var = cfg.defaultApps.webapp;};
     };
   };
 }
