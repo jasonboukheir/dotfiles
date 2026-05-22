@@ -195,6 +195,32 @@ in {
     })
 
     (lib.mkIf cfg.discord.enable {
+      # Upstream nixpkgs `services.mautrix-discord` ships a tmpfiles rule
+      # that pins the data dir to `0770 mautrix-discord:mautrix-discord`,
+      # which contradicts the same module's `registerToSynapse` path: synapse
+      # is added to the `mautrix-discord-registration` supplementary group
+      # so it can read the 0640 registration file, but with the parent dir
+      # giving "others" no execute bit, synapse can't even traverse into the
+      # dir to reach it. Synapse crashloops with `PermissionError: [Errno 13]
+      # Permission denied: /var/lib/mautrix-discord/discord-registration.yaml`.
+      # Re-own the dir to `mautrix-discord-registration` so synapse traverses
+      # via its existing supplementary group; the bridge itself is in both
+      # groups so it keeps full access.
+      #
+      # systemd-tmpfiles dedupes by path and keeps the *first* line it sees
+      # (later occurrences are dropped with "Duplicate line ... ignoring").
+      # `mkBefore` puts our rule ahead of upstream's in the merged
+      # 00-nixos.conf, so ours wins and upstream's becomes the dropped dup.
+      # A separate higher-priority *.conf file does NOT work here: systemd
+      # processes 00-nixos.conf first, so the override file's line is the
+      # one that gets discarded as the duplicate.
+      # TODO: drop once nixpkgs `nixos/modules/services/matrix/mautrix-discord.nix`
+      # stops pinning the dataDir to `770 mautrix-discord:mautrix-discord`
+      # (issue to be filed upstream).
+      systemd.tmpfiles.rules = lib.mkBefore [
+        "d /var/lib/mautrix-discord 0750 mautrix-discord mautrix-discord-registration -"
+      ];
+
       systemd.services = builtins.listToAttrs [
         (mkBridgeSecrets {
           bridge = "discord";
