@@ -12,6 +12,7 @@
     ./hyprland
     ./btop.nix
     ./clipse.nix
+    ./gtk.nix
     ./hypridle.nix
     ./hyprlock.nix
     ./hyprsunset.nix
