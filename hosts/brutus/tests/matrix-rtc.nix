@@ -19,6 +19,21 @@ pkgs.testers.nixosTest {
     # start. Disabling it for the test exercises the same module path
     # without making the host depend on stun1.l.google.com being up.
     services.livekit.settings.rtc.use_external_ip = lib.mkForce false;
+    # Production also restricts ICE gathering to `eno1` (see module
+    # comment). The nixosTest sandbox has only `eth1`/`lo`, so the
+    # filter would leave LiveKit with no usable interface and it
+    # would fail to gather any host candidates. Drop the filter for
+    # the test; the production module path still gets exercised
+    # because the freeform JSON merge still flows.
+    services.livekit.settings.rtc.interfaces = lib.mkForce {};
+    # Embedded TURN reads the wildcard ACME cert; the test path
+    # forces `security.acme.certs = {}`, so the cert files don't
+    # exist and livekit would crash on first read. Disable TURN
+    # for the test — startup of the SFU + JWT services is what this
+    # test covers, not the TURN listener. Disabling at the option
+    # level also drops the SupplementaryGroups=["acme"] reference
+    # and the after/wants on acme-finished-*.target.
+    homelab.matrix-rtc.turn.enable = false;
   };
 
   testScript = {nodes, ...}: let

@@ -28,7 +28,7 @@ in {
             type = "ldap";
             ldap_uri = "ldap://${ldapCfg.settings.ldap_host}:${toString ldapCfg.settings.ldap_port}";
             ldap_base = ldapCfg.settings.ldap_base_dn;
-            ldap_filter = "(email={0})";
+            ldap_filter = "(|(uid={0})(email={0}))";
             ldap_reader_dn = "uid=${ldapCfg.ensureUsers.radicale.id},ou=people,${ldapCfg.settings.ldap_base_dn}";
             ldap_secret_file = config.ephemeral-secrets."radicale.ldap.pw".path;
           };

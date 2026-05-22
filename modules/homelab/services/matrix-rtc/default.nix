@@ -26,6 +26,8 @@
   # (trailing /rtc gets appended by clients).
   sfuWsUrl = "wss://${domain}/livekit/sfu";
 in {
+  imports = [./turn.nix];
+
   config = lib.mkMerge [
     {
       homelab.services.matrix-rtc = {
@@ -122,6 +124,22 @@ in {
             # and the media leg never connects. STUN discovery here
             # avoids hard-coding a public IP that changes on ISP renew.
             use_external_ip = true;
+            # LiveKit's default ICE candidate gathering walks every
+            # interface on the host. On brutus that meant podman
+            # veths, the wireguard bridge, a USB-ethernet adapter with
+            # a link-local 169.254.* address, and the SFU dutifully
+            # advertised every one of them to remote clients. iOS
+            # Safari/WKWebView (Element X mobile's WebRTC stack)
+            # chews through the candidate list slowly and bails before
+            # finding the public IP. Pin to eno1 so the only host
+            # candidates clients see are the public 50.47.214.120 (via
+            # `use_external_ip` + STUN) and the LAN 192.168.50.182.
+            interfaces.includes = ["eno1"];
+            # Pin LiveKit's TCP-fallback ICE port so the router DNAT
+            # for 7881 keeps working across rebuilds. Without this,
+            # LiveKit picks the default at boot (currently 7881) but
+            # nothing in the schema forbids a future bump.
+            tcp_port = 7881;
           };
         };
         # The SFU does the firewall hole itself for the RTC range so the
@@ -130,6 +148,12 @@ in {
         # the public side on 443/8443.
         openFirewall = true;
       };
+
+      # The upstream livekit module's `openFirewall` opens the UDP RTC
+      # range and the WS signaling port (loopback-only here, so a
+      # no-op for ingress) but skips the TCP fallback port. Open it
+      # explicitly so router DNAT for 7881 reaches the daemon.
+      networking.firewall.allowedTCPPorts = [7881];
 
       services.lk-jwt-service = {
         enable = true;
