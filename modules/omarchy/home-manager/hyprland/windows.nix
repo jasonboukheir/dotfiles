@@ -18,7 +18,7 @@
       # Just dash of transparency
       "opacity 1 0.97, match:class .*"
       # Normal chrome Youtube tabs
-      "opacity 1 1, match:class ^(chromium|google-chrome|google-chrome-unstable|brave-browser)$, match:title .*[Yy]ou[Tt]ube.*"
+      "opacity 1 1, match:class ^(chromium|google-chrome|google-chrome-unstable|helium)$, match:title .*[Yy]ou[Tt]ube.*"
       "opacity 1 0.97, match:class ^(chromium|google-chrome|google-chrome-unstable)$"
       "opacity 1 0.97, match:initial_class ^(chrome-.*-Default)$ # web apps"
       "opacity 1 1, match:initial_class ^(chrome-[Yy]ou[Tt]ube.*-Default)$ # Youtube"

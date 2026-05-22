@@ -111,7 +111,7 @@ in {
         description = "Command to use when launching fileManager";
       };
       browser = lib.mkOption {
-        default = "brave --new-window --ozone-platform=wayland";
+        default = "helium --new-window --ozone-platform=wayland";
         type = lib.types.str;
         description = "Command to use when launching browser";
       };

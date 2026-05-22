@@ -66,6 +66,11 @@
       url = "github:jasonboukheir/vllm-xpu-nix";
       inputs.nixpkgs.follows = "nixos-unstable";
     };
+
+    helium-flake = {
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
   };
 
   outputs = _: {};

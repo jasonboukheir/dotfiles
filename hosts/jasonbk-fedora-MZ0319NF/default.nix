@@ -3,6 +3,7 @@
   nixgl,
   config,
   lib,
+  inputs,
   ...
 }: let
   nixGLWrap = pkg: let
@@ -10,7 +11,7 @@
     # TODO(home-manager#8395): drop once nix-community/home-manager#8396 is
     # backported to release-25.11. The upstream `lib.nixGL.wrap` only rewrites
     # `share/applications/*.desktop`. GTK apps with `DBusActivatable=true`
-    # (Ghostty, Brave) are launched by GNOME via their systemd user unit, which
+    # (Ghostty, Helium) are launched by GNOME via their systemd user unit, which
     # still points at the unwrapped binary — so the app starts without
     # nixGL's GL/EGL env and fails to find an OpenGL context. Patch the
     # systemd + d-bus service files too, mirroring upstream PR #8396.
@@ -20,6 +21,10 @@
       name = "${pkg.pname or pkg.name}-nixgl-desktop";
       paths = [wrapped];
       meta = (pkg.meta or {}) // {mainProgram = pkg.meta.mainProgram or pkg.pname or pkg.name;};
+      # Keep .override propagating through the wrapper — modules that pass
+      # tunables via cfg.package.override (e.g. oxcl's programs.helium.flags)
+      # otherwise hit "attribute 'override' missing" on the symlinkJoin.
+      passthru = (pkg.passthru or {}) // {override = args: nixGLWrap (pkg.override args);};
       postBuild = ''
         if [ -d ${pkg}/share/applications ]; then
           rm -rf $out/share/applications
@@ -45,9 +50,11 @@
 in {
   imports = [
     ../../modules/home-manager/sharedModules/programs
+    ../../modules/home-manager/sharedModules/stylix.nix
     ../../modules/home-manager/jasonbk/programs
     ../../modules/stylix
     ./programs
+    inputs.helium-flake.homeModules.default
   ];
 
   stylix.enable = true;
@@ -58,7 +65,7 @@ in {
   targets.genericLinux.nixGL.packages = nixgl;
 
   programs.ghostty.package = nixGLWrap pkgs.ghostty;
-  programs.brave.package = nixGLWrap pkgs.brave;
+  programs.helium.package = nixGLWrap pkgs.helium;
   programs._1password.package = config.lib.nixGL.wrap pkgs._1password-gui;
 
   xdg.systemDirs.config = ["/etc/xdg"];
