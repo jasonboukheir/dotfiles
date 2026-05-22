@@ -29,7 +29,7 @@
       };
 
       flake.homeConfigurations."jasonbk@jasonbk-fedora-MZ0319NF" = inputs.home-manager-nixos.lib.homeManagerConfiguration {
-        pkgs = linuxPkgs;
+        pkgs = linuxPkgs.extend inputs.helium-flake.overlays.default;
         extraSpecialArgs = {
           inherit inputs;
           pkgs-unstable = linuxPkgsUnstable;

@@ -7,10 +7,24 @@
   inputs,
   ...
 }: {
-  imports = [./state-version.nix];
+  imports = [
+    ./state-version.nix
+    inputs.helium-flake.nixosModules.default
+  ];
+
+  programs.helium = {
+    enable = true;
+    policies.ExtensionInstallForcelist = [
+      "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
+      "dphilobhebphkdjbpfohgikllaljmgbn"
+    ];
+  };
 
   # CachyOS kernel overlay and binary cache
-  nixpkgs.overlays = [inputs.nix-cachyos-kernel.overlays.pinned];
+  nixpkgs.overlays = [
+    inputs.nix-cachyos-kernel.overlays.pinned
+    inputs.helium-flake.overlays.default
+  ];
   nix.settings = {
     substituters = ["https://attic.xuyh0120.win/lantian"];
     trusted-public-keys = ["lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="];

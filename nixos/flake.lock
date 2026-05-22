@@ -466,6 +466,26 @@
         "type": "github"
       }
     },
+    "helium-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixos-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779362613,
+        "narHash": "sha256-gYJQTjBYuYOB/yii5bd9xGkxph+eL+mq4kj4F8PC/aA=",
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "rev": "c1db1cc295118e95923a95fbcd2346a619fbe159",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -849,6 +869,7 @@
         "agenix": "agenix",
         "determinate": "determinate",
         "ezmtls": "ezmtls",
+        "helium-flake": "helium-flake",
         "home-manager-nixos-unstable": "home-manager-nixos-unstable",
         "jovian": "jovian",
         "nix-cachyos-kernel": "nix-cachyos-kernel",
