@@ -54,7 +54,22 @@ in {
       sdrMaxLuminance = lib.mkOption {
         type = lib.types.int;
         default = 200;
-        description = "SDR maximum luminance for SDR→HDR brightness (80–400, typically 200–250)";
+        description = "SDR maximum luminance for SDR→HDR brightness — set to the panel's 100% white window spec (250 for G95SC; 80–400 typical)";
+      };
+      minLuminance = lib.mkOption {
+        type = lib.types.nullOr lib.types.float;
+        default = null;
+        description = "HDR minimum luminance override (null = use EDID). 0.005 for OLED true black";
+      };
+      maxLuminance = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "HDR peak luminance override (null = use EDID). Set to the panel's 1–3% white window spec (1000 for G95SC)";
+      };
+      maxAvgLuminance = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "HDR average luminance override (null = use EDID). Set to the panel's 10% white window spec (500 for G95SC)";
       };
     };
     waybar = {
