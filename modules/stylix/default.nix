@@ -8,7 +8,7 @@
 in {
   config = lib.mkIf cfg.enable {
     stylix = {
-      image = ./wallpapers/analog-dreams.jpeg;
+      image = ./wallpapers/vaporwave-neon-nightscape.jpg;
       # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
       base16Scheme = ./themes/digital-nightmares.yaml;
       polarity = "dark";

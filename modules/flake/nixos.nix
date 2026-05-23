@@ -69,6 +69,9 @@
           checks.thebeast-session = import ../../hosts/thebeast/tests/session.nix {
             inherit pkgs inputs;
           };
+          checks.thebeast-dm-recovery = import ../../hosts/thebeast/tests/dm-recovery.nix {
+            inherit pkgs inputs;
+          };
           checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {
             inherit pkgs inputs;
           };
