@@ -42,7 +42,7 @@ in {
     stylix.cursor = {
       name = "Bibata-Modern-Stylix";
       package = themedCursors;
-      size = 32;
+      size = 24;
     };
   };
 }
