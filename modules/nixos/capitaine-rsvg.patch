@@ -1,0 +1,39 @@
+Render with rsvg-convert in parallel instead of inkscape.
+
+Upstream's build.sh shells out to inkscape per (svg x size), paying GTK
+startup and emitting fontconfig warnings on every call. rsvg-convert
+under xargs -P drops the build from ~5min to ~1s and removes the
+inkscape closure dependency entirely.
+
+--- a/build.sh
++++ b/build.sh
+@@ -112,17 +112,9 @@
+   OUTPUT_DIR="$BUILD_DIR/$variant/$name"
+   mkdir -p "$OUTPUT_DIR"
+
+-  # Set options for Inkscape depending on version.
+-  INKSCAPE_OPTS=('-w' "$size" -h "$size" -d "$dpi" )
+-  case $(inkscape -V | cut -d' ' -f2) in
+-    # NB: The export option (-e or -o) must be the last option in the INKSCAPE_OPTS array.
+-    0.*) INKSCAPE_OPTS+=('-z' '-e');; # -z specifies not to launch GUI, -e is export
+-    1.*) INKSCAPE_OPTS+=('-o');;      # v1.0+ uses no GUI by default, -e replaced by -o
+-  esac
+-
+-  for svg_file in "$SRC/svg/$variant"/*.svg; do
+-   inkscape "${INKSCAPE_OPTS[@]}" "$OUTPUT_DIR/$(basename "${svg_file%.svg}").png" "$svg_file"
+-  done
++  export size OUTPUT_DIR
++  printf "%s\0" "$SRC/svg/$variant"/*.svg | xargs -0 -n 1 -P "${NIX_BUILD_CORES:-1}" sh -c \
++    'rsvg-convert -w "$size" -h "$size" -o "$OUTPUT_DIR/$(basename "${1%.svg}").png" "$1"' _
+ }
+
+ # Assembles rendered PNGs into a cursor distribution.
+@@ -209,7 +201,7 @@
+ }
+
+ # Check dependencies are present.
+-DEPENDENCIES=(inkscape xcursorgen)
++DEPENDENCIES=(rsvg-convert xcursorgen)
+ for dep in "${DEPENDENCIES[@]}"; do
+   if ! command -v "$dep" >/dev/null; then
+     echo "$dep is not installed, exiting."
