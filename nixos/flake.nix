@@ -71,6 +71,19 @@
       url = "github:oxcl/nix-flake-helium-browser";
       inputs.nixpkgs.follows = "nixos-unstable";
     };
+
+    # Upstream CSS for the Catppuccin Steam Deck theme, consumed verbatim
+    # by hosts/thebeast/session/steam-theme.nix. We don't take their
+    # palette — only the selector library in `src/shared.css` — and
+    # alias their `--ctp-*` vars to the active Stylix base16 scheme.
+    # Refresh with `nix flake update catppuccin-steam-deck` whenever a
+    # Steam client beta rotates webpack hashes; upstream's CSSLoader
+    # Mappings dependency keeps their selectors in sync with the latest
+    # Steam build.
+    catppuccin-steam-deck = {
+      url = "github:catppuccin/steam-deck";
+      flake = false;
+    };
   };
 
   outputs = _: {};

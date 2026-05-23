@@ -123,6 +123,22 @@
         "type": "github"
       }
     },
+    "catppuccin-steam-deck": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778098644,
+        "narHash": "sha256-kkhP2uQcnHwF5t4e4DawAqfjZrbhh6yQcmJ+xxEwkEM=",
+        "owner": "catppuccin",
+        "repo": "steam-deck",
+        "rev": "9b7e098e2c2d9cf379f9dd41370a4f8406c01c75",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "steam-deck",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -867,6 +883,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "catppuccin-steam-deck": "catppuccin-steam-deck",
         "determinate": "determinate",
         "ezmtls": "ezmtls",
         "helium-flake": "helium-flake",

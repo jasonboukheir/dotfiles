@@ -6,6 +6,7 @@ pkgs.testers.nixosTest {
   name = "thebeast-session";
 
   nodes.machine = {...}: {
+    _module.args.inputs = inputs;
     imports = [
       inputs.agenix.nixosModules.default
       inputs.home-manager-nixos-unstable.nixosModules.home-manager

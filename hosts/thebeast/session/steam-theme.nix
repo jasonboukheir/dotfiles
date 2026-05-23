@@ -1,43 +1,83 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }: let
   cfg = config.gaming;
   colors = config.lib.stylix.colors;
+  catppuccinSrc = inputs.catppuccin-steam-deck;
 
   themeName = "Stylix";
 
-  # Limited to the System-Wide target plus the legacy `bigpicture` /
-  # `QuickAccess` aliases that CSS Loader still honours on the
-  # `steam -gamepadui` build, so the same stylesheet covers the home
-  # grid, library, store, QAM panel, and lock screen in one drop.
-  # CSS Loader scans theme.json's `inject` map at plugin startup and
-  # picks themes up by directory scan, so a pure file-drop install is
-  # sufficient — no runtime API call is needed.
-  themeJson = builtins.toJSON {
-    name = themeName;
-    author = "stylix";
-    version = "1.0.0";
-    description = "Auto-generated from the active Stylix base16 scheme";
-    manifest_version = 8;
-    target = "System-Wide";
-    inject = {
-      "colors.css" = ["System-Wide"];
-    };
-  };
+  rgbCsv = slot:
+    "${toString colors."${slot}-rgb-r"}, "
+    + "${toString colors."${slot}-rgb-g"}, "
+    + "${toString colors."${slot}-rgb-b"}";
 
-  # Stylix exposes a base16 attrset at config.lib.stylix.colors with
-  # raw hex (no leading #). CSS Loader injects this stylesheet into
-  # every GamepadUI document, so the strategy is: bind every base16
-  # slot to a custom property, then re-point the small set of Valve
-  # CSS variables that are documented as stable across client betas.
-  # Mangled React class names (`.libraryhome_Container_xxxx`) rotate
-  # every Steam beta and are deliberately not touched here — see
-  # https://docs.deckthemes.com/CSSLoader/theming_step_by_step/
-  colorsCss = ''
+  # Catppuccin's selector library reads its palette out of `--ctp-*`
+  # custom properties. Their upstream flavor files (mocha.css, latte.css,
+  # …) populate those vars from a fixed palette; we instead populate
+  # them from the active Stylix base16 scheme so the theme follows
+  # whichever scheme stylix is currently rendering. Slot mapping below
+  # follows base16 lightness ordering — Catppuccin's `crust < mantle
+  # < base < surface0..2 < overlay0..2 < subtext0..1 < text` collapses
+  # against base16's coarser `base00..base07` greys (we don't have a
+  # tone darker than base00), and the accents map by hue.
+  paletteCss = ''
     :root {
+      --ctp-base: #${colors.base00};
+      --ctp-mantle: #${colors.base01};
+      --ctp-crust: #${colors.base00};
+
+      --ctp-surface0: #${colors.base02};
+      --ctp-surface1: #${colors.base02};
+      --ctp-surface2: #${colors.base03};
+
+      --ctp-overlay0: #${colors.base03};
+      --ctp-overlay1: #${colors.base04};
+      --ctp-overlay2: #${colors.base04};
+
+      --ctp-subtext0: #${colors.base04};
+      --ctp-subtext1: #${colors.base05};
+      --ctp-text: #${colors.base05};
+
+      --ctp-rosewater: #${colors.base06};
+      --ctp-flamingo: #${colors.base08};
+      --ctp-mauve: #${colors.base0E};
+      --ctp-red: #${colors.base08};
+      --ctp-peach: #${colors.base09};
+      --ctp-yellow: #${colors.base0A};
+      --ctp-green: #${colors.base0B};
+      --ctp-teal: #${colors.base0C};
+      --ctp-sky: #${colors.base0C};
+      --ctp-sapphire: #${colors.base0C};
+      --ctp-blue: #${colors.base0D};
+      --ctp-lavender: #${colors.base0D};
+
+      --ctp-accent-color: var(--stylix-base0D);
+
+      --ctp-base-rgb: ${rgbCsv "base00"};
+      --ctp-crust-rgb: ${rgbCsv "base00"};
+      --ctp-surface0-rgb: ${rgbCsv "base02"};
+
+      /* Catppuccin's SVG-recolor filter chains are precomputed per
+         palette and can't be derived from arbitrary base16 hex at
+         eval time — so monochrome icons keep their default fill.
+         Acceptable for v1; revisit if specific glyphs look broken. */
+      --ctp-base-filter: none;
+      --ctp-mantle-filter: none;
+      --ctp-red-filter: none;
+      --ctp-text-filter: none;
+
+      --ctp-blur: 10px;
+      /* Leading `, ` is intentional — shared.css concatenates this
+         into `rgba(<rgb-triplet><opacity>)` argument lists. */
+      --ctp-opacity: , 0.8;
+
+      /* Stylix base16 slots, exposed so future host-local tweaks can
+         reference them by base16 name without re-templating. */
       --stylix-base00: #${colors.base00};
       --stylix-base01: #${colors.base01};
       --stylix-base02: #${colors.base02};
@@ -54,55 +94,48 @@
       --stylix-base0D: #${colors.base0D};
       --stylix-base0E: #${colors.base0E};
       --stylix-base0F: #${colors.base0F};
-
-      --main-bg-color: var(--stylix-base00);
-      --main-bg-transparency: var(--stylix-base00);
-      --main-editor-bg-color: var(--stylix-base00);
-      --main-editor-fg-color: var(--stylix-base05);
-      --main-text-color: var(--stylix-base05);
-      --main-text-color-secondary: var(--stylix-base04);
-      --main-text-color-muted: var(--stylix-base03);
-      --main-accent-color: var(--stylix-base0D);
-      --main-accent-color-hover: var(--stylix-base0E);
-      --main-accent-color-active: var(--stylix-base08);
-      --main-link-color: var(--stylix-base0D);
-      --main-link-color-hover: var(--stylix-base0E);
-      --header-bg-color: var(--stylix-base01);
-      --header-fg-color: var(--stylix-base06);
-      --tab-bar-bg-color: var(--stylix-base01);
-      --tab-bar-fg-color: var(--stylix-base05);
-      --tab-bar-fg-color-selected: var(--stylix-base07);
-      --tab-bar-fg-color-hover: var(--stylix-base06);
-      --tab-bar-focus-color: var(--stylix-base0D);
-      --focus-ring-color: var(--stylix-base0D);
-      --selection-bg-color: var(--stylix-base02);
-      --selection-fg-color: var(--stylix-base07);
-      --hover-bg-color: var(--stylix-base02);
-      --button-bg-color: var(--stylix-base01);
-      --button-fg-color: var(--stylix-base05);
-      --button-bg-color-hover: var(--stylix-base02);
-      --button-fg-color-hover: var(--stylix-base07);
-      --notification-bg-color: var(--stylix-base01);
-      --notification-fg-color: var(--stylix-base05);
-      --notification-accent-color: var(--stylix-base0D);
-      --qam-bg-color: var(--stylix-base01);
-      --qam-fg-color: var(--stylix-base05);
-      --qam-accent-color: var(--stylix-base0D);
     }
+  '';
 
-    body,
-    html,
-    .gamepadui_Root,
-    .gamepadui_GamepadUIRoot,
-    .basicuibody {
-      background-color: var(--stylix-base00) !important;
-      color: var(--stylix-base05) !important;
-    }
+  # `target` is a free-text category that just controls how the theme is
+  # filed in the CSS Loader picker. `inject` is the actual mount-point
+  # map — its keys are window-target identifiers documented at
+  # https://docs.deckthemes.com/CSSLoader/Features/ . `bigpicture`
+  # covers the BPM main window (home, library, store, settings, game
+  # details) and `bigpictureoverlay` covers the Steam button menu +
+  # Quick Access panel which render in a separate CEF window.
+  #
+  # `dependencies` declares an install-time prerequisite the CSS Loader
+  # store should fetch alongside this theme. Catppuccin and most
+  # palette-driven themes depend on "Focus Highlight Color" because
+  # Valve's gamepad focus ring is layered on shared DOM the third-party
+  # theme owns; declaring the dep means the ring follows our accent.
+  themeJson = builtins.toJSON {
+    name = themeName;
+    author = "stylix (derived from catppuccin/steam-deck)";
+    version = "1.0.0";
+    description = "Catppuccin Steam Deck CSS, re-palettized from the active Stylix base16 scheme.";
+    manifest_version = 8;
+    target = "System-Wide";
+    inject = {
+      "colors.css" = ["bigpicture" "bigpictureoverlay"];
+    };
+    dependencies = {
+      "Focus Highlight Color" = {
+        "Round Compatibility" = "No";
+      };
+    };
+  };
+
+  colorsCss = pkgs.runCommand "stylix-steam-colors.css" {} ''
+    cat ${pkgs.writeText "palette.css" paletteCss} \
+        ${catppuccinSrc}/src/shared.css \
+      > $out
   '';
 
   themePkg = pkgs.runCommand "stylix-steam-theme" {} ''
     install -Dm644 ${pkgs.writeText "theme.json" themeJson} $out/theme.json
-    install -Dm644 ${pkgs.writeText "colors.css" colorsCss} $out/colors.css
+    install -Dm644 ${colorsCss} $out/colors.css
   '';
 in {
   options.gaming.steamTheme.enable = lib.mkOption {
@@ -110,12 +143,15 @@ in {
     default = config.jovian.decky-loader.enable;
     defaultText = lib.literalExpression "config.jovian.decky-loader.enable";
     description = ''
-      Generate a CSS Loader theme directory from the active Stylix
-      base16 scheme and drop it into Decky's themes path. Requires
-      jovian.decky-loader.enable. CSS Loader itself still has to be
-      installed once interactively from the Decky store inside Big
-      Picture — see https://github.com/jasonboukheir/nix-config/issues/29
-      Phase 2 for the rationale (no nix-packaged build yet).
+      Generate a CSS Loader theme directory by re-palettizing the
+      upstream catppuccin/steam-deck selector library (`shared.css`)
+      against the active Stylix base16 scheme. Refresh upstream with
+      `nix flake update catppuccin-steam-deck` inside `./nixos`.
+      Requires jovian.decky-loader.enable. CSS Loader itself still
+      has to be installed once interactively from the Decky store
+      inside Big Picture — see
+      https://github.com/jasonboukheir/nix-config/issues/29 Phase 2
+      for the rationale (no nix-packaged build yet).
     '';
   };
 
