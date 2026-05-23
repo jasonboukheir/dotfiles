@@ -9,7 +9,9 @@ pkgs.testers.nixosTest {
     lib,
     pkgs,
     ...
-  }: {
+  }: let
+    wallpapers = import ../../../modules/stylix/wallpapers {inherit pkgs;};
+  in {
     imports = [
       inputs.home-manager-nixos-unstable.nixosModules.home-manager
       inputs.stylix-nixos-unstable.nixosModules.stylix
@@ -40,7 +42,7 @@ pkgs.testers.nixosTest {
     # the production host does.
     stylix = {
       enable = true;
-      image = ../../../modules/stylix/wallpapers/analog-dreams.jpeg;
+      image = wallpapers.analog-dreams;
       base16Scheme = ../../../modules/stylix/themes/digital-nightmares.yaml;
       polarity = "dark";
     };
