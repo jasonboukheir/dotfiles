@@ -6,37 +6,41 @@
 }: let
   colors = config.lib.stylix.colors;
 
-  themedCursors = pkgs.capitaine-cursors.overrideAttrs (old: {
-    pname = "capitaine-cursors-stylix";
+  themedCursors = pkgs.bibata-cursors.overrideAttrs (old: {
+    pname = "bibata-cursors-stylix";
 
     nativeBuildInputs = (old.nativeBuildInputs or []) ++ [pkgs.librsvg];
 
-    buildInputs = lib.filter (p: p.pname or null != "inkscape") (old.buildInputs or []);
-
-    patches = (old.patches or []) ++ [./capitaine-rsvg.patch];
-
-    postPatch =
-      old.postPatch
-      + ''
-        find src/svg/dark -name '*.svg' -exec sed -i \
-          -e 's/#fff"/#${colors.base04}"/g' \
-          -e 's/#1a1a1a/#${colors.base00}/g' \
-          {} +
-      '';
+    bitmaps = null;
 
     buildPhase = ''
-      HOME="$NIX_BUILD_ROOT" ./build.sh --max-dpi xhd --type dark
-    '';
+      runHook preBuild
 
-    installPhase = ''
-      install -dm 0755 "$out/share/icons/Capitaine Cursors"
-      cp -pr dist/dark/* "$out/share/icons/Capitaine Cursors/"
+      mkdir -p themed-svg bitmaps/Bibata-Modern-Stylix
+      cp -rL svg/modern/. themed-svg/
+
+      find themed-svg -name '*.svg' -exec sed -i \
+        -e 's/#00FF00/#${colors.base04}/gi' \
+        -e 's/#0000FF/#${colors.base00}/gi' \
+        -e 's/#FF0000/#${colors.base04}/gi' \
+        {} +
+
+      find themed-svg -name '*.svg' -print0 | \
+        xargs -0 -n 1 -P "''${NIX_BUILD_CORES:-1}" sh -c \
+          'rsvg-convert -w 256 -h 256 -o "bitmaps/Bibata-Modern-Stylix/$(basename "$1" .svg).png" "$1"' _
+
+      ctgen configs/normal/x.build.toml -p x11 \
+        -d bitmaps/Bibata-Modern-Stylix \
+        -n 'Bibata-Modern-Stylix' \
+        -c 'Bibata cursors themed with stylix base16 colors'
+
+      runHook postBuild
     '';
   });
 in {
   config = lib.mkIf config.stylix.enable {
     stylix.cursor = {
-      name = "Capitaine Cursors";
+      name = "Bibata-Modern-Stylix";
       package = themedCursors;
       size = 32;
     };
