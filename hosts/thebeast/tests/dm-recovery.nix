@@ -83,7 +83,13 @@ pkgs.testers.nixosTest {
             "branch in PLM's Display::slotHelperFinished, leaving the "
             "display stuck without a greeter. Got:\n" + script
         )
-        assert "hyprctl dispatch exit" in script, (
+        # Pin the Lua-mode dispatcher spelling. Under
+        # `configType = "lua"` the legacy `hyprctl dispatch exit`
+        # lowers to `hl.dispatch(exit)`, where `exit` is a bare Lua
+        # identifier (= nil), and hl.dispatch rejects it — the
+        # compositor stays alive and PLM never gets a greeter back.
+        # Refs: hyprwm/Hyprland#14255, hyprwm/Hyprland#14282.
+        assert "hyprctl dispatch 'hl.dsp.exit()'" in script, (
             "hyprexit must dispatch a clean hyprland exit so the "
             "wayland-session process exits with code 0, propagating "
             "HELPER_SUCCESS up to plasmalogin and triggering the "

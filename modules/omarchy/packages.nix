@@ -42,8 +42,16 @@
       # already does this; the script then returns and the user-binding's
       # spawned shell exits, but the session leader (the helper, via its
       # exec'd wayland-session child) drives the actual teardown.
+      #
+      # Under `configType = "lua"` (see
+      # modules/omarchy/home-manager/hyprland/default.nix), `hyprctl
+      # dispatch <X>` lowers to `return hl.dispatch(<X>)` and Lua parses
+      # the bare identifier `exit` as nil, so hl.dispatch rejects it
+      # ("expected a dispatcher"). The Lua-mode spelling of the same
+      # dispatcher is `hl.dsp.exit()`.
+      # Refs: hyprwm/Hyprland#14255, hyprwm/Hyprland#14282.
       (writeShellScriptBin "hyprexit" ''
-        exec ${hyprland}/bin/hyprctl dispatch exit
+        exec ${hyprland}/bin/hyprctl dispatch 'hl.dsp.exit()'
       '')
       beeper
       supersonic-wayland
