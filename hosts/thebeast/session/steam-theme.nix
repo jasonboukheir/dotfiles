@@ -120,14 +120,33 @@ in {
   };
 
   config = lib.mkIf (cfg.steamTheme.enable && config.stylix.enable) {
-    # tmpfiles' L+ overwrites whatever's at the target so the symlink
-    # tracks closure rebumps when the Stylix scheme changes. The dir
-    # name is intentionally non-conflicting with anything the user
-    # could install via the CSS Loader store UI (which would land
-    # under .../themes/<store-name>/) so the two paths can't fight.
+    # The theme directory itself has to be writable: CSS Loader persists
+    # the enabled/preset state to <theme>/config_USER.json on every
+    # toggle, and an EROFS there silently reverts the toggle on the
+    # next Refresh. So the directory is a regular dir owned by the
+    # Steam user, and only the immutable payload files are symlinked
+    # into the Nix store. The `r` rule evicts the legacy whole-dir
+    # symlink left by earlier revisions; it's a no-op once the path
+    # is a populated directory (tmpfiles refuses to `r` non-empty
+    # dirs), so it won't clobber CSS Loader's persisted state. The
+    # dir name is intentionally non-conflicting with anything the
+    # user could install via the CSS Loader store UI (which would
+    # land under .../themes/<store-name>/) so the two paths can't
+    # fight.
     systemd.tmpfiles.settings."10-stylix-steam-theme" = {
-      "${config.jovian.decky-loader.stateDir}/themes/${themeName}"."L+" = {
-        argument = "${themePkg}";
+      "${config.jovian.decky-loader.stateDir}/themes/${themeName}" = {
+        r = {};
+        d = {
+          mode = "0755";
+          user = cfg.user;
+          group = cfg.user;
+        };
+      };
+      "${config.jovian.decky-loader.stateDir}/themes/${themeName}/theme.json"."L+" = {
+        argument = "${themePkg}/theme.json";
+      };
+      "${config.jovian.decky-loader.stateDir}/themes/${themeName}/colors.css"."L+" = {
+        argument = "${themePkg}/colors.css";
       };
     };
   };
