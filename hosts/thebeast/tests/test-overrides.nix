@@ -38,4 +38,8 @@
     file = pkgs.writeText "jasonbk-password.age" "stub";
     path = "/etc/test-jasonbk-password";
   };
+  age.secrets."users/root/password" = {
+    file = pkgs.writeText "root-password.age" "stub";
+    path = "/etc/test-root-password";
+  };
 }
