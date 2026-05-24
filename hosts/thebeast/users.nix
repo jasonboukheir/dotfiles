@@ -42,4 +42,17 @@ in {
   security.pam.services.login.allowNullPassword = true;
   security.pam.services.sddm.allowNullPassword = true;
   security.pam.services.plasma-login-manager.allowNullPassword = true;
+
+  # With the systemd default (KillUserProcesses=no), a session scope
+  # whose leader has exited becomes "abandoned" rather than torn down,
+  # and any process pam launched as a side-effect of pam_sm_open_session
+  # keeps the scope (and its memory/cgroup) pinned until reboot. The
+  # observed offender on this host is pam_kwallet5's ksecretd, which
+  # the Hyprland session path does not reap on its own — Plasma's
+  # session script does, which is why the same logout cycle leaks
+  # ksecretd from Hyprland but not from Plasma. Letting logind kill
+  # the scope when its leader exits is the load-bearing fix; user
+  # services that must outlive a logout are expected to enable-linger
+  # explicitly. Refs #32.
+  services.logind.killUserProcesses = true;
 }

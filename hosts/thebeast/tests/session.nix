@@ -25,7 +25,6 @@ pkgs.testers.nixosTest {
     devUser = "jasonbk";
     sessionsRoot = "${cfg.services.displayManager.sessionData.desktops}/share";
     defaultDesktopSession = cfg.gaming.defaultDesktopSession;
-    appsDir = "/run/current-system/sw/share/applications";
     gamerDesktopDir = "/home/${gamingUser}/Desktop";
   in ''
     import configparser
@@ -34,7 +33,6 @@ pkgs.testers.nixosTest {
     DEV_USER = "${devUser}"
     SESSIONS_ROOT = "${sessionsRoot}"
     DEFAULT_DESKTOP_SESSION = "${defaultDesktopSession}"
-    APPS_DIR = "${appsDir}"
     GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
 
     def read_plasmalogin_conf():
@@ -158,6 +156,55 @@ pkgs.testers.nixosTest {
             machine.succeed(f"id -nG {user} | grep -qw gamemode")
             machine.succeed(f"id -nG {user} | grep -qw input")
 
+    with subtest("logind tears down abandoned session scopes (regression for #32)"):
+        # The bug: pam_kwallet5 forks ksecretd during pam_sm_open_session,
+        # the daemon is re-parented to PID 1 but stays inside the session
+        # scope, and with the systemd default KillUserProcesses=no the
+        # scope is "abandoned" rather than torn down once Hyprland exits.
+        # The orphaned ksecretd then pins the cgroup until reboot.
+        #
+        # Reproducing pam_kwallet5 in a headless VM is not practical, but
+        # the load-bearing behaviour is generic: any process pam left
+        # behind in the scope after the session leader exits. A detached
+        # `sleep` started inside a real PAM session has the same shape.
+        # systemd accepts both `true` and `yes` for boolean directives;
+        # nixpkgs' settings-based renderer emits the lower-case bool, so
+        # match either spelling to stay robust against a future renderer
+        # change.
+        logind_conf = machine.succeed("cat /etc/systemd/logind.conf")
+        assert any(
+            line.replace(" ", "") in {"KillUserProcesses=true", "KillUserProcesses=yes"}
+            for line in logind_conf.splitlines()
+        ), (
+            "logind.conf must enable KillUserProcesses for the #32 fix:\n"
+            f"{logind_conf}"
+        )
+
+        # Open a real PAM session for jasonbk via machinectl, spawn a
+        # detached child that outlives the session leader, then let the
+        # leader exit. With KillUserProcesses=yes logind SIGTERMs the
+        # whole scope; without it the orphaned child survives.
+        machine.succeed(
+            f"machinectl shell {DEV_USER}@ /run/current-system/sw/bin/bash -c "
+            "'setsid -f sleep 600 </dev/null >/dev/null 2>&1'"
+        )
+
+        # logind's scope teardown is asynchronous — give it a generous
+        # window before declaring a leak. Pin the pgrep to the canary
+        # argv so we don't collide with any unrelated sleep on the box.
+        machine.wait_until_fails(
+            f"pgrep -u {DEV_USER} -af 'sleep 600' >/dev/null",
+            timeout=30,
+        )
+        leftover_scopes = machine.succeed(
+            "systemctl list-units --type=scope --state=abandoned "
+            "--no-legend --plain 2>/dev/null || true"
+        ).strip()
+        assert "session-" not in leftover_scopes, (
+            "no session-*.scope should be left abandoned after a clean "
+            f"PAM session exit; got:\n{leftover_scopes}"
+        )
+
     with subtest("jovian session-side user units are installed"):
         # These are what populate steamos-manager's DefaultDesktopSession
         # and tear down the zzt- SDDM override after a desktop round trip.
@@ -185,25 +232,35 @@ pkgs.testers.nixosTest {
         # PLM-equivalent.
 
     with subtest("switch-to-big-picture: installed, surfaced, unprivileged"):
+        # Plasma's desktop shortcut lives in gamer's ~/Desktop and must
+        # resolve to a live store path. A dangling symlink (a previous
+        # closure GC'd) silently drops the icon. The .desktop entry and
+        # its referenced script are deliberately NOT in
+        # /run/current-system/sw — see big-picture.nix for the security
+        # rationale — so the gamer desktop symlink is the canonical
+        # entry point everything else has to be derived from.
+        machine.succeed(f"test -L {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop")
+        desktop_target = machine.succeed(
+            f"readlink -f {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop"
+        ).strip()
+        machine.succeed(f"test -e {desktop_target}")
+
         # The wrapper must actually shut Steam down before relaunching —
         # otherwise the existing window keeps the single-instance lock
         # and `steam -gamepadui` no-ops back into the same window. Both
         # the shutdown call and the gamepadui exec must appear in the
-        # rendered script.
-        machine.succeed(f"test -e {APPS_DIR}/switch-to-big-picture.desktop")
-        bp_script = machine.succeed("cat $(command -v switch-to-big-picture)")
+        # rendered script, which the .desktop entry points to via Exec=.
+        desktop_entry = machine.succeed(f"cat {desktop_target}")
+        exec_path = next(
+            line.split("=", 1)[1].strip()
+            for line in desktop_entry.splitlines()
+            if line.startswith("Exec=")
+        )
+        bp_script = machine.succeed(f"cat {exec_path}")
         assert "steam -shutdown" in bp_script, \
             f"big-picture wrapper missing shutdown call:\n{bp_script}"
         assert "steam -gamepadui" in bp_script, \
             f"big-picture wrapper missing gamepadui launch:\n{bp_script}"
-        # Plasma's desktop shortcut lives in gamer's ~/Desktop and must
-        # resolve to a live store path. A dangling symlink (a previous
-        # closure GC'd) silently drops the icon.
-        machine.succeed(f"test -L {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop")
-        target = machine.succeed(
-            f"readlink -f {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop"
-        ).strip()
-        machine.succeed(f"test -e {target}")
 
         # The wrapper must NOT escalate (no sudo). Real Steam fails in
         # the headless VM (no display, no session bus) so the wrapper's
@@ -211,7 +268,7 @@ pkgs.testers.nixosTest {
         # tells us we got past the in-process branches. What we're
         # ruling out is silently routing through a privileged path.
         status, output = machine.execute(
-            f"sudo -u {GAMING_USER} switch-to-big-picture 2>&1"
+            f"sudo -u {GAMING_USER} {exec_path} 2>&1"
         )
         assert status != 0, \
             f"big-picture wrapper unexpectedly succeeded headless: {output!r}"
