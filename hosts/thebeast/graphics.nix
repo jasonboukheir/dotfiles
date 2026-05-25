@@ -31,7 +31,7 @@ in {
       };
       gpus."1002:7550-1DA2:E490-0000:03:00.0" = {
         power_cap = 304.0;
-        voltage_offset = 0;
+        voltage_offset = -20;
         fan_control_enabled = true;
         fan_control_settings = {
           mode = "curve";

@@ -24,9 +24,9 @@ in {
         description = "Monitor scale factor";
       };
       vrr = lib.mkOption {
-        type = lib.types.enum [0 1 2];
+        type = lib.types.enum [0 1 2 3];
         default = 0;
-        description = "Variable refresh rate (0=off, 1=on, 2=fullscreen only)";
+        description = "Variable refresh rate (0=off, 1=on, 2=fullscreen only, 3=fullscreen+game heuristic)";
       };
     };
     hdr = {
