@@ -1,4 +1,18 @@
-{...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  yamlFormat = pkgs.formats.yaml {};
+  # TODO: drop the sed once pkgs.formats.yaml emits integer YAML keys for
+  # numeric-named Nix attrs. It currently round-trips through JSON, which
+  # stringifies every key, and LACT's BTreeMap<i32, f32> fan curve rejects
+  # quoted keys. See pkgs/pkgs-lib/formats.nix in nixpkgs (yaml_1_1).
+  lactConfig = pkgs.runCommand "lact-config.yaml" {} ''
+    sed -E "s/'([0-9]+)':/\1:/g" ${yamlFormat.generate "lact-config-raw.yaml" config.services.lact.settings} > $out
+  '';
+in {
   hardware.amdgpu.initrd.enable = true;
   hardware.amdgpu.overdrive.enable = true;
 
@@ -34,6 +48,9 @@
       };
     };
   };
+
+  environment.etc."lact/config.yaml".source = lib.mkForce lactConfig;
+  systemd.services.lactd.restartTriggers = lib.mkForce [lactConfig];
 
   services.xserver = {
     enable = true;
