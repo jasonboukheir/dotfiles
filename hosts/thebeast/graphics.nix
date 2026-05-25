@@ -31,18 +31,18 @@ in {
       };
       gpus."1002:7550-1DA2:E490-0000:03:00.0" = {
         power_cap = 304.0;
-        voltage_offset = -10;
+        voltage_offset = 0;
         fan_control_enabled = true;
         fan_control_settings = {
           mode = "curve";
           temperature_key = "edge";
           interval_ms = 500;
           curve = {
-            "40" = 0.30;
-            "55" = 0.50;
-            "65" = 0.70;
-            "75" = 0.90;
-            "85" = 1.00;
+            "30" = 0.30;
+            "40" = 0.50;
+            "55" = 0.70;
+            "65" = 0.90;
+            "75" = 1.00;
           };
         };
       };
