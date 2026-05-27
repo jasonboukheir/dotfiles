@@ -92,12 +92,30 @@ in {
       (bindFlags "ALT + mouse:273" (dsp "window.resize()") {mouse = true;})
 
       # Audio + brightness, repeat-on-hold + works while locked (hyprlang bindel)
-      (bindFlags "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+") {repeating = true; locked = true;})
-      (bindFlags "XF86AudioLowerVolume" (exec "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") {repeating = true; locked = true;})
-      (bindFlags "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") {repeating = true; locked = true;})
-      (bindFlags "XF86AudioMicMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") {repeating = true; locked = true;})
-      (bindFlags "XF86MonBrightnessUp" (exec "brightnessctl -e4 -n2 set 5%+") {repeating = true; locked = true;})
-      (bindFlags "XF86MonBrightnessDown" (exec "brightnessctl -e4 -n2 set 5%-") {repeating = true; locked = true;})
+      (bindFlags "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+") {
+        repeating = true;
+        locked = true;
+      })
+      (bindFlags "XF86AudioLowerVolume" (exec "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") {
+        repeating = true;
+        locked = true;
+      })
+      (bindFlags "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") {
+        repeating = true;
+        locked = true;
+      })
+      (bindFlags "XF86AudioMicMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") {
+        repeating = true;
+        locked = true;
+      })
+      (bindFlags "XF86MonBrightnessUp" (exec "brightnessctl -e4 -n2 set 5%+") {
+        repeating = true;
+        locked = true;
+      })
+      (bindFlags "XF86MonBrightnessDown" (exec "brightnessctl -e4 -n2 set 5%-") {
+        repeating = true;
+        locked = true;
+      })
 
       # Media keys, works while locked (hyprlang bindl)
       (bindFlags "XF86AudioNext" (exec "playerctl next") {locked = true;})

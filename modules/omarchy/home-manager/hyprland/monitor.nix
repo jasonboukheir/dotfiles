@@ -15,16 +15,16 @@
   };
 
   hdrSettings = lib.optionalAttrs hdrCfg.enable ({
-    bitdepth = 10;
-    cm = hdrCfg.colorManagement;
-    sdrbrightness = hdrCfg.sdrBrightness;
-    sdrsaturation = hdrCfg.sdrSaturation;
-    sdr_min_luminance = hdrCfg.sdrMinLuminance;
-    sdr_max_luminance = hdrCfg.sdrMaxLuminance;
-  }
-  // lib.optionalAttrs (hdrCfg.minLuminance != null) {min_luminance = hdrCfg.minLuminance;}
-  // lib.optionalAttrs (hdrCfg.maxLuminance != null) {max_luminance = hdrCfg.maxLuminance;}
-  // lib.optionalAttrs (hdrCfg.maxAvgLuminance != null) {max_avg_luminance = hdrCfg.maxAvgLuminance;});
+      bitdepth = 10;
+      cm = hdrCfg.colorManagement;
+      sdrbrightness = hdrCfg.sdrBrightness;
+      sdrsaturation = hdrCfg.sdrSaturation;
+      sdr_min_luminance = hdrCfg.sdrMinLuminance;
+      sdr_max_luminance = hdrCfg.sdrMaxLuminance;
+    }
+    // lib.optionalAttrs (hdrCfg.minLuminance != null) {min_luminance = hdrCfg.minLuminance;}
+    // lib.optionalAttrs (hdrCfg.maxLuminance != null) {max_luminance = hdrCfg.maxLuminance;}
+    // lib.optionalAttrs (hdrCfg.maxAvgLuminance != null) {max_avg_luminance = hdrCfg.maxAvgLuminance;});
 in {
   wayland.windowManager.hyprland.settings.monitor = [
     (baseSettings // hdrSettings)

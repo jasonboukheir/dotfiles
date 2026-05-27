@@ -66,6 +66,9 @@ in {
             nix = {
               enable = true;
             };
+            markdown = {
+              enable = true;
+            };
             nu.enable = true;
             python.enable = true;
             zig.enable = true;

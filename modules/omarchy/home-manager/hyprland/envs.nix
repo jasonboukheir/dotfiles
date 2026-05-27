@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: let
+{config, ...}: let
   cursorSize = toString config.stylix.cursor.size;
   envPair = name: value: {_args = [name value];};
 in {
