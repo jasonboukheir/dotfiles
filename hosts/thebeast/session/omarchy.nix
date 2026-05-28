@@ -4,7 +4,7 @@
   omarchy.enable = true;
   omarchy.monitor = {
     mode = "5120x1440@120";
-    vrr = 3;
+    vrr = 1;
   };
   omarchy.hdr = {
     enable = true;
