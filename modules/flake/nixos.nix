@@ -93,4 +93,6 @@
 
   partitionedAttrs.nixosConfigurations = "nixos";
   partitionedAttrs.checks = "nixos";
+  partitionedAttrs.packages = "nixos";
+  partitionedAttrs.apps = "nixos";
 }

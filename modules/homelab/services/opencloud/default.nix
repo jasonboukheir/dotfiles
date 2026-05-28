@@ -101,7 +101,6 @@ in {
             additionalScriptSrc = [oidc_url];
           };
         };
-        credentialBootstrap.enable = true;
         environment = {
           "OC_INSECURE" = "true";
           "INSECURE" = "true";
