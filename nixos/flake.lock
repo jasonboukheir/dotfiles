@@ -1160,11 +1160,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1779943551,
-        "narHash": "sha256-9xR26b8I3AnKPeFYrXvuMgNYJfJWpZBCw6odBD5n+Ak=",
+        "lastModified": 1779946890,
+        "narHash": "sha256-JV984BD1chsTxjihD6RdzY3k+lL1luWHaN5NjmPgVH0=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "c9084b956f7901973f6208c5dbe01c4978072fa6",
+        "rev": "4df16ff84dd6b3aad6761c9572c023ec8c83365e",
         "type": "github"
       },
       "original": {
@@ -1192,11 +1192,11 @@
     "vllm-xpu-unstable-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1779943534,
-        "narHash": "sha256-rnd99cMaFtq33Lrh6z3q4w+62gke8/v5lt8C22cQ58A=",
+        "lastModified": 1779946849,
+        "narHash": "sha256-sw6esWbfprO6NdsvMM8eyTVti6wccLY/2VkxXDOH/Bs=",
         "ref": "refs/heads/main",
-        "rev": "210c5690d9cd2d4aa3493ec9202318dcb8946fa4",
-        "revCount": 16972,
+        "rev": "8f07b56abf9c58d5812e42837e4e5aa29411131c",
+        "revCount": 16973,
         "type": "git",
         "url": "https://github.com/jasonboukheir/vllm.git"
       },
