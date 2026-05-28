@@ -101,6 +101,7 @@ in {
             additionalScriptSrc = [oidc_url];
           };
         };
+        credentialBootstrap.enable = true;
         environment = {
           "OC_INSECURE" = "true";
           "INSECURE" = "true";
@@ -111,7 +112,6 @@ in {
           "OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD" = "false";
 
           # oidc
-          "OC_ADMIN_USER_ID" = "";
           "OC_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
           "WEBFINGER_WEB_OIDC_CLIENT_ID" = oidcWebCfg.settings.id;
           "WEBFINGER_ANDROID_OIDC_CLIENT_ID" = oidcAndroidCfg.settings.id;
