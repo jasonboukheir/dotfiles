@@ -52,9 +52,9 @@ in {
       dtype = "bfloat16";
       quantization = "inc";
       kvCacheDtype = "fp8";
-      maxModelLen = 131072;
-      maxNumSeqs = 24;
-      gpuMemoryUtilization = 0.77;
+      maxModelLen = 65536;
+      maxNumSeqs = 15;
+      gpuMemoryUtilization = 0.75;
       speculativeConfig = {
         method = "mtp";
         num_speculative_tokens = 2;
