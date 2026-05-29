@@ -51,7 +51,7 @@ in {
       servedName = "qwen3.6-27b";
       dtype = "bfloat16";
       quantization = "inc";
-      kvCacheDtype = "fp8";
+      kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 65536;
       maxNumSeqs = 15;
       gpuMemoryUtilization = 0.75;
