@@ -1,15 +1,20 @@
 final: prev: {
-  pocket-id = prev.pocket-id.overrideAttrs (finalAttrs: previousAttrs: {
-    version = "2.3.0";
+  pocket-id = (prev.pocket-id.override {
+    buildGo125Module = prev.buildGo126Module;
+  }).overrideAttrs (finalAttrs: previousAttrs: {
+    version = "2.7.0";
 
     src = prev.fetchFromGitHub {
       owner = "pocket-id";
       repo = "pocket-id";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-n1jNU7+eNO7MFUWB7+EnssACMvNoMcJqPk0AvyIr9h8=";
+      hash = "sha256-rWU1jldmdtXDcHrFty/Pmll1xFUQnLFF12j833M05rQ=";
     };
 
-    vendorHash = "sha256-hMhOG/2xnI/adjg8CnA0tRBD8/OFDsTloFXC8iwxlV0=";
+    # CVE-2026-28513 and CVE-2026-43983 fixed upstream in v2.6.0+
+    patches = [];
+
+    vendorHash = "sha256-nr9L7FVUQYzn+bLtvqKGsYydVCjW/fl53Od9lzRv8gk=";
 
     checkFlags =
       (previousAttrs.checkFlags or [])
@@ -25,7 +30,7 @@ final: prev: {
         pnpm = prev.pnpm_10;
         fetcherVersion = 3; # Keep consistent with original
 
-        hash = "sha256-jhlHrekVk0sNLwo8LFQY6bgX9Ic0xbczM6UTzmZTnPI=";
+        hash = "sha256-DVNzFFHMMasKEx+adAhisE32qtirBhJlfMHKrOVl1dM=";
       };
     });
   });
