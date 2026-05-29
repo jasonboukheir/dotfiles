@@ -27,7 +27,7 @@
       hash = "sha256-xbUms+PNZM2JQNq7Rei6cmYp4i2O04nCm1UvkUDa8Eo=";
     };
   };
-  vllm-enable = false;
+  vllm-enable = true;
 in {
   homelab.ports.allocate = {
     local-llm = lib.mkIf chat.enable 8000;
