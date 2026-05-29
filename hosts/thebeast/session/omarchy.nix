@@ -10,9 +10,9 @@
     enable = true;
     colorManagement = "hdr";
     sdrBrightness = 1.0;
-    sdrSaturation = 1.15;
+    sdrSaturation = 1.0;
     sdrMinLuminance = 0.005;
-    sdrMaxLuminance = 250;
+    sdrMaxLuminance = 300;
     minLuminance = 0.005;
     maxLuminance = 1000;
     maxAvgLuminance = 500;
