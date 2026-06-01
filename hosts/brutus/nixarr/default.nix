@@ -10,6 +10,7 @@
   cfg = config.nixarr;
 in {
   imports = [
+    ./arrApi.nix
     ./audiobookshelfFixes.nix
     ./lidarr.nix
     ./transmissionPortForwarding.nix

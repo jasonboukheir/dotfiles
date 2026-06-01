@@ -49,10 +49,11 @@ in {
       servedName = "qwen3.6-27b";
       dtype = "bfloat16";
       quantization = "inc";
-      kvCacheDtype = "turboquant_k3v4_nc";
+      # kvCacheDtype = "turboquant_k3v4_nc";
+      kvCacheDtype = "fp8";
       maxModelLen = 65536;
       maxNumSeqs = 8;
-      gpuMemoryUtilization = 0.75;
+      gpuMemoryUtilization = 0.85;
       speculativeConfig = {
         method = "mtp";
         num_speculative_tokens = 2;
