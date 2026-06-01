@@ -61,7 +61,19 @@ in {
       };
       enforceEager = false;
       enableXpuGraph = true;
-      cudagraphCaptureSizes = [3 9];
+      cudagraphCaptureSizes = null;
+      # Force PIECEWISE-only — the default FULL_AND_PIECEWISE trips
+      # `sycl_ext_oneapi_work_group_scratch_memory feature is not yet
+      # available for use with the SYCL Graph extension` inside
+      # _vllm_fa2_C.varlen_fwd during FULL decode capture
+      # (vllm_xpu_kernels FA2 + oneAPI 2025.3 SYCL Graph).
+      extraArgs = [
+        "--compilation-config"
+        (builtins.toJSON {
+          cudagraph_mode = "PIECEWISE";
+          cudagraph_capture_sizes = [ 3 9 ];
+        })
+      ];
       reasoningParser = "qwen3";
       enableAutoToolChoice = true;
       toolCallParser = "qwen3_xml";
