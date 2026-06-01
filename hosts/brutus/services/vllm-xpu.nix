@@ -52,8 +52,8 @@ in {
       dtype = "bfloat16";
       quantization = "inc";
       kvCacheDtype = "turboquant_k3v4_nc";
-      maxModelLen = 65536;
-      maxNumSeqs = 15;
+      maxModelLen = 131072;
+      maxNumSeqs = 3;
       gpuMemoryUtilization = 0.75;
       speculativeConfig = {
         method = "mtp";
