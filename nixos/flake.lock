@@ -552,11 +552,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780037506,
-        "narHash": "sha256-z7lnxUsYex11x73HiRCzRZDYF2OGqnB0QqouMYcHSX4=",
+        "lastModified": 1780129573,
+        "narHash": "sha256-6/S2FvBz+dxEgPfRU7dK+ycLYzRU7L8aN+GjDRyVs/E=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "aee8bab39b309b038c14f216538e6141f28808c6",
+        "rev": "8f97d1dee8c0971b01cd6b17ccf913e8bb70f5d5",
         "type": "github"
       },
       "original": {
@@ -633,11 +633,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1780084541,
-        "narHash": "sha256-1dfrj9KRVjYdRQV677wHJVqSi1+IseAofINIIpPO+7E=",
+        "lastModified": 1780253365,
+        "narHash": "sha256-wcJ+6+Z+mfzBjClI0XsjOoGSW6o1RldVj6UETLzK+GQ=",
         "owner": "xddxdd",
         "repo": "nix-cachyos-kernel",
-        "rev": "bc4719a00b3e52764b947cb3c7f15a8b8769432e",
+        "rev": "236462fb93cb56e26e6a6801ba5edb6dad66be0d",
         "type": "github"
       },
       "original": {
@@ -767,22 +767,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-oneapi": {
-      "locked": {
-        "lastModified": 1778443072,
-        "narHash": "sha256-zi7/fsqM/kFdNuED//4WOCUtezGtKKqRNORjMvfwjnA=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "da5ad661ba4e5ef59ba743f0d112cbc30e474f32",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "da5ad661ba4e5ef59ba743f0d112cbc30e474f32",
-        "type": "github"
-      }
-    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -815,11 +799,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1780011192,
-        "narHash": "sha256-luHrZG6I7Mwdt413XoDOYBpp9z1z6X23/5SNktwjM+k=",
+        "lastModified": 1780206209,
+        "narHash": "sha256-33WNQ5sssy+8+xhUz953aEnjR1Oh828j0DgLU1TfMqE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3242faf14b7611a62ce0f0071619438a08b65c12",
+        "rev": "45cf63e030188dd38532669b2450182bfc2d4653",
         "type": "github"
       },
       "original": {
@@ -935,11 +919,11 @@
         "tinted-zed": "tinted-zed"
       },
       "locked": {
-        "lastModified": 1780079634,
-        "narHash": "sha256-VVyCrzwLitvxZGx48FgzvlbLYGQU99GsaQnZmwqZoUo=",
+        "lastModified": 1780256506,
+        "narHash": "sha256-wEXN/OoZt9HfsKBL6694p2Y9xRlwfUbdn/M107U8fVU=",
         "owner": "nix-community",
         "repo": "stylix",
-        "rev": "ca07e0644716a7c13e91c6d92d169fc81889c589",
+        "rev": "8ed48a41087feeb66372ff718021a9512fc552b3",
         "type": "github"
       },
       "original": {
@@ -1170,7 +1154,6 @@
         "nixpkgs": [
           "nixos-unstable"
         ],
-        "nixpkgs-oneapi": "nixpkgs-oneapi",
         "sycl-tla-src": "sycl-tla-src",
         "vllm-xpu-kernels-src": "vllm-xpu-kernels-src",
         "vllm-xpu-kernels-unstable-src": "vllm-xpu-kernels-unstable-src",
@@ -1178,11 +1161,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1780090819,
-        "narHash": "sha256-KHijcA9cYKT1czmGyDjSuqorLVXYwlffQVxKYWiHEEg=",
+        "lastModified": 1780296328,
+        "narHash": "sha256-o+8cO8uMHNLiJN7i+0jj+jyk/ma0awfgl9w/ui0k05I=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "90ac2c2dda2dac7d03a7bc8364d7636606d00fd2",
+        "rev": "d19b32dcdd21c80aeb2f0bfa62ff20ff960b3ac6",
         "type": "github"
       },
       "original": {
@@ -1211,11 +1194,11 @@
     "vllm-xpu-unstable-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1780089479,
-        "narHash": "sha256-MMDroWwLVvQzwltpn4zBzziqaN5ZyRf3YzPF7cA8I4E=",
+        "lastModified": 1780288847,
+        "narHash": "sha256-yCm/ZR/VgcI8evwaHAugM6HkZ2tQPxrk4+/UOGH2S1s=",
         "ref": "refs/heads/main",
-        "rev": "61763a9fa9518bac3e3b7fa786a1c9a2bcd5d486",
-        "revCount": 17103,
+        "rev": "e63cd2ed9359a3d1057fde961083304192b8e028",
+        "revCount": 17104,
         "type": "git",
         "url": "https://github.com/jasonboukheir/vllm.git"
       },
