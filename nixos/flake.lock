@@ -767,22 +767,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-oneapi": {
-      "locked": {
-        "lastModified": 1778443072,
-        "narHash": "sha256-zi7/fsqM/kFdNuED//4WOCUtezGtKKqRNORjMvfwjnA=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "da5ad661ba4e5ef59ba743f0d112cbc30e474f32",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "da5ad661ba4e5ef59ba743f0d112cbc30e474f32",
-        "type": "github"
-      }
-    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -1170,7 +1154,6 @@
         "nixpkgs": [
           "nixos-unstable"
         ],
-        "nixpkgs-oneapi": "nixpkgs-oneapi",
         "sycl-tla-src": "sycl-tla-src",
         "vllm-xpu-kernels-src": "vllm-xpu-kernels-src",
         "vllm-xpu-kernels-unstable-src": "vllm-xpu-kernels-unstable-src",
@@ -1178,11 +1161,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1780291998,
-        "narHash": "sha256-K0U1ok79BcFgWRM3StAGFPdQD8mtPxkbxAF/h7Zc2xI=",
+        "lastModified": 1780295686,
+        "narHash": "sha256-IdIIWqkmhYaBnDPkJJeJADZPAFxTgXLoBl+4WGCn9+Y=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "e98ade2f3890dfd93dcfd4315a9da4e34cd95652",
+        "rev": "1021fbf4228a3a95d6490d1707cf21155e440c10",
         "type": "github"
       },
       "original": {

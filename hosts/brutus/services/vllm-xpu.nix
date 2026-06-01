@@ -49,9 +49,9 @@ in {
       servedName = "qwen3.6-27b";
       dtype = "bfloat16";
       quantization = "inc";
-      kvCacheDtype = "fp8";
+      kvCacheDtype = "turboquant_k3v4_nc";
       maxModelLen = 65536;
-      maxNumSeqs = 4;
+      maxNumSeqs = 8;
       gpuMemoryUtilization = 0.75;
       speculativeConfig = {
         method = "mtp";
@@ -60,7 +60,6 @@ in {
       enforceEager = false;
       enableXpuGraph = true;
       cudagraphCaptureSizes = [3 6];
-      # cudagraphMode = "PIECEWISE";
       reasoningParser = "qwen3";
       enableAutoToolChoice = true;
       toolCallParser = "qwen3_xml";
@@ -76,14 +75,14 @@ in {
       model = models.embedding.repo;
       servedName = "jina-embeddings-v5-nano";
       maxModelLen = 8192;
-      maxNumSeqs = 6;
+      maxNumSeqs = 8;
       gpuMemoryUtilization = 0.05;
       enforceEager = true;
       extraArgs = ["--trust-remote-code"];
     };
 
     instances.stt = {
-      enable = vllm-enable;
+      enable = false;
       port = lib.mkIf stt.enable ports.local-stt;
       host = "127.0.0.1";
 
