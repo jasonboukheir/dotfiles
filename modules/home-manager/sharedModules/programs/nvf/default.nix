@@ -58,7 +58,21 @@ in {
             shiftwidth = 2;
             softtabstop = 2;
             expandtab = true;
+            updatetime = 250;
           };
+          diagnostics.config.float.focusable = false;
+          autocmds = [
+            {
+              event = ["CursorHold"];
+              desc = "Show diagnostic float on cursor hold";
+              callback = lib.generators.mkLuaInline ''
+                function()
+                  if vim.bo.buftype ~= "" then return end
+                  vim.diagnostic.open_float(nil, { focus = false })
+                end
+              '';
+            }
+          ];
           utility.oil-nvim.enable = true;
           languages = {
             enableFormat = true;
