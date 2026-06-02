@@ -8,7 +8,13 @@
   stylixPolarity = lib.optionalString stylixEnabled config.stylix.polarity;
 in {
   config = lib.mkIf config.programs.nvf.enable {
-    programs.nvf.settings = {lib, ...}: {
+    programs.nvf.settings = {
+      lib,
+      options,
+      ...
+    }: let
+      hasTomlLanguage = lib.hasAttrByPath ["vim" "languages" "toml" "enable"] options;
+    in {
       vim = lib.mkMerge [
         (lib.mkIf stylixEnabled {
           luaConfigRC.background = lib.nvim.dag.entryBefore ["theme"] ''
@@ -74,19 +80,23 @@ in {
             }
           ];
           utility.oil-nvim.enable = true;
-          languages = {
-            enableFormat = true;
-            enableTreesitter = true;
-            nix = {
-              enable = true;
+          languages =
+            {
+              enableFormat = true;
+              enableTreesitter = true;
+              nix = {
+                enable = true;
+              };
+              markdown = {
+                enable = true;
+              };
+              nu.enable = true;
+              python.enable = true;
+              zig.enable = true;
+            }
+            // lib.optionalAttrs hasTomlLanguage {
+              toml.enable = true;
             };
-            markdown = {
-              enable = true;
-            };
-            nu.enable = true;
-            python.enable = true;
-            zig.enable = true;
-          };
         }
       ];
     };
