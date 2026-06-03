@@ -49,6 +49,21 @@
         disable_hyprland_logo = true;
         disable_splash_rendering = true;
       };
+
+      # TODO: workaround for Hyprland 0.55 HDR/FP16 blur regression — blurred
+      # translucent windows render flat (no blur) and black out on idle until
+      # re-damaged. Drop once fixed upstream (PRs #14584/#14574 in-flight).
+      # https://github.com/hyprwm/Hyprland/issues/14437
+      render = {
+        use_shader_blur_blend = true;
+      };
+
+      # If translucent windows still black out after sitting idle, the VFR
+      # idle-redraw freeze is also implicated — uncomment to disable it.
+      # https://github.com/hyprwm/Hyprland/issues/8631
+      # debug = {
+      #   vfr = false;
+      # };
     };
 
     curve = [
