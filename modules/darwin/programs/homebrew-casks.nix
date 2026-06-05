@@ -65,6 +65,10 @@ in {
       appName = lib.mkDefault "Brave Browser";
       binaries = lib.mkDefault {brave = "Brave Browser";};
     };
+    homebrewCasks.element = {
+      caskName = lib.mkDefault "element";
+      appName = lib.mkDefault "Element";
+    };
     homebrewCasks.zed = {
       caskName = lib.mkDefault "zed";
       appName = lib.mkDefault "Zed";
