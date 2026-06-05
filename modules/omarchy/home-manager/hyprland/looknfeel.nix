@@ -58,12 +58,10 @@
         use_shader_blur_blend = true;
       };
 
-      # If translucent windows still black out after sitting idle, the VFR
-      # idle-redraw freeze is also implicated — uncomment to disable it.
+      # The VFR idle-redraw freeze also blacks out translucent windows after
+      # sitting idle (cursor stays, drawn on its own plane). Left enabled on
+      # purpose — the lowered idle framerate is worth more than the blackout.
       # https://github.com/hyprwm/Hyprland/issues/8631
-      # debug = {
-      #   vfr = false;
-      # };
     };
 
     curve = [
