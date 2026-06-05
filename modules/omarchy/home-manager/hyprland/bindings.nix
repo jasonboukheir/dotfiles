@@ -81,6 +81,11 @@ in {
       (bind "SHIFT + PRINT" (exec "hyprshot -m window"))
       (bind "CTRL + PRINT" (exec "hyprshot -m output"))
 
+      # macOS-style screenshots (SUPER = the Cmd key on a Mac keyboard)
+      (bind "SUPER + SHIFT + 4" (exec "hyprshot -m region"))
+      (bind "SUPER + SHIFT + 3" (exec "hyprshot -m output"))
+      (bind "SUPER + SHIFT + 5" (exec "hyprshot -m window"))
+
       (bind "XF86Tools" (exec "gpu-screen-recorder-gtk"))
 
       (bind "ALT + PRINT" (exec "hyprpicker -a"))
