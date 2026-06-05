@@ -38,7 +38,30 @@ in {
   ];
 
   services.vllm-xpu = {
-    package = pkgs.vllm-xpu-unstable.withTorchvision true;
+    # Partial kernel buildout (upstream vllm-xpu-kernels #324): compile only
+    # the attn-kernel variants the served models dispatch to instead of the
+    # full ~600-variant Cartesian sweep. The stock presets cover head 128
+    # (Llama/Qwen), 192 (DeepSeek MLA), and 64 (gpt-oss); the *Extra lines add
+    # Qwen3.6-27B's full-attention head_size=256 (num_attention_heads 24 /
+    # num_key_value_heads 4 -> GQA 6 -> qgroup 8, no sliding window) on top,
+    # without forking the preset. ~39 attn TUs vs 632 full.
+    # If a model startup hits "kernel not compiled for this configuration",
+    # add the missing variant line here or switch that stage to its *_full preset.
+    package = (pkgs.vllm-xpu-unstable.withTorchvision true).withKernelConfig {
+      chunkPrefill = "chunk_prefill_default";
+      chunkPrefillExtra = [
+        "256,true,true,false,false,false"
+        "256,false,true,false,false,false"
+        "256,false,true,false,false,true"
+      ];
+      pagedDecode = "paged_decode_default";
+      pagedDecodeExtra = [
+        "8,256,16,true,false,false"
+        "8,256,32,true,false,false"
+        "8,256,64,true,false,false"
+        "8,256,64,false,false,false"
+      ];
+    };
 
     instances.chat = {
       enable = vllm-enable;

@@ -6,6 +6,7 @@
     ./ghostty.nix
     ./helium.nix
     ./ssh.nix
+    ./weechat.nix
     ./zed-editor.nix
   ];
 }

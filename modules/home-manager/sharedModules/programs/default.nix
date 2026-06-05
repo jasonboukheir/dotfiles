@@ -15,6 +15,7 @@
     ./zmx.nix
     ./ssh.nix
     ./starship.nix
+    ./weechat.nix
     ./zsh.nix
   ];
 }
