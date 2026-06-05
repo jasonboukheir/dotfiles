@@ -17,14 +17,12 @@
       hash = "sha256-zV62kIKjIDOWpQ6I6z0ll5n0+QIJEEMTrDP/rhml+1Y=";
     };
     embedding = {
-      repo = "Qwen/Qwen3-Embedding-0.6B";
-      rev = "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3";
-      hash = "sha256-tb8fUfxFvkc6VHGM75JEjZChvgAb+bmkS4x/EKGf6qk=";
+      repo = "jinaai/jina-embeddings-v5-text-nano-retrieval";
+      rev = "ac5d898c8d382b17167c33e5c8af644a3519b47d";
     };
     stt = {
-      repo = "openai/whisper-large-v3-turbo";
-      rev = "41f01f3fe87f28c78e2fbf8b568835947dd65ed9";
-      hash = "sha256-xbUms+PNZM2JQNq7Rei6cmYp4i2O04nCm1UvkUDa8Eo=";
+      repo = "distil-whisper/distil-large-v3.5";
+      rev = "728a7691f3ff1d3d971528d3203a6e9559165d41";
     };
   };
   vllm-enable = true;
@@ -51,17 +49,18 @@ in {
       servedName = "qwen3.6-27b";
       dtype = "bfloat16";
       quantization = "inc";
+      # kvCacheDtype = "turboquant_k3v4_nc";
       kvCacheDtype = "fp8";
       maxModelLen = 65536;
-      maxNumSeqs = 15;
-      gpuMemoryUtilization = 0.75;
+      maxNumSeqs = 8;
+      gpuMemoryUtilization = 0.85;
       speculativeConfig = {
         method = "mtp";
         num_speculative_tokens = 2;
       };
       enforceEager = false;
       enableXpuGraph = true;
-      cudagraphCaptureSizes = [3 9];
+      cudagraphCaptureSizes = [3 6];
       reasoningParser = "qwen3";
       enableAutoToolChoice = true;
       toolCallParser = "qwen3_xml";
@@ -75,26 +74,27 @@ in {
 
       runner = "pooling";
       model = models.embedding.repo;
-      servedName = "qwen3-embedding-0.6b";
+      servedName = "jina-embeddings-v5-nano";
       maxModelLen = 8192;
       maxNumSeqs = 8;
-      gpuMemoryUtilization = 0.07;
+      gpuMemoryUtilization = 0.05;
       enforceEager = true;
+      extraArgs = ["--trust-remote-code"];
     };
 
     instances.stt = {
-      enable = vllm-enable;
+      enable = false;
       port = lib.mkIf stt.enable ports.local-stt;
       host = "127.0.0.1";
 
-      model = "openai/whisper-large-v3-turbo";
-      servedName = "whisper-large-v3-turbo";
+      model = models.stt.repo;
+      servedName = "distil-large-v3.5";
       dtype = "bfloat16";
       maxModelLen = 448;
       maxNumSeqs = 32;
       limitMmPerPrompt = {audio = 1;};
       kvCacheDtype = "fp8";
-      gpuMemoryUtilization = 0.07;
+      gpuMemoryUtilization = 0.05;
       enforceEager = true;
       attentionBackend = "TRITON_ATTN";
     };
