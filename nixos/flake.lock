@@ -1133,11 +1133,11 @@
     "vllm-xpu-kernels-unstable-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1780531722,
-        "narHash": "sha256-WZ7h9uHXUI/uKMQ2dLI8Kibu0NQI1gDWRXUY9lSj0xs=",
+        "lastModified": 1780579418,
+        "narHash": "sha256-I0gtXNaPuoN58RNRAAo4fKHXqBxiWlDbAcfjjrS1s3Q=",
         "ref": "refs/heads/main",
-        "rev": "54d39759cdbd3ea16f9d4736af173cdfa5ba4c90",
-        "revCount": 260,
+        "rev": "1437161b97dfd7a6799ce2b2da5ab53fdcf36a6f",
+        "revCount": 261,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/jasonboukheir/vllm-xpu-kernels.git"
@@ -1161,11 +1161,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1780531815,
-        "narHash": "sha256-U6e/DKA1cUxUB+UMbCcvzM7sTA0/PZIL9H003VKX4pk=",
+        "lastModified": 1780579444,
+        "narHash": "sha256-JR/oPy1Y1r400vWebJHH2eZWb9a/23mv5F2J0bi3kD4=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "1fa22904a9b38479107b4a5d3d10957a713da21a",
+        "rev": "847c616809dfc573540a5da5f28455343fa6bad6",
         "type": "github"
       },
       "original": {
