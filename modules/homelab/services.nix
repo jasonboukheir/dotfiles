@@ -91,6 +91,18 @@ with lib; let
         description = "Enable WebSocket proxying";
       };
 
+      proxyReadTimeout = mkOption {
+        type = types.str;
+        default = "60s";
+        description = ''
+          nginx proxy_read_timeout for this service. Raise it for backends
+          that hold a request open while doing slow work (e.g. *arr
+          interactive searches that fan out across rate-limited indexers and
+          exceed the 60s default).
+        '';
+        example = "600s";
+      };
+
       locations = mkOption {
         type = types.attrsOf (types.submodule {
           options = {
@@ -208,12 +220,17 @@ in {
                 }
               '';
 
+              timeoutExtra = optionalString (svcCfg.proxyReadTimeout != "60s") ''
+                proxy_read_timeout ${svcCfg.proxyReadTimeout};
+                proxy_send_timeout ${svcCfg.proxyReadTimeout};
+              '';
+
               primaryVhost = nameValuePair domain {
                 forceSSL = true;
                 useACMEHost = cfg.domain;
                 locations = allLocations;
                 listen = listenSpec;
-                extraConfig = svcCfg.extraConfig + mtlsExtra;
+                extraConfig = svcCfg.extraConfig + mtlsExtra + timeoutExtra;
               };
 
               wildcardVhost = nameValuePair "${domain}-wildcard" {
@@ -222,7 +239,7 @@ in {
                 useACMEHost = cfg.domain;
                 locations = allLocations;
                 listen = listenSpec;
-                extraConfig = svcCfg.extraConfig + mtlsExtra;
+                extraConfig = svcCfg.extraConfig + mtlsExtra + timeoutExtra;
               };
             in
               [primaryVhost] ++ optional svcCfg.wildcard wildcardVhost

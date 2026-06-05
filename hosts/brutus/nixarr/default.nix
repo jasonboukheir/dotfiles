@@ -8,6 +8,10 @@
   jellyfinPort = 8096;
   transmissionPort = 9091;
   cfg = config.nixarr;
+
+  # Interactive searches fan out across rate-limited indexers and can run for
+  # several minutes; keep nginx from dropping the connection at the 60s default.
+  arrSearchTimeout = "600s";
 in {
   imports = [
     ./arrApi.nix
@@ -105,22 +109,27 @@ in {
     bazarr = lib.mkIf config.nixarr.bazarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.bazarr.port}";
+      proxyReadTimeout = arrSearchTimeout;
     };
     lidarr = lib.mkIf config.nixarr.lidarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.lidarr.port}";
+      proxyReadTimeout = arrSearchTimeout;
     };
     prowlarr = lib.mkIf config.nixarr.prowlarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.prowlarr.port}";
+      proxyReadTimeout = arrSearchTimeout;
     };
     radarr = lib.mkIf config.nixarr.radarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.radarr.port}";
+      proxyReadTimeout = arrSearchTimeout;
     };
     sonarr = lib.mkIf config.nixarr.sonarr.enable {
       enable = true;
       proxyPass = "http://localhost:${toString config.nixarr.sonarr.port}";
+      proxyReadTimeout = arrSearchTimeout;
     };
   };
 
