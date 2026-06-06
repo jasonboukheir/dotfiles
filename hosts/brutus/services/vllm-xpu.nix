@@ -10,12 +10,28 @@
   stt = cfg.instances.stt;
   ports = config.homelab.ports.values;
 
-  models = {
-    chat = {
+  # Flip `selectedChatModel` to regression-test/compare a different chat model.
+  # Each preset carries its HF identity and the name vLLM serves it under;
+  # shared serving tuning lives in instances.chat below. Both are Qwen3.6 with
+  # full-attention head_size=256, so they share the kernel buildout.
+  chatModels = {
+    qwen27b = {
       repo = "Lorbus/Qwen3.6-27B-int4-AutoRound";
       rev = "c3aea2d531678621989e5e2db034e32b22536e79";
-      hash = "sha256-zV62kIKjIDOWpQ6I6z0ll5n0+QIJEEMTrDP/rhml+1Y=";
+      servedName = "qwen3.6-27b";
+      quantization = "inc";
     };
+    qwen35b = {
+      repo = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
+      rev = "d1fef185160f938fca00c3c664f21250dd544d63";
+      servedName = "qwen3.6-35b-a3b";
+      quantization = "gptq";
+    };
+  };
+  selectedChatModel = "qwen35b";
+  chatModel = chatModels.${selectedChatModel};
+
+  models = {
     embedding = {
       repo = "jinaai/jina-embeddings-v5-text-nano-retrieval";
       rev = "ac5d898c8d382b17167c33e5c8af644a3519b47d";
@@ -68,14 +84,14 @@ in {
       port = lib.mkIf chat.enable ports.local-llm;
       host = "127.0.0.1";
 
-      model = models.chat.repo;
-      servedName = "qwen3.6-27b";
+      model = chatModel.repo;
+      servedName = chatModel.servedName;
       dtype = "bfloat16";
-      quantization = "inc";
+      quantization = chatModel.quantization;
       # kvCacheDtype = "turboquant_k3v4_nc";
       kvCacheDtype = "fp8";
-      maxModelLen = 65536;
-      maxNumSeqs = 8;
+      maxModelLen = 131072;
+      maxNumSeqs = 4;
       gpuMemoryUtilization = 0.85;
       speculativeConfig = {
         method = "mtp";
