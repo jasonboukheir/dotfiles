@@ -54,5 +54,5 @@ in {
   # the scope when its leader exits is the load-bearing fix; user
   # services that must outlive a logout are expected to enable-linger
   # explicitly. Refs #32.
-  services.logind.killUserProcesses = true;
+  services.logind.settings.Login.KillUserProcesses = true;
 }
