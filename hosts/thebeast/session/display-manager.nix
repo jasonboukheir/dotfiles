@@ -30,4 +30,17 @@ in {
     # never reaches the greeter).
     settings.Greeter.PreselectedSession = preselectSession;
   };
+
+  # plasma-login-manager records a single global "last logged-in session"
+  # in state.conf and preselects it over Greeter.PreselectedSession. A stale
+  # plasma.desktop written once when a Plasma session was launched is why the
+  # greeter keeps defaulting to Plasma despite PreselectedSession=hyprland.
+  # Clearing state.conf on each activation/boot makes the greeter fall back
+  # to PreselectedSession (greeterDefaultSession) every time. The fork has no
+  # per-user default; gamer is jovian-autologin'd into gamescope and never
+  # sees the greeter, so a global preselect covers both users.
+  systemd.tmpfiles.settings."20-plasmalogin-session" =
+    lib.mkIf usePlasmaLoginManager {
+      "/var/lib/plasmalogin/state.conf".r = {};
+    };
 }

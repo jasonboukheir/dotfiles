@@ -21,6 +21,14 @@ in {
       # template ends up as literal `$VAR` substrings in the path, corrupting
       # XDG lookups (wofi drops apps, GTK fails to resolve icons).
 
+      # glib's g_time_zone_new_local() reads the zone name from
+      # /etc/localtime and resolves it under $TZDIR. NixOS only exports
+      # TZDIR via /etc/set-environment (login shells) and
+      # systemd.globalEnvironment, neither of which reach a Hyprland
+      # session launched by plasma-login-manager, so GUI-launched glib
+      # apps get a NULL GTimeZone — gnome-calendar aborts on it.
+      (envPair "TZDIR" "/etc/zoneinfo")
+
       (envPair "XCOMPOSEFILE" "~/.XCompose")
       (envPair "EDITOR" "nvim")
     ];

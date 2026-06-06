@@ -7,6 +7,7 @@
   imports = [
     ./programs
     ./accounts.nix
+    ./kwallet.nix
   ];
 
   home.file.".cache/huggingface/token".source =
