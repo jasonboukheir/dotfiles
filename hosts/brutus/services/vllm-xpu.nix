@@ -131,10 +131,17 @@
       repo = "Intel/gemma-4-26B-A4B-it-int4-AutoRound";
       rev = "edff62728a3c79ec541983b86a21674500e0f05b";
       servedName = "gemma-4-26b-a4b";
-      # "inc" matches the qwen27b AutoRound preset: identical checkpoint metadata
-      # (quant_method auto-round, packing auto_round:auto_gptq, gs128 sym), which
-      # serves correctly on this stack with --quantization inc.
-      quantization = "inc";
+      # MoE int4 on XPU must use the GPTQ path, not inc: inc routes through
+      # INCConfig which has NO XPU fused-MoE method (reverted in #41426 per
+      # jikunshang — "everything can be done in other 2 files"), so experts
+      # dead-end at a KeyError. gptq -> AutoGPTQConfig -> WNA16 oracle ->
+      # XPUExpertsWNA16 (xpu_fused_moe is_int4), same path qwen35b uses. The
+      # checkpoint is auto_round:auto_gptq-packed (sym, bits4, no desc_act), so
+      # forcing gptq should parse it; the auto-detect oracle won't claim it on
+      # its own because is_moe_wna16_compatible gates on quant_method=="gptq"
+      # and this declares "auto-round". If vLLM's quant arg-vs-config check
+      # rejects gptq-on-auto-round, the fix moves to the oracle compat gate.
+      quantization = "gptq";
       dtype = "bfloat16";
       reasoningParser = "gemma4";
       toolCallParser = null;
@@ -146,7 +153,7 @@
       speculative = null;
     };
   };
-  selectedChatModel = "qwen35b";
+  selectedChatModel = "gemma4";
   chatModel = chatModels.${selectedChatModel};
 
   # Verify pass processes 1 real + K spec tokens; vLLM rounds capture sizes up to

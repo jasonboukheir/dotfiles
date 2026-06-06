@@ -22,4 +22,13 @@
     #   ttl=300  # Set custom TTL for the A record (in seconds)
     # '';
   };
+
+  # TODO: drop once the ddclient DynamicUser/nscd race is fixed upstream.
+  # nscd restarts during `nixos-rebuild switch`; the !-privileged preStart runs
+  # `install --owner=ddclient` and can't resolve the dynamic user mid-restart.
+  # https://github.com/NixOS/nixpkgs/issues/350408
+  systemd.services.ddclient = {
+    after = ["nscd.service"];
+    wants = ["nscd.service"];
+  };
 }
