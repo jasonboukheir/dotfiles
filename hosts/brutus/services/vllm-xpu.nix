@@ -81,16 +81,28 @@
     # blockers below). Selectable for testing — leave selectedChatModel on a
     # Qwen preset for production.
     #
-    # Quant: Intel's AutoRound "int4-mixed" (MoE experts int4, attn/mlp/router
-    # int8, sym gs128, auto_round:auto_gptq packing). No pure-GPTQ quant of this
-    # model exists; the only other int4 (cyankiwi compressed-tensors AWQ gs32)
-    # can't load on XPU at all (no awq_dequantize, vllm #41469).
+    # Quant: Intel's AutoRound uniform int4 (W4A16, sym gs128, auto_round:
+    # auto_gptq packing). NOT the "-int4-mixed-" sibling: that one keeps
+    # attn/mlp/router at int8, which the XPU INC path rejects at load
+    # ("INC on XPU only supports 4-bit quantization, got weight_bits=8",
+    # inc.py:416 apply_xpu_w4a16_quant_layer) -> deterministic crash-loop. This
+    # uniform-4-bit checkpoint has no extra_config/int8 layers. No pure-GPTQ
+    # quant exists; the cyankiwi compressed-tensors AWQ gs32 can't load on XPU
+    # either (no awq_dequantize, vllm #41469).
     #
-    # Known upstream blockers (expect breakage until these land):
-    #   - vllm #43750: compressed-tensors/Marlin W4A16 MoE crashes on XPU
-    #     (missing gptq_marlin_repack) — the quantized-MoE attn path generally.
-    #   - vllm #42029 / #43227 (both OPEN): AutoRound/GPTQ quantized Gemma4
-    #     router + packed-MoE weight loading; needed for this checkpoint.
+    # Status (2026-06-06): does NOT load yet — selecting this preset crash-loops
+    # chat. Uniform-int4 cleared the INC weight_bits=8 crash, but loading then
+    # dies: KeyError 'layers.0.moe.experts.0.down_proj.qweight'. ROOT CAUSE is
+    # NOT the gemma4.py loader — it's inc.py: on XPU, INCConfig.get_quant_method
+    # -> apply_xpu_w4a16_quant_layer returns a method only for LinearBase/
+    # ParallelLMHead and `return None` for the FusedMoE experts, so w13/w2_qweight
+    # params never register and the checkpoint's expert qweights have nowhere to
+    # load. XPU INC W4A16 is linear-only; there is no XPU INC fused-MoE path.
+    # The two "Gemma4 MoE loading" PRs (#42029, #43227) both edit gemma4.py and
+    # do NOT touch inc.py, so neither fixes this. Reviving gemma4 here needs real
+    # inc.py XPU MoE work (W4A16 fused-MoE), not a cherry-pick — and the adjacent
+    # path is also broken (#43750: XPU WNA16 MoE wants CUDA-only gptq_marlin_repack).
+    # Keep selectedChatModel on a Qwen preset.
     # bf16 Gemma4 MoE on XPU itself is already merged (xpu-kernels #251 head_dim
     # 512, #354 + vllm #42822 gelu_tanh MoE activation). If startup hits "kernel
     # not compiled", add the missing sliding-window head_size=256 attn variant
@@ -116,8 +128,8 @@
     # ~0.2% accept, #42261 crashes, #41262 gibberish) and the BF16 drafter
     # mismatches this int4 target. Get the base model loading first.
     gemma4 = {
-      repo = "Intel/gemma-4-26B-A4B-it-int4-mixed-AutoRound";
-      rev = "81939a2721231f6d1196e51ab4f4d265005b5d3a";
+      repo = "Intel/gemma-4-26B-A4B-it-int4-AutoRound";
+      rev = "edff62728a3c79ec541983b86a21674500e0f05b";
       servedName = "gemma-4-26b-a4b";
       # "inc" matches the qwen27b AutoRound preset: identical checkpoint metadata
       # (quant_method auto-round, packing auto_round:auto_gptq, gs128 sym), which
@@ -134,7 +146,7 @@
       speculative = null;
     };
   };
-  selectedChatModel = "gemma4";
+  selectedChatModel = "qwen35b";
   chatModel = chatModels.${selectedChatModel};
 
   # Verify pass processes 1 real + K spec tokens; vLLM rounds capture sizes up to
