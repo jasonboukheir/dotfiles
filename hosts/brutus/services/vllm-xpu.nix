@@ -20,12 +20,38 @@
       rev = "c3aea2d531678621989e5e2db034e32b22536e79";
       servedName = "qwen3.6-27b";
       quantization = "inc";
+      dtype = "bfloat16";
+      speculative = {
+        method = "mtp";
+        num_speculative_tokens = 2;
+      };
     };
     qwen35b = {
       repo = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4";
       rev = "d1fef185160f938fca00c3c664f21250dd544d63";
       servedName = "qwen3.6-35b-a3b";
       quantization = "gptq";
+      dtype = "bfloat16";
+      speculative = {
+        method = "mtp";
+        num_speculative_tokens = 2;
+      };
+    };
+    # Uncensored/abliterated variant — BROKEN on this stack, kept for reference.
+    # Community quants of the 35B-A3B all fail: AWQ checkpoints pack MoE experts
+    # projection-first (vLLM qwen3_5 loader KeyError); this GPTQ repo loads but its
+    # MTP head is mispacked (spec disabled below) AND it device-losts the XPU on the
+    # first forward pass (UR_RESULT_ERROR_DEVICE_LOST). Plan: self-quant a bf16
+    # abliterated base with AutoRound to get a clean, vLLM-compatible checkpoint.
+    qwen35bHeretic = {
+      repo = "llmfan46/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-GPTQ-Int4";
+      rev = "fb685a8409e4290f8a15dad0a691e6a9e3d42c3f";
+      servedName = "qwen3.6-35b-a3b-heretic";
+      quantization = "gptq";
+      dtype = "bfloat16";
+      # MTP head is mispacked in this checkpoint (vLLM KeyError loading the
+      # drafter's fused experts); the main model loads fine, so disable spec.
+      speculative = null;
     };
   };
   selectedChatModel = "qwen35b";
@@ -88,17 +114,14 @@ in {
 
       model = chatModel.repo;
       servedName = chatModel.servedName;
-      dtype = "bfloat16";
+      dtype = chatModel.dtype;
       quantization = chatModel.quantization;
       # kvCacheDtype = "turboquant_k3v4_nc";
       kvCacheDtype = "fp8";
       maxModelLen = 131072;
       maxNumSeqs = 4;
       gpuMemoryUtilization = 0.85;
-      speculativeConfig = {
-        method = "mtp";
-        num_speculative_tokens = 2;
-      };
+      speculativeConfig = chatModel.speculative;
       enforceEager = false;
       enableXpuGraph = true;
       cudagraphCaptureSizes = [3 6];
