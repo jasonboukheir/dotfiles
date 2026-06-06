@@ -13,6 +13,7 @@ in {
     {
       package = lib.mkDefault pkgs-unstable.claude-code;
       settings = {
+        autoMemoryEnabled = lib.mkDefault false;
         effortLevel = "high";
         permissions = {
           defaultMode = lib.mkDefault "auto";
