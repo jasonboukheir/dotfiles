@@ -21,6 +21,14 @@
       servedName = "qwen3.6-27b";
       quantization = "inc";
       dtype = "bfloat16";
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_xml";
+      # Mirrors the checkpoint's generation_config.json defaults.
+      sampling = {
+        temperature = 1.0;
+        topP = 0.95;
+        topK = 20;
+      };
       speculative = {
         method = "mtp";
         num_speculative_tokens = 2;
@@ -32,6 +40,13 @@
       servedName = "qwen3.6-35b-a3b";
       quantization = "gptq";
       dtype = "bfloat16";
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_xml";
+      sampling = {
+        temperature = 1.0;
+        topP = 0.95;
+        topK = 20;
+      };
       speculative = {
         method = "mtp";
         num_speculative_tokens = 2;
@@ -49,13 +64,89 @@
       servedName = "qwen3.6-35b-a3b-heretic";
       quantization = "gptq";
       dtype = "bfloat16";
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_xml";
+      sampling = {
+        temperature = 1.0;
+        topP = 0.95;
+        topK = 20;
+      };
       # MTP head is mispacked in this checkpoint (vLLM KeyError loading the
       # drafter's fused experts); the main model loads fine, so disable spec.
       speculative = null;
     };
+    # Gemma 4 26B-A4B (Google, 2026) — MoE, 26B total / 4B active, multimodal,
+    # arch Gemma4ForConditionalGeneration. EXPERIMENTAL on this XPU stack;
+    # untested here and quantized Gemma4 MoE is not yet working upstream (see
+    # blockers below). Selectable for testing — leave selectedChatModel on a
+    # Qwen preset for production.
+    #
+    # Quant: Intel's AutoRound "int4-mixed" (MoE experts int4, attn/mlp/router
+    # int8, sym gs128, auto_round:auto_gptq packing). No pure-GPTQ quant of this
+    # model exists; the only other int4 (cyankiwi compressed-tensors AWQ gs32)
+    # can't load on XPU at all (no awq_dequantize, vllm #41469).
+    #
+    # Known upstream blockers (expect breakage until these land):
+    #   - vllm #43750: compressed-tensors/Marlin W4A16 MoE crashes on XPU
+    #     (missing gptq_marlin_repack) — the quantized-MoE attn path generally.
+    #   - vllm #42029 / #43227 (both OPEN): AutoRound/GPTQ quantized Gemma4
+    #     router + packed-MoE weight loading; needed for this checkpoint.
+    # bf16 Gemma4 MoE on XPU itself is already merged (xpu-kernels #251 head_dim
+    # 512, #354 + vllm #42822 gelu_tanh MoE activation). If startup hits "kernel
+    # not compiled", add the missing sliding-window head_size=256 attn variant
+    # to withKernelConfig below.
+    #
+    # Reasoning: vLLM registers a "gemma4" reasoning parser (Gemma4 emits its CoT
+    # inside <|channel>thought ... <channel|>; thinking is gated by
+    # enable_thinking=True in the chat-template kwargs, default off). Sampling
+    # values are Google/Unsloth's recommendation (temp 1.0, top_p 0.95, top_k 64),
+    # which also match the checkpoint's generation_config.json.
+    # Tool calling: no gemma4 tool-call parser exists upstream (only the separate
+    # 270M `functiongemma` model has one), so toolCallParser is null — auto tool
+    # choice is disabled for this preset. Revisit with `pythonic` if needed.
+    #
+    # MTP spec decode uses Google's SEPARATE drafter repo (not an in-model head
+    # like Qwen). Merged in vllm v0.21.0 (#41745). To enable, set:
+    #   speculative = {
+    #     method = "mtp";
+    #     model = "google/gemma-4-26B-A4B-it-assistant"; # rev 44033eb5
+    #     num_speculative_tokens = 4;  # cudagraphCaptureSizes auto-follow -> [5 10]
+    #   };
+    # Disabled for now: Gemma4 MTP is broadly broken upstream (vllm #41789
+    # ~0.2% accept, #42261 crashes, #41262 gibberish) and the BF16 drafter
+    # mismatches this int4 target. Get the base model loading first.
+    gemma4 = {
+      repo = "Intel/gemma-4-26B-A4B-it-int4-mixed-AutoRound";
+      rev = "81939a2721231f6d1196e51ab4f4d265005b5d3a";
+      servedName = "gemma-4-26b-a4b";
+      # "inc" matches the qwen27b AutoRound preset: identical checkpoint metadata
+      # (quant_method auto-round, packing auto_round:auto_gptq, gs128 sym), which
+      # serves correctly on this stack with --quantization inc.
+      quantization = "inc";
+      dtype = "bfloat16";
+      reasoningParser = "gemma4";
+      toolCallParser = null;
+      sampling = {
+        temperature = 1.0;
+        topP = 0.95;
+        topK = 64;
+      };
+      speculative = null;
+    };
   };
-  selectedChatModel = "qwen35b";
+  selectedChatModel = "gemma4";
   chatModel = chatModels.${selectedChatModel};
+
+  # Verify pass processes 1 real + K spec tokens; vLLM rounds capture sizes up to
+  # multiples of (K + 1), so capture (K+1) and 2*(K+1). K=0 when spec is off.
+  specDecodingNum =
+    if chatModel.speculative == null
+    then 0
+    else chatModel.speculative.num_speculative_tokens;
+  chatCaptureSizes = [
+    (1 + specDecodingNum)
+    (2 * (1 + specDecodingNum))
+  ];
 
   models = {
     embedding = {
@@ -124,10 +215,20 @@ in {
       speculativeConfig = chatModel.speculative;
       enforceEager = false;
       enableXpuGraph = true;
-      cudagraphCaptureSizes = [3 6];
-      reasoningParser = "qwen3";
-      enableAutoToolChoice = true;
-      toolCallParser = "qwen3_xml";
+      cudagraphCaptureSizes = chatCaptureSizes;
+      reasoningParser = chatModel.reasoningParser;
+      enableAutoToolChoice = chatModel.toolCallParser != null;
+      toolCallParser = chatModel.toolCallParser;
+      # No --temperature flag in vLLM serve; pin sampling defaults via the
+      # model's generation config. Clients still override per-request.
+      extraArgs = [
+        "--override-generation-config"
+        (builtins.toJSON {
+          temperature = chatModel.sampling.temperature;
+          top_p = chatModel.sampling.topP;
+          top_k = chatModel.sampling.topK;
+        })
+      ];
       languageModelOnly = true;
     };
 
