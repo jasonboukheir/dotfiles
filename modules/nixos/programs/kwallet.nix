@@ -12,10 +12,14 @@
   # hang on the freedesktop name. ksecretd already claims it once
   # activated — we just need an activation file pointing at the
   # same binary.
+  # Skipped when gnome-keyring is the Secret Service provider (e.g. a Hyprland
+  # session, where ksecretd's wallet wizard can't render) — gnome-keyring owns
+  # org.freedesktop.secrets itself, so the ksecretd shim would only race it.
   # TODO: drop once upstream ships the file.
   # https://invent.kde.org/frameworks/kwallet/-/merge_requests/97
   # https://invent.kde.org/frameworks/kwallet/-/raw/master/src/runtime/ksecretd/CMakeLists.txt
-  config = lib.mkIf config.services.desktopManager.plasma6.enable {
+  config = lib.mkIf (config.services.desktopManager.plasma6.enable
+    && !config.services.gnome.gnome-keyring.enable) {
     services.dbus.packages = [
       (pkgs.writeTextDir "share/dbus-1/services/org.freedesktop.secrets.service" ''
         [D-BUS Service]
