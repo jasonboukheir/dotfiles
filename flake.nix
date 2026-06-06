@@ -5,15 +5,15 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixos.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixos.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     home-manager-nixos = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixos";
     };
 
     stylix-nixos = {
-      url = "github:nix-community/stylix/release-25.11";
+      url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixos";
     };
 

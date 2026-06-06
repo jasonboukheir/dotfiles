@@ -9,16 +9,14 @@
     ControlPersist = "10m";
   };
 
-  zmxSessionBlock = host: {
-    hostname = host;
-    forwardAgent = true;
-    extraOptions =
-      sshMultiplexing
-      // {
-        RemoteCommand = "sh -c 'zmx attach \"\${1#*.}\"' _ %n";
-        RequestTTY = "yes";
-      };
-  };
+  zmxSessionBlock = host:
+    sshMultiplexing
+    // {
+      HostName = host;
+      ForwardAgent = true;
+      RemoteCommand = "sh -c 'zmx attach \"\${1#*.}\"' _ %n";
+      RequestTTY = "yes";
+    };
 in {
   options = {
     _1passwordSshHostGlob = lib.mkOption {
@@ -33,22 +31,16 @@ in {
   config = lib.mkIf config.programs.ssh.enable {
     programs.ssh = {
       enableDefaultConfig = false;
-      matchBlocks = {
-        "brutus" = {
-          forwardAgent = true;
-          extraOptions = sshMultiplexing;
-        };
+      settings = {
+        "brutus" = sshMultiplexing // {ForwardAgent = true;};
         "brutus.*" = zmxSessionBlock "brutus";
-        "litus" = {
-          forwardAgent = true;
-          extraOptions = sshMultiplexing;
-        };
+        "litus" = sshMultiplexing // {ForwardAgent = true;};
         "litus.*" = zmxSessionBlock "litus";
         "pibitcoin" = {
-          forwardAgent = true;
+          ForwardAgent = true;
         };
         "${config._1passwordSshHostGlob}" = lib.mkIf (config.programs._1password.enable && config.programs._1password.agentPath != null) {
-          identityAgent = config.programs._1password.agentPath;
+          IdentityAgent = config.programs._1password.agentPath;
         };
       };
     };
