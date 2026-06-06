@@ -69,6 +69,8 @@ in {
         "256,true,true,false,false,false"
         "256,false,true,false,false,false"
         "256,false,true,false,false,true"
+        # jina embedder: encoder, bidirectional (non-causal) head_size=64
+        "64,false,false,false,false,false"
       ];
       pagedDecode = "paged_decode_default";
       pagedDecodeExtra = [
