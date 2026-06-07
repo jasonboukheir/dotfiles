@@ -7,5 +7,6 @@
     ./hardware-configuration.nix
     ./../../modules
     ./../../modules/nixos
+    ./../../modules/homelab
   ];
 }
