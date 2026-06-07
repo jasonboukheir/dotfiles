@@ -5,7 +5,7 @@
   ...
 }: let
   homelabCfg = config.homelab.services.seer;
-  cfg = config.services.jellyseerr;
+  cfg = config.services.seerr;
 in {
   config = lib.mkMerge [
     {
@@ -15,7 +15,7 @@ in {
       };
     }
     (lib.mkIf homelabCfg.enable {
-      services.jellyseerr = {
+      services.seerr = {
         enable = true;
         package = pkgs-unstable.seerr;
       };
