@@ -7,6 +7,8 @@
     ./hardware-configuration.nix
     ./../../modules
     ./../../modules/nixos
-    ./../../modules/homelab
+    # TODO: make it s.t. importing homelab is safe to get
+    # defined options.
+    #    ./../../modules/homelab
   ];
 }
