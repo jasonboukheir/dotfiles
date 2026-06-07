@@ -11,8 +11,8 @@
   issuerDomain = config.homelab.services.id.domain;
   port = config.homelab.ports.values.headscale;
   oidcCfg = config.services.pocket-id.ensureClients.headscale;
-  brutusTailscaleIP = "100.64.0.7";
-  litusTailscaleIP = "100.64.0.2";
+  brutusTailscaleIP = "100.64.0.2";
+  litusTailscaleIP = "100.64.0.1";
 in {
   config = lib.mkMerge [
     {
