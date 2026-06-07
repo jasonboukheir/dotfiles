@@ -3,24 +3,6 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixos.url = "github:NixOS/nixpkgs/nixos-26.05";
-
-    home-manager-nixos = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixos";
-    };
-
-    stylix-nixos = {
-      url = "github:nix-community/stylix/release-26.05";
-      inputs.nixpkgs.follows = "nixos";
-    };
-
-    nvf-nixos = {
-      url = "github:notashelf/nvf/main";
-      inputs.nixpkgs.follows = "nixos";
-    };
   };
 
   outputs = inputs @ {flake-parts, ...}:

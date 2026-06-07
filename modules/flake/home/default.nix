@@ -1,6 +1,6 @@
 {
   partitions.home = {
-    extraInputsFlake = ../../fedora;
+    extraInputsFlake = ./.;
     module = {inputs, ...}: let
       linuxPkgs = import inputs.nixos {
         system = "x86_64-linux";
@@ -16,14 +16,14 @@
       ];
     in {
       flake.homeConfigurations."jasonbk@work-devserver" = inputs.home-manager-nixos.lib.homeManagerConfiguration {
-        pkgs = linuxPkgs.extend (import ../../modules/nixpkgs/overlays/zmx.nix);
+        pkgs = linuxPkgs.extend (import ../../../modules/nixpkgs/overlays/zmx.nix);
         extraSpecialArgs = {
           inherit inputs;
           pkgs-unstable = linuxPkgsUnstable;
         };
         modules =
           [
-            ../../hosts/work-devserver
+            ../../../hosts/work-devserver
           ]
           ++ commonModules;
       };
@@ -37,7 +37,7 @@
         };
         modules =
           [
-            ../../hosts/jasonbk-fedora-MZ0319NF
+            ../../../hosts/jasonbk-fedora-MZ0319NF
           ]
           ++ commonModules;
       };

@@ -1,21 +1,21 @@
 {
   inputs = {
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs = {
-    nixpkgs-unstable,
+    nixpkgs,
     agenix,
     ...
   }: let
-    forAllSystems = nixpkgs-unstable.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
   in {
     devShells = forAllSystems (system: let
-      pkgs = import nixpkgs-unstable {inherit system;};
+      pkgs = import nixpkgs {inherit system;};
       agenixPkg = agenix.packages.${system}.default;
 
       # Shared snippet: populates two bash arrays for the current host —
@@ -30,25 +30,35 @@
         repo_root=$(git rev-parse --show-toplevel)
         host=$(scutil --get LocalHostName 2>/dev/null || hostname -s 2>/dev/null || uname -n | cut -d. -f1)
 
+        # Meta devservers get per-allocation hostnames (devvm1234, devbig5,
+        # devgpu9, ...); they all share the work-devserver home config.
+        case "$host" in
+          devvm*|devbig*|devgpu*) host=work-devserver ;;
+        esac
+
         flakes=("$repo_root")
         host_tests=()
 
         case "$(uname -s)" in
           Linux)
-            flakes+=("$repo_root/dev")
+            flakes+=("$repo_root/modules/flake/dev")
             # Include nixos only if the current host is declared as a
-            # nixosSystem in modules/flake/nixos.nix. work-devserver is
+            # nixosSystem in modules/flake/nixos/default.nix. work-devserver is
             # Linux but home-manager-only, so it skips this branch.
             if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
-                 "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
-              flakes+=("$repo_root/nixos")
+                 "$repo_root/modules/flake/nixos/default.nix" 2>/dev/null; then
+              flakes+=("$repo_root/modules/flake/nixos")
             fi
-            if grep -q "nixgl" "$repo_root/hosts/''${host}/default.nix" 2>/dev/null; then
-              flakes+=("$repo_root/fedora")
+            # home-manager-only Linux hosts (work-devserver, fedora) declare a
+            # homeConfigurations."jasonbk@<host>" entry in
+            # modules/flake/home/default.nix. Their inputs live in that flake.
+            if grep -qF "homeConfigurations.\"jasonbk@''${host}\"" \
+                 "$repo_root/modules/flake/home/default.nix" 2>/dev/null; then
+              flakes+=("$repo_root/modules/flake/home")
             fi
             ;;
           Darwin)
-            flakes+=("$repo_root/darwin")
+            flakes+=("$repo_root/modules/flake/darwin")
             ;;
           *)
             echo "unsupported OS $(uname -s)" >&2
@@ -94,7 +104,7 @@
           case "$(uname -s)" in
             Linux)
               if grep -qE "^[[:space:]]+''${host}[[:space:]]*=[[:space:]]*inputs\.[A-Za-z0-9_-]+\.lib\.nixosSystem" \
-                   "$repo_root/modules/flake/nixos.nix" 2>/dev/null; then
+                   "$repo_root/modules/flake/nixos/default.nix" 2>/dev/null; then
                 echo "==> nixos-rebuild switch ($host)"
                 exec sudo nixos-rebuild switch --flake "$repo_root#$host" "$@"
               fi
@@ -159,10 +169,10 @@
             commands                 Show this help
 
           Per-host flake set:
-            brutus, litus, thebeast  → root + dev + nixos
-            work-devserver           → root + dev          (home-manager only)
-            jasonbk-fedora-MZ0319NF  → root + dev          (home-manager only)
-            *-macbook                → root + darwin
+            brutus, litus, thebeast  → root + modules/flake/{dev,nixos}
+            work-devserver           → root + modules/flake/{dev,home}  (home-manager only)
+            jasonbk-fedora-MZ0319NF  → root + modules/flake/{dev,home}  (home-manager only)
+            *-macbook                → root + modules/flake/{dev,darwin}
 
           Per-host nixosTest checks (consumed by `vm-test`):
             thebeast                 thebeast-session
@@ -322,7 +332,7 @@
           # disk pulls smartmontools, memtester, cryptsetup, zfs userspace —
           # all Linux-only and only useful against a NixOS host that owns
           # real disks. Skip on darwin so the dev shell still evaluates.
-          ++ nixpkgs-unstable.lib.optional pkgs.stdenv.isLinux disk;
+          ++ nixpkgs.lib.optional pkgs.stdenv.isLinux disk;
       };
     });
   };

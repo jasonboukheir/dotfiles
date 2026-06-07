@@ -5,12 +5,11 @@
 }: let
   caskToProgram = {
     brave = "brave";
-    zed = "zed-editor";
   };
 
   # Programs that use extraPackages for wrapping (unnecessary on darwin
   # since tools are already in PATH via home.packages / programs.*.enable).
-  programsWithExtraPackages = ["zed-editor"];
+  programsWithExtraPackages = [];
 
   caskCfg = osConfig.homebrewCasks;
 in {

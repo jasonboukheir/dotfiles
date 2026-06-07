@@ -101,7 +101,7 @@ in {
         description = "Command to use when launching terminal";
       };
       editor = lib.mkOption {
-        default = "zeditor";
+        default = "ghostty -e nvim";
         type = lib.types.str;
         description = "Command to use when launching code editor";
       };

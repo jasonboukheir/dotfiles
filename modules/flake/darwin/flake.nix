@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
+    # Cherry-pick channel shared by every system partition: the darwin fish
+    # overlay (modules/nixpkgs/overlays/fish.nix) and the home-manager
+    # pkgs-unstable escape hatch both resolve against it.
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
     nix-darwin = {
       url = "github:LnL7/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs-darwin";

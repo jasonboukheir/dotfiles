@@ -37,6 +37,7 @@ in {
           mode = "curve";
           temperature_key = "edge";
           interval_ms = 500;
+          zero_rpm = false;
           curve = {
             "30" = 0.30;
             "40" = 0.50;

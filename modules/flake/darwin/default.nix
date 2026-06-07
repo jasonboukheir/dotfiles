@@ -1,6 +1,6 @@
 {
   partitions.darwin = {
-    extraInputsFlake = ../../darwin;
+    extraInputsFlake = ./.;
     module = {inputs, ...}: {
       flake.darwinConfigurations = let
         specialArgs = {inherit inputs;};
@@ -17,8 +17,8 @@
             modules = sharedModules ++ [hostPath];
           };
       in {
-        "Jasons-MacBook-Pro" = mkHost ../../hosts/home-macbook;
-        "jasonbk-mac" = mkHost ../../hosts/work-macbook;
+        "Jasons-MacBook-Pro" = mkHost ../../../hosts/home-macbook;
+        "jasonbk-mac" = mkHost ../../../hosts/work-macbook;
       };
     };
   };

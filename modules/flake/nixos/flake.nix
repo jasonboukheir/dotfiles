@@ -1,10 +1,16 @@
 {
-  description = "NixOS-only inputs partition.";
+  description = "NixOS inputs partition (brutus, litus, thebeast).";
 
   inputs = {
+    # Channels. nixos = stable 26.05 (brutus, litus). nixos-unstable = the
+    # OS channel for thebeast. nixpkgs-unstable = cherry-pick channel for
+    # fast-moving user packages (pkgs-unstable) and the darwin fish overlay;
+    # shared by every system partition.
     nixos.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixos-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # Common to every nixos host.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
     agenix = {
@@ -12,6 +18,23 @@
       inputs.nixpkgs.follows = "nixos";
     };
 
+    # Stable base — brutus, litus.
+    home-manager-nixos = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixos";
+    };
+
+    stylix-nixos = {
+      url = "github:nix-community/stylix/release-26.05";
+      inputs.nixpkgs.follows = "nixos";
+    };
+
+    nvf-nixos = {
+      url = "github:notashelf/nvf/main";
+      inputs.nixpkgs.follows = "nixos";
+    };
+
+    # Unstable + gaming — thebeast only.
     home-manager-nixos-unstable = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixos-unstable";
@@ -32,11 +55,31 @@
       inputs.nixpkgs.follows = "nixos-unstable";
     };
 
+    helium-flake = {
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixos-unstable";
+    };
+
     # TODO: do NOT add inputs.nixpkgs.follows here. Upstream README warns that
     # overriding nixpkgs causes mismatch between cachy patches and kernel version.
     # https://github.com/xddxdd/nix-cachyos-kernel#how-to-use-kernels
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
+    # Upstream CSS for the Catppuccin Steam Deck theme, consumed verbatim
+    # by hosts/thebeast/session/steam-theme.nix. We don't take their
+    # palette — only the selector library in `src/shared.css` — and
+    # alias their `--ctp-*` vars to the active Stylix base16 scheme.
+    # Refresh with `nix flake update catppuccin-steam-deck` whenever a
+    # Steam client beta rotates webpack hashes; upstream's CSSLoader
+    # Mappings dependency keeps their selectors in sync with the latest
+    # Steam build.
+    catppuccin-steam-deck = {
+      url = "github:catppuccin/steam-deck";
+      flake = false;
+    };
+
+    # Services — brutus only.
+    #
     # TODO: nixarr's transitive flake graph (vpnconfinement, website-builder) is
     # historically brittle under follows overrides. Leave on its own pin until a
     # nixarr release documents follows compatibility.
@@ -65,24 +108,6 @@
     vllm-xpu-nix = {
       url = "github:jasonboukheir/vllm-xpu-nix";
       inputs.nixpkgs.follows = "nixos-unstable";
-    };
-
-    helium-flake = {
-      url = "github:oxcl/nix-flake-helium-browser";
-      inputs.nixpkgs.follows = "nixos-unstable";
-    };
-
-    # Upstream CSS for the Catppuccin Steam Deck theme, consumed verbatim
-    # by hosts/thebeast/session/steam-theme.nix. We don't take their
-    # palette — only the selector library in `src/shared.css` — and
-    # alias their `--ctp-*` vars to the active Stylix base16 scheme.
-    # Refresh with `nix flake update catppuccin-steam-deck` whenever a
-    # Steam client beta rotates webpack hashes; upstream's CSSLoader
-    # Mappings dependency keeps their selectors in sync with the latest
-    # Steam build.
-    catppuccin-steam-deck = {
-      url = "github:catppuccin/steam-deck";
-      flake = false;
     };
   };
 

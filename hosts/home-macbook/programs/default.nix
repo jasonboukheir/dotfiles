@@ -9,6 +9,5 @@
     ./opencloud-desktop.nix
     ./sparrow.nix
     ./utm.nix
-    ./zed.nix
   ];
 }

@@ -1,12 +1,12 @@
 {
   partitions.nixos = {
-    extraInputsFlake = ../../nixos;
+    extraInputsFlake = ./.;
     module = {inputs, ...}: {
       flake.nixosConfigurations = {
         thebeast = inputs.nixos-unstable.lib.nixosSystem {
           specialArgs = {inherit inputs;};
           modules = [
-            ../../hosts/thebeast
+            ../../../hosts/thebeast
             inputs.agenix.nixosModules.default
             inputs.determinate.nixosModules.default
             inputs.home-manager-nixos-unstable.nixosModules.home-manager
@@ -25,7 +25,7 @@
             terranix = inputs.terranix;
           };
           modules = [
-            ../../hosts/brutus
+            ../../../hosts/brutus
             inputs.agenix.nixosModules.default
             inputs.determinate.nixosModules.default
             inputs.home-manager-nixos.nixosModules.home-manager
@@ -39,7 +39,7 @@
         litus = inputs.nixos.lib.nixosSystem {
           specialArgs = {inherit inputs;};
           modules = [
-            ../../hosts/litus
+            ../../../hosts/litus
             inputs.agenix.nixosModules.default
             inputs.determinate.nixosModules.default
             inputs.home-manager-nixos.nixosModules.home-manager
@@ -66,27 +66,27 @@
             config.allowUnfree = true;
           };
         in {
-          checks.thebeast-session = import ../../hosts/thebeast/tests/session.nix {
+          checks.thebeast-session = import ../../../hosts/thebeast/tests/session.nix {
             inherit pkgs inputs;
           };
-          checks.thebeast-dm-recovery = import ../../hosts/thebeast/tests/dm-recovery.nix {
+          checks.thebeast-dm-recovery = import ../../../hosts/thebeast/tests/dm-recovery.nix {
             inherit pkgs inputs;
           };
-          checks.thebeast-keyring = import ../../hosts/thebeast/tests/keyring.nix {
+          checks.thebeast-keyring = import ../../../hosts/thebeast/tests/keyring.nix {
             inherit pkgs inputs;
           };
-          checks.thebeast-hm-stale-kvantum = import ../../hosts/thebeast/tests/hm-stale-kvantum.nix {
+          checks.thebeast-hm-stale-kvantum = import ../../../hosts/thebeast/tests/hm-stale-kvantum.nix {
             inherit pkgs inputs;
           };
-          checks.brutus-matrix = import ../../hosts/brutus/tests/matrix.nix {
+          checks.brutus-matrix = import ../../../hosts/brutus/tests/matrix.nix {
             pkgs = brutusPkgs;
             inherit inputs;
           };
-          checks.brutus-matrix-rtc = import ../../hosts/brutus/tests/matrix-rtc.nix {
+          checks.brutus-matrix-rtc = import ../../../hosts/brutus/tests/matrix-rtc.nix {
             pkgs = brutusPkgs;
             inherit inputs;
           };
-          checks.brutus-ntfy = import ../../hosts/brutus/tests/ntfy.nix {
+          checks.brutus-ntfy = import ../../../hosts/brutus/tests/ntfy.nix {
             pkgs = brutusPkgs;
             inherit inputs;
           };
