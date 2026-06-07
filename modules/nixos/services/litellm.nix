@@ -6,8 +6,12 @@
 }: let
   cfg = config.services.litellm;
 
-  prismaEngines = pkgs.prisma-engines;
-  prismaCli = pkgs.prisma;
+# TODO: drop the _6 pin once litellm's schema.prisma stops using the
+  # `datasource url` property, which Prisma 7 removed. nixpkgs aliased the
+  # default `prisma`/`prisma-engines` to v7 (2025-12-19), so v6 must be
+  # requested explicitly. https://github.com/NixOS/nixpkgs/issues/432925
+  prismaEngines = pkgs.prisma-engines_6;
+  prismaCli = pkgs.prisma_6;
   py = pkgs.python3;
   ps = pkgs.python3Packages;
 

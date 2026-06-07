@@ -4,40 +4,16 @@
   config,
   ...
 }: let
-  inherit (lib) getExe mkIf mkOption types;
+  inherit (lib) mkIf mkOption types;
   cfg = config.services.pocket-id;
   jsonFormat = pkgs.formats.json {};
-
-  # Import the credentials library
-  credsLib = import ../../lib/credentials.nix {inherit lib;};
 
   secretsDir = "/run/pocket-id-secrets";
   generatedApiKeyPath = config.ephemeral-secrets.pocket-id-api-key.path;
 
-  # Determine if we should use the generated key or a user-provided one
-  useGeneratedKey = ! (cfg.credentials ? STATIC_API_KEY);
-  finalApiKeyPath =
-    if useGeneratedKey
-    then generatedApiKeyPath
-    else cfg.credentials.STATIC_API_KEY;
-
-  # Create a "virtual" config that merges user credentials with the generated key
-  # This allows us to pass the complete set to mkCredentialsHelpers
-  effectiveConfig =
-    cfg
-    // {
-      credentials =
-        cfg.credentials
-        // (lib.optionalAttrs useGeneratedKey {
-          STATIC_API_KEY = generatedApiKeyPath;
-        });
-    };
-
-  # Generate the helpers using the effective config
-  credHelpers = credsLib.mkCredentialsHelpers {
-    cfg = effectiveConfig;
-    inherit pkgs;
-  };
+  # The provisioner authenticates with STATIC_API_KEY. Use the user-provided
+  # one if present, otherwise the key generated below via ephemeral-secrets.
+  apiKeyPath = cfg.credentials.STATIC_API_KEY or generatedApiKeyPath;
 
   allDependentServices = lib.unique (lib.flatten (lib.mapAttrsToList (
       _: c:
@@ -52,8 +28,15 @@
   pocket-id-bootstrap = pkgs.callPackage ./bootstrap-script.nix {};
 in {
   options.services.pocket-id = {
-    # Use the helper to define the option
-    credentials = credsLib.mkCredentialsOption {};
+    generateApiKey = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Generate a random STATIC_API_KEY via ephemeral-secrets and load it into
+        the server, so declarative `ensureClients` provisioning can authenticate.
+        Set to false to supply your own `services.pocket-id.credentials.STATIC_API_KEY`.
+      '';
+    };
 
     ensureClients = mkOption {
       description = "Declarative OIDC client management.";
@@ -132,20 +115,10 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Generate a random API key via ephemeral-secrets if one isn't provided
-    ephemeral-secrets.pocket-id-api-key = mkIf useGeneratedKey {};
-
-    systemd.services.pocket-id = {
-      serviceConfig = {
-        # Use the generated load list
-        LoadCredential = credHelpers.loadList;
-        ExecStart = lib.mkForce (pkgs.writeShellScript "pocket-id-start" ''
-          # Use the generated export script
-          ${credHelpers.exportScript}
-          exec ${getExe cfg.package}
-        '');
-      };
-    };
+    # Generate a random API key via ephemeral-secrets and hand it to the server
+    # through the upstream credentials mechanism (loaded as STATIC_API_KEY).
+    ephemeral-secrets.pocket-id-api-key = mkIf cfg.generateApiKey {};
+    services.pocket-id.credentials.STATIC_API_KEY = mkIf cfg.generateApiKey generatedApiKeyPath;
 
     systemd.services.pocket-id-provisioner = mkIf (cfg.ensureClients != {}) (let
       clientsList =
@@ -172,7 +145,7 @@ in {
         Type = "oneshot";
         DynamicUser = true;
         RuntimeDirectory = baseNameOf secretsDir;
-        LoadCredential = ["static_api_key:${finalApiKeyPath}"];
+        LoadCredential = ["static_api_key:${apiKeyPath}"];
         RemainAfterExit = true;
       };
 

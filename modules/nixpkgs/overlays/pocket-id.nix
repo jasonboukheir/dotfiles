@@ -1,7 +1,5 @@
 final: prev: {
-  pocket-id = (prev.pocket-id.override {
-    buildGo125Module = prev.buildGo126Module;
-  }).overrideAttrs (finalAttrs: previousAttrs: {
+  pocket-id = prev.pocket-id.overrideAttrs (finalAttrs: previousAttrs: {
     version = "2.7.0";
 
     src = prev.fetchFromGitHub {
