@@ -8,9 +8,6 @@
   port = config.homelab.ports.values.searx;
 in {
   config = lib.mkMerge [
-    {
-      homelab.services.search.isExternal = true;
-    }
     (lib.mkIf homelabCfg.enable {
       homelab.ports.allocate.searx = 3300;
 

@@ -28,7 +28,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.meals = {
-        isExternal = true;
         proxyPass = "http://localhost:${toString cfg.port}";
       };
     }

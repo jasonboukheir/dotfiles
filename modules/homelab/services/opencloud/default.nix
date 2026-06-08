@@ -18,7 +18,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.cloud = {
-        isExternal = true;
         proxyPass = "http://localhost:${toString cfg.port}";
         extraConfig = ''
           # Increase max upload size (required for Tus — without this, uploads over 1 MB fail)

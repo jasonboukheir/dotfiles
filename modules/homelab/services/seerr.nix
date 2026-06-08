@@ -10,7 +10,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.seer = {
-        isExternal = true;
         proxyPass = "http://localhost:${toString cfg.port}";
       };
     }

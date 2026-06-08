@@ -31,7 +31,6 @@
             inputs.home-manager-nixos.nixosModules.home-manager
             inputs.nixarr.nixosModules.default
             inputs.stylix-nixos.nixosModules.stylix
-            inputs.ezmtls.nixosModules.default
             inputs.vllm-xpu-nix.nixosModules.default
           ];
         };
@@ -92,6 +91,11 @@
               brutus-ntfy = import ../../../hosts/brutus/tests/ntfy.nix {
                 pkgs = brutusPkgs;
                 inherit inputs;
+              };
+              # litus pins inputs.nixos too (same channel as brutus), so run
+              # its homelab-import guard under brutusPkgs (the stable nixpkgs).
+              litus-homelab-import = import ../../../hosts/litus/tests/homelab-import.nix {
+                pkgs = brutusPkgs;
               };
             };
         };

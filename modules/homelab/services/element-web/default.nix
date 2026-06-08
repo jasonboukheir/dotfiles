@@ -47,7 +47,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.chat = {
-        isExternal = true;
         mtls.enable = false;
         # element-web is a static SPA — no backend to proxyPass to. Leaving
         # proxyPass null tells the homelab framework to skip its implicit

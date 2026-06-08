@@ -30,7 +30,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.synapse = {
-        isExternal = true;
         # Federation peers + Element X clients arrive without a homelab
         # client cert; the framework's default of `isExternal →
         # mtls.enable` would 403 them on 8443. Auth still gates the

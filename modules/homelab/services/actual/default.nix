@@ -12,7 +12,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.budget = {
-        isExternal = true;
         proxyPass = "http://localhost:${toString port}";
       };
     }

@@ -31,7 +31,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.matrix-rtc = {
-        isExternal = true;
         # Element X mobile + Element Web in arbitrary browsers reach
         # the SFU/JWT endpoints without a homelab client cert. The
         # framework's `isExternal → mtls.enable` default would 403 them.

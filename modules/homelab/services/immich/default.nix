@@ -12,7 +12,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.photos = {
-        isExternal = true;
         proxyPass = "http://localhost:${toString cfg.port}";
         extraConfig = ''
           client_max_body_size 5000M;

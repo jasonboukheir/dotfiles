@@ -8,6 +8,10 @@
     ../../../modules/homelab/ports.nix
     ../../../modules/homelab/services.nix
     ../../../modules/homelab/wellKnown.nix
+    # Shared service registry: carries each service's isExternal, which
+    # the framework needs to compute the right .domain. Service modules
+    # under ./services no longer declare it themselves.
+    ../../../modules/homelab/registry.nix
 
     # pocket-id provides the `services.pocket-id.ensureClients` option type
     # most homelab services reference at module-eval time for OIDC client
@@ -46,19 +50,12 @@
     username = "stub";
     passwordFile = "/dev/null";
   };
-  # Several service modules read `homelab.services.id.domain` to build
-  # their OIDC issuer URL. Declaring an empty submodule entry makes the
-  # option resolvable without enabling pocket-id (which would need
-  # agenix-backed secrets we don't carry in the test path). Tests that
-  # actually exercise pocket-id can override with `enable = true;`.
-  homelab.services.id = {};
-  # matrix-synapse delegates auth to MAS and references
-  # `config.homelab.services.matrix-auth.domain` to build its MSC3861
-  # issuer URL. The MAS module itself is heavier than the synapse test
-  # cares about (it pulls in mas-cli runs + the secrets oneshot), so
-  # stub the submodule so the domain option resolves without bringing
-  # MAS along.
-  homelab.services.matrix-auth = {};
+  # The `id` and `matrix-auth` service entries (and their domains) come
+  # from modules/homelab/registry.nix above, so service modules can read
+  # `homelab.services.{id,matrix-auth}.domain` without enabling pocket-id
+  # or MAS — both of which are heavier than the per-service smoke tests
+  # need. Tests that exercise them override with `enable = true;`.
+  #
   # MAS's own module guards its `ports.allocate.matrix-auth = "auto"`
   # behind its enable flag, but matrix-synapse reads
   # `ports.values.matrix-auth` unconditionally to build the introspection

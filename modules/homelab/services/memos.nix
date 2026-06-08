@@ -10,7 +10,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.memos = {
-        isExternal = true;
         proxyPass = "http://localhost:${cfg.settings.MEMOS_PORT}";
       };
     }

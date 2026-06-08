@@ -22,7 +22,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.code = {
-        isExternal = true;
         proxyPass = "http://${cfg.listenAddress}";
         wildcard = true;
       };

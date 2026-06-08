@@ -124,7 +124,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.matrix-auth = {
-        isExternal = true;
         # Element X mobile + federation peers reach MAS without a
         # homelab CA cert; mTLS would block them. Browser flows from
         # Element Web also land here without the chat-vhost cert
