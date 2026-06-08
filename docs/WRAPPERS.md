@@ -100,6 +100,45 @@ pins the editor via `GH_EDITOR` and leaves `GH_CONFIG_DIR` (config + auth) in th
 real `~/.config/gh`. The `settings` option mirrors gh's config shape, but only
 `editor` is wired.
 
+## ghostty: `--config-file` + stylix theming
+
+`modules/programs/ghostty.nix` bakes `settings` into a `writeText` config and
+loads it via `flags = ["--config-file=${file}"]`. List values render as repeated
+`key = item` lines, so `palette = ["0=#…" "1=#…"]` becomes ghostty's repeated
+`palette = N=#…` form. The user's own `~/.config/ghostty/config` still loads, so
+hand edits win on conflicts.
+
+## stylix: per-user theming without the HM stylix module
+
+home-manager's stylix module turned the **system** stylix config
+(`stylix-nixos`/`stylix-darwin`) into per-`~/.config` color files. Dropping HM
+([#38]) drops those, so `modules/stylix/users/` re-creates the mechanism on the
+`users.users.<name>` submodule — the same surface the wrappers already extend.
+
+- **Foundation** (`modules/stylix/users/options.nix`): declares
+  `users.users.<name>.stylix.{enable,polarity,colors,fonts,opacity}`. Each option
+  **defaults from the system stylix config** — `colors` from
+  `config.lib.stylix.colors`, `polarity`/`fonts`/`opacity`/`enable` from
+  `config.stylix.*` — so a user inherits the system theme but can override any of
+  them (e.g. `users.users.<name>.stylix.colors` for a different base16 scheme).
+  The system reads are guarded, so importing the foundation onto a host with no
+  system stylix is a no-op rather than an eval error. `stylix.cursor` is a
+  NixOS-only option (the darwin stylix module never declares it), so the
+  per-user `cursor.{name,package,size}` is a `nullOr` that inherits the themed
+  system cursor on Linux and resolves to `null` on darwin — a cursor target
+  keys off `cursor.name != null` and stays inactive where there is no cursor.
+- **Targets** (`modules/stylix/users/<app>.nix`): mirror HM's
+  `stylix.targets.<app>`. A target declares
+  `users.users.<name>.stylix.targets.<app>.enable` (defaulting to the user's
+  `stylix.enable`) and, when both it and the app wrapper are enabled, writes the
+  palette into that wrapper's `settings` via `lib.mkDefault` — so the user's own
+  `settings` still win. `ghostty.nix` is the first target: it maps base16 →
+  `background`/`foreground`/`selection-*`/`cursor-*` and the 16 ANSI `palette`
+  slots.
+
+This keeps the wrapper (a tool) and the theme (a target) separate, exactly as
+upstream stylix splits `programs.<app>` from `stylix.targets.<app>`.
+
 ## Testing the convention
 
 `modules/programs/tests/jujutsu-wrapper.nix` (flake check `jujutsu-wrapper`) is
@@ -116,6 +155,14 @@ nix build .#checks.x86_64-linux.jujutsu-wrapper
 `git-lfs` resolves on the wrapper PATH and the lfs filter is baked; `gh-wrapper`
 asserts the editor is pinned as `GH_EDITOR` and that `GH_CONFIG_DIR` is *not*
 touched (so auth stays in the real config dir).
+
+`ghostty-stylix` proves the per-user stylix path end-to-end: it feeds a set of
+arbitrary base16 ids into `users.users.<name>.stylix.colors`, then asserts the
+wrapper injects a baked `--config-file` whose rendered config carries those ids
+on the right ghostty keys, and that `ghostty +show-config` parses the theme and
+resolves the palette. Like the others it asserts the **plumbing**
+(`stylix.colors → target → ghostty.settings → --config-file → ghostty`), never a
+specific scheme.
 
 Each `*.nix` in `modules/programs/tests/` is a `{pkgs, inputs ? null}` function
 returning a VM test; `modules/programs/tests/default.nix` auto-registers them

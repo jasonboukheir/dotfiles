@@ -4,5 +4,6 @@
     ./nixpkgs
     ./programs
     ./stylix
+    ./stylix/users
   ];
 }
