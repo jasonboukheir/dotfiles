@@ -4,6 +4,7 @@ final: _prev: {
     name ? pkg.meta.mainProgram or pkg.pname,
     env ? {},
     flags ? [],
+    extraPaths ? [],
   }:
     final.symlinkJoin {
       name = "${name}-wrapped";
@@ -13,6 +14,7 @@ final: _prev: {
         wrapProgram $out/bin/${name} \
           ${final.lib.concatStringsSep " \\\n      " (
           final.lib.mapAttrsToList (k: v: "--set ${k} ${final.lib.escapeShellArg "${v}"}") env
+          ++ final.lib.optional (extraPaths != []) "--prefix PATH : ${final.lib.escapeShellArg (final.lib.makeBinPath extraPaths)}"
           ++ map (f: "--add-flags ${final.lib.escapeShellArg f}") flags
         )}
       '';
