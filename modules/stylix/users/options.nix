@@ -68,6 +68,13 @@
         description = "Opacity settings for this user's wrappers. Defaults to the system stylix opacity.";
       };
 
+      # TODO: no consumer yet — the session env (XCURSOR_*/HYPRCURSOR_*), GTK
+      # cursor-theme, and installing `cursor.package` into the icon path land
+      # with the Hyprland session generator
+      # (https://github.com/jasonboukheir/dotfiles/issues/40) and the
+      # omarchy/Hyprland desktop set
+      # (https://github.com/jasonboukheir/dotfiles/issues/48), replacing
+      # modules/omarchy/home-manager/hyprland/envs.nix.
       cursor = {
         name = lib.mkOption {
           type = lib.types.nullOr lib.types.str;

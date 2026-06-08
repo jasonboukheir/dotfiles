@@ -24,6 +24,10 @@
     stylix = config.stylix;
     c = stylix.colors;
 
+    # TODO: only the base16 palette is mapped; wire `stylix.fonts` into
+    # ghostty's font-family/font-size and `stylix.opacity.terminal` into
+    # background-opacity to match HM-stylix's ghostty target.
+    # https://github.com/jasonboukheir/dotfiles/issues/44
     themed = {
       background = "#${c.base00}";
       foreground = "#${c.base05}";
