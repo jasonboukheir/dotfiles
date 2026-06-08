@@ -5,20 +5,12 @@
 }: let
   dataDir = "/var/lib/nixarr";
   globals = config.util-nixarr.globals;
-  jellyfinPort = 8096;
-  transmissionPort = 9091;
   cfg = config.nixarr;
-
-  # Interactive searches fan out across rate-limited indexers and can run for
-  # several minutes; keep nginx from dropping the connection at the 60s default.
-  arrSearchTimeout = "600s";
 in {
-  imports = [
-    ./arrApi.nix
-    ./audiobookshelfFixes.nix
-    ./lidarr.nix
-    ./transmissionPortForwarding.nix
-  ];
+  # Host-specific nixarr config: what brutus runs, where its media/state
+  # live, the VPN, Jellyfin's Intel-Arc hardware acceleration, and the
+  # storage mounts. The homelab-service wiring (proxyPass/ports/registry)
+  # and the nixarr flake input live under modules/homelab/services/nixarr.
   age.secrets."nixarr/wgconf" = {
     file = ../secrets/nixarr/wgconf.age;
     owner = globals.libraryOwner.user;
@@ -104,68 +96,6 @@ in {
       };
       hardwareEncodingCodecs.hevc = true;
       maxConcurrentStreams = 2;
-    };
-  };
-
-  homelab.ports.allocate = lib.mkIf cfg.enable {
-    transmission-rpc = lib.mkIf cfg.transmission.enable transmissionPort;
-    transmission-peer = lib.mkIf cfg.transmission.enable cfg.transmission.peerPort;
-    jellyfin = lib.mkIf cfg.jellyfin.enable jellyfinPort;
-    audiobookshelf = lib.mkIf cfg.audiobookshelf.enable config.services.audiobookshelf.port;
-    bazarr = lib.mkIf cfg.bazarr.enable config.services.bazarr.listenPort;
-    sonarr = lib.mkIf cfg.sonarr.enable config.services.sonarr.settings.server.port;
-    radarr = lib.mkIf cfg.radarr.enable config.services.radarr.settings.server.port;
-    prowlarr = lib.mkIf cfg.prowlarr.enable config.services.prowlarr.settings.server.port;
-    lidarr = lib.mkIf cfg.lidarr.enable config.services.lidarr.settings.server.port;
-  };
-
-  homelab.services = lib.mkIf config.nixarr.enable {
-    transmission = lib.mkIf config.nixarr.transmission.enable {
-      enable = true;
-      proxyPass = "http://127.0.0.1:${toString transmissionPort}";
-    };
-    audiobookshelf = lib.mkIf config.nixarr.audiobookshelf.enable {
-      enable = true;
-      isExternal = true;
-      proxyPass = "http://localhost:${toString config.nixarr.audiobookshelf.port}";
-    };
-    jellyfin = lib.mkIf config.nixarr.jellyfin.enable {
-      enable = true;
-      isExternal = true;
-      proxyPass = "http://localhost:${toString jellyfinPort}";
-      # nginx buffers the response to a temp file by default and throttles
-      # reads from Jellyfin while buffers drain, which stalls high-bitrate 4K
-      # direct play (plays a few seconds, then freezes). Jellyfin 10.11's
-      # chunked direct-play delivery makes this severe.
-      # https://github.com/jellyfin/jellyfin/issues/15237
-      extraConfig = ''
-        proxy_buffering off;
-      '';
-    };
-    bazarr = lib.mkIf config.nixarr.bazarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.bazarr.port}";
-      proxyReadTimeout = arrSearchTimeout;
-    };
-    lidarr = lib.mkIf config.nixarr.lidarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.lidarr.port}";
-      proxyReadTimeout = arrSearchTimeout;
-    };
-    prowlarr = lib.mkIf config.nixarr.prowlarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.prowlarr.port}";
-      proxyReadTimeout = arrSearchTimeout;
-    };
-    radarr = lib.mkIf config.nixarr.radarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.radarr.port}";
-      proxyReadTimeout = arrSearchTimeout;
-    };
-    sonarr = lib.mkIf config.nixarr.sonarr.enable {
-      enable = true;
-      proxyPass = "http://localhost:${toString config.nixarr.sonarr.port}";
-      proxyReadTimeout = arrSearchTimeout;
     };
   };
 

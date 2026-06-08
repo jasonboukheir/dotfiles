@@ -29,9 +29,7 @@
             inputs.agenix.nixosModules.default
             inputs.determinate.nixosModules.default
             inputs.home-manager-nixos.nixosModules.home-manager
-            inputs.nixarr.nixosModules.default
             inputs.stylix-nixos.nixosModules.stylix
-            inputs.vllm-xpu-nix.nixosModules.default
           ];
         };
 

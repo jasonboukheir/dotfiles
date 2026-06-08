@@ -4,7 +4,6 @@
     ./ddclient.nix
     ./hydroxide.nix
     ./libation.nix
-    ./litellm.nix
     ./vllm-xpu.nix
     ./speaches.nix
     ./postgresql.nix
