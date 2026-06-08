@@ -59,8 +59,8 @@ in
         inputs.stylix-nixos-unstable.nixosModules.stylix
         inputs.jovian.nixosModules.default
 
-        ../software.nix
-        ../session.nix
+        ../system
+        ../session
         ./test-overrides.nix
       ];
 

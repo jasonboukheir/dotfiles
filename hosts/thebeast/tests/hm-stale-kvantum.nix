@@ -26,7 +26,7 @@ pkgs.testers.nixosTest {
       inputs.home-manager-nixos-unstable.nixosModules.home-manager
       inputs.stylix-nixos-unstable.nixosModules.stylix
 
-      ../state-version.nix
+      ../configuration.nix
     ];
 
     # The production-side workaround for the stale-Kvantum-symlink bug

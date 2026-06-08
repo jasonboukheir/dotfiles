@@ -13,8 +13,8 @@ pkgs.testers.nixosTest {
       inputs.stylix-nixos-unstable.nixosModules.stylix
       inputs.jovian.nixosModules.default
 
-      ../software.nix
-      ../session.nix
+      ../system
+      ../session
       ./test-overrides.nix
     ];
   };
@@ -277,8 +277,8 @@ pkgs.testers.nixosTest {
 
   '';
 }
-# Plymouth + boot.kernelParams live in ../configuration.nix, which this
+# Plymouth + boot.kernelParams live in ../boot.nix, which this
 # session-scoped test deliberately does not import (the VM stubs hardware
-# and skips configuration entirely). The toplevel build is the assertion
-# that those land; no separate subtest is meaningful here.
+# and skips the host boot layer entirely). The toplevel build is the
+# assertion that those land; no separate subtest is meaningful here.
 

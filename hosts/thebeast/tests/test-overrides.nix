@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  imports = [../state-version.nix];
+  imports = [../configuration.nix];
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # The real host puts /games on a dedicated ext4 partition declared in

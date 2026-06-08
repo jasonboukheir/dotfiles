@@ -1,6 +1,14 @@
 {...}: {
   imports = [
-    ./common.nix
-    ./session.nix
+    ./system
+    ./session
+    ./home-manager
+    ./secrets
+    ./boot.nix
+    ./graphics.nix
+    ./helium.nix
+    ./packages.nix
+    ./configuration.nix
+    ./hardware-configuration.nix
   ];
 }
