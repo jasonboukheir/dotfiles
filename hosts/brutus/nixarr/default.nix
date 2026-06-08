@@ -79,6 +79,34 @@ in {
     };
   };
 
+  # Offload Jellyfin transcoding to the Intel Arc (renderD128) via QuickSync.
+  # nixarr's jellyfin module only sets enable/dirs but delegates to the
+  # upstream services.jellyfin module, so these options merge onto the same
+  # service. The Arc is shared with vllm-xpu (gpuMemoryUtilization 0.85, ~27GB
+  # of 32GB), so cap concurrent transcodes to fit the remaining VRAM headroom.
+  users.users.${config.services.jellyfin.user}.extraGroups = ["render" "video"];
+  services.jellyfin = lib.mkIf cfg.jellyfin.enable {
+    forceEncodingConfig = true;
+    hardwareAcceleration = {
+      enable = true;
+      type = "qsv";
+      device = "/dev/dri/renderD128";
+    };
+    transcoding = {
+      enableHardwareEncoding = true;
+      enableIntelLowPowerEncoding = true;
+      enableToneMapping = true;
+      hardwareDecodingCodecs = {
+        h264 = true;
+        hevc = true;
+        vp9 = true;
+        av1 = true;
+      };
+      hardwareEncodingCodecs.hevc = true;
+      maxConcurrentStreams = 2;
+    };
+  };
+
   homelab.ports.allocate = lib.mkIf cfg.enable {
     transmission-rpc = lib.mkIf cfg.transmission.enable transmissionPort;
     transmission-peer = lib.mkIf cfg.transmission.enable cfg.transmission.peerPort;
@@ -105,6 +133,14 @@ in {
       enable = true;
       isExternal = true;
       proxyPass = "http://localhost:${toString jellyfinPort}";
+      # nginx buffers the response to a temp file by default and throttles
+      # reads from Jellyfin while buffers drain, which stalls high-bitrate 4K
+      # direct play (plays a few seconds, then freezes). Jellyfin 10.11's
+      # chunked direct-play delivery makes this severe.
+      # https://github.com/jellyfin/jellyfin/issues/15237
+      extraConfig = ''
+        proxy_buffering off;
+      '';
     };
     bazarr = lib.mkIf config.nixarr.bazarr.enable {
       enable = true;
