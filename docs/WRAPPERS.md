@@ -42,30 +42,40 @@ configFile = (pkgs.formats.toml {}).generate "jj-config.toml" cfg.settings;
 ```
 
 Tunables are exposed as module **options** (repo rule — never `let`-bound
-consts), so a host overrides `programs.<tool>.settings` rather than editing the
+consts), so config is overridden through `settings` rather than by editing the
 wrapper.
 
 ## Exposure surface
 
-Each configured wrapper is a normal package, reachable two ways:
+Wrappers are **per-user**, mirroring what home-manager gave us. NixOS has no
+`users.users.<name>.programs`, so a capability module under `modules/programs/`
+declares that surface itself (a module-merge onto the `users.users.<name>`
+submodule) and, when enabled, pushes the built wrapper into that user's
+`users.users.<name>.packages` — installed in the user's environment, not
+system-wide.
 
-- **System hosts** (NixOS / nix-darwin): a module under `modules/programs/`
-  declares the options and adds the wrapper to `environment.systemPackages`.
-- **Standalone hosts** (`work-devserver`, `jasonbk-fedora`, no system layer):
-  the same module exposes a read-only `wrappedPackage` option, installed via
-  `nix profile install` / `home.packages` (see [#39]).
+- **Capability** (`modules/programs/<tool>.nix`): declares
+  `users.users.<name>.programs.<tool>.{enable,settings}` and wires `.packages`.
+  Tool-centric, built once, identity-free.
+- **Per-user values** (`modules/users/<name>.nix`): sets
+  `users.users.<name>.programs.<tool> = {enable; settings;}`. The
+  home-manager-`jasonbk` replacement; wired in via `modules/nixos` (darwin's
+  `users.users` has no `packages` yet — its cutover comes later).
+
+Standalone hosts (`work-devserver`, `jasonbk-fedora`) have no system layer and
+are handled separately (see [#39]).
 
 ## Reference example: jujutsu
 
-`modules/programs/jujutsu.nix` is the cleanest case — a single `JJ_CONFIG` file:
+`modules/programs/jujutsu.nix` is the cleanest case — a single `JJ_CONFIG` file.
+A user opts in and tunes it via the per-user surface:
 
 ```nix
-programs.jujutsu.enable = true;            # adds the wrapper to systemPackages
-programs.jujutsu.settings.ui.editor = ...; # tunable; baked into JJ_CONFIG
+users.users.jasonbk.programs.jujutsu = {
+  enable = true;                  # adds the wrapper to jasonbk's packages
+  settings.ui.editor = "nvim";    # tunable; baked into that user's JJ_CONFIG
+};
 ```
-
-`config.programs.jujutsu.wrappedPackage` is the built `jj`, addressable for
-standalone use or for `nix build`.
 
 ## Testing the convention
 
