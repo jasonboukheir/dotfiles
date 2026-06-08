@@ -1,5 +1,5 @@
 {...}: {
   imports = [
-    ./jasonbk
+    ./jujutsu.nix
   ];
 }
