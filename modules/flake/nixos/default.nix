@@ -66,30 +66,34 @@
             config.allowUnfree = true;
           };
         in {
-          checks.thebeast-session = import ../../../hosts/thebeast/tests/session.nix {
-            inherit pkgs inputs;
-          };
-          checks.thebeast-dm-recovery = import ../../../hosts/thebeast/tests/dm-recovery.nix {
-            inherit pkgs inputs;
-          };
-          checks.thebeast-keyring = import ../../../hosts/thebeast/tests/keyring.nix {
-            inherit pkgs inputs;
-          };
-          checks.thebeast-hm-stale-kvantum = import ../../../hosts/thebeast/tests/hm-stale-kvantum.nix {
-            inherit pkgs inputs;
-          };
-          checks.brutus-matrix = import ../../../hosts/brutus/tests/matrix.nix {
-            pkgs = brutusPkgs;
-            inherit inputs;
-          };
-          checks.brutus-matrix-rtc = import ../../../hosts/brutus/tests/matrix-rtc.nix {
-            pkgs = brutusPkgs;
-            inherit inputs;
-          };
-          checks.brutus-ntfy = import ../../../hosts/brutus/tests/ntfy.nix {
-            pkgs = brutusPkgs;
-            inherit inputs;
-          };
+          checks =
+            (import ../../../modules/programs/tests {inherit pkgs inputs;})
+            // {
+              thebeast-session = import ../../../hosts/thebeast/tests/session.nix {
+                inherit pkgs inputs;
+              };
+              thebeast-dm-recovery = import ../../../hosts/thebeast/tests/dm-recovery.nix {
+                inherit pkgs inputs;
+              };
+              thebeast-keyring = import ../../../hosts/thebeast/tests/keyring.nix {
+                inherit pkgs inputs;
+              };
+              thebeast-hm-stale-kvantum = import ../../../hosts/thebeast/tests/hm-stale-kvantum.nix {
+                inherit pkgs inputs;
+              };
+              brutus-matrix = import ../../../hosts/brutus/tests/matrix.nix {
+                pkgs = brutusPkgs;
+                inherit inputs;
+              };
+              brutus-matrix-rtc = import ../../../hosts/brutus/tests/matrix-rtc.nix {
+                pkgs = brutusPkgs;
+                inherit inputs;
+              };
+              brutus-ntfy = import ../../../hosts/brutus/tests/ntfy.nix {
+                pkgs = brutusPkgs;
+                inherit inputs;
+              };
+            };
         };
     };
   };

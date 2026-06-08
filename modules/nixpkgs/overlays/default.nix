@@ -1,5 +1,6 @@
 {inputs, ...}: {
   nixpkgs.overlays = [
+    (import ./mkWrapped.nix)
     (import ./direnv.nix)
     (import ./fish.nix {inherit inputs;})
     (import ./pocket-id.nix)
