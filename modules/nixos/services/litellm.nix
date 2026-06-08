@@ -28,6 +28,40 @@
     };
   });
 
+  # litellm imports this distribution to locate its bundled prisma migrations
+  # (litellm_proxy_extras.utils.ProxyExtrasDBManager). nixpkgs does not package
+  # it yet (`# FIXME package litellm-proxy-extras`), so without it prisma
+  # `migrate deploy` is silently skipped at startup.
+  # https://github.com/jasonboukheir/dotfiles/issues/58
+  # The version must match litellm, which pins `litellm-proxy-extras==<version>`
+  # in its pyproject.toml; bump both together when bumping ps.litellm.
+  litellmProxyExtras = ps.buildPythonPackage rec {
+    pname = "litellm-proxy-extras";
+    version = "0.4.69";
+    pyproject = true;
+
+    src = pkgs.fetchPypi {
+      pname = "litellm_proxy_extras";
+      inherit version;
+      hash = "sha256-jCSgGk3/sTfpXHCaR6toBTWRzN99eKA4xXNI9bKrmQ0=";
+    };
+
+    postPatch = ''
+      substituteInPlace pyproject.toml \
+        --replace-fail "uv_build==0.10.7" "uv_build"
+    '';
+
+    build-system = [ps.uv-build];
+
+    pythonImportsCheck = ["litellm_proxy_extras"];
+
+    meta = {
+      description = "Bundled prisma migrations and helpers for the LiteLLM proxy";
+      homepage = "https://github.com/BerriAI/litellm";
+      license = lib.licenses.mit;
+    };
+  };
+
   litellmWithPrisma =
     (py.withPackages (_: [
       prismaPatched
@@ -77,7 +111,7 @@
             ++ (old.optional-dependencies.proxy or [])
             ++ (old.optional-dependencies.extra_proxy or [])
           )
-          ++ [prismaPatched];
+          ++ [prismaPatched litellmProxyExtras];
       }))
     ])).overrideAttrs (old: {
       meta = (old.meta or {}) // {mainProgram = "litellm";};
@@ -108,9 +142,22 @@ in {
           "litellm"
           "litellm/ui"
           "litellm/tiktoken-cache"
-          "litellm/migrations"
         ];
         ReadWritePaths = [cfg.stateDir];
+        # litellm_proxy_extras copies its bundled prisma migrations into
+        # LITELLM_MIGRATION_DIR at startup, then chdirs there to run
+        # `prisma migrate deploy`. The package files live read-only in the Nix
+        # store, so seed the dir from them as writable each start — otherwise
+        # the copy fails overwriting stale read-only files (PermissionError)
+        # and prisma cannot write baseline migrations into a read-only tree.
+        ExecStartPre = let
+          migrations = "${litellmProxyExtras}/${py.sitePackages}/litellm_proxy_extras";
+        in pkgs.writeShellScript "litellm-seed-migrations" ''
+          set -eu
+          ${pkgs.coreutils}/bin/rm -rf ${cfg.stateDir}/migrations
+          ${pkgs.coreutils}/bin/cp -rT ${migrations} ${cfg.stateDir}/migrations
+          ${pkgs.coreutils}/bin/chmod -R u+w ${cfg.stateDir}/migrations
+        '';
       };
     };
 

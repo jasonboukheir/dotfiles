@@ -179,15 +179,28 @@ in {
     options = ["bind"];
   };
 
-  # nixarr (and the upstream nixos transmission module) declare
-  # RequiresMountsFor for the default /var/lib/transmission paths, but we
-  # relocate everything under cfg.mediaDir (a bind mount on top of a ZFS
-  # dataset). Without a mount dep on the real path, a nixos-rebuild can
-  # unmount /var/lib/nixarr, restart transmission against the empty rootfs
-  # mountpoint, and then remount /var/lib/nixarr on top -- leaving
-  # transmission in a stale mount namespace with no visible state. Bind the
+  # nixarr (and the upstream nixos service modules) declare RequiresMountsFor
+  # for the default /var/lib/<svc> paths, but we relocate everything under
+  # cfg.mediaDir (a bind mount on top of a ZFS dataset). Without a mount dep on
+  # the real path, a nixos-rebuild can unmount /var/lib/nixarr, restart a
+  # service against the empty rootfs mountpoint, and then remount /var/lib/nixarr
+  # on top -- leaving the service in a stale mount namespace with no visible
+  # state, or writing to the dataset mid-(un)mount and corrupting its SQLite DB
+  # (see issue #59: radarr Commands-table corruption). Bind every stateful
   # service to the actual mount so it waits for the dataset.
-  systemd.services.transmission.unitConfig = lib.mkIf cfg.transmission.enable {
-    RequiresMountsFor = cfg.mediaDir;
-  };
+  systemd.services = let
+    statefulServices = lib.filter (s: cfg.${s}.enable) [
+      "transmission"
+      "radarr"
+      "sonarr"
+      "lidarr"
+      "prowlarr"
+      "bazarr"
+      "jellyfin"
+      "audiobookshelf"
+    ];
+  in
+    lib.mkIf cfg.enable (lib.genAttrs statefulServices (_: {
+      unitConfig.RequiresMountsFor = cfg.mediaDir;
+    }));
 }
