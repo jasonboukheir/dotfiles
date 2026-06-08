@@ -46,9 +46,19 @@
       hash = "sha256-jCSgGk3/sTfpXHCaR6toBTWRzN99eKA4xXNI9bKrmQ0=";
     };
 
+    # _get_prisma_dir copies its migrations from the read-only store into
+    # LITELLM_MIGRATION_DIR (an ephemeral RuntimeDirectory, empty each boot)
+    # with copy2, which stamps the store's read-only mode onto the copies. It is
+    # called repeatedly per startup, so a later call cannot overwrite the copies
+    # and prisma cannot write baseline migrations into the tree. Make the copied
+    # tree writable before returning so repeat calls and baselining both work.
     postPatch = ''
       substituteInPlace pyproject.toml \
         --replace-fail "uv_build==0.10.7" "uv_build"
+      substituteInPlace litellm_proxy_extras/utils.py \
+        --replace-fail '            return custom_migrations_dir' '
+                  [os.chmod(_p, 0o755 if os.path.isdir(_p) else 0o644) for _r, _d, _fs in os.walk(custom_migrations_dir) for _p in [_r, *(os.path.join(_r, _f) for _f in _fs)]]
+                  return custom_migrations_dir'
     '';
 
     build-system = [ps.uv-build];
@@ -123,7 +133,9 @@ in {
       environment = {
         HOME = cfg.stateDir;
         PRISMA_HOME_DIR = cfg.stateDir;
-        LITELLM_MIGRATION_DIR = "${cfg.stateDir}/migrations";
+        # Ephemeral, writable, recreated empty each start (see RuntimeDirectory);
+        # litellm_proxy_extras reseeds it from the read-only package on boot.
+        LITELLM_MIGRATION_DIR = "/run/litellm/migrations";
         PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines}/bin/query-engine";
         PRISMA_QUERY_ENGINE_LIBRARY = "${prismaEngines}/lib/libquery_engine.node";
         PRISMA_SCHEMA_ENGINE_BINARY = "${prismaEngines}/bin/schema-engine";
@@ -143,21 +155,11 @@ in {
           "litellm/ui"
           "litellm/tiktoken-cache"
         ];
+        # Upstream's litellm module already sets RuntimeDirectory = "litellm";
+        # mkForce both so /run/litellm/migrations (LITELLM_MIGRATION_DIR) also
+        # exists and is wiped empty each start.
+        RuntimeDirectory = lib.mkForce ["litellm" "litellm/migrations"];
         ReadWritePaths = [cfg.stateDir];
-        # litellm_proxy_extras copies its bundled prisma migrations into
-        # LITELLM_MIGRATION_DIR at startup, then chdirs there to run
-        # `prisma migrate deploy`. The package files live read-only in the Nix
-        # store, so seed the dir from them as writable each start — otherwise
-        # the copy fails overwriting stale read-only files (PermissionError)
-        # and prisma cannot write baseline migrations into a read-only tree.
-        ExecStartPre = let
-          migrations = "${litellmProxyExtras}/${py.sitePackages}/litellm_proxy_extras";
-        in pkgs.writeShellScript "litellm-seed-migrations" ''
-          set -eu
-          ${pkgs.coreutils}/bin/rm -rf ${cfg.stateDir}/migrations
-          ${pkgs.coreutils}/bin/cp -rT ${migrations} ${cfg.stateDir}/migrations
-          ${pkgs.coreutils}/bin/chmod -R u+w ${cfg.stateDir}/migrations
-        '';
       };
     };
 
