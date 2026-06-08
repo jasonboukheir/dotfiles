@@ -13,6 +13,15 @@
     then lib.filterAttrs (_: lib.isString) config.lib.stylix.colors
     else {};
 
+  # `stylix.cursor` is a NixOS/HM-stylix option; the darwin stylix module
+  # never declares it (macOS has no X cursor themes). Guard on its presence
+  # so the per-user cursor inherits the themed system cursor on Linux and
+  # falls back to null on darwin instead of throwing.
+  systemCursor =
+    if (config ? stylix && config.stylix ? cursor)
+    then config.stylix.cursor
+    else {};
+
   perUser = _: {
     options.stylix = {
       enable = lib.mkOption {
@@ -57,6 +66,33 @@
         default = systemStylix.opacity or {};
         defaultText = lib.literalExpression "config.stylix.opacity";
         description = "Opacity settings for this user's wrappers. Defaults to the system stylix opacity.";
+      };
+
+      cursor = {
+        name = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = systemCursor.name or null;
+          defaultText = lib.literalExpression "config.stylix.cursor.name or null";
+          description = ''
+            Cursor theme name. Inherits the themed system stylix cursor on
+            NixOS; null where the system stylix has no cursor (darwin), which
+            leaves cursor-consuming targets inactive.
+          '';
+        };
+
+        package = lib.mkOption {
+          type = lib.types.nullOr lib.types.package;
+          default = systemCursor.package or null;
+          defaultText = lib.literalExpression "config.stylix.cursor.package or null";
+          description = "Cursor theme package a target installs into this user's icon path. Inherits the system stylix cursor when defined.";
+        };
+
+        size = lib.mkOption {
+          type = lib.types.int;
+          default = systemCursor.size or 24;
+          defaultText = lib.literalExpression "config.stylix.cursor.size or 24";
+          description = "Cursor size (XCURSOR_SIZE/HYPRCURSOR_SIZE). Inherits the system stylix cursor size when defined.";
+        };
       };
     };
   };

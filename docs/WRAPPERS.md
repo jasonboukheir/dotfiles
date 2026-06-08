@@ -122,7 +122,11 @@ home-manager's stylix module turned the **system** stylix config
   `config.stylix.*` — so a user inherits the system theme but can override any of
   them (e.g. `users.users.<name>.stylix.colors` for a different base16 scheme).
   The system reads are guarded, so importing the foundation onto a host with no
-  system stylix is a no-op rather than an eval error.
+  system stylix is a no-op rather than an eval error. `stylix.cursor` is a
+  NixOS-only option (the darwin stylix module never declares it), so the
+  per-user `cursor.{name,package,size}` is a `nullOr` that inherits the themed
+  system cursor on Linux and resolves to `null` on darwin — a cursor target
+  keys off `cursor.name != null` and stays inactive where there is no cursor.
 - **Targets** (`modules/stylix/users/<app>.nix`): mirror HM's
   `stylix.targets.<app>`. A target declares
   `users.users.<name>.stylix.targets.<app>.enable` (defaulting to the user's
