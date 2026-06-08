@@ -13,6 +13,8 @@
         signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
       };
       init.defaultBranch = "main";
+      # TODO: replace the "nvim" literals with users.users.jasonbk.editor
+      # https://github.com/jasonboukheir/dotfiles/issues/62
       core.editor = "nvim";
       merge.tool = "nvim";
       diff.tool = "nvim";
