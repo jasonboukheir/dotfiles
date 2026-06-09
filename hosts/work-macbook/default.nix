@@ -6,6 +6,7 @@
     ./programs
     ./system
     ./environment.nix
+    ./nvf.nix
     ./stylix.nix
   ];
 }

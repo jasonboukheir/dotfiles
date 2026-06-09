@@ -9,7 +9,6 @@
 in {
   imports = [
     ../../modules/home-manager/sharedModules/programs
-    ../../modules/home-manager/sharedModules/programs/nvf/meta.nix
     ../../modules/home-manager/sharedModules/stylix.nix
     ../../modules/home-manager/jasonbk/programs
     ../../modules/stylix

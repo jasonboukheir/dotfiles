@@ -2,7 +2,6 @@
   imports = [
     ./calcure
     ./nushell
-    ./nvf
     ./vscode-fb
     ./_1password.nix
     ./claude-code.nix
