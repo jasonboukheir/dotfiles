@@ -1,7 +1,9 @@
 - clean code conventions for comments
-  - comments generally are a code smell
+  - NEVER plain comments to describe what code is already describing. Instead
+    use nix module descriptions or code documents that are idiomatic ways to
+    document the code.
   - comments useful for short TODO, or detailed quirk that can't be looked up.
-  - prefer assertions or named variables to comments
+  - prefer assertions or named variables to comments.
 - use the flakes CLI (`nix run`/`shell`/`build`), not legacy
   `nix-shell`/`nix-channel`.
 - prefer existing module options over manual config (e.g. `services.nginx.*`
