@@ -8,6 +8,7 @@
     ./graphics.nix
     ./hardware-configuration.nix
     ./packages.nix
+    ./nvf.nix
     ./stylix.nix
     ./networking
     ./virtualization.nix

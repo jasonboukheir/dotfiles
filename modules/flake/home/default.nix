@@ -11,7 +11,13 @@
         config.allowUnfree = true;
       };
       commonModules = [
-        inputs.nvf-nixos.homeManagerModules.default
+        ../../../modules/programs/nvf/home-manager.nix
+        {
+          programs.nvf = {
+            enable = true;
+            neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
+          };
+        }
         inputs.stylix-nixos.homeModules.stylix
       ];
     in {

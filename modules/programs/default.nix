@@ -8,6 +8,7 @@
     ./git.nix
     ./jujutsu.nix
     ./nushell
+    ./nvf
     ./rg.nix
     ./starship.nix
   ];
