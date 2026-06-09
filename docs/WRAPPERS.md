@@ -125,15 +125,21 @@ each is hand-concatenated into the right place.
   processes don't inherit a redirected config home. vivid defaults to the `ansi`
   theme so `LS_COLORS` follows the terminal's 16 ANSI slots (themed from base16
   by stylix) instead of pinning a separate colour scheme.
-- **fish** (`modules/nixos/programs/fish.nix`): native `programs.fish` at the
-  system layer. `interactiveShellInit` concatenates `starship init fish` (guarded
-  on starship being on a user's PATH, since it's a per-user wrapper); `plugin-git`
-  rides in via the system profile's `share/fish/vendor_*`.
-- **direnv** (`modules/nixos/programs/direnv.nix` + `modules/darwin/programs/direnv.nix`):
-  native `programs.direnv` + `nix-direnv`, enabled system-wide on every host
-  with a system layer (split per-platform like `fish`); the module emits its own
-  `direnv hook fish` (and bash/zsh). Standalone home-manager hosts keep direnv
-  via HM (no system layer to hook — see [#39]).
+- **fish** (`modules/programs/fish.nix`): native `programs.fish` at the system
+  layer. `interactiveShellInit` concatenates `starship init fish` (guarded on
+  starship being on a user's PATH, since it's a per-user wrapper); `plugin-git`
+  rides in via the system profile's `share/fish/vendor_*`. Shared, like direnv —
+  both NixOS and nix-darwin expose `interactiveShellInit` + vendor loading.
+  `mkDefault` so a per-host `programs.fish.enable = true` (the macs) doesn't
+  conflict.
+- **direnv** (`modules/programs/direnv.nix`): native `programs.direnv` +
+  `nix-direnv`, enabled system-wide. Both fish and direnv live in the shared
+  `modules/programs` (single modules, like `fd.nix`/`rg.nix`): it's imported by
+  the NixOS *and* darwin system configs, and both platforms expose the same
+  option interface, so one module covers every host with a system layer — no
+  per-platform split needed. The module emits its own `direnv hook fish` (and
+  bash/zsh). Standalone home-manager hosts (devserver/fedora) have no system
+  layer, so they keep fish/direnv via HM — see [#39].
 - **zsh**: no wrapper — it stays gated behind `programs.zsh.enable`, dropped
   where unused.
 

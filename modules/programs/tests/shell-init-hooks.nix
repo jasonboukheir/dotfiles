@@ -10,8 +10,8 @@ in
     nodes.machine = {
       nixpkgs.pkgs = pkgsWrapped;
       imports = [
-        ../../nixos/programs/fish.nix
-        ../../nixos/programs/direnv.nix
+        ../fish.nix
+        ../direnv.nix
         ../starship.nix
       ];
 

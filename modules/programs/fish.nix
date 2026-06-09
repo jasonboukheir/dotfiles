@@ -1,6 +1,13 @@
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  # Shared by the NixOS and darwin system configs (both expose the same
+  # programs.fish interface — interactiveShellInit + vendor loading). mkDefault
+  # so per-host `programs.fish.enable = true` (the macs) doesn't conflict.
   programs.fish = {
-    enable = true;
+    enable = lib.mkDefault true;
     # HM used to auto-emit these on home.shell.enable*Integration. With HM gone
     # the hooks are hand-concatenated here; direnv's fish hook is emitted by the
     # native programs.direnv module. starship is a per-user wrapper, so guard on
