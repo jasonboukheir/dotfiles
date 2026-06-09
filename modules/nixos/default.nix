@@ -8,5 +8,6 @@
     ./ephemeral-secrets.nix
     ./users.nix
     ../users
+    ../my/nixos.nix
   ];
 }

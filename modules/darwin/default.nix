@@ -6,5 +6,6 @@
     ./environment.nix
     ./nix.nix
     ./users.nix
+    ../my/nix-darwin.nix
   ];
 }

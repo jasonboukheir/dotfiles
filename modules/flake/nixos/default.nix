@@ -65,6 +65,7 @@
         in {
           checks =
             (import ../../../modules/programs/tests {inherit pkgs inputs;})
+            // (import ../../../modules/my/tests {inherit pkgs inputs;})
             // {
               thebeast-session = import ../../../hosts/thebeast/tests/session.nix {
                 inherit pkgs inputs;
