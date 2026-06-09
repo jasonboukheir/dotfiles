@@ -12,6 +12,7 @@
       };
       commonModules = [
         ../../../modules/programs/nvf/home-manager.nix
+        ../../../modules/my/home-manager.nix
         {
           programs.nvf = {
             enable = true;
