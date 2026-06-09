@@ -129,8 +129,11 @@ each is hand-concatenated into the right place.
   system layer. `interactiveShellInit` concatenates `starship init fish` (guarded
   on starship being on a user's PATH, since it's a per-user wrapper); `plugin-git`
   rides in via the system profile's `share/fish/vendor_*`.
-- **direnv** (`modules/nixos/programs/direnv.nix`): native `programs.direnv` +
-  `nix-direnv`; the module emits its own `direnv hook fish` (and bash/zsh).
+- **direnv** (`modules/nixos/programs/direnv.nix` + `modules/darwin/programs/direnv.nix`):
+  native `programs.direnv` + `nix-direnv`, enabled system-wide on every host
+  with a system layer (split per-platform like `fish`); the module emits its own
+  `direnv hook fish` (and bash/zsh). Standalone home-manager hosts keep direnv
+  via HM (no system layer to hook — see [#39]).
 - **zsh**: no wrapper — it stays gated behind `programs.zsh.enable`, dropped
   where unused.
 
