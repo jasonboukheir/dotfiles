@@ -4,7 +4,12 @@
     module = {inputs, ...}: {
       flake.nixosConfigurations = {
         thebeast = inputs.nixos-unstable.lib.nixosSystem {
-          specialArgs = {inherit inputs;};
+          # neovimConfiguration is the specialArg my.nvf builds neovim from;
+          # pin the nvf input whose nixpkgs matches this host's channel.
+          specialArgs = {
+            inherit inputs;
+            neovimConfiguration = inputs.nvf-nixos-unstable.lib.neovimConfiguration;
+          };
           modules = [
             ../../../hosts/thebeast
             inputs.agenix.nixosModules.default

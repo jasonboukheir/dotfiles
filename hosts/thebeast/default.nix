@@ -7,7 +7,7 @@
     ./boot.nix
     ./graphics.nix
     ./helium.nix
-    ./nvf.nix
+    ./my.nix
     ./packages.nix
     ./configuration.nix
     ./hardware-configuration.nix
