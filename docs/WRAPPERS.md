@@ -108,6 +108,48 @@ loads it via `flags = ["--config-file=${file}"]`. List values render as repeated
 `palette = N=#…` form. The user's own `~/.config/ghostty/config` still loads, so
 hand edits win on conflicts.
 
+## shell stack: starship/nushell wrappers + native fish/direnv
+
+The shell stack ([#42]) splits by tool. HM auto-emitted the shell-init hooks
+(starship init, direnv hook, carapace completer, vivid `LS_COLORS`); with HM gone
+each is hand-concatenated into the right place.
+
+- **starship** (`modules/programs/starship.nix`): a `JJ_CONFIG`-style per-user
+  wrapper — `settings` → `formats.toml` → `STARSHIP_CONFIG`. It only pins the
+  prompt config; the shells run `starship init <shell>` themselves.
+- **nushell** (`modules/programs/nushell/`): the wrapper bakes `config.nu`
+  (loaded via `--config`) and a generated `env.nu` (via `--env-config`). `env.nu`
+  carries the gotcha hooks — vivid `$env.LS_COLORS` and `starship init nu` into
+  nushell's vendor-autoload dir — and carapace rides on the wrapper PATH for the
+  `config.nu` external completer. Flags, not `XDG_CONFIG_HOME`, so child
+  processes don't inherit a redirected config home. vivid defaults to the `ansi`
+  theme so `LS_COLORS` follows the terminal's 16 ANSI slots (themed from base16
+  by stylix) instead of pinning a separate colour scheme.
+- **fish** (`modules/programs/fish.nix`): native `programs.fish` at the system
+  layer. `interactiveShellInit` concatenates `starship init fish` (guarded on
+  starship being on a user's PATH, since it's a per-user wrapper); `plugin-git`
+  rides in via the system profile's `share/fish/vendor_*`. Shared, like direnv —
+  both NixOS and nix-darwin expose `interactiveShellInit` + vendor loading.
+  `mkDefault` so a per-host `programs.fish.enable = true` (the macs) doesn't
+  conflict.
+- **direnv** (`modules/programs/direnv.nix`): native `programs.direnv` +
+  `nix-direnv`, enabled system-wide. Both fish and direnv live in the shared
+  `modules/programs` (single modules, like `fd.nix`/`rg.nix`): it's imported by
+  the NixOS *and* darwin system configs, and both platforms expose the same
+  option interface, so one module covers every host with a system layer — no
+  per-platform split needed. The module emits its own `direnv hook fish` (and
+  bash/zsh). Standalone home-manager hosts (devserver/fedora) have no system
+  layer, so they keep fish/direnv via HM — see [#39].
+- **zsh**: no wrapper — it stays gated behind `programs.zsh.enable`, dropped
+  where unused.
+
+`starship-wrapper`/`nushell-wrapper` assert the per-user plumbing
+(`settings → STARSHIP_CONFIG`; `config.nu`/`env.nu` → `--config`/`--env-config`,
+vivid `LS_COLORS`, carapace on PATH, the baked `starship init nu`).
+`shell-init-hooks` boots native fish + direnv with the per-user starship wrapper
+and asserts the concatenated hooks are present in `/etc/fish`, the plugin-git
+vendor functions load, and direnv/starship resolve.
+
 ## stylix: per-user theming without the HM stylix module
 
 home-manager's stylix module turned the **system** stylix config
