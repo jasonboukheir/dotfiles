@@ -62,6 +62,18 @@ with lib; let
         description = "Whether this is an external service";
       };
 
+      registered = mkOption {
+        type = types.bool;
+        default = false;
+        internal = true;
+        description = ''
+          Set by modules/homelab/registry.nix for every catalog entry. The
+          drift assertion below uses it to fail an enabled service that has
+          no registry entry (which would silently default its domain to
+          internal).
+        '';
+      };
+
       mtls.enable = mkOption {
         type = types.bool;
         default = cfg.services.${name}.isExternal && cfg.mtls.caCertFile != null;
@@ -158,11 +170,16 @@ in {
   config = mkIf cfg.enable (let
     hasExternal = any (svc: svc.enable && svc.isExternal) (attrValues cfg.services);
     nginxLogDir = "/var/log/nginx";
+    unregistered = attrNames (filterAttrs (_: svc: svc.enable && !svc.registered) cfg.services);
   in {
     assertions = [
       {
         assertion = !(any (svc: svc.enable && svc.mtls.enable) (attrValues cfg.services)) || cfg.mtls.caCertFile != null;
         message = "homelab.mtls.caCertFile must be set when mTLS is enabled for any service";
+      }
+      {
+        assertion = unregistered == [];
+        message = "homelab services enabled without a modules/homelab/registry.nix entry (their domain would silently default to internal): ${concatStringsSep ", " unregistered}";
       }
     ];
 

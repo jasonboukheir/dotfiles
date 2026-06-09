@@ -100,7 +100,7 @@ in {
   };
 
   age.secrets."litellm/env" = lib.mkIf cfg.enable {
-    file = ../secrets/litellm/env.age;
+    file = config.homelab.secretsDir + /litellm/env.age;
   };
 
   services.postgresql = lib.mkIf cfg.enable {

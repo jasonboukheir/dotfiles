@@ -12,7 +12,6 @@ in {
     {
       homelab.services.id = {
         proxyPass = "http://localhost:${toString port}";
-        isExternal = true;
         mtls.enable = false;
         extraConfig = ''
           proxy_busy_buffers_size   512k;

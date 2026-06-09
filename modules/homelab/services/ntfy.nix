@@ -10,7 +10,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.ntfy = {
-        isExternal = true;
         # UnifiedPush clients (FCM-less Android via the ntfy app) reach this
         # vhost from arbitrary networks without a homelab client cert; the
         # framework's `isExternal → mtls.enable` default would 403 them.

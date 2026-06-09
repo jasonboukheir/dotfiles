@@ -13,7 +13,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.home = {
-        isExternal = true;
         proxyPass = "http://[::1]:${toString cfg.config.http.server_port}";
         extraConfig = ''
           proxy_buffering off;

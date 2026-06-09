@@ -10,7 +10,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.radicale = {
-        isExternal = true;
         proxyPass = "http://127.0.0.1:${toString cfg.port}";
       };
     }

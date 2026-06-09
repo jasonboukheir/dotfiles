@@ -18,7 +18,6 @@ in {
     {
       homelab.services.headscale = {
         mtls.enable = false;
-        isExternal = true;
         proxyPass = "http://localhost:${toString port}";
       };
     }

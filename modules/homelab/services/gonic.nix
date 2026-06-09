@@ -11,7 +11,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.gonic = {
-        isExternal = true;
         proxyPass = "http://${cfg.settings.listen-addr}";
       };
     }

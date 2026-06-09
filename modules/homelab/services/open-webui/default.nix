@@ -29,7 +29,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.ai = {
-        isExternal = true;
         proxyPass = "http://${cfg.host}:${toString cfg.port}";
         # Stream chat-completion SSE byte-by-byte; nginx's default buffering
         # re-chunks the stream and breaks markdown tokens across boundaries

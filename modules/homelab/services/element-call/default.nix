@@ -40,7 +40,6 @@ in {
   config = lib.mkMerge [
     {
       homelab.services.call = {
-        isExternal = true;
         mtls.enable = false;
         # element-call is a static SPA — no backend to proxyPass to.
         # Leaving this null skips the framework's implicit `/` location

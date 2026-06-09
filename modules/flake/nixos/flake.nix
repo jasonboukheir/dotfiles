@@ -96,13 +96,6 @@
       inputs.nixpkgs.follows = "nixos";
     };
 
-    # AI gateway evaluated alongside litellm (services.bifrost). Single Go
-    # binary, declarative config.json, no database. Exposes nixosModules.bifrost
-    # and packages.bifrost-http. No nixpkgs follows: it builds a CGO Go binary +
-    # Vite UI against its own pinned nixpkgs, and overriding the toolchain risks
-    # skew. https://github.com/maximhq/bifrost
-    bifrost.url = "github:maximhq/bifrost";
-
     terranix = {
       url = "github:terranix/terranix";
       inputs.nixpkgs.follows = "nixos";
