@@ -5,7 +5,8 @@
     ./ghostty.nix
     ./git.nix
     ./jujutsu.nix
-    ./nushell.nix
+    ./nushell
     ./rg.nix
+    ./starship.nix
   ];
 }
