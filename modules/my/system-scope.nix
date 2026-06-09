@@ -1,11 +1,13 @@
-# Shared NixOS + nix-darwin core for the my.* surface. Declares the system scope
-# (my.<tool> -> environment.systemPackages) and the per-user scope
-# (users.users.<n>.my.<tool> -> users.users.<n>.packages, cascading from the
-# system scope). Imported by ./nixos.nix and ./nix-darwin.nix.
+# Shared NixOS + nix-darwin core for the my.* surface. There are two parallel
+# scopes, built from the SAME per-scope helpers below:
 #
-# `neovimConfiguration` arrives as a specialArg (set per-configuration in the
-# flake partitions); it's null when unset, which is fine until a host enables
-# my.nvf. See ./programs/CONTRACT.md.
+#   - system scope:   my.<tool>            -> environment.systemPackages
+#   - per-user scope: users.users.<n>.my.<tool> -> users.users.<n>.packages,
+#                     with its options cascading from the system scope.
+#
+# Imported by ./nixos.nix and ./nix-darwin.nix. `neovimConfiguration` arrives as
+# a specialArg (set per-configuration in the flake partitions); null when unset,
+# fine until a host enables my.nvf. See ./programs/CONTRACT.md.
 {
   config,
   lib,
@@ -18,11 +20,11 @@
 
   specialArgs = {inherit neovimConfiguration;};
 
+  # The system scope's resolved stylix theme (base16 palette + polarity/etc).
   systemStylix =
     if config ? stylix
     then config.stylix
     else {};
-
   systemTheme = mkTheme {
     stylixCfg = systemStylix;
     colors =
@@ -31,49 +33,73 @@
       else {};
   };
 
-  # Capture the system-scope config for cascade inside the per-user submodule.
-  outerConfig = config;
+  # A user's resolved stylix theme, from the per-user stylix surface
+  # (modules/stylix/users), which itself defaults from the system stylix.
+  userTheme = userCfg:
+    mkTheme {
+      stylixCfg = userCfg.stylix or {};
+      colors = userCfg.stylix.colors or {};
+    };
 
-  # `finalPackage` is defined UNCONDITIONALLY (it's lazy, so a disabled tool
-  # never forces `build`). Gating it with `mkIf …enable` inside the `my`
-  # submodule would make the submodule's unmatched-definition check force the
-  # condition while computing the submodule → infinite recursion. Only the
-  # install (a top-level option) is gated on enable.
-  perUser = userArgs: {
+  # ── Per-scope helpers (used identically by both scopes) ──────────────────
+  # `scopeMy` is the scope's `my` config (config.my for system, userCfg.my for a
+  # user); `scopeTheme` its resolved stylix theme.
+
+  # `finalPackage` for every tool, my-shaped: { <tool> = { finalPackage = …; } }.
+  # UNCONDITIONAL (lazy) on purpose: a disabled tool never forces `build`. Gating
+  # it with `mkIf …enable` *inside* the `my` submodule would make the submodule's
+  # unmatched-definition check force the condition while computing the submodule
+  # → infinite recursion. Only the install (below) is gated on enable.
+  finalPackageDefs = scopeMy: scopeTheme:
+    lib.mapAttrs (toolName: def: {
+      finalPackage = buildTool {
+        inherit def specialArgs;
+        theme = themeFor def scopeMy scopeMy.${toolName} scopeTheme;
+        toolCfg = scopeMy.${toolName};
+      };
+    })
+    defs;
+
+  # The enabled tools' finalPackages in a scope — the list to install.
+  installFor = scopeMy:
+    lib.concatLists (lib.mapAttrsToList (toolName: _def:
+      lib.optional scopeMy.${toolName}.enable scopeMy.${toolName}.finalPackage)
+    defs);
+
+  # Assertions declared by the scope's enabled tools (e.g. nvf's specialArg).
+  assertionsFor = scopeMy:
+    lib.concatLists (lib.mapAttrsToList (toolName: def:
+      lib.optionals (scopeMy.${toolName}.enable && def ? assertions) (def.assertions {
+        inherit specialArgs lib;
+        cfg = scopeMy.${toolName};
+      }))
+    defs);
+
+  # Per-user options default-cascade from the system scope: every non-enable,
+  # non-finalPackage option as a per-leaf mkDefault (deep-merge; user wins).
+  # enable stays its own default (false) so a system-enabled tool doesn't fan a
+  # copy into every user. Read from the *system* `config.my`.
+  cascadeFromSystem =
+    lib.mapAttrs (toolName: _def:
+      recursiveMkDefault (removeAttrs config.my.${toolName} ["enable" "finalPackage"]))
+    defs;
+
+  # The submodule applied to EVERY users.users.<name> (wired as the type of
+  # options.users.users below). This is where the per-user scope lives.
+  perUser = userArgs: let
+    userCfg = userArgs.config;
+  in {
     options.my = lib.mkOption {
       type = myType;
       default = {};
     };
 
-    config = let
-      userCfg = userArgs.config;
-      userTheme = mkTheme {
-        stylixCfg = userCfg.stylix or {};
-        colors = userCfg.stylix.colors or {};
-      };
-    in
-      lib.mkMerge (
-        # cascade the my.stylix master toggle
-        [{my.stylix.enable = lib.mkDefault outerConfig.my.stylix.enable;}]
-        ++ lib.mapAttrsToList (
-          toolName: def: {
-            # cascade every non-enable/finalPackage option as per-leaf mkDefault
-            my.${toolName} =
-              recursiveMkDefault
-              (removeAttrs outerConfig.my.${toolName} ["enable" "finalPackage"])
-              // {
-                finalPackage = buildTool {
-                  inherit def specialArgs;
-                  theme = themeFor def userCfg.my userCfg.my.${toolName} userTheme;
-                  toolCfg = userCfg.my.${toolName};
-                };
-              };
-
-            packages = lib.optional userCfg.my.${toolName}.enable userCfg.my.${toolName}.finalPackage;
-          }
-        )
-        defs
-      );
+    config = lib.mkMerge [
+      {my = cascadeFromSystem;}
+      {my.stylix.enable = lib.mkDefault config.my.stylix.enable;}
+      {my = finalPackageDefs userCfg.my (userTheme userCfg);}
+      {packages = installFor userCfg.my;}
+    ];
   };
 in {
   options.my = lib.mkOption {
@@ -85,34 +111,12 @@ in {
     type = lib.types.attrsOf (lib.types.submodule perUser);
   };
 
-  config = lib.mkMerge (
-    [
-      {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
-      {
-        my =
-          lib.mapAttrs (toolName: def: {
-            finalPackage = buildTool {
-              inherit def specialArgs;
-              theme = themeFor def config.my config.my.${toolName} systemTheme;
-              toolCfg = config.my.${toolName};
-            };
-          })
-          defs;
-      }
-      {
-        environment.systemPackages =
-          lib.concatLists (lib.mapAttrsToList (toolName: _def:
-            lib.optional config.my.${toolName}.enable config.my.${toolName}.finalPackage)
-          defs);
-
-        assertions =
-          lib.concatLists (lib.mapAttrsToList (toolName: def:
-            lib.optionals (config.my.${toolName}.enable && def ? assertions) (def.assertions {
-              inherit specialArgs lib;
-              cfg = config.my.${toolName};
-            }))
-          defs);
-      }
-    ]
-  );
+  config = lib.mkMerge [
+    {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
+    {my = finalPackageDefs config.my systemTheme;}
+    {
+      environment.systemPackages = installFor config.my;
+      assertions = assertionsFor config.my;
+    }
+  ];
 }
