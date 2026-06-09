@@ -18,7 +18,10 @@
     if !(stylixCfg.enable or false)
     then null
     else {
-      inherit colors;
+      # Keep only the base16 palette slots; stylix's colors attr also carries
+      # string metadata (author/scheme/slug) that consumers like nvf's
+      # base16-colors reject.
+      colors = lib.filterAttrs (name: _: lib.match "base0[0-9A-Fa-f]" name != null) colors;
       polarity = stylixCfg.polarity or "dark";
       fonts = stylixCfg.fonts or {};
       opacity = stylixCfg.opacity or {};

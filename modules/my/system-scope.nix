@@ -58,6 +58,11 @@
       }))
     defs);
 
+  # TODO: recursiveMkDefault descends into deferredModule options (e.g.
+  # my.nvf.settings), wrapping their internal `imports` list in mkDefault, which
+  # the inner module system then rejects ("expected a list but found a set").
+  # Tools with a deferredModule option therefore only work at the system scope
+  # today; enable them via `my.<tool>` rather than `users.users.<n>.my.<tool>`.
   cascadeFromSystem =
     lib.mapAttrs (toolName: _def:
       recursiveMkDefault (removeAttrs config.my.${toolName} ["enable" "finalPackage"]))

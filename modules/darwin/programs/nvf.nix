@@ -1,8 +1,12 @@
-# Both macs build nvf from the darwin nvf input. work-macbook layers the FB
-# meta.nvim pluginPath on top (hosts/work-macbook).
-{inputs, ...}: {
+# Both macs build nvf from the darwin nvf input. mkDefault so a host can opt out
+# (e.g. work-macbook, which builds neovim through the my.nvf wrapper instead).
+{
+  inputs,
+  lib,
+  ...
+}: {
   programs.nvf = {
-    enable = true;
+    enable = lib.mkDefault true;
     neovimConfiguration = inputs.nvf-darwin.lib.neovimConfiguration;
   };
 }

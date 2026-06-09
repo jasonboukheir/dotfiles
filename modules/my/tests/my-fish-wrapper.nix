@@ -17,6 +17,7 @@ in
         isNormalUser = true;
         my.fish.enable = true;
         my.fish.interactiveShellInit = "set -gx MY_FISH_SENTINEL ${sentinel}";
+        my.fish.plugins = [pkgs.fishPlugins.plugin-git];
       };
     };
 
@@ -26,10 +27,16 @@ in
       with subtest("the wrapped fish is in the user's environment and runs"):
           machine.succeed("su -l tester -c 'fish --version'")
 
-      with subtest("the wrapper sources the user's baked conf.d (interactiveShellInit)"):
+      with subtest("fish sources the wrapper's interactiveShellInit (via profile vendor_conf.d)"):
           got = machine.succeed(
               "su -l tester -c 'fish -c \"echo $MY_FISH_SENTINEL\"'"
           ).strip()
           assert got == "${sentinel}", f"wrapper did not source baked conf.d: {got!r}"
+
+      with subtest("a fisher-style plugin's abbreviations initialise (plugin-git gss)"):
+          got = machine.succeed(
+              "su -l tester -c 'fish -c \"abbr --query gss; and abbr --show gss\"'"
+          ).strip()
+          assert "git status" in got, f"plugin-git abbr gss not set up: {got!r}"
     '';
   }

@@ -5,10 +5,13 @@ final: _prev: {
     env ? {},
     flags ? [],
     extraPaths ? [],
+    # Extra packages merged into the join alongside pkg (e.g. to contribute
+    # share/ files). pkg stays first so its passthru/meta (shellPath, …) win.
+    extraMerge ? [],
   }:
     final.symlinkJoin {
       name = "${name}-wrapped";
-      paths = [pkg];
+      paths = [pkg] ++ extraMerge;
       nativeBuildInputs = [final.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/${name} \

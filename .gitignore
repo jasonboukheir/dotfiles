@@ -4,3 +4,4 @@ VaulTLS
 .claude/**/*.lock
 nix.conf
 result
+.DS_Store

@@ -3,7 +3,12 @@
     extraInputsFlake = ./.;
     module = {inputs, ...}: {
       flake.darwinConfigurations = let
-        specialArgs = {inherit inputs;};
+        # neovimConfiguration is the specialArg my.nvf builds neovim from; the
+        # native programs.nvf module takes the same builder via programs.nvf.
+        specialArgs = {
+          inherit inputs;
+          neovimConfiguration = inputs.nvf-darwin.lib.neovimConfiguration;
+        };
         sharedModules = [
           inputs.mac-app-util.darwinModules.default
           inputs.home-manager-darwin.darwinModules.home-manager
