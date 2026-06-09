@@ -1,4 +1,3 @@
-# fd program definition. See ./CONTRACT.md.
 {
   lib,
   pkgs,

@@ -1,7 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.fish.{enable} +
-# my.fish.interactiveShellInit -> baked conf.d -> wrapped fish that sources it on
-# interactive start. Sentinel-based, so it never asserts a real default. Part of
-# the my.* foundation.
+# Per-user plumbing: my.fish.interactiveShellInit -> baked conf.d -> wrapped fish.
 {
   pkgs,
   inputs ? null,

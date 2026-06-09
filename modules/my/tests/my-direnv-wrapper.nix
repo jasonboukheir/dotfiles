@@ -1,6 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.direnv.{enable,stdlib} ->
-# baked direnvrc in the DIRENV_CONFIG dir -> wrapped direnv. Sentinel-based, so it
-# never asserts a real default. The my.* port of the OLD native direnv module.
+# Per-user plumbing: my.direnv.{stdlib,settings} -> DIRENV_CONFIG dir -> wrapped direnv.
 {
   pkgs,
   inputs ? null,

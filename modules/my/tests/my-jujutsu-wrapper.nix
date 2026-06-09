@@ -1,6 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.jujutsu.{enable,settings} ->
-# baked JJ_CONFIG -> wrapped jj. Sentinel-based, so it never asserts a real
-# default. Part of the my.* foundation.
+# Per-user plumbing: users.users.<n>.my.jujutsu.settings -> JJ_CONFIG -> jj.
 {
   pkgs,
   inputs ? null,

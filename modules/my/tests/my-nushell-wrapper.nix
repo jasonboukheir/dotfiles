@@ -1,8 +1,5 @@
-# Asserts the per-user plumbing: users.users.<n>.my.nushell.{enable,extraConfig,
-# vivid} -> baked config.nu (--config) + generated env.nu (--env-config) ->
-# wrapped nu, with vivid LS_COLORS, carapace on PATH, and the baked
-# `starship init nu` hook. Sentinel-based, so it never asserts a real default.
-# Part of the my.* foundation.
+# Per-user plumbing: my.nushell config.nu/env.nu -> wrapped nu, with vivid
+# LS_COLORS, carapace on PATH, and the baked `starship init nu` hook.
 {
   pkgs,
   inputs ? null,

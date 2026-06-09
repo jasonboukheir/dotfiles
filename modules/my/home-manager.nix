@@ -1,8 +1,5 @@
-# home-manager entry point for the my.* surface, for the standalone-HM hosts
-# (work-devserver, jasonbk-fedora) which have no system layer. A standalone host
-# is effectively single-user, so it exposes only the system scope (my.<tool>) and
-# installs finalPackage into home.packages. Hosts with a system layer use
-# ./nixos.nix / ./nix-darwin.nix instead.
+# home-manager entry point for my.*, for the standalone-HM hosts (no system
+# layer). Single-user: only the system scope (my.<tool>) -> home.packages.
 {
   config,
   lib,
@@ -33,9 +30,8 @@ in {
     default = {};
   };
 
-  # finalPackage is unconditional (lazy); only the install + assertions are gated
-  # on enable. See the note in ./system-scope.nix on why gating finalPackage
-  # inside the `my` submodule causes infinite recursion.
+  # finalPackage unconditional (lazy); only the install is gated. See the
+  # recursion note in ./system-scope.nix.
   config = lib.mkMerge [
     {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
     {

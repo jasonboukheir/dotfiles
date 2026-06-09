@@ -1,14 +1,3 @@
-# nushell program definition. See ../CONTRACT.md.
-#
-# Bakes config.nu (loaded via --config) and a generated env.nu (via
-# --env-config) into a mkWrapped nu. The env.nu carries the two gotcha hooks the
-# old module had: vivid's $env.LS_COLORS and `starship init nu` written into
-# nushell's vendor autoload dir. carapace rides on the wrapper PATH so the baked
-# config.nu external completer can call it.
-#
-# NOT themeable: the default vivid `ansi` theme renders file types through the
-# terminal's 16 ANSI slots, which stylix themes from base16 elsewhere, so
-# LS_COLORS tracks the scheme without a stylix target here.
 {
   lib,
   pkgs,

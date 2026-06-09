@@ -1,13 +1,5 @@
-# Proves the standalone nvf build plumbing end-to-end through the my.* surface: a
-# sentinel stylix polarity comes out the far side as `vim.o.background` in the
-# wrapped neovim built by my.nvf. "light" is the sentinel (the default is
-# "dark"), so the test exercises the wiring rather than a default. The my.* port
-# of programs/tests/nvf-polarity.nix.
-#
-# nvf builds via the `neovimConfiguration` specialArg (not an option), so the
-# node sets it through `_module.args`. The system-scope `theme` is resolved from
-# the host's `config.stylix`; my.stylix.enable turns the integration on so the
-# polarity reaches the baked nvf body.
+# nvf build plumbing: a stylix polarity comes out as `vim.o.background` in the
+# wrapped neovim built by my.nvf.
 {
   pkgs,
   inputs ? null,
@@ -20,8 +12,7 @@ pkgs.testers.nixosTest {
       ../nixos.nix
     ];
 
-    # Minimal stylix stub so system-scope.nix's `config.stylix` read resolves a
-    # `theme` without pulling the whole stylix module into the test.
+    # stylix stub so system-scope's `config.stylix` read resolves a theme.
     options.stylix = {
       enable = lib.mkOption {
         type = lib.types.bool;
@@ -34,9 +25,8 @@ pkgs.testers.nixosTest {
     };
 
     config = {
-      # nvf builds via the `neovimConfiguration` specialArg (not an option); feed
-      # it as a module arg. Must live under `config` (a module with an explicit
-      # `options`/`config` can't also have bare top-level attributes).
+      # the neovimConfiguration specialArg, fed as a module arg (must be under
+      # `config` since this module also declares `options`).
       _module.args.neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
 
       stylix = {

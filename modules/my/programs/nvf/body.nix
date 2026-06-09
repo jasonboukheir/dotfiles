@@ -1,12 +1,4 @@
-# The nvf module body fed to `lib.neovimConfiguration`. Ported from the old
-# modules/programs/nvf/config.nix `settings` body: the LSP/treesitter/telescope/
-# languages/keymaps block, the meta.nvim block (gated on cfg.meta.enable) and the
-# stylix polarity/base16 wiring (now driven by the my.* `theme` instead of the
-# ambient `config.stylix` + a separate stylix nvf target).
-#
-# `theme` is the framework's resolved theme (or null): `{ colors; polarity; ... }`
-# with base16 `colors` as base00..base0F hex WITHOUT a leading `#`. `cfg` is the
-# resolved my.nvf option set.
+# The nvf module body fed to `lib.neovimConfiguration`.
 {
   cfg,
   theme ? null,
@@ -24,8 +16,7 @@
     then theme.polarity
     else "dark";
 
-  # nvf's base16 theme wants `#`-prefixed hex; the framework hands base16
-  # `colors` without the `#`. Only wire it when the palette is actually present.
+  # nvf's base16 theme wants `#`-prefixed hex; the framework hands it without.
   hasPalette = themed && (theme.colors or {}) != {};
   base16Colors = lib.mapAttrs (_name: hex: "#${hex}") (theme.colors or {});
 in {
@@ -35,9 +26,6 @@ in {
         vim.o.background = "${polarity}"
       '';
     })
-    # base16 palette from `theme.colors` via nvf's own base16 theme support.
-    # Replaces the removed per-app stylix nvf target that used to feed
-    # `programs.nvf.settings` with the scheme (#43/#38).
     (lib.mkIf hasPalette {
       theme = {
         enable = true;

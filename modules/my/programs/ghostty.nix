@@ -1,6 +1,3 @@
-# ghostty program definition. See ./CONTRACT.md. Themeable: bakes the per-scope
-# stylix base16 palette into the wrapper's --config-file, while the user's own
-# `settings` win on conflicts.
 {
   lib,
   pkgs,

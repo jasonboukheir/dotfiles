@@ -1,7 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.gh.{enable,settings} ->
-# GH_EDITOR baked into the wrapped gh, with GH_CONFIG_DIR deliberately left
-# alone so `gh auth login` keeps owning hosts.yml. Sentinel-based, so it never
-# asserts a real default. Part of the my.* foundation.
+# Per-user plumbing: my.gh.settings.editor -> GH_EDITOR; GH_CONFIG_DIR untouched.
 {
   pkgs,
   inputs ? null,

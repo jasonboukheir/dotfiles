@@ -1,6 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.starship.{enable,settings} ->
-# baked STARSHIP_CONFIG -> wrapped starship. Sentinel-based, so it never asserts
-# a real default. Part of the my.* foundation.
+# Per-user plumbing: my.starship.settings -> STARSHIP_CONFIG -> wrapped starship.
 {
   pkgs,
   inputs ? null,

@@ -1,6 +1,5 @@
 # Auto-registers every *.nix here (except this file) as a flake check named after
-# the file. Each is a `{pkgs, inputs ? null}` -> nixosTest. Merged into
-# perSystem.checks by modules/flake/nixos/default.nix.
+# the file. Each is a `{pkgs, inputs ? null}` -> nixosTest.
 {
   pkgs,
   inputs ? null,

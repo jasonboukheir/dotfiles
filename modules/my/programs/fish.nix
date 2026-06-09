@@ -1,10 +1,3 @@
-# Program definition for a per-user WRAPPED fish (my.fish). Replaces the OLD
-# native programs.fish system module: instead of system-wide interactiveShellInit
-# + system-profile vendor loading, this bakes a private config dir (pointed at via
-# $__fish_config_dir) carrying the init hooks and plugin vendor-path wiring, so a
-# single user gets a configured fish on PATH without any system fish module.
-# See ./CONTRACT.md and docs/plans/2026-06-09-my-namespace-wrappers-design-final.md
-# ("fish & direnv").
 {
   lib,
   pkgs,
@@ -46,11 +39,8 @@
     lib,
     ...
   }: let
-    # Prepend each plugin's vendor dirs onto fish's search/source paths. fish has
-    # no env-var equivalent for these, so we emit a conf.d snippet that runs
-    # before user config (conf.d files are sourced in alphabetical order, hence
-    # the 00- prefix). vendor_conf.d files are sourced explicitly since adding to
-    # a search path alone does not auto-source already-loaded conf.d.
+    # vendor_conf.d is sourced explicitly: prepending the search path alone does
+    # not auto-source conf.d fish has already scanned.
     pluginVendorSnippet = let
       forPlugin = p: ''
         if test -d ${p}/share/fish/vendor_completions.d
@@ -79,13 +69,9 @@
       }
     ];
   in
-    # fish reads config.fish/conf.d from $__fish_config_dir (defaults to
-    # $XDG_CONFIG_HOME/fish). Setting it via --set points fish at our baked dir
-    # without clobbering XDG_CONFIG_HOME / XDG_DATA_DIRS. Plugin packages are also
-    # placed on PATH so any binaries they ship resolve.
-    # TODO(#42): conf.d-only config dir (no config.fish); vendor-completion parity
-    # relies on plugins shipping vendor_completions.d. carapace/vivid/full vendor
-    # machinery from the old system module are not yet reproduced here.
+    # TODO(#42): vendor-completion parity relies on plugins shipping
+    # vendor_completions.d; carapace/vivid from the old system module aren't
+    # reproduced here yet.
     pkgs.mkWrapped {
       pkg = cfg.package;
       name = "fish";

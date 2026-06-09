@@ -1,4 +1,3 @@
-# Program definition for starship. See ./CONTRACT.md.
 {
   lib,
   pkgs,

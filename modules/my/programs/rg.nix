@@ -1,4 +1,3 @@
-# rg program definition. See ./CONTRACT.md.
 {
   lib,
   pkgs,

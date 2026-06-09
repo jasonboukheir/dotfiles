@@ -1,25 +1,16 @@
-# Framework for the `my.*` program surface. Turns the program definitions in
-# ./programs into a shared submodule type and the helpers the platform modules
-# (./system-scope.nix, ./home-manager.nix) use to cascade, theme, build, and
-# install. See ./programs/CONTRACT.md.
 {
   lib,
   pkgs,
 }: let
   defs = import ./programs {inherit lib pkgs;};
 
-  # Per-leaf `mkDefault`: recurse an attrset and wrap each leaf, stopping at
-  # derivations (so a `package` option is a leaf, not descended into). This is
-  # what makes the cascade deep-merge nested `settings` while letting the user
-  # win on scalars — a whole-attrset mkDefault would be dropped wholesale.
+  # Per-leaf (stops at derivations) so the cascade deep-merges nested settings
+  # and lets the user win on scalars; a whole-attrset mkDefault is dropped whole.
   recursiveMkDefault =
     lib.mapAttrsRecursiveCond
     (as: !(lib.isDerivation as))
     (_path: value: lib.mkDefault value);
 
-  # Resolve a stylix-ish config + base16 palette into the `theme` passed to a
-  # themeable tool's `build`. Returns null when stylix isn't enabled, so a host
-  # with no stylix is a no-op.
   mkTheme = {
     stylixCfg ? {},
     colors ? {},
@@ -33,8 +24,6 @@
       opacity = stylixCfg.opacity or {};
     };
 
-  # Options for one tool's submodule (under my.<name>). The framework owns
-  # enable/package/finalPackage/stylix.enable; the def supplies the rest.
   toolOptions = def:
     {
       enable = lib.mkEnableOption "${def.name} (my.* wrapped package) in this environment";
@@ -57,8 +46,6 @@
     }
     // (def.options or {});
 
-  # The shared submodule type used for BOTH the system scope (my.*) and the
-  # per-user scope (users.users.<n>.my.*).
   myType = lib.types.submodule {
     options =
       {
@@ -79,14 +66,11 @@
       defs;
   };
 
-  # Whether a tool should be themed in a given scope, and with which theme.
   themeFor = def: scopeMy: toolCfg: theme:
     if (def.themeable or false) && (scopeMy.stylix.enable or false) && (toolCfg.stylix.enable or true)
     then theme
     else null;
 
-  # Invoke a def's build with the resolved cfg (finalPackage stripped to avoid
-  # forcing it) and context.
   buildTool = {
     def,
     toolCfg,

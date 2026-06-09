@@ -1,8 +1,5 @@
-# Asserts the load-bearing cascade + PATH-precedence mechanics:
-#   - system my.jujutsu installs a system-wide wrapper (root sees it),
-#   - a per-user override deep-merges over the system settings (per-leaf
-#     mkDefault: user keeps system keys AND adds/overrides its own),
-#   - the per-user wrapper shadows the system one in that user's PATH.
+# Cascade + PATH precedence: a per-user override deep-merges over system settings
+# and the per-user wrapper shadows the system one in that user's PATH.
 {
   pkgs,
   inputs ? null,
@@ -40,11 +37,8 @@ in
           assert "per-user" in where, f"tester did not get the per-user wrapper: {where!r}"
 
       with subtest("per-user config deep-merges over system (cascade)"):
-          # inherited from the system scope
           assert machine.succeed("su -l tester -c 'jj config get sys-key.value'").strip() == "SYS"
-          # the user's own addition
           assert machine.succeed("su -l tester -c 'jj config get user-key.value'").strip() == "USER"
-          # the user wins on a shared key
           assert machine.succeed("su -l tester -c 'jj config get shared.value'").strip() == "USER"
     '';
   }

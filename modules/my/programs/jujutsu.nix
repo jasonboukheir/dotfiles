@@ -1,4 +1,3 @@
-# Reference program definition. See ./CONTRACT.md.
 {
   lib,
   pkgs,

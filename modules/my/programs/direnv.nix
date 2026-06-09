@@ -1,15 +1,3 @@
-# Program definition for a per-user WRAPPED direnv (my.direnv). Replaces the OLD
-# native programs.direnv system module (programs.direnv + nix-direnv): instead of
-# a system-wide direnvrc and shell hooks, this bakes a private config dir (pointed
-# at via $DIRENV_CONFIG) carrying direnvrc (sourcing nix-direnv) and direnv.toml,
-# so a single user gets a configured direnv on PATH without any system module.
-#
-# direnv resolves its config dir from $DIRENV_CONFIG (overriding the default
-# $XDG_CONFIG_HOME/direnv); that dir holds `direnvrc` and `direnv.toml`. The
-# `direnv hook <shell>` line is NOT baked here — it lives in the shell wrappers
-# (my.fish etc.). direnv must be installed in the same environment as the shell.
-# See ./CONTRACT.md and docs/plans/2026-06-09-my-namespace-wrappers-design-final.md
-# ("fish & direnv").
 {
   lib,
   pkgs,

@@ -1,4 +1,3 @@
-# Program definition for git. See ./CONTRACT.md.
 {
   lib,
   pkgs,

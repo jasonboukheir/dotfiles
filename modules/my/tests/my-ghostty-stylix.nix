@@ -1,17 +1,11 @@
-# Asserts the per-user my.* stylix plumbing for ghostty: an arbitrary base16
-# palette fed through users.users.<n>.stylix.colors lands on the right ghostty
-# keys in the wrapper's baked --config-file, and `ghostty +validate-config`
-# accepts the injected theme. The my.* port of programs/tests/ghostty-stylix.nix.
+# Per-user stylix theming: users.users.<n>.stylix.colors -> ghostty --config-file.
 {
   pkgs,
   inputs ? null,
 }: let
   pkgsWrapped = pkgs.extend (import ../../nixpkgs/overlays/mkWrapped.nix);
 
-  # Arbitrary, mutually distinct base16 ids so each slot is greppable in the
-  # rendered ghostty config. The values are meaningless — the test only proves
-  # that whatever palette goes into stylix comes out the far side as ghostty
-  # colors.
+  # Arbitrary distinct base16 ids so each slot is greppable in the output.
   colors = {
     base00 = "010203";
     base01 = "040506";
@@ -38,9 +32,8 @@ in
       nixpkgs.pkgs = pkgsWrapped;
       imports = [
         ../nixos.nix
-        # only the per-user stylix OPTIONS surface (colors/polarity/…); NOT
-        # ../../stylix/users (whole dir), which pulls in the old hand-written
-        # ghostty stylix target that the framework theming replaces.
+        # the per-user stylix options surface only; not the whole ../../stylix/users
+        # dir, which pulls in the old ghostty target the framework theming replaces.
         ../../stylix/users/options.nix
       ];
 

@@ -1,12 +1,9 @@
-# Auto-collects every program definition (*.nix here, except this file) into an
-# attrset keyed by each def's `name`. Drop a new modules/my/programs/<tool>.nix
-# conforming to ./CONTRACT.md and it's picked up automatically — no edits here.
+# Auto-collects every program def (file or dir) into an attrset keyed by `name`.
+# See ./CONTRACT.md.
 {
   lib,
   pkgs,
 }: let
-  # A def is either a `<tool>.nix` file or a `<tool>/` directory (with its own
-  # default.nix returning the def). CONTRACT.md and this default.nix are skipped.
   isDef = name: type:
     type
     == "directory"

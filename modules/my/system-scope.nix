@@ -1,13 +1,6 @@
-# Shared NixOS + nix-darwin core for the my.* surface. There are two parallel
-# scopes, built from the SAME per-scope helpers below:
-#
-#   - system scope:   my.<tool>            -> environment.systemPackages
-#   - per-user scope: users.users.<n>.my.<tool> -> users.users.<n>.packages,
-#                     with its options cascading from the system scope.
-#
-# Imported by ./nixos.nix and ./nix-darwin.nix. `neovimConfiguration` arrives as
-# a specialArg (set per-configuration in the flake partitions); null when unset,
-# fine until a host enables my.nvf. See ./programs/CONTRACT.md.
+# Shared NixOS + nix-darwin core for my.*: the system scope
+# (my.<tool> -> environment.systemPackages) and the per-user scope
+# (users.users.<n>.my.<tool> -> users.users.<n>.packages, cascading from system).
 {
   config,
   lib,
@@ -20,7 +13,6 @@
 
   specialArgs = {inherit neovimConfiguration;};
 
-  # The system scope's resolved stylix theme (base16 palette + polarity/etc).
   systemStylix =
     if config ? stylix
     then config.stylix
@@ -33,23 +25,16 @@
       else {};
   };
 
-  # A user's resolved stylix theme, from the per-user stylix surface
-  # (modules/stylix/users), which itself defaults from the system stylix.
   userTheme = userCfg:
     mkTheme {
       stylixCfg = userCfg.stylix or {};
       colors = userCfg.stylix.colors or {};
     };
 
-  # ── Per-scope helpers (used identically by both scopes) ──────────────────
-  # `scopeMy` is the scope's `my` config (config.my for system, userCfg.my for a
-  # user); `scopeTheme` its resolved stylix theme.
-
-  # `finalPackage` for every tool, my-shaped: { <tool> = { finalPackage = …; } }.
-  # UNCONDITIONAL (lazy) on purpose: a disabled tool never forces `build`. Gating
-  # it with `mkIf …enable` *inside* the `my` submodule would make the submodule's
-  # unmatched-definition check force the condition while computing the submodule
-  # → infinite recursion. Only the install (below) is gated on enable.
+  # finalPackage is UNCONDITIONAL (lazy, so a disabled tool never forces build);
+  # gating it inside the `my` submodule makes the submodule's unmatched-def check
+  # force the condition while computing the submodule -> infinite recursion. Only
+  # the install (below) is gated on enable.
   finalPackageDefs = scopeMy: scopeTheme:
     lib.mapAttrs (toolName: def: {
       finalPackage = buildTool {
@@ -60,13 +45,11 @@
     })
     defs;
 
-  # The enabled tools' finalPackages in a scope — the list to install.
   installFor = scopeMy:
     lib.concatLists (lib.mapAttrsToList (toolName: _def:
       lib.optional scopeMy.${toolName}.enable scopeMy.${toolName}.finalPackage)
     defs);
 
-  # Assertions declared by the scope's enabled tools (e.g. nvf's specialArg).
   assertionsFor = scopeMy:
     lib.concatLists (lib.mapAttrsToList (toolName: def:
       lib.optionals (scopeMy.${toolName}.enable && def ? assertions) (def.assertions {
@@ -75,17 +58,12 @@
       }))
     defs);
 
-  # Per-user options default-cascade from the system scope: every non-enable,
-  # non-finalPackage option as a per-leaf mkDefault (deep-merge; user wins).
-  # enable stays its own default (false) so a system-enabled tool doesn't fan a
-  # copy into every user. Read from the *system* `config.my`.
   cascadeFromSystem =
     lib.mapAttrs (toolName: _def:
       recursiveMkDefault (removeAttrs config.my.${toolName} ["enable" "finalPackage"]))
     defs;
 
-  # The submodule applied to EVERY users.users.<name> (wired as the type of
-  # options.users.users below). This is where the per-user scope lives.
+  # The submodule type of every users.users.<n>: its config is the per-user scope.
   perUser = userArgs: let
     userCfg = userArgs.config;
   in {

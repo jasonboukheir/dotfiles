@@ -1,13 +1,6 @@
-# nvf program definition. See ../CONTRACT.md.
-#
-# nvf is the special case in the my.* surface: it does NOT wrap one pkgs attr, so
-# it OMITS `defaultPackage` (no `package` option is added). Instead it builds a
-# wrapped neovim from nvf's per-channel `lib.neovimConfiguration` builder, which
-# arrives as the `neovimConfiguration` specialArg (set per-configuration in the
-# flake partitions). The whole nvf config is baked into the derivation.
-#
-# Self-contained: ./body.nix is the ported config body and ./package.nix is the
-# ported standalone builder, so the old modules/programs/nvf can be deleted.
+# nvf omits defaultPackage (no `package` option): it builds neovim from the
+# `neovimConfiguration` specialArg (set per-configuration in the flake partitions)
+# rather than wrapping one pkgs attr.
 {
   lib,
   pkgs,

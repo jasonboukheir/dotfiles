@@ -1,7 +1,4 @@
-# Asserts the per-user plumbing: users.users.<n>.my.git.{enable,settings,lfs} ->
-# baked GIT_CONFIG_GLOBAL -> wrapped git, with git-lfs on the wrapper PATH and
-# its filter baked in. Sentinel-based, so it never asserts a real default. Part
-# of the my.* foundation.
+# Per-user plumbing: my.git.{settings,lfs} -> GIT_CONFIG_GLOBAL + git-lfs on PATH.
 {
   pkgs,
   inputs ? null,
