@@ -7,7 +7,7 @@
   neovimConfiguration ? null,
   ...
 }: let
-  my = import ./lib.nix {inherit lib pkgs;};
+  my = import ./lib {inherit lib pkgs;};
   inherit (my) defs myType mkTheme themeFor buildTool settingsDefaultsFor;
 
   specialArgs = {inherit neovimConfiguration;};

@@ -2,7 +2,7 @@
   lib,
   pkgs,
 }: let
-  defs = import ./programs {inherit lib pkgs;};
+  defs = import ../programs {inherit lib pkgs;};
 
   # Per-leaf (stops at derivations) so injected values deep-merge into nested
   # settings and stronger definitions win on scalars; a whole-attrset

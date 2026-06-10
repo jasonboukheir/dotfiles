@@ -1,7 +1,7 @@
 # Auto-collects every program def (file or dir) into an attrset keyed by `name`.
 # Each def is a pure `{lib, pkgs}: {name; build; …}` function — it never receives
 # the ambient module `config`, which is what keeps `build` pure (see `buildTool`
-# in ../lib.nix for the full set of inputs a build may read).
+# in ../lib for the full set of inputs a build may read).
 {
   lib,
   pkgs,

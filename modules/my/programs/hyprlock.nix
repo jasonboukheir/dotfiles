@@ -2,44 +2,7 @@
   lib,
   pkgs,
 }: let
-  settingsType = with lib.types;
-    nullOr (oneOf [
-      bool
-      int
-      float
-      str
-      path
-      (attrsOf settingsType)
-      (listOf settingsType)
-    ])
-    // {description = "hyprlang value (attrsets are sections; lists of attrsets repeat a section)";};
-
-  # Minimal hyprlang renderer mirroring home-manager's
-  # lib.hm.generators.toHyprconf (not available to pure defs, and nixpkgs lib
-  # ships no hyprlang generator): `$`-prefixed variables first, attrset values
-  # as `name { … }` sections, lists of attrsets as repeated sections, lists of
-  # scalars as duplicate keys.
-  toHyprlang = let
-    render = indent: attrs: let
-      isSection = v: lib.isAttrs v || (lib.isList v && v != [] && lib.all lib.isAttrs v);
-      variables = lib.filterAttrs (n: _: lib.hasPrefix "$" n) attrs;
-      rest = removeAttrs attrs (lib.attrNames variables);
-      sections = lib.filterAttrs (_: isSection) rest;
-      fields = lib.filterAttrs (n: v: !isSection v) rest;
-      mkSection = name: value:
-        if lib.isList value
-        then lib.concatMapStringsSep "\n" (mkSection name) value
-        else "${indent}${name} {\n${render "  ${indent}" value}${indent}}\n";
-      mkFields = lib.generators.toKeyValue {
-        listsAsDuplicateKeys = true;
-        inherit indent;
-      };
-    in
-      mkFields variables
-      + lib.concatStringsSep "\n" (lib.mapAttrsToList mkSection sections)
-      + mkFields fields;
-  in
-    render "";
+  inherit (import ../lib/hyprland {inherit lib;}) toHyprlang settingsType;
 
   # The same slots stylix's hyprlock target paints (modules/hyprlock/hm.nix at
   # the pinned stylix rev). Its background.path wallpaper is not replicated:
