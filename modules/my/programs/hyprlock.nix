@@ -5,14 +5,14 @@
   inherit (import ../lib/hyprland {inherit lib;}) toHyprlang settingsType;
 
   # The same slots stylix's hyprlock target paints (modules/hyprlock/hm.nix at
-  # the pinned stylix rev). Its background.path wallpaper is not replicated:
-  # the my.* theme payload carries no image.
-  # TODO: wire stylix.image into the theme payload so the lock screen gets the
-  # wallpaper back. https://github.com/jasonboukheir/dotfiles/issues/48
+  # the pinned stylix rev): the base16 palette, plus the wallpaper as
+  # background.path when the theme payload carries an image.
   themedSettings = theme: let
     c = theme.colors;
   in {
-    background.color = "rgb(${c.base00})";
+    background =
+      {color = "rgb(${c.base00})";}
+      // lib.optionalAttrs ((theme.image or null) != null) {path = theme.image;};
     input-field = {
       outer_color = "rgb(${c.base03})";
       inner_color = "rgb(${c.base00})";

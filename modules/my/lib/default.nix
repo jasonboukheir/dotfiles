@@ -33,6 +33,7 @@
       polarity = stylixCfg.polarity or "dark";
       fonts = stylixCfg.fonts or {};
       opacity = stylixCfg.opacity or {};
+      image = stylixCfg.image or null;
     };
 
   toolOptions = def:

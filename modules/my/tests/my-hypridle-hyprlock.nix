@@ -28,6 +28,10 @@
   };
 
   explicitFontColor = "rgb(fedcba)";
+
+  # Content is irrelevant — hyprlock only ever sees the path; the test
+  # asserts the theme payload routes it into background.path.
+  wallpaper = pkgs.writeText "test-wallpaper.png" "stub";
 in
   pkgs.testers.nixosTest {
     name = "my-hypridle-hyprlock";
@@ -61,6 +65,7 @@ in
         stylix = {
           enable = true;
           inherit colors;
+          image = wallpaper;
         };
         my.stylix.enable = true;
         my.hyprlock = {
@@ -109,6 +114,9 @@ in
           machine.succeed(f"grep -aq 'outer_color=rgb(${colors.base03})' {lock_conf}")
           machine.succeed(f"grep -aq 'font_color=${explicitFontColor}' {lock_conf}")
           machine.fail(f"grep -aq 'font_color=rgb(${colors.base05})' {lock_conf}")
+
+      with subtest("the stylix wallpaper lands as the lock screen background"):
+          machine.succeed(f"grep -aq 'path=${wallpaper}' {lock_conf}")
 
       with subtest("the wrapped hyprlock runs (config-parse level; no session/PAM headless)"):
           machine.succeed("su -l tester -c 'hyprlock --help'")
