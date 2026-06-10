@@ -7,6 +7,20 @@
 in {
   options.omarchy = {
     enable = lib.mkEnableOption "Omarchy-esque Hyprland config";
+    sessionTarget = lib.mkOption {
+      type = lib.types.str;
+      default = "hyprland-session.target";
+      description = ''
+        systemd user target that gates every desktop-session service in the
+        omarchy stack (waybar, mako, hypridle, …). Defaults to
+        hyprland-session.target, which Hyprland starts only after the wayland
+        socket is published and `dbus-update-activation-environment --systemd`
+        has run, so services see WAYLAND_DISPLAY on their first attempt
+        (issue #32). The planned UWSM flip (issue #40) retargets this to
+        graphical-session.target, whose activation UWSM gates the same way via
+        wayland-session-waitenv.service.
+      '';
+    };
     monitor = {
       mode = lib.mkOption {
         type = lib.types.str;
