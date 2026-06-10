@@ -4,12 +4,20 @@
 }: let
   defs = import ./programs {inherit lib pkgs;};
 
-  # Per-leaf (stops at derivations) so the cascade deep-merges nested settings
-  # and lets the user win on scalars; a whole-attrset mkDefault is dropped whole.
-  recursiveMkDefault =
+  # Per-leaf (stops at derivations) so injected values deep-merge into nested
+  # settings and stronger definitions win on scalars; a whole-attrset
+  # mkOverride would be dropped whole.
+  recursiveMkOverride = priority:
     lib.mapAttrsRecursiveCond
     (as: !(lib.isDerivation as))
-    (_path: value: lib.mkDefault value);
+    (_path: value: lib.mkOverride priority value);
+
+  recursiveMkDefault = recursiveMkOverride 1000;
+
+  # One notch below the system→user cascade's mkDefault (1000) and above the
+  # option default (1500), so both explicit settings and the cascade beat the
+  # framework-injected settingsDefaults instead of tying with them.
+  settingsDefaultsPriority = 1100;
 
   mkTheme = {
     stylixCfg ? {},
@@ -94,10 +102,10 @@
 
   # Framework-injected option defaults: each def's `settingsDefaults` maps the
   # trimmed per-scope view (theme/identity/editor — never full config) to that
-  # tool's settings schema, and the result is fed in as `recursiveMkDefault` so
-  # the user's own `my.<tool>.settings` (and the system→user cascade) win through
-  # the ordinary module-system priority merge. Defs without the hook contribute
-  # nothing.
+  # tool's settings schema, and the result is fed in at settingsDefaultsPriority
+  # so the user's own `my.<tool>.settings` and the system→user cascade win
+  # through the ordinary module-system priority merge. Defs without the hook
+  # contribute nothing.
   settingsDefaultsFor = {
     scopeMy,
     scopeTheme,
@@ -107,7 +115,7 @@
     lib.mapAttrs (
       toolName: def:
         lib.optionalAttrs (def ? settingsDefaults) {
-          settings = recursiveMkDefault (def.settingsDefaults {
+          settings = recursiveMkOverride settingsDefaultsPriority (def.settingsDefaults {
             theme = themeFor def scopeMy scopeMy.${toolName} scopeTheme;
             inherit identity editor;
           });
@@ -115,5 +123,5 @@
     )
     defs;
 in {
-  inherit defs myType recursiveMkDefault mkTheme themeFor buildTool settingsDefaultsFor;
+  inherit defs myType recursiveMkDefault recursiveMkOverride mkTheme themeFor buildTool settingsDefaultsFor;
 }

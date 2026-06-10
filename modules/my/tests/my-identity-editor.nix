@@ -4,7 +4,8 @@
   pkgs,
   inputs ? null,
 }: let
-  editor = pkgs.writeShellScriptBin "fake-editor" "exit 0";
+  # Named nvim so the vim-family merge/diff tool mapping in the defs fires.
+  editor = pkgs.writeShellScriptBin "nvim" "exit 0";
   pkgsWrapped = pkgs.extend (import ../../nixpkgs/overlays/mkWrapped.nix);
 in
   pkgs.testers.nixosTest {
@@ -25,6 +26,11 @@ in
         my.gh.enable = true;
         my.jujutsu.enable = true;
       };
+
+      users.users.blank = {
+        isNormalUser = true;
+        my.git.enable = true;
+      };
     };
 
     testScript = ''
@@ -37,22 +43,37 @@ in
               ).strip()
               assert got == want, f"git {key} not defaulted from identity: {got!r}"
 
-      with subtest("editor defaults git's editor fields to the package's exe"):
-          for key in ["core.editor", "merge.tool", "diff.tool"]:
+      with subtest("editor defaults git's editor and vim-family merge/diff tools"):
+          for key, want in [
+              ("core.editor", "${pkgs.lib.getExe editor}"),
+              ("merge.tool", "nvimdiff"),
+              ("mergetool.nvimdiff.path", "${pkgs.lib.getExe editor}"),
+              ("diff.tool", "nvimdiff"),
+              ("difftool.nvimdiff.path", "${pkgs.lib.getExe editor}"),
+          ]:
               got = machine.succeed(
                   f"su -l tester -c 'git config --global --get {key}'"
               ).strip()
-              assert got == "${pkgs.lib.getExe editor}", f"git {key} not defaulted from editor: {got!r}"
+              assert got == want, f"git {key} not defaulted from editor: {got!r}"
+
+      with subtest("a user without identity gets no user.* baked into git"):
+          machine.fail("su -l blank -c 'git config --global --get user.name'")
+          listed = machine.succeed("su -l blank -c 'git config --global --list'")
+          assert "user." not in listed, f"unexpected user.* in blank's gitconfig: {listed!r}"
 
       with subtest("identity defaults jj's user.{name,email}"):
           for key, want in [("user.name", "Test Person"), ("user.email", "test@example.com")]:
               got = machine.succeed(f"su -l tester -c 'jj config get {key}'").strip()
               assert got == want, f"jj {key} not defaulted from identity: {got!r}"
 
-      with subtest("editor defaults jj's ui.{editor,merge-editor}"):
-          for key in ["ui.editor", "ui.merge-editor"]:
+      with subtest("editor defaults jj's editor and vim-family merge tool"):
+          for key, want in [
+              ("ui.editor", "${pkgs.lib.getExe editor}"),
+              ("ui.merge-editor", "vimdiff"),
+              ("merge-tools.vimdiff.program", "${pkgs.lib.getExe editor}"),
+          ]:
               got = machine.succeed(f"su -l tester -c 'jj config get {key}'").strip()
-              assert got == "${pkgs.lib.getExe editor}", f"jj {key} not defaulted from editor: {got!r}"
+              assert got == want, f"jj {key} not defaulted from editor: {got!r}"
 
       with subtest("editor defaults gh's baked GH_EDITOR"):
           gh = machine.succeed("su -l tester -c 'readlink -f $(command -v gh)'").strip()

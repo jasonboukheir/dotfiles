@@ -35,6 +35,10 @@ in {
   config = lib.mkMerge [
     {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
     {
+      # TODO: the identity/editor knobs (./users/{identity,editor}.nix) only
+      # exist on the system scopes — they hang off users.users.<n>, which
+      # standalone HM doesn't have. Until HM-scope equivalents are added,
+      # git/jj here fall back to unset user.{name,email} and editor fields.
       my = settingsDefaultsFor {
         scopeMy = config.my;
         scopeTheme = theme;

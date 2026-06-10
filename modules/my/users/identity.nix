@@ -1,6 +1,6 @@
 # Per-user VCS identity (name/email), a module-merge onto the users.users.<name>
 # submodule. The my.{git,jujutsu} program defs map it into their user.{name,email}
-# settings via `settingsDefaults` (injected as mkDefault), so the same person
+# settings via `settingsDefaults` (injected below mkDefault), so the same person
 # isn't spelled out once per tool.
 {lib, ...}: {
   options.users.users = lib.mkOption {

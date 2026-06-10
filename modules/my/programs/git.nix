@@ -36,25 +36,38 @@ in {
     };
   };
 
-  # Mapped from the per-user identity/editor into git's schema; injected as
-  # mkDefault so the user's own settings win.
+  # Mapped from the per-user identity/editor into git's schema; injected below
+  # the cascade's mkDefault (see settingsDefaultsFor) so explicit settings and
+  # the system→user cascade win.
   settingsDefaults = {
     identity ? null,
     editor ? null,
     ...
   }:
-    (lib.optionalAttrs (identity != null) {
+    (lib.optionalAttrs (identity != null && (identity.name != null || identity.email != null)) {
       user =
         (lib.optionalAttrs (identity.name != null) {name = identity.name;})
         // (lib.optionalAttrs (identity.email != null) {email = identity.email;});
     })
     // (lib.optionalAttrs (editor != null) (let
       exe = lib.getExe editor;
-    in {
-      core.editor = exe;
-      merge.tool = exe;
-      diff.tool = exe;
-    }));
+      # merge.tool/diff.tool take a *tool name* git resolves against its
+      # builtin table, not a command — so only the vim family maps onto a
+      # builtin tool, pointed at the editor via {merge,diff}tool.<name>.path.
+      # Program name from metadata, not baseNameOf exe: a store-path basename
+      # carries string context, which attribute names reject.
+      vimFamilyTool = {
+        nvim = "nvimdiff";
+        vim = "vimdiff";
+      }.${editor.meta.mainProgram or (lib.getName editor)} or null;
+    in
+      {core.editor = exe;}
+      // (lib.optionalAttrs (vimFamilyTool != null) {
+        merge.tool = vimFamilyTool;
+        mergetool.${vimFamilyTool}.path = exe;
+        diff.tool = vimFamilyTool;
+        difftool.${vimFamilyTool}.path = exe;
+      })));
 
   build = {
     cfg,

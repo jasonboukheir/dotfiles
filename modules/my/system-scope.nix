@@ -94,8 +94,9 @@
 in {
   # Per-user identity/editor knobs. Each program def maps them (and the resolved
   # stylix theme) into its own settings schema via `settingsDefaults`, which the
-  # framework folds in as mkDefault (see settingsDefaultsFor) — so the consuming
-  # logic stays in the pure program defs and the user's settings still win.
+  # framework folds in below mkDefault (see settingsDefaultsFor) — so the
+  # consuming logic stays in the pure program defs while the user's settings and
+  # the system→user cascade still win.
   imports = [
     ./users/identity.nix
     ./users/editor.nix

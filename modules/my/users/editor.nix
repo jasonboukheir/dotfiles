@@ -1,7 +1,7 @@
 # Per-user default editor, a module-merge onto the users.users.<name> submodule.
 # The my.{git,gh,jujutsu} program defs point their editor fields at `lib.getExe`
-# of it via `settingsDefaults` (injected as mkDefault), pinning an absolute store
-# path instead of leaning on whatever `nvim` resolves to on PATH.
+# of it via `settingsDefaults` (injected below mkDefault), pinning an absolute
+# store path instead of leaning on whatever `nvim` resolves to on PATH.
 {lib, ...}: {
   options.users.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
