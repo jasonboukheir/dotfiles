@@ -20,6 +20,15 @@ in {
     };
   };
 
+  # Mapped from the per-user editor into gh's `editor` setting; injected below
+  # the cascade's mkDefault (see settingsDefaultsFor) so an explicit
+  # settings.editor and the system→user cascade win.
+  settingsDefaults = {
+    editor ? null,
+    ...
+  }:
+    lib.optionalAttrs (editor != null) {editor = lib.getExe editor;};
+
   build = {
     cfg,
     pkgs,

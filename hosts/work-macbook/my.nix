@@ -10,9 +10,6 @@
   pkgs,
   ...
 }: let
-  authorName = "Jason Elie Bou Kheir";
-  authorEmail = "5115126+jasonboukheir@users.noreply.github.com";
-
   # Resolved 1Password ssh-signing values the old _1password home-manager module
   # injected into programs.git/jujutsu; my.* has no such auto-injection.
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
@@ -35,20 +32,24 @@
 
   fishWrapper = config.users.users.jasonbk.my.fish.finalPackage;
 in {
+  # Consumed by the my.{git,gh,jujutsu} wiring (modules/my/) to default each
+  # tool's user.{name,email} and editor fields. editor pins the system nvf-built
+  # neovim by store path rather than relying on `nvim` off PATH.
+  users.users.jasonbk = {
+    identity = {
+      name = "Jason Elie Bou Kheir";
+      email = "5115126+jasonboukheir@users.noreply.github.com";
+    };
+    editor = config.my.nvf.finalPackage;
+  };
+
   users.users.jasonbk.my = {
     git = {
       enable = true;
       ignores = [".DS_Store"];
       settings = {
-        user = {
-          name = authorName;
-          email = authorEmail;
-          signingKey = signingKey;
-        };
+        user.signingKey = signingKey;
         init.defaultBranch = "main";
-        core.editor = "nvim";
-        merge.tool = "nvim";
-        diff.tool = "nvim";
         gpg.format = "ssh";
         commit.gpgsign = true;
         "gpg \"ssh\"".program = opSshSign;
@@ -58,13 +59,7 @@ in {
     jujutsu = {
       enable = true;
       settings = {
-        user = {
-          name = authorName;
-          email = authorEmail;
-        };
         ui = {
-          editor = "nvim";
-          merge-editor = "nvim";
           pager = "less -FRX";
           default-command = "log";
         };

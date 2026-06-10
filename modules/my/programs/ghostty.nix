@@ -74,23 +74,25 @@ in {
     };
   };
 
+  # The base16 palette mapped into ghostty's color keys; injected as mkDefault so
+  # the user's own `settings` win on conflicts.
+  settingsDefaults = {
+    theme ? null,
+    ...
+  }:
+    lib.optionalAttrs (theme != null) (themedSettings theme);
+
   build = {
     cfg,
     pkgs,
     lib,
-    theme ? null,
     ...
   }: let
-    finalSettings =
-      if theme == null
-      then cfg.settings
-      else lib.recursiveUpdate (themedSettings theme) cfg.settings;
-
-    configFile = pkgs.writeText "ghostty-config" (renderConfig finalSettings);
+    configFile = pkgs.writeText "ghostty-config" (renderConfig cfg.settings);
   in
     pkgs.mkWrapped {
       pkg = cfg.package;
       name = "ghostty";
-      flags = lib.optional (finalSettings != {}) "--config-file=${configFile}";
+      flags = lib.optional (cfg.settings != {}) "--config-file=${configFile}";
     };
 }
