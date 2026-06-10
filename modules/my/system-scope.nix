@@ -85,6 +85,17 @@
     ];
   };
 in {
+  # Per-user identity/editor knobs and the wiring that defaults each tool's
+  # settings from them. Kept out of programs/ (pure build defs) since this reads
+  # sibling user config, which the program-definition contract forbids in build.
+  imports = [
+    ./users/identity.nix
+    ./users/editor.nix
+    ./git.nix
+    ./gh.nix
+    ./jujutsu.nix
+  ];
+
   options.my = lib.mkOption {
     type = myType;
     default = {};

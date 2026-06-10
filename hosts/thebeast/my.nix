@@ -9,9 +9,6 @@
   pkgs,
   ...
 }: let
-  authorName = "Jason Elie Bou Kheir";
-  authorEmail = "5115126+jasonboukheir@users.noreply.github.com";
-
   # ssh signing flattened from the old per-user git/jujutsu wrappers; op-ssh-sign
   # ships with the 1Password GUI (linux-only path).
   # TODO: fold back into an ssh/1Password module once it lands.
@@ -19,20 +16,24 @@
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
   opSshSign = lib.getExe' pkgs._1password-gui "op-ssh-sign";
 in {
+  # Consumed by the my.{git,gh,jujutsu} wiring (modules/my/) to default each
+  # tool's user.{name,email} and editor fields. editor pins the system nvf-built
+  # neovim by store path rather than relying on `nvim` off PATH.
+  users.users.jasonbk = {
+    identity = {
+      name = "Jason Elie Bou Kheir";
+      email = "5115126+jasonboukheir@users.noreply.github.com";
+    };
+    editor = config.my.nvf.finalPackage;
+  };
+
   users.users.jasonbk.my = {
     git = {
       enable = true;
       ignores = [".DS_Store"];
       settings = {
-        user = {
-          name = authorName;
-          email = authorEmail;
-          signingKey = signingKey;
-        };
+        user.signingKey = signingKey;
         init.defaultBranch = "main";
-        core.editor = "nvim";
-        merge.tool = "nvim";
-        diff.tool = "nvim";
         gpg.format = "ssh";
         commit.gpgsign = true;
         "gpg \"ssh\"".program = opSshSign;
@@ -42,13 +43,7 @@ in {
     jujutsu = {
       enable = true;
       settings = {
-        user = {
-          name = authorName;
-          email = authorEmail;
-        };
         ui = {
-          editor = "nvim";
-          merge-editor = "nvim";
           pager = "less -FRX";
           default-command = "log";
         };
@@ -75,10 +70,7 @@ in {
       };
     };
 
-    gh = {
-      enable = true;
-      settings.editor = "nvim";
-    };
+    gh.enable = true;
 
     nushell = {
       enable = true;
