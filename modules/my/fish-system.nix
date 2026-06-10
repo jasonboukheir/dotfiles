@@ -62,14 +62,14 @@ in {
       ];
     })
 
-    # On darwin, native programs.fish (turned on by modules/programs/fish.nix when
-    # the SYSTEM-scope my.fish is off) would double-write the preinit for a
-    # per-user-only wrapper, so force it off and let my.fish own /etc/fish (#69).
-    # `isDarwin` is evaluated first so this whole definition short-circuits away on
-    # NixOS: there, gating programs.fish.enable on the users.users scan inside
-    # `allFish` forms an infinite recursion (man-db's completion cache, which
-    # contributes to users.users, reads programs.fish.enable). NixOS instead keeps
-    # the existing system-scope yield in modules/programs/fish.nix.
+    # On darwin, a host-enabled native programs.fish would double-write the
+    # preinit for a per-user-only wrapper, so force it off and let my.fish own
+    # /etc/fish (#69). `isDarwin` is evaluated first so this whole definition
+    # short-circuits away on NixOS: there, gating programs.fish.enable on the
+    # users.users scan inside `allFish` forms an infinite recursion (man-db's
+    # completion cache, which contributes to users.users, reads
+    # programs.fish.enable). On NixOS nothing enables native fish, so no
+    # override is needed.
     (mkIf (isDarwin && allFish != []) {
       programs.fish.enable = mkForce false;
     })

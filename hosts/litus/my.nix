@@ -1,21 +1,11 @@
-# Dogfoods the my.* wrapped-package surface on thebeast. Per-user tools live on
-# jasonbk's profile; fish and nvf build at the system scope (fish becomes the
-# system fish wrapper, nvf a system-wide neovim). Each tool below replaces an
-# old per-user-wrapper / home-manager / native-system module, disabled in the
-# same place so each tool resolves to exactly one package.
+# my.* wrapped packages on litus. Headless server: no ghostty, and no
+# 1Password ssh-signing (op-ssh-sign needs the GUI).
 {
   config,
   lib,
   pkgs,
   ...
-}: let
-  # ssh signing flattened from the old per-user git/jujutsu wrappers; op-ssh-sign
-  # ships with the 1Password GUI (linux-only path).
-  # TODO: fold back into an ssh/1Password module once it lands.
-  # https://github.com/jasonboukheir/dotfiles/issues/46
-  signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
-  opSshSign = lib.getExe' pkgs._1password-gui "op-ssh-sign";
-in {
+}: {
   # Consumed by the my.{git,gh,jujutsu} wiring (modules/my/) to default each
   # tool's user.{name,email} and editor fields. editor pins the system nvf-built
   # neovim by store path rather than relying on `nvim` off PATH.
@@ -31,13 +21,7 @@ in {
     git = {
       enable = true;
       ignores = [".DS_Store"];
-      settings = {
-        user.signingKey = signingKey;
-        init.defaultBranch = "main";
-        gpg.format = "ssh";
-        commit.gpgsign = true;
-        "gpg \"ssh\"".program = opSshSign;
-      };
+      settings.init.defaultBranch = "main";
     };
 
     jujutsu = {
@@ -50,11 +34,6 @@ in {
         git = {
           colocate = true;
           private-commits = "description(glob:'wip:*')";
-        };
-        signing = {
-          behavior = "own";
-          backend = "ssh";
-          key = signingKey;
         };
       };
     };
@@ -80,29 +59,11 @@ in {
     };
 
     # nix-direnv is baked into the wrapper's direnvrc; the fish hook is emitted
-    # by my.fish.interactiveShellInit below (the native programs.direnv that used
-    # to emit it is disabled here).
+    # by my.fish.interactiveShellInit below.
     direnv.enable = true;
 
     rg.enable = true;
     fd.enable = true;
-
-    # Linux ghostty is exec-launched, so the baked --config-file wrapper reaches
-    # it (unlike a darwin GUI .app); my.ghostty's stylix target re-bakes the
-    # base16 palette HM-stylix used to emit.
-    ghostty.enable = true;
-
-    # package defaults to master's claude-code (the claude-code-master overlay);
-    # theme comes from system stylix polarity. ~/.claude + CLAUDE.md stay
-    # writable runtime state (the seed-and-accept carve-out, out of my.*).
-    claude-code = {
-      enable = true;
-      settings = {
-        autoMemoryEnabled = false;
-        effortLevel = "high";
-        permissions.defaultMode = "auto";
-      };
-    };
   };
 
   # fish + nvf build at the system scope. fish becomes the system fish wrapper
@@ -146,5 +107,4 @@ in {
     fish.enable = lib.mkForce false;
     direnv.enable = lib.mkForce false;
   };
-
 }

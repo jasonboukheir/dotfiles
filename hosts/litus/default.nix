@@ -5,7 +5,7 @@
     ./services
     ./configuration.nix
     ./hardware-configuration.nix
-    ./nvf.nix
+    ./my.nix
     ./../../modules
     ./../../modules/nixos
     # The homelab settings layer only: domain, ports, and the service

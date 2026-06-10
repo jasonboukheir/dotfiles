@@ -1,15 +1,11 @@
 {...}: {
-  # ghostty is the first per-user stylix target; more targets re-baking what
-  # HM-stylix used to emit land with their module wrappers:
-  #   claude-code (polarity -> dark-ansi/light-ansi):
-  #     https://github.com/jasonboukheir/dotfiles/issues/45
-  #   nvf (base16 scheme):
-  #     https://github.com/jasonboukheir/dotfiles/issues/43
-  #   btop / waybar / mako / wofi:
-  #     https://github.com/jasonboukheir/dotfiles/issues/48
-  # Tracked under https://github.com/jasonboukheir/dotfiles/issues/38
+  # Per-user stylix knobs (users.users.<name>.stylix) consumed by the my.*
+  # theming cascade (modules/my/system-scope.nix). Per-app targets re-baking
+  # what HM-stylix used to emit live with the my.* program defs; remaining
+  # desktop targets (btop / waybar / mako / wofi) are tracked under
+  # https://github.com/jasonboukheir/dotfiles/issues/48 and
+  # https://github.com/jasonboukheir/dotfiles/issues/38
   imports = [
     ./options.nix
-    ./ghostty.nix
   ];
 }

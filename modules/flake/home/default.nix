@@ -11,13 +11,12 @@
         config.allowUnfree = true;
       };
       commonModules = [
-        ../../../modules/programs/nvf/home-manager.nix
         ../../../modules/my/home-manager.nix
         {
-          programs.nvf = {
-            enable = true;
-            neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
-          };
+          # neovimConfiguration is the specialArg my.nvf builds neovim from;
+          # pin the nvf input whose nixpkgs matches these hosts' channel.
+          _module.args.neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
+          my.nvf.enable = true;
         }
         inputs.stylix-nixos.homeModules.stylix
       ];

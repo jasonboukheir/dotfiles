@@ -23,6 +23,7 @@
         brutus = inputs.nixos.lib.nixosSystem {
           specialArgs = {
             inherit inputs;
+            neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
             pkgs-unstable = import inputs.nixpkgs-unstable {
               localSystem = "x86_64-linux";
               config.allowUnfree = true;
@@ -39,7 +40,10 @@
         };
 
         litus = inputs.nixos.lib.nixosSystem {
-          specialArgs = {inherit inputs;};
+          specialArgs = {
+            inherit inputs;
+            neovimConfiguration = inputs.nvf-nixos.lib.neovimConfiguration;
+          };
           modules = [
             ../../../hosts/litus
             inputs.agenix.nixosModules.default
@@ -69,8 +73,7 @@
           };
         in {
           checks =
-            (import ../../../modules/programs/tests {inherit pkgs inputs;})
-            // (import ../../../modules/my/tests {inherit pkgs inputs;})
+            (import ../../../modules/my/tests {inherit pkgs inputs;})
             // {
               thebeast-session = import ../../../hosts/thebeast/tests/session.nix {
                 inherit pkgs inputs;
