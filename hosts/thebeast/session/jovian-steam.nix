@@ -5,15 +5,15 @@
   ...
 }: let
   cfg = config.gaming;
-  # NixOS's `display-manager.service` is an alias, not the canonical
-  # unit — the actual unit is `sddm.service` or `plasmalogin.service`
-  # depending on which DM the host opts into in hosts/thebeast/options.nix.
-  # systemd.services overrides keyed by alias get clobbered by the
-  # alias-generation pass, so we have to target the real name.
+  # The canonical DM unit differs per DM: plasma-login-manager ships a
+  # real `plasmalogin.service` and only aliases `display-manager.service`
+  # (systemd.services overrides keyed by an alias get clobbered by the
+  # alias-generation pass), while NixOS's sddm path skips the upstream
+  # unit entirely and execs sddm from `display-manager.service` itself.
   dmUnit =
     if config.thebeast.displayManager == "plasma-login-manager"
     then "plasmalogin"
-    else "sddm";
+    else "display-manager";
 in {
   options.gaming.enable =
     lib.mkEnableOption "Jovian + Steam + plasma desktop session for the gamer user";
@@ -46,13 +46,14 @@ in {
       wayvr
     ];
 
-    # Jovian's autoStart wiring sets `autoLogin.relogin = true` via plain
-    # assignment so SDDM relogins gamer on logout, never showing a greeter.
-    # mkForce false: on logout (Switch User → Logout from inside gamer's
-    # plasma, or `loginctl terminate-session` from gamescope) we want
-    # the greeter back so jasonbk can pick the Hyprland session.
-    # Tradeoff: a Switch-to-Desktop round-trip costs one password prompt.
-    services.displayManager.sddm.autoLogin.relogin = lib.mkForce false;
+    # SDDM only re-runs autologin after a session exit when Relogin=true
+    # (Display.cpp displayServerStarted: `daemonApp->first || m_relogin`);
+    # jovian sets it true via plain assignment for SteamOS parity.
+    # gaming.exitToGreeter (default on) deliberately forces it off — see
+    # the option description for the intended exit-Steam-to-dev-session
+    # flow and tests/steamos-autologin.nix for both behaviours.
+    services.displayManager.sddm.autoLogin.relogin =
+      lib.mkIf cfg.exitToGreeter (lib.mkForce false);
 
     # Steam's network stack (login, content servers, Remote Play, friends
     # service) initialises during user-session startup. The display

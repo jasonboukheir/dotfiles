@@ -4,7 +4,16 @@
   ...
 }: let
   dmCfg = config.thebeast;
-  usePlm = dmCfg.displayManager == "plasma-login-manager";
+  # Both DMs run their greeter as a dedicated system user and read the
+  # KDE color scheme from that user's ~/.config/kdeglobals — SDDM's
+  # breeze greeter from /var/lib/sddm (what sddm-kcm's "Apply Plasma
+  # Settings" writes imperatively), plasma-login-manager's from
+  # /var/lib/plasmalogin.
+  greeterUser =
+    if dmCfg.displayManager == "plasma-login-manager"
+    then "plasmalogin"
+    else "sddm";
+  greeterHome = "/var/lib/${greeterUser}";
 
   gamerUser = config.gaming.user;
   # The tests/test-overrides.nix path clears home-manager.users entirely;
@@ -24,40 +33,40 @@
     then null
     else lib.findFirst (p: lib.hasInfix "stylix-kde-config" (toString p)) null gamerHm.xdg.systemDirs.config;
 
-  ready = usePlm && themePackage != null && configPath != null;
+  ready = themePackage != null && configPath != null;
 in {
   config = lib.mkIf ready {
     # System-wide install puts the lookandfeel, color-scheme, and
-    # wallpaper under /run/current-system/sw/share/, where the greeter's
-    # plasma session can resolve them via kpackage/XDG.
+    # wallpaper under /run/current-system/sw/share/, where the greeter
+    # can resolve them via kpackage/XDG.
     environment.systemPackages = [themePackage];
 
-    # Seed the plasmalogin greeter user's plasma config. The
-    # LookAndFeelPackage=stylix entry in kdeglobals is what the KDE KCM's
-    # "Apply Plasma Settings" button writes here imperatively — doing it
-    # via tmpfiles keeps it declarative and lets new stylix outputs roll
-    # through with `nixos-rebuild switch` instead of needing the GUI.
+    # Seed the greeter user's plasma config. The LookAndFeelPackage=stylix
+    # entry in kdeglobals is what the KDE KCM's "Apply Plasma Settings"
+    # button writes here imperatively — doing it via tmpfiles keeps it
+    # declarative and lets new stylix outputs roll through with
+    # `nixos-rebuild switch` instead of needing the GUI.
     # L+ replaces the symlink on each rebuild so closure bumps land.
-    systemd.tmpfiles.settings."10-plasmalogin-stylix" = {
-      "/var/lib/plasmalogin".d = {
-        user = "plasmalogin";
-        group = "plasmalogin";
+    systemd.tmpfiles.settings."10-login-greeter-stylix" = {
+      ${greeterHome}.d = {
+        user = greeterUser;
+        group = greeterUser;
         mode = "0750";
       };
-      "/var/lib/plasmalogin/.config".d = {
-        user = "plasmalogin";
-        group = "plasmalogin";
+      "${greeterHome}/.config".d = {
+        user = greeterUser;
+        group = greeterUser;
         mode = "0750";
       };
-      "/var/lib/plasmalogin/.config/kdeglobals"."L+" = {
+      "${greeterHome}/.config/kdeglobals"."L+" = {
         argument = "${configPath}/kdeglobals";
-        user = "plasmalogin";
-        group = "plasmalogin";
+        user = greeterUser;
+        group = greeterUser;
       };
-      "/var/lib/plasmalogin/.config/kcminputrc"."L+" = {
+      "${greeterHome}/.config/kcminputrc"."L+" = {
         argument = "${configPath}/kcminputrc";
-        user = "plasmalogin";
-        group = "plasmalogin";
+        user = greeterUser;
+        group = greeterUser;
       };
     };
   };
