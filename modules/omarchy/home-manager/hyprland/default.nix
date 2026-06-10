@@ -1,14 +1,10 @@
 {
-  config,
-  lib,
   systemConfig,
   ...
 }: {
-  # defaultApps.nix declares options that other parts of the codebase
-  # may reference — keep it imported unconditionally. The Hyprland-
-  # specific settings nested inside the other files only take effect
-  # when wayland.windowManager.hyprland.enable is true, so the single
-  # gate below is enough to keep the gamer Plasma session quiet.
+  # Everything here is per-session state: hyprland.conf only takes
+  # effect inside a Hyprland session, so applying it to every user
+  # (including gamer, whose default session is Plasma) is safe.
   imports = [
     ./autostart.nix
     ./bindings.nix
@@ -20,16 +16,14 @@
     ./windows.nix
   ];
 
-  config = lib.mkIf config.omarchy.enable {
-    wayland.windowManager.hyprland = {
-      enable = true;
-      configType = "lua";
-    };
-
-    # Remaining home-manager wayland services follow the same session
-    # target as the native omarchy units (see omarchy.sessionTarget for
-    # why that is hyprland-session.target and not graphical-session.target
-    # today — issue #32).
-    wayland.systemd.target = systemConfig.omarchy.sessionTarget;
+  wayland.windowManager.hyprland = {
+    enable = true;
+    configType = "lua";
   };
+
+  # Remaining home-manager wayland services follow the same session
+  # target as the native omarchy units (see omarchy.sessionTarget for
+  # why that is hyprland-session.target and not graphical-session.target
+  # today — issue #32).
+  wayland.systemd.target = systemConfig.omarchy.sessionTarget;
 }
