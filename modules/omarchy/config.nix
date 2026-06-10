@@ -14,9 +14,12 @@ in {
         Run the Hyprland session under UWSM (issues #40/#48). This is the
         single fallback flag: it flips `programs.hyprland.withUWSM`, the
         uwsm compositor registration + greeter session entry, the
-        `sessionTarget` default, and the home-manager hyprland systemd
-        integration together, so turning it off restores the pre-UWSM
-        hyprland-session.target world in one move.
+        `sessionTarget` default, and the generated hyprland config's
+        session-start hook (`uwsm finalize` vs the recreated
+        dbus-update + hyprland-session.target recycle, see
+        modules/omarchy/hyprland/autostart.nix) together, so turning it
+        off restores the pre-UWSM hyprland-session.target world in one
+        move.
       '';
     };
     sessionTarget = lib.mkOption {
@@ -44,9 +47,10 @@ in {
         After it still see the socket on their first attempt (issue #32).
 
         Without UWSM, hyprland-session.target serves the same role: the
-        home-manager hyprland integration starts it only after the wayland
-        socket is published and `dbus-update-activation-environment
-        --systemd` has run.
+        generated hyprland config starts it (from its `hyprland.start`
+        hook, see modules/omarchy/hyprland/autostart.nix) only after the
+        wayland socket is published and
+        `dbus-update-activation-environment --systemd` has run.
       '';
     };
     monitor = {

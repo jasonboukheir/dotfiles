@@ -1,10 +1,10 @@
 {
+  config,
   lib,
-  osConfig,
   ...
 }: let
-  hdrCfg = osConfig.omarchy.hdr;
-  monCfg = osConfig.omarchy.monitor;
+  hdrCfg = config.omarchy.hdr;
+  monCfg = config.omarchy.monitor;
 
   baseSettings = {
     output = "";
@@ -26,7 +26,9 @@
     // lib.optionalAttrs (hdrCfg.maxLuminance != null) {max_luminance = hdrCfg.maxLuminance;}
     // lib.optionalAttrs (hdrCfg.maxAvgLuminance != null) {max_avg_luminance = hdrCfg.maxAvgLuminance;});
 in {
-  wayland.windowManager.hyprland.settings.monitor = [
-    (baseSettings // hdrSettings)
-  ];
+  config = lib.mkIf config.omarchy.enable {
+    my.hyprland.settings.monitor = [
+      (baseSettings // hdrSettings)
+    ];
+  };
 }
