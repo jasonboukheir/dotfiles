@@ -13,13 +13,8 @@
     ./btop.nix
     ./clipse.nix
     ./gtk.nix
-    ./hypridle.nix
-    ./hyprlock.nix
     ./hyprsunset.nix
-    ./mako.nix
     ./onepassword.nix
-    ./waybar.nix
     ./wl-clip-persist.nix
-    ./wofi.nix
   ];
 }
