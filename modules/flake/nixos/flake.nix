@@ -10,6 +10,10 @@
     nixos-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # Tip-of-tree, imported only to pull claude-code ahead of unstable
+    # (modules/nixpkgs/overlays/claude-code-master.nix); never a host's base pkgs.
+    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
+
     # Common to every nixos host.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 

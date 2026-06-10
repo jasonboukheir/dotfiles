@@ -10,7 +10,7 @@
   # that wrapper bakes its own plugins + interactiveShellInit, so re-emitting
   # them here would double-load. mkDefault so per-host `programs.fish.enable =
   # true` (the macs) doesn't conflict.
-  config = lib.mkIf (!config.my.fish.enable) {
+  config = lib.mkIf (!(config.my.fish.enable or false)) {
     programs.fish = {
       enable = lib.mkDefault true;
       # HM used to auto-emit these on home.shell.enable*Integration. With HM gone

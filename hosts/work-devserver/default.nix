@@ -9,13 +9,19 @@
 in {
   imports = [
     ../../modules/home-manager/sharedModules/programs
-    ../../modules/home-manager/sharedModules/stylix.nix
     ../../modules/home-manager/jasonbk/programs
     ../../modules/stylix
   ];
 
   stylix.enable = true;
   dconf.enable = false;
+
+  # claude is preinstalled on the devserver; my.* installs nothing and the
+  # preinstalled binary owns its own ~/.claude settings.
+  my.claude-code = {
+    enable = true;
+    package = null;
+  };
 
   home = {
     username = "jasonbk";
@@ -37,8 +43,6 @@ in {
 
   programs = {
     nvf.meta.enable = true;
-
-    claude-code.settings.permissions.defaultMode = "acceptEdits";
 
     ssh = {
       enable = true;
