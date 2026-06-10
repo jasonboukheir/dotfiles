@@ -22,6 +22,8 @@
           config.jasonbk.sshKey
         ];
         shell = pkgs.fish;
+        # my.fish owns the nix env wiring instead of programs.fish.enable
+        ignoreShellProgramCheck = true;
       };
     };
 
