@@ -146,21 +146,32 @@ pkgs.testers.nixosTest {
         # session exit, including leaving Steam.
         sddm_conf = read_sddm_conf()
         preselect = sddm_conf.get("General", "defaultsession", fallback="")
-        assert preselect.endswith("hyprland.desktop"), (
-            "[General].DefaultSession should be hyprland.desktop; "
+        assert preselect == "hyprland-uwsm.desktop", (
+            "[General].DefaultSession should be the uwsm-managed entry; "
             f"got {preselect!r}"
         )
 
-    with subtest("session files for all three entry points exist"):
+    with subtest("session files for all entry points exist; bare hyprland is hidden"):
         # gamescope-wayland: jovian default, runs on first boot.
         # plasma: the Switch-to-Desktop target.
-        # hyprland: jasonbk's pick from the greeter.
+        # hyprland-uwsm: jasonbk's pick from the greeter.
+        # hyprland: the bare entry — must stay on disk (the uwsm entry's
+        # `uwsm start … hyprland.desktop` resolves it, and providedSessions
+        # validation needs the file) but carry NoDisplay so the greeter
+        # only offers the uwsm-managed session (#40).
         for sess in (
             "gamescope-wayland.desktop",
             f"{DEFAULT_DESKTOP_SESSION}.desktop",
+            "hyprland-uwsm.desktop",
             "hyprland.desktop",
         ):
             machine.succeed(f"test -e {SESSIONS_ROOT}/wayland-sessions/{sess}")
+        machine.succeed(
+            f"grep -q '^NoDisplay=true' {SESSIONS_ROOT}/wayland-sessions/hyprland.desktop"
+        )
+        machine.fail(
+            f"grep -q 'NoDisplay' {SESSIONS_ROOT}/wayland-sessions/hyprland-uwsm.desktop"
+        )
 
     with subtest("both users exist with the right gaming groups"):
         for user in (GAMING_USER, DEV_USER):

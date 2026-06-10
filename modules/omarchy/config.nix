@@ -7,18 +7,46 @@
 in {
   options.omarchy = {
     enable = lib.mkEnableOption "Omarchy-esque Hyprland config";
+    uwsm.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Run the Hyprland session under UWSM (issues #40/#48). This is the
+        single fallback flag: it flips `programs.hyprland.withUWSM`, the
+        uwsm compositor registration + greeter session entry, the
+        `sessionTarget` default, and the home-manager hyprland systemd
+        integration together, so turning it off restores the pre-UWSM
+        hyprland-session.target world in one move.
+      '';
+    };
     sessionTarget = lib.mkOption {
       type = lib.types.str;
-      default = "hyprland-session.target";
+      defaultText = lib.literalExpression ''
+        if config.omarchy.uwsm.enable
+        then "wayland-session@hyprland.desktop.target"
+        else "hyprland-session.target"
+      '';
       description = ''
         systemd user target that gates every desktop-session service in the
-        omarchy stack (waybar, mako, hypridle, …). Defaults to
-        hyprland-session.target, which Hyprland starts only after the wayland
-        socket is published and `dbus-update-activation-environment --systemd`
-        has run, so services see WAYLAND_DISPLAY on their first attempt
-        (issue #32). The planned UWSM flip (issue #40) retargets this to
-        graphical-session.target, whose activation UWSM gates the same way via
-        wayland-session-waitenv.service.
+        omarchy stack (waybar, mako, hypridle, …).
+
+        Under UWSM this is `wayland-session@hyprland.desktop.target` — the
+        instance is uwsm's compositor ID, the basename of what the shipped
+        hyprland-uwsm.desktop entry starts (`uwsm start … hyprland.desktop`).
+        It is deliberately not `graphical-session.target` as issue #40
+        originally planned: jovian binds its steam units to
+        graphical-session.target inside the gamescope session (and Plasma
+        starts it too), so anything gated there would leak into game mode
+        and gamer's Plasma. The uwsm per-compositor target only exists in
+        the Hyprland session, and its `wayland-wm@.service` dependency is
+        Type=notify — `uwsm finalize` exports WAYLAND_DISPLAY into the
+        activation environment before notifying — so services ordered
+        After it still see the socket on their first attempt (issue #32).
+
+        Without UWSM, hyprland-session.target serves the same role: the
+        home-manager hyprland integration starts it only after the wayland
+        socket is published and `dbus-update-activation-environment
+        --systemd` has run.
       '';
     };
     monitor = {
@@ -151,4 +179,10 @@ in {
       };
     };
   };
+
+  config.omarchy.sessionTarget = lib.mkDefault (
+    if cfg.uwsm.enable
+    then "wayland-session@hyprland.desktop.target"
+    else "hyprland-session.target"
+  );
 }
