@@ -20,6 +20,14 @@ in {
     };
   };
 
+  # Mapped from the per-user editor into gh's `editor` setting; injected as
+  # mkDefault so an explicit settings.editor wins.
+  settingsDefaults = {
+    editor ? null,
+    ...
+  }:
+    lib.optionalAttrs (editor != null) {editor = lib.getExe editor;};
+
   build = {
     cfg,
     pkgs,

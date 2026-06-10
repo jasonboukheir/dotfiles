@@ -74,6 +74,13 @@
     then theme
     else null;
 
+  # The full set of inputs a def's `build` ever receives. There is deliberately
+  # no `config` here: defs are imported as pure `{lib, pkgs}` functions (see
+  # ./programs/default.nix), so a build that reads ambient module config can't
+  # be written — purity is enforced by config's absence from scope, not by
+  # convention. `build` renders the already-resolved `cfg.settings`; the
+  # framework folds theme/identity/editor defaults into that option beforehand
+  # (see settingsDefaultsFor), so build does no merging of its own.
   buildTool = {
     def,
     toolCfg,
@@ -84,6 +91,29 @@
       cfg = removeAttrs toolCfg ["finalPackage"];
       inherit pkgs lib theme specialArgs;
     };
+
+  # Framework-injected option defaults: each def's `settingsDefaults` maps the
+  # trimmed per-scope view (theme/identity/editor — never full config) to that
+  # tool's settings schema, and the result is fed in as `recursiveMkDefault` so
+  # the user's own `my.<tool>.settings` (and the system→user cascade) win through
+  # the ordinary module-system priority merge. Defs without the hook contribute
+  # nothing.
+  settingsDefaultsFor = {
+    scopeMy,
+    scopeTheme,
+    identity ? null,
+    editor ? null,
+  }:
+    lib.mapAttrs (
+      toolName: def:
+        lib.optionalAttrs (def ? settingsDefaults) {
+          settings = recursiveMkDefault (def.settingsDefaults {
+            theme = themeFor def scopeMy scopeMy.${toolName} scopeTheme;
+            inherit identity editor;
+          });
+        }
+    )
+    defs;
 in {
-  inherit defs myType recursiveMkDefault mkTheme themeFor buildTool;
+  inherit defs myType recursiveMkDefault mkTheme themeFor buildTool settingsDefaultsFor;
 }

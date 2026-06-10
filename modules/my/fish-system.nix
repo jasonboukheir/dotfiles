@@ -1,8 +1,8 @@
 # Fish's nix-environment system wiring for the my.* wrapper, shared by the NixOS
 # and nix-darwin entry points (config.system.build.setEnvironment exists on both).
 #
-# my.* program defs set no system state (see programs/CONTRACT.md), so this lives
-# in a platform-imported module rather than modules/my/programs/fish.nix. It is
+# my.* program defs set no system state (they only build a package), so this
+# lives in a platform-imported module rather than modules/my/programs/fish.nix. It is
 # the self-contained replacement for piggybacking on the native programs.fish
 # module (https://github.com/jasonboukheir/dotfiles/issues/69).
 #

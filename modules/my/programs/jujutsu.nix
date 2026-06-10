@@ -16,6 +16,25 @@ in {
     };
   };
 
+  # Mapped from the per-user identity/editor into jj's schema; injected as
+  # mkDefault so the user's own settings win.
+  settingsDefaults = {
+    identity ? null,
+    editor ? null,
+    ...
+  }:
+    (lib.optionalAttrs (identity != null) {
+      user =
+        (lib.optionalAttrs (identity.name != null) {name = identity.name;})
+        // (lib.optionalAttrs (identity.email != null) {email = identity.email;});
+    })
+    // (lib.optionalAttrs (editor != null) (let
+      exe = lib.getExe editor;
+    in {
+      ui.editor = exe;
+      ui.merge-editor = exe;
+    }));
+
   build = {
     cfg,
     pkgs,

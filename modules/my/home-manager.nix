@@ -8,7 +8,7 @@
   ...
 }: let
   my = import ./lib.nix {inherit lib pkgs;};
-  inherit (my) defs myType mkTheme themeFor buildTool;
+  inherit (my) defs myType mkTheme themeFor buildTool settingsDefaultsFor;
 
   specialArgs = {inherit neovimConfiguration;};
 
@@ -34,6 +34,12 @@ in {
   # recursion note in ./system-scope.nix.
   config = lib.mkMerge [
     {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
+    {
+      my = settingsDefaultsFor {
+        scopeMy = config.my;
+        scopeTheme = theme;
+      };
+    }
     {
       my =
         lib.mapAttrs (toolName: def: {

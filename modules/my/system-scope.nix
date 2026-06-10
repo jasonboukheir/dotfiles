@@ -9,7 +9,7 @@
   ...
 }: let
   my = import ./lib.nix {inherit lib pkgs;};
-  inherit (my) defs myType recursiveMkDefault mkTheme themeFor buildTool;
+  inherit (my) defs myType recursiveMkDefault mkTheme themeFor buildTool settingsDefaultsFor;
 
   specialArgs = {inherit neovimConfiguration;};
 
@@ -80,20 +80,25 @@
     config = lib.mkMerge [
       {my = cascadeFromSystem;}
       {my.stylix.enable = lib.mkDefault config.my.stylix.enable;}
+      {
+        my = settingsDefaultsFor {
+          scopeMy = userCfg.my;
+          scopeTheme = userTheme userCfg;
+          inherit (userCfg) identity editor;
+        };
+      }
       {my = finalPackageDefs userCfg.my (userTheme userCfg);}
       {packages = installFor userCfg.my;}
     ];
   };
 in {
-  # Per-user identity/editor knobs and the wiring that defaults each tool's
-  # settings from them. Kept out of programs/ (pure build defs) since this reads
-  # sibling user config, which the program-definition contract forbids in build.
+  # Per-user identity/editor knobs. Each program def maps them (and the resolved
+  # stylix theme) into its own settings schema via `settingsDefaults`, which the
+  # framework folds in as mkDefault (see settingsDefaultsFor) — so the consuming
+  # logic stays in the pure program defs and the user's settings still win.
   imports = [
     ./users/identity.nix
     ./users/editor.nix
-    ./git.nix
-    ./gh.nix
-    ./jujutsu.nix
   ];
 
   options.my = lib.mkOption {
@@ -107,6 +112,12 @@ in {
 
   config = lib.mkMerge [
     {my.stylix.enable = lib.mkDefault (systemStylix.enable or false);}
+    {
+      my = settingsDefaultsFor {
+        scopeMy = config.my;
+        scopeTheme = systemTheme;
+      };
+    }
     {my = finalPackageDefs config.my systemTheme;}
     {
       environment.systemPackages = installFor config.my;

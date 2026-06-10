@@ -1,6 +1,7 @@
 # Per-user VCS identity (name/email), a module-merge onto the users.users.<name>
-# submodule. The my.{git,jujutsu} wiring defaults their user.{name,email} fields
-# from it, so the same person isn't spelled out once per tool.
+# submodule. The my.{git,jujutsu} program defs map it into their user.{name,email}
+# settings via `settingsDefaults` (injected as mkDefault), so the same person
+# isn't spelled out once per tool.
 {lib, ...}: {
   options.users.users = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
