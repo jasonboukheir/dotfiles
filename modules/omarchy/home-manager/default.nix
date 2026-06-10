@@ -11,10 +11,6 @@
     ./calendar
     ./hyprland
     ./btop.nix
-    ./clipse.nix
     ./gtk.nix
-    ./hyprsunset.nix
-    ./onepassword.nix
-    ./wl-clip-persist.nix
   ];
 }

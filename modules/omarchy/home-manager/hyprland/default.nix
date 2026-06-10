@@ -25,7 +25,6 @@
       enable = true;
       configType = "lua";
     };
-    services.hyprpolkitagent.enable = true;
 
     # Remaining home-manager wayland services follow the same session
     # target as the native omarchy units (see omarchy.sessionTarget for
