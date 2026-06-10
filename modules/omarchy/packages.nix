@@ -43,9 +43,8 @@
       # spawned shell exits, but the session leader (the helper, via its
       # exec'd wayland-session child) drives the actual teardown.
       #
-      # Under `configType = "lua"` (see
-      # modules/omarchy/home-manager/hyprland/default.nix), `hyprctl
-      # dispatch <X>` lowers to `return hl.dispatch(<X>)` and Lua parses
+      # Under the Lua config (see modules/my/programs/hyprland.nix),
+      # `hyprctl dispatch <X>` lowers to `return hl.dispatch(<X>)` and Lua parses
       # the bare identifier `exit` as nil, so hl.dispatch rejects it
       # ("expected a dispatcher"). The Lua-mode spelling of the same
       # dispatcher is `hl.dsp.exit()`.

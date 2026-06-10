@@ -69,9 +69,10 @@ in
         cores = 2;
       };
 
-      # Headless: gamescope autologin can't run and only adds boot noise.
-      # The unlock we exercise goes through the `login` PAM stack directly,
-      # not the greeter's VT. (Same override as dm-recovery.nix.)
+      # Headless: gamescope autologin can't run and only adds boot noise
+      # (with jovian's Relogin=true it would respawn in a loop). The
+      # unlock we exercise goes through the `login` PAM stack directly,
+      # not the greeter's VT.
       services.displayManager.autoLogin.enable = lib.mkForce false;
 
       # Give jasonbk a known password so the test can drive a real password
@@ -119,18 +120,17 @@ in
               for ln in login_pam.splitlines()
           ), ("login session stack must auto_start gnome-keyring:\n" + login_pam)
 
-      with subtest("the greeter (plasma-login-manager) inherits the login stack"):
-          # plasma-login-manager lists no keyring modules itself — it
-          # substacks/includes `login`, so the unlock above applies to a
-          # real greeter login. This is the crux of "can the login manager
-          # unlock the keyring": the greeter runs the same login stack that
-          # the behavioural subtest proves works.
-          plm_pam = machine.succeed(
-              "cat /etc/pam.d/plasmalogin 2>/dev/null "
-              "|| cat /etc/pam.d/plasma-login-manager"
-          )
-          assert ("substack login" in plm_pam) or ("include login" in plm_pam), (
-              "plasma-login-manager must pull in the login stack:\n" + plm_pam
+      with subtest("the greeter (sddm) inherits the login stack"):
+          # sddm's PAM service lists no keyring modules itself — NixOS
+          # renders it as substack/include `login`, so the unlock above
+          # applies to a real greeter login. This is the crux of "can the
+          # login manager unlock the keyring": the greeter runs the same
+          # login stack that the behavioural subtest proves works.
+          # (sddm-autologin includes sddm, so gamer's autologin rides the
+          # same stack.)
+          sddm_pam = machine.succeed("cat /etc/pam.d/sddm")
+          assert ("substack login" in sddm_pam) or ("include login" in sddm_pam), (
+              "sddm must pull in the login stack:\n" + sddm_pam
           )
 
       with subtest("a password unlock makes the secret service store & retrieve a secret"):

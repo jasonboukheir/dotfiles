@@ -87,6 +87,7 @@ in {
     };
 
     rg.enable = true;
+    fd.enable = true;
 
     # claude is preinstalled on the work machine; my.* installs nothing and the
     # preinstalled binary owns its own ~/.claude (the seed-and-accept carve-out).
@@ -136,8 +137,7 @@ in {
     fish.enable = lib.mkForce false;
   };
 
-  # Old system program paths, superseded by my.* above.
+  # Old system program path (modules/darwin/programs/git.nix), superseded by
+  # my.git above.
   programs.git.enable = false;
-  programs.nvf.enable = false;
-  programs.ripgrep.enable = false;
 }

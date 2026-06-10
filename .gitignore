@@ -2,6 +2,7 @@
 VaulTLS
 .claude/settings.local.json
 .claude/**/*.lock
+.claude/worktrees
 nix.conf
 result
 .DS_Store

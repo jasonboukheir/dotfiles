@@ -35,15 +35,16 @@ pkgs.testers.nixosTest {
     DEFAULT_DESKTOP_SESSION = "${defaultDesktopSession}"
     GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
 
-    def read_plasmalogin_conf():
-        """Read the merged plasma-login-manager config.
+    def read_sddm_conf():
+        """Read the merged sddm config.
 
-        plasmalogin walks /etc/plasmalogin.conf.d/*.conf in lexical
-        order; later definitions win. ConfigParser with multiple read()s
-        produces the same last-wins semantics.
+        sddm walks /etc/sddm.conf.d/*.conf in lexical order (after an
+        optional /etc/sddm.conf, which NixOS does not write); later
+        definitions win. ConfigParser with multiple read()s produces
+        the same last-wins semantics.
         """
         # ConfigParser.optionxform lowercases keys by default; the
-        # canonical keys (User, Session, Relogin, PreselectedSession)
+        # canonical keys (User, Session, Relogin, DefaultSession)
         # survive as their lower-case forms. We compare against
         # lowercase below so we don't need to override optionxform —
         # the test driver's type checker rejects the standard
@@ -51,7 +52,7 @@ pkgs.testers.nixosTest {
         parser = configparser.RawConfigParser()
         files = sorted(
             machine.succeed(
-                "find /etc/plasmalogin.conf.d -maxdepth 1 -name '*.conf' "
+                "find /etc/sddm.conf.d -maxdepth 1 -name '*.conf' "
                 "-printf '%p\\n' 2>/dev/null || true"
             ).split()
         )
@@ -96,60 +97,81 @@ pkgs.testers.nixosTest {
             status, _ = machine.execute(f"test -e {path}")
             assert status != 0, f"{path} should not exist after the refactor"
 
-    with subtest("display-manager is plasma-login-manager, not sddm or greetd"):
-        # The host opted into KDE's new SDDM replacement; verify
-        # display-manager.service actually runs plasmalogin and that
-        # SDDM is fully disabled (sddm.conf must not exist).
+    with subtest("display-manager is sddm, not plasma-login-manager or greetd"):
+        # The host flipped back to SDDM for the UWSM path (#48 plan);
+        # verify display-manager.service actually execs sddm and that
+        # plasma-login-manager is fully disabled (no plasmalogin config
+        # tree).
         dm_unit = machine.succeed(
             "systemctl cat display-manager.service"
         )
-        assert "plasmalogin" in dm_unit, \
-            f"display-manager.service should run plasmalogin:\n{dm_unit}"
-        status, _ = machine.execute("test -e /etc/sddm.conf")
+        assert "sddm" in dm_unit, \
+            f"display-manager.service should exec sddm:\n{dm_unit}"
+        status, _ = machine.execute("test -e /etc/plasmalogin.conf.d")
         assert status != 0, (
-            "SDDM should be disabled when plasma-login-manager is "
-            "the active DM; /etc/sddm.conf still exists"
+            "plasma-login-manager should be disabled when sddm is "
+            "the active DM; /etc/plasmalogin.conf.d still exists"
         )
 
     with subtest("autologin honours the standard displayManager contract"):
-        # Both DMs read services.displayManager.autoLogin; plasma-login-manager
-        # writes the [Autologin] section into 00-nixos-defaults.conf. Jovian
-        # sets the user/session via the same contract, so the assertion is the
-        # same regardless of DM choice.
-        plasmalogin = read_plasmalogin_conf()
-        assert plasmalogin.has_section("Autologin"), \
-            f"plasmalogin config missing [Autologin]:\n{dict(plasmalogin)}"
-        autologin = dict(plasmalogin["Autologin"])
-        # Keys lowercased by ConfigParser (see read_plasmalogin_conf comment).
+        # Both DMs read services.displayManager.autoLogin; the sddm
+        # module writes the [Autologin] section into 00-nixos.conf.
+        # Jovian sets the user/session via the same contract, so the
+        # assertion is the same regardless of DM choice.
+        sddm_conf = read_sddm_conf()
+        assert sddm_conf.has_section("Autologin"), \
+            f"sddm config missing [Autologin]:\n{dict(sddm_conf)}"
+        autologin = dict(sddm_conf["Autologin"])
+        # Keys lowercased by ConfigParser (see read_sddm_conf comment).
         assert autologin.get("user") == GAMING_USER, \
             f"autologin user should be {GAMING_USER}: {autologin}"
         assert autologin.get("session") == "gamescope-wayland.desktop", (
             f"autologin session should be gamescope-wayland; got {autologin}"
         )
+        # gaming.exitToGreeter forces Relogin off against jovian's plain
+        # `relogin = true` assignment: exiting any session (including
+        # Steam's Switch-to-Desktop) must land on the greeter so jasonbk
+        # can pick the Hyprland session. If jovian's assignment ever
+        # outranks the mkForce, this silently reverts to SteamOS-style
+        # re-autologin — the rendered conf is the contract.
+        assert autologin.get("relogin") == "false", (
+            f"gaming.exitToGreeter should force relogin off: {autologin}"
+        )
 
     with subtest("greeter preselects Hyprland"):
-        # plasma-login-manager's [Greeter].PreselectedSession is the
-        # equivalent of SDDM's [General].DefaultSession. The
-        # thebeast.greeterDefaultSession option drives this so jasonbk
-        # lands on Hyprland in the session dropdown when the greeter
-        # appears (only after explicit gamer→logout).
-        plasmalogin = read_plasmalogin_conf()
-        preselect = plasmalogin.get("Greeter", "preselectedsession", fallback="")
-        assert preselect == "hyprland.desktop", (
-            "[Greeter].PreselectedSession should be hyprland.desktop; "
+        # SDDM's [General].DefaultSession preselects the greeter's
+        # session dropdown. The thebeast.greeterDefaultSession option
+        # drives this so jasonbk lands on Hyprland when the greeter
+        # appears — which with gaming.exitToGreeter is after every
+        # session exit, including leaving Steam.
+        sddm_conf = read_sddm_conf()
+        preselect = sddm_conf.get("General", "defaultsession", fallback="")
+        assert preselect == "hyprland-uwsm.desktop", (
+            "[General].DefaultSession should be the uwsm-managed entry; "
             f"got {preselect!r}"
         )
 
-    with subtest("session files for all three entry points exist"):
+    with subtest("session files for all entry points exist; bare hyprland is hidden"):
         # gamescope-wayland: jovian default, runs on first boot.
         # plasma: the Switch-to-Desktop target.
-        # hyprland: jasonbk's pick from the greeter.
+        # hyprland-uwsm: jasonbk's pick from the greeter.
+        # hyprland: the bare entry — must stay on disk (the uwsm entry's
+        # `uwsm start … hyprland.desktop` resolves it, and providedSessions
+        # validation needs the file) but carry NoDisplay so the greeter
+        # only offers the uwsm-managed session (#40).
         for sess in (
             "gamescope-wayland.desktop",
             f"{DEFAULT_DESKTOP_SESSION}.desktop",
+            "hyprland-uwsm.desktop",
             "hyprland.desktop",
         ):
             machine.succeed(f"test -e {SESSIONS_ROOT}/wayland-sessions/{sess}")
+        machine.succeed(
+            f"grep -q '^NoDisplay=true' {SESSIONS_ROOT}/wayland-sessions/hyprland.desktop"
+        )
+        machine.fail(
+            f"grep -q 'NoDisplay' {SESSIONS_ROOT}/wayland-sessions/hyprland-uwsm.desktop"
+        )
 
     with subtest("both users exist with the right gaming groups"):
         for user in (GAMING_USER, DEV_USER):
@@ -225,11 +247,11 @@ pkgs.testers.nixosTest {
             "jovian-setup-desktop-session should hand "
             f"{DEFAULT_DESKTOP_SESSION}.desktop to steamosctl; got:\n{rendered}"
         )
-        # /etc/sddm.conf.d/steamos.conf was the SDDM-era marker
-        # steamos-manager probed for. Under plasma-login-manager that
-        # path is gone and the relevant probe shifts to whatever PLM
-        # surfaces — leave it untested here until upstream wires a
-        # PLM-equivalent.
+        # /etc/sddm.conf.d/steamos.conf is the is_session_managed()
+        # marker steamos-manager probes before exposing the
+        # SessionManagement1 interface — without it Switch-to-Desktop
+        # never even appears. Jovian writes it whenever autoStart is on.
+        machine.succeed("test -e /etc/sddm.conf.d/steamos.conf")
 
     with subtest("switch-to-big-picture: installed, surfaced, unprivileged"):
         # Plasma's desktop shortcut lives in gamer's ~/Desktop and must

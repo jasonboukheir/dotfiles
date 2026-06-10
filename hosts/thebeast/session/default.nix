@@ -11,12 +11,13 @@
     ./omarchy.nix
   ];
 
-  # KDE's new SDDM-replacement (Plasma 6.6, landed in nixos-unstable
-  # Jan 2026). Still upstream-experimental ("works for me" per KDE),
-  # but the autoLogin contract is identical to SDDM so the jovian
-  # gamer→gamescope autoStart path is unaffected. Flip back to "sddm"
-  # if the greeter regresses.
-  thebeast.displayManager = "plasma-login-manager";
+  # SDDM, per the #48 session-redesign plan: strictly less KDE than
+  # plasma-login-manager (PLM is a Plasma-coupled SDDM fork), and the
+  # UWSM/hyprland-uwsm path (#40) is only documented against SDDM.
+  # Jovian already forces sddm.wayland.enable, so the Wayland greeter
+  # is status quo. The greeter-recycle-after-logout lifecycle is gated
+  # by tests/dm-recovery.nix. PLM stays one flag away if SDDM regresses.
+  thebeast.displayManager = "sddm";
 
   gaming.enable = true;
   gaming.bigPicture.enable = true;

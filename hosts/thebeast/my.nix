@@ -136,15 +136,6 @@ in {
   # modules/my/nixos.nix.
   users.users.jasonbk.shell = lib.mkForce config.my.fish.finalPackage;
 
-  # Old per-user wrappers (modules/users/jasonbk/programs), superseded by my.*.
-  users.users.jasonbk.programs = {
-    git.enable = lib.mkForce false;
-    jujutsu.enable = lib.mkForce false;
-    starship.enable = lib.mkForce false;
-    gh.enable = lib.mkForce false;
-    nushell.enable = lib.mkForce false;
-  };
-
   # Old home-manager program paths, superseded by my.* above.
   home-manager.users.jasonbk.programs = {
     git.enable = lib.mkForce false;
@@ -156,11 +147,4 @@ in {
     direnv.enable = lib.mkForce false;
   };
 
-  # Old native-system program paths, superseded by my.* above. programs.fish is
-  # owned by the my.* fish wiring (modules/my/nixos.nix), which modules/programs/
-  # fish.nix yields to.
-  programs.git.enable = false;
-  programs.ripgrep.enable = false;
-  programs.fd.enable = false;
-  programs.direnv.enable = lib.mkForce false;
 }

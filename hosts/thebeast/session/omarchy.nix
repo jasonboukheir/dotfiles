@@ -1,7 +1,14 @@
-{...}: {
+{config, ...}: {
   # jasonbk's omarchy/Hyprland session. Part of the desktop-session
   # surface SDDM/plasma-login-manager hands off to.
   omarchy.enable = true;
+
+  # The uwsm-managed session entry is the one the greeter should land
+  # on; follows omarchy.uwsm.enable so the fallback stays one flag.
+  thebeast.greeterDefaultSession =
+    if config.omarchy.uwsm.enable
+    then "hyprland-uwsm"
+    else "hyprland";
   omarchy.monitor = {
     mode = "5120x1440@120";
     vrr = 1;

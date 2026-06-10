@@ -41,6 +41,22 @@
       '';
     };
 
+    exitToGreeter = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Land on the display manager's greeter whenever a session exits,
+        instead of jovian's default of re-autologin'ing gamer into
+        gamescope. Forces SDDM's Autologin.Relogin off, which also
+        suppresses steamos-manager's one-shot Switch-to-Desktop
+        temp-login (proved in tests/steamos-autologin.nix) — so Steam's
+        "Switch to Desktop" / exit lands on the greeter too. That is the
+        intended flow on thebeast: exiting Steam should offer the
+        session picker (preselecting thebeast.greeterDefaultSession) so
+        jasonbk can get straight into the Hyprland dev session.
+      '';
+    };
+
     romDir = lib.mkOption {
       type = lib.types.str;
       default = "/games/roms";

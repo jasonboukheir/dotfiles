@@ -3,8 +3,8 @@
     extraInputsFlake = ./.;
     module = {inputs, ...}: {
       flake.darwinConfigurations = let
-        # neovimConfiguration is the specialArg my.nvf builds neovim from; the
-        # native programs.nvf module takes the same builder via programs.nvf.
+        # neovimConfiguration is the specialArg my.nvf builds neovim from;
+        # pin the nvf input whose nixpkgs matches these hosts' channel.
         specialArgs = {
           inherit inputs;
           neovimConfiguration = inputs.nvf-darwin.lib.neovimConfiguration;

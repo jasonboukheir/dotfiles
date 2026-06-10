@@ -61,6 +61,17 @@
         description = "Fonts for this user's wrappers. Defaults to the system stylix fonts.";
       };
 
+      image = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = systemStylix.image or null;
+        defaultText = lib.literalExpression "config.stylix.image or null";
+        description = ''
+          Wallpaper for this user's wrappers (e.g. hyprlock's lock-screen
+          background). Defaults to the system stylix wallpaper; null leaves
+          image-consuming theme slots unset.
+        '';
+      };
+
       opacity = lib.mkOption {
         type = lib.types.attrs;
         default = systemStylix.opacity or {};
@@ -68,13 +79,12 @@
         description = "Opacity settings for this user's wrappers. Defaults to the system stylix opacity.";
       };
 
-      # TODO: no consumer yet — the session env (XCURSOR_*/HYPRCURSOR_*), GTK
-      # cursor-theme, and installing `cursor.package` into the icon path land
-      # with the Hyprland session generator
-      # (https://github.com/jasonboukheir/dotfiles/issues/40) and the
-      # omarchy/Hyprland desktop set
-      # (https://github.com/jasonboukheir/dotfiles/issues/48), replacing
-      # modules/omarchy/home-manager/hyprland/envs.nix.
+      # TODO: no per-user consumer yet — the session env
+      # (XCURSOR_*/HYPRCURSOR_*) is consumed from the *system* stylix cursor
+      # by the Hyprland config generator
+      # (modules/omarchy/hyprland/envs.nix, issues #40/#48); the GTK
+      # cursor-theme and installing `cursor.package` into the icon path
+      # remain open (issue #48's gtk migration).
       cursor = {
         name = lib.mkOption {
           type = lib.types.nullOr lib.types.str;

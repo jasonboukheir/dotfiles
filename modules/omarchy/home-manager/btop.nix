@@ -1,9 +1,5 @@
-{
-  config,
-  lib,
-  ...
-}: {
-  config = lib.mkIf config.omarchy.enable {
+{...}: {
+  config = {
     programs.btop = {
       enable = true;
       settings = {

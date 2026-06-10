@@ -23,6 +23,8 @@ in {
     package = null;
   };
 
+  my.nvf.meta.enable = true;
+
   home = {
     username = "jasonbk";
     homeDirectory = "/home/jasonbk";
@@ -42,8 +44,6 @@ in {
   };
 
   programs = {
-    nvf.meta.enable = true;
-
     ssh = {
       enable = true;
       matchBlocks."github.com" = {
