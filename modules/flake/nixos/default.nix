@@ -84,6 +84,9 @@
               thebeast-keyring = import ../../../hosts/thebeast/tests/keyring.nix {
                 inherit pkgs inputs;
               };
+              thebeast-steamos-autologin = import ../../../hosts/thebeast/tests/steamos-autologin.nix {
+                inherit pkgs inputs;
+              };
               thebeast-hm-stale-kvantum = import ../../../hosts/thebeast/tests/hm-stale-kvantum.nix {
                 inherit pkgs inputs;
               };
