@@ -6,7 +6,11 @@
 # hypridle) — defs are pure standalone files, so the renderer lives here.
 {lib}: let
   render = indent: attrs: let
-    isSection = v: lib.isAttrs v || (lib.isList v && v != [] && lib.all lib.isAttrs v);
+    # Derivations are attrsets too, but they are store-path *values*
+    # (e.g. a theme wallpaper in background.path); recursing into one
+    # never terminates (drv.out is the drv itself).
+    isSectionAttrs = v: lib.isAttrs v && !lib.isDerivation v;
+    isSection = v: isSectionAttrs v || (lib.isList v && v != [] && lib.all isSectionAttrs v);
     variables = lib.filterAttrs (n: _: lib.hasPrefix "$" n) attrs;
     rest = removeAttrs attrs (lib.attrNames variables);
     sections = lib.filterAttrs (_: isSection) rest;
