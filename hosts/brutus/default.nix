@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./packages.nix
     ./nvf.nix
+    ./my.nix
     ./stylix.nix
     ./networking
     ./virtualization.nix

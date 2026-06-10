@@ -4,7 +4,6 @@
     ./nushell
     ./vscode-fb
     ./_1password.nix
-    ./claude-code.nix
     ./direnv.nix
     ./fish.nix
     ./ghostty.nix

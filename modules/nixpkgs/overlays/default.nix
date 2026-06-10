@@ -3,6 +3,7 @@
     (import ./mkWrapped.nix)
     (import ./direnv.nix)
     (import ./fish.nix {inherit inputs;})
+    (import ./claude-code-master.nix {inherit inputs;})
     (import ./pocket-id.nix)
     (import ./zmx.nix)
     (import ./speaches.nix)

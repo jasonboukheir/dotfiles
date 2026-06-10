@@ -22,7 +22,16 @@ in {
   };
 
   config = {
-    nixpkgs.config.allowUnfreePredicate = pkg:
-      builtins.elem (lib.getName pkg) (config.allowUnfreePackageNames ++ commonUnfreePackages);
+    # A mkWrapped package carries its wrapped name ("<tool>-wrapped") but keeps
+    # the unwrapped derivation under passthru.unwrapped, so an unfree tool stays
+    # allowed once wrapped (e.g. my.claude-code's claude wrapper). At check-meta
+    # time the predicate sees the raw mkDerivation args, where `unwrapped` is
+    # still nested under `passthru`, so look there too.
+    nixpkgs.config.allowUnfreePredicate = pkg: let
+      allowed = config.allowUnfreePackageNames ++ commonUnfreePackages;
+      unwrapped = pkg.unwrapped or pkg.passthru.unwrapped or null;
+      names = [(lib.getName pkg)] ++ lib.optional (unwrapped != null) (lib.getName unwrapped);
+    in
+      lib.any (name: builtins.elem name allowed) names;
   };
 }

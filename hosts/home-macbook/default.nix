@@ -5,6 +5,7 @@
     ./home-manager
     ./programs
     ./system
+    ./my.nix
     ./stylix.nix
   ];
 }

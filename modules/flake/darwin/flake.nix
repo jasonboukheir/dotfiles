@@ -9,6 +9,10 @@
     # pkgs-unstable escape hatch both resolve against it.
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # Tip-of-tree, imported only to pull claude-code ahead of unstable
+    # (modules/nixpkgs/overlays/claude-code-master.nix); never a host's base pkgs.
+    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
+
     nix-darwin = {
       url = "github:LnL7/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
