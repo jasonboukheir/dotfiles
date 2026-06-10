@@ -31,7 +31,9 @@ in
           machine.succeed("su -l tester -c 'direnv version'")
 
       with subtest("the wrapper pins DIRENV_CONFIG to a baked config dir"):
-          machine.succeed(f"grep -aq -- '--set DIRENV_CONFIG ' {direnv}")
+          # makeWrapper emits a shell wrapper exporting the var (not the
+          # makeBinaryWrapper `--set DIRENV_CONFIG` flag form).
+          machine.succeed(f"grep -aq -- 'export DIRENV_CONFIG=' {direnv}")
 
       config_dir = machine.succeed(
           f"grep -aoE '/nix/store/[a-z0-9]{{32}}-my-direnv-config' {direnv} | head -n1"

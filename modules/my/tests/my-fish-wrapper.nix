@@ -28,8 +28,10 @@ in
           machine.succeed("su -l tester -c 'fish --version'")
 
       with subtest("fish sources the wrapper's interactiveShellInit (via profile vendor_conf.d)"):
+          # \$ keeps the login shell (bash) from expanding the variable; only
+          # fish has it, via the wrapper's vendor_conf.d.
           got = machine.succeed(
-              "su -l tester -c 'fish -c \"echo $MY_FISH_SENTINEL\"'"
+              "su -l tester -c 'fish -c \"echo \\$MY_FISH_SENTINEL\"'"
           ).strip()
           assert got == "${sentinel}", f"wrapper did not source baked conf.d: {got!r}"
 
