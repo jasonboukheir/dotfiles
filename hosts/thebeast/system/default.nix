@@ -8,6 +8,7 @@
     ./nixpkgs.nix
     ./printing.nix
     ./programs.nix
+    ./ssh.nix
     ./stylix.nix
     # Shared modules live here rather than the host default.nix so the
     # nixosTests under ../tests can pull the full system stack by

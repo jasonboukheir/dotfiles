@@ -22,6 +22,23 @@ in {
         move.
       '';
     };
+    uwsm.oomPolicy = lib.mkOption {
+      type = lib.types.enum ["continue" "stop" "kill"];
+      default = "continue";
+      description = ''
+        OOMPolicy for uwsm's `wayland-wm@.service`, delivered as a
+        systemd drop-in (the unit itself is shipped by the uwsm package,
+        so a drop-in is the only way to amend it without shadowing it).
+
+        systemd's default `stop` turns any kernel OOM kill inside the
+        compositor's cgroup into a stop of the whole unit — a full
+        session teardown back to the greeter. Anything launched by a raw
+        `exec` bind (and every child of those terminals, e.g. a fat nix
+        eval) lives in that cgroup, so a single OOM-killed process logs
+        the user out. `continue` confines the damage to the process the
+        kernel actually killed.
+      '';
+    };
     sessionTarget = lib.mkOption {
       type = lib.types.str;
       defaultText = lib.literalExpression ''

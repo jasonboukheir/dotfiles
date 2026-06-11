@@ -78,7 +78,6 @@ in {
   xdg.configFile."ghostty/config".source = config.my.ghostty.finalPackage.configFile;
 
   my.helium.package = nixGLWrap pkgs.helium;
-  programs._1password.package = config.lib.nixGL.wrap pkgs._1password-gui;
 
   my.fd.enable = true;
   my.rg.enable = true;

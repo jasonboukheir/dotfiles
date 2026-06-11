@@ -60,6 +60,22 @@ in {
       # one would register the session name twice. withUWSM pulls in
       # programs.uwsm (the uwsm package, its user units, and dbus-broker).
       programs.hyprland.withUWSM = true;
+
+      # wayland-wm@.service comes from the uwsm package (withUWSM pulls in
+      # programs.uwsm, which symlinks the package units into
+      # /etc/systemd/user); systemd merges this template drop-in into the
+      # instances (asserted by the omarchy-session-units VM test). asDropin
+      # is mandatory: the default asDropinIfExists only sees units defined
+      # in systemd.user.units itself, so plain .text would emit a full unit
+      # that shadows uwsm's Type=notify one and breaks session startup.
+      # See omarchy.uwsm.oomPolicy for why.
+      systemd.user.units."wayland-wm@.service" = {
+        overrideStrategy = "asDropin";
+        text = ''
+          [Service]
+          OOMPolicy=${cfg.uwsm.oomPolicy}
+        '';
+      };
     })
   ];
 }

@@ -9,10 +9,10 @@
   pkgs,
   ...
 }: let
-  # ssh signing flattened from the old per-user git/jujutsu wrappers; op-ssh-sign
-  # ships with the 1Password GUI (linux-only path).
-  # TODO: fold back into an ssh/1Password module once it lands.
-  # https://github.com/jasonboukheir/dotfiles/issues/46
+  # ssh signing wiring stays flattened here by design (issue #46): my.* defs
+  # are pure, so per-host 1Password values bake straight into the wrappers.
+  # op-ssh-sign ships with the 1Password GUI (linux-only path); the agent and
+  # client config live at the system layer (system/ssh.nix).
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
   opSshSign = lib.getExe' pkgs._1password-gui "op-ssh-sign";
 in {
@@ -151,5 +151,4 @@ in {
     fish.enable = lib.mkForce false;
     direnv.enable = lib.mkForce false;
   };
-
 }

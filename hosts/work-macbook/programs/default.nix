@@ -1,6 +1,6 @@
 {...}: {
   imports = [
+    ./1password.nix
     ./brave.nix
-    ./home-manager.nix
   ];
 }

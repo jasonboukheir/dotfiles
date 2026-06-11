@@ -107,6 +107,11 @@
               litus-homelab-import = import ../../../hosts/litus/tests/homelab-import.nix {
                 pkgs = brutusPkgs;
               };
+              # The module's consumers (litus/brutus) pin inputs.nixos, so the
+              # test runs under the same stable nixpkgs.
+              ssh-agent-switcher = import ../../../modules/nixos/tests/ssh-agent-switcher.nix {
+                pkgs = brutusPkgs;
+              };
             };
         };
     };

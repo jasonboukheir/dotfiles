@@ -246,6 +246,31 @@ in
                   f"{svc} started without WAYLAND_DISPLAY (issue #32):\n" + journal
               )
 
+      with subtest("oom-policy drop-in reaches uwsm's package-shipped unit"):
+          # The template drop-in must merge into the running instance of the
+          # uwsm package's wayland-wm@.service — otherwise one kernel OOM
+          # kill inside the compositor cgroup stops the unit and tears the
+          # whole session down (OOMPolicy=stop default).
+          oom = uwsm_user(
+              "systemctl --user show -p OOMPolicy wayland-wm@hyprland.desktop.service"
+          ).strip()
+          assert oom == "OOMPolicy=continue", oom
+
+      with subtest("uwsm app launches escape the compositor unit's cgroup"):
+          # What the launch/launchLocal keybinding helpers rely on: the
+          # launched app gets its own transient scope instead of living (and
+          # being OOM-accounted) inside wayland-wm@'s cgroup.
+          uwsm_user(
+              "systemd-run --user --unit=uwsm-app-probe -- uwsm app -- sleep 600"
+          )
+          machine.wait_until_succeeds("pgrep -u uwsmtester -fx 'sleep 600'")
+          cgroup = machine.succeed(
+              "cat /proc/$(pgrep -u uwsmtester -fx 'sleep 600')/cgroup"
+          )
+          assert "wayland-wm@" not in cgroup, cgroup
+          assert ".scope" in cgroup, cgroup
+          machine.succeed("pkill -u uwsmtester -fx 'sleep 600'")
+
       with subtest("uwsm stop tears the omarchy units down with the session"):
           # Stopping while session activation jobs are still queued is
           # refused as a destructive transaction; let the graph settle.
