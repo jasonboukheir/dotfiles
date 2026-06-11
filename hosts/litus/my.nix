@@ -65,6 +65,18 @@
     rg.enable = true;
     fd.enable = true;
     rga.enable = true;
+
+    # package defaults to master's claude-code (the claude-code-master overlay);
+    # theme comes from system stylix polarity. ~/.claude + CLAUDE.md stay
+    # writable runtime state (the seed-and-accept carve-out, out of my.*).
+    claude-code = {
+      enable = true;
+      settings = {
+        autoMemoryEnabled = false;
+        effortLevel = "high";
+        permissions.defaultMode = "auto";
+      };
+    };
   };
 
   # fish + nvf build at the system scope. fish becomes the system fish wrapper
