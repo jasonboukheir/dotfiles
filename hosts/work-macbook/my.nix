@@ -1,9 +1,9 @@
 # Dogfoods the my.* wrapped-package surface (per-user scope) on work-macbook.
-# Each tool below replaces an old home-manager/system module path, which is
-# disabled in the same place so jasonbk ends up with exactly one of each. The
-# fish system integration (nix env on PATH, /etc/shells) is wired automatically
-# by modules/my/nix-darwin.nix when my.fish is enabled; only the login-shell
-# choice lives here.
+# This host is home-manager-free (#55), so the old per-user HM program paths are
+# simply gone; the only legacy path still explicitly disabled is the system git
+# module (see programs.git.enable below). The fish system integration (nix env
+# on PATH, /etc/shells) is wired automatically by modules/my/nix-darwin.nix when
+# my.fish is enabled; only the login-shell choice lives here.
 {
   config,
   lib,
@@ -131,14 +131,6 @@ in {
   # Make the my.fish wrapper jasonbk's login shell (modules/my/nix-darwin.nix
   # handles the programs.fish system integration + /etc/shells registration).
   users.users.jasonbk.shell = lib.mkForce fishWrapper;
-
-  # Old per-user (home-manager) program paths, superseded by my.* above.
-  home-manager.users.jasonbk.programs = {
-    git.enable = lib.mkForce false;
-    jujutsu.enable = lib.mkForce false;
-    starship.enable = lib.mkForce false;
-    fish.enable = lib.mkForce false;
-  };
 
   # Old system program path (modules/darwin/programs/git.nix), superseded by
   # my.git above.
