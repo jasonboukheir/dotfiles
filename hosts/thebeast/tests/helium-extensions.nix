@@ -1,7 +1,8 @@
-# The helium External Extensions carve-out (../helium.nix): tmpfiles seeds the
-# fixed-path manifests under ~/.config/net.imput.helium for jasonbk, and —
-# being seed-and-accept — never clobbers a manifest Helium has since rewritten.
-# my.helium.package is stubbed so the test doesn't fetch the real browser.
+# my.helium.extensions must reach Helium through the channel its
+# ungoogled-chromium base honors: a Chromium ExtensionInstallForcelist managed
+# policy under /etc/chromium/policies/managed (../helium.nix), rendered by the
+# framework's `etc` hook from a per-user scope. my.helium.package is stubbed so
+# the test doesn't fetch the real browser.
 {
   pkgs,
   inputs,
@@ -30,7 +31,7 @@ pkgs.testers.nixosTest {
   testScript = ''
     import json
 
-    extensions_dir = "/home/jasonbk/.config/net.imput.helium/External Extensions"
+    policy = "/etc/chromium/policies/managed/helium-extensions.json"
     extension_ids = [
         "aeblfdkhhhdcdjpifhhbdiojplfjncoa",
         "dphilobhebphkdjbpfohgikllaljmgbn",
@@ -38,22 +39,12 @@ pkgs.testers.nixosTest {
 
     machine.wait_for_unit("multi-user.target")
 
-    with subtest("tmpfiles seeds a manifest per extension, owned by jasonbk"):
-        for ext_id in extension_ids:
-            manifest = f"{extensions_dir}/{ext_id}.json"
-            machine.succeed(f"test -f '{manifest}'")
-            machine.succeed(f"[ \"$(stat -c %U:%a '{manifest}')\" = jasonbk:644 ]")
-            content = json.loads(machine.succeed(f"cat '{manifest}'"))
-            assert content["external_update_url"] == (
-                "https://clients2.google.com/service/update2/crx"
-            ), f"unexpected manifest content: {content!r}"
-        machine.succeed(f"[ \"$(stat -c %U '{extensions_dir}')\" = jasonbk ]")
-
-    with subtest("seeding is seed-and-accept: a rewritten manifest is left alone"):
-        manifest = f"{extensions_dir}/{extension_ids[0]}.json"
-        machine.succeed(f"su -l jasonbk -c 'echo helium-owns-this > \"{manifest}\"'")
-        machine.succeed("systemd-tmpfiles --create")
-        machine.succeed(f"grep -q helium-owns-this '{manifest}'")
+    with subtest("a per-user my.helium.extensions list renders a system forcelist policy"):
+        machine.succeed(f"test -f '{policy}'")
+        content = json.loads(machine.succeed(f"cat '{policy}'"))
+        assert content["ExtensionInstallForcelist"] == extension_ids, (
+            f"unexpected forcelist: {content!r}"
+        )
 
     with subtest("my.helium installs the (stubbed) browser on jasonbk's PATH"):
         machine.succeed("su -l jasonbk -c 'helium' | grep -q helium-stub")

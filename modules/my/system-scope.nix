@@ -50,6 +50,16 @@
       lib.optional scopeMy.${toolName}.enable scopeMy.${toolName}.finalPackage)
     defs);
 
+  # A def may carry an `etc` hook mapping its resolved cfg to environment.etc
+  # entries (e.g. a browser's managed-policy file). Collected from every enabled
+  # tool in a scope; merged across all scopes below. The hook reads `lib`/`pkgs`
+  # from the def's own closure, so it only needs `cfg`.
+  etcFor = scopeMy:
+    lib.mkMerge (lib.concatLists (lib.mapAttrsToList (toolName: def:
+      lib.optional (def ? etc && scopeMy.${toolName}.enable)
+      (def.etc {cfg = removeAttrs scopeMy.${toolName} ["finalPackage"];}))
+    defs));
+
   assertionsFor = scopeMy:
     lib.concatLists (lib.mapAttrsToList (toolName: def:
       lib.optionals (scopeMy.${toolName}.enable && def ? assertions) (def.assertions {
@@ -123,6 +133,14 @@ in {
     {
       environment.systemPackages = installFor config.my;
       assertions = assertionsFor config.my;
+    }
+    {
+      # Managed policy and other /etc state is system-global, so def `etc`
+      # contributions from the per-user scopes surface here at the system level.
+      environment.etc = lib.mkMerge (
+        [(etcFor config.my)]
+        ++ lib.mapAttrsToList (_name: userCfg: etcFor userCfg.my) config.users.users
+      );
     }
   ];
 }
