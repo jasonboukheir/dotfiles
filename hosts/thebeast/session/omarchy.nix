@@ -1,6 +1,6 @@
 {config, ...}: {
   # jasonbk's omarchy/Hyprland session. Part of the desktop-session
-  # surface SDDM/plasma-login-manager hands off to.
+  # surface SDDM hands off to.
   omarchy.enable = true;
 
   # The uwsm-managed session entry is the one the greeter should land
@@ -9,6 +9,11 @@
     if config.omarchy.uwsm.enable
     then "hyprland-uwsm"
     else "hyprland";
+
+  # gamer no longer runs Plasma — Steam's "Switch to Desktop" hands off to
+  # the same Hyprland entry the greeter preselects (jovian-setup-desktop-session
+  # records it with steamos-manager, so it must name a session that exists).
+  gaming.defaultDesktopSession = config.thebeast.greeterDefaultSession;
   omarchy.monitor = {
     mode = "5120x1440@120";
     vrr = 1;

@@ -55,10 +55,10 @@ in {
         hyprland-uwsm.desktop entry starts (`uwsm start … hyprland.desktop`).
         It is deliberately not `graphical-session.target` as issue #40
         originally planned: jovian binds its steam units to
-        graphical-session.target inside the gamescope session (and Plasma
-        starts it too), so anything gated there would leak into game mode
-        and gamer's Plasma. The uwsm per-compositor target only exists in
-        the Hyprland session, and its `wayland-wm@.service` dependency is
+        graphical-session.target inside the gamescope session, so anything
+        gated there would leak into game mode. The uwsm per-compositor
+        target only exists in the Hyprland session, and its
+        `wayland-wm@.service` dependency is
         Type=notify — `uwsm finalize` exports WAYLAND_DISPLAY into the
         activation environment before notifying — so services ordered
         After it still see the socket on their first attempt (issue #32).

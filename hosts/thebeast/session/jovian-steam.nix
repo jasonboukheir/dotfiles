@@ -5,18 +5,9 @@
   ...
 }: let
   cfg = config.gaming;
-  # The canonical DM unit differs per DM: plasma-login-manager ships a
-  # real `plasmalogin.service` and only aliases `display-manager.service`
-  # (systemd.services overrides keyed by an alias get clobbered by the
-  # alias-generation pass), while NixOS's sddm path skips the upstream
-  # unit entirely and execs sddm from `display-manager.service` itself.
-  dmUnit =
-    if config.thebeast.displayManager == "plasma-login-manager"
-    then "plasmalogin"
-    else "display-manager";
 in {
   options.gaming.enable =
-    lib.mkEnableOption "Jovian + Steam + plasma desktop session for the gamer user";
+    lib.mkEnableOption "Jovian + Steam session for the gamer user";
 
   config = lib.mkIf cfg.enable {
     jovian.steam = {
@@ -35,8 +26,6 @@ in {
       localNetworkGameTransfers.openFirewall = true;
     };
     programs.gamemode.enable = true;
-
-    services.desktopManager.plasma6.enable = true;
 
     environment.systemPackages = with pkgs; [
       cmake
@@ -67,7 +56,7 @@ in {
     # boot when wifi is slow but eliminates the race entirely. The
     # `wait-online` service is `mkDefault true` when NM is enabled, so
     # nothing else needs to be flipped on.
-    systemd.services.${dmUnit} = {
+    systemd.services.display-manager = {
       wants = ["network-online.target"];
       after = ["network-online.target"];
     };

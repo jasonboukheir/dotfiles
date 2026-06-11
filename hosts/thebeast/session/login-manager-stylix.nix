@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  dmCfg = config.thebeast;
   # The greeter's KDE *color-scheme* seeding (kdeglobals/kcminputrc +
   # the LookAndFeelPackage entry) used to borrow the gamer user's
   # home-manager stylix `kde` target outputs (stylix-kde-theme /
@@ -12,8 +11,10 @@
   # stylix `kde` target only exists in the HM stylix module, so that
   # block was dropped. The greeter wallpaper below survives because it
   # comes from system stylix (config.stylix.image), not HM.
-  # TODO(#78): re-derive a system-stylix KDE theme/config for the
-  # greeter (and gamer's Plasma), or retire KDE on gamer.
+  # gamer no longer runs Plasma (it shares jasonbk's Hyprland session), so
+  # the only KDE surface left to theme is the greeter itself.
+  # TODO(#78): re-derive a system-stylix KDE color-scheme for the SDDM
+  # greeter, or move it to a non-KDE greeter theme.
   wallpaper =
     if (config ? stylix) && (config.stylix.enable or false)
     then config.stylix.image or null
@@ -35,18 +36,16 @@
       > $out/share/sddm/themes/breeze-stylix/theme.conf.user
   '';
 in {
-  config = lib.mkMerge [
-    (lib.mkIf (dmCfg.displayManager == "sddm" && wallpaper != null) {
-      environment.systemPackages = [breezeStylixTheme];
-      services.displayManager.sddm = {
-        theme = "breeze-stylix";
-        # The sddm module's breeze cursor defaults key off the literal
-        # theme name "breeze"; replicate them for the renamed copy.
-        settings.Theme = {
-          CursorTheme = "breeze_cursors";
-          CursorSize = 24;
-        };
+  config = lib.mkIf (wallpaper != null) {
+    environment.systemPackages = [breezeStylixTheme];
+    services.displayManager.sddm = {
+      theme = "breeze-stylix";
+      # The sddm module's breeze cursor defaults key off the literal
+      # theme name "breeze"; replicate them for the renamed copy.
+      settings.Theme = {
+        CursorTheme = "breeze_cursors";
+        CursorSize = 24;
       };
-    })
-  ];
+    };
+  };
 }

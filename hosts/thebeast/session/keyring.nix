@@ -11,9 +11,8 @@
   # pam_gnome_keyring unlocks the login keyring with the login password at
   # greeter login and claims org.freedesktop.secrets before any client asks,
   # so ksecretd is never activated. The login pam stack covers the greeter
-  # and gamer's autologin under either DM: both sddm and plasmalogin
-  # substack/include login (sddm-autologin includes sddm, which includes
-  # login).
+  # and gamer's autologin under SDDM (sddm-autologin includes sddm, which
+  # includes login).
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
 }

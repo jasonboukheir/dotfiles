@@ -2,9 +2,8 @@
 # HM-stylix's home.pointerCursor used to carry (issue #48). GTK loads
 # settings.ini from every XDG_CONFIG_DIRS entry and then XDG_CONFIG_HOME,
 # merging per-key with later files winning — so this /etc/xdg fallback
-# supplies the icon and cursor themes wherever the user file doesn't set
-# them, while Plasma's GTK Settings Sync keeps owning gamer's user files
-# outright.
+# supplies the icon and cursor themes wherever a user's own file doesn't
+# set them.
 {
   config,
   lib,

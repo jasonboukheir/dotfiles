@@ -24,7 +24,6 @@ pkgs.testers.nixosTest {
     devUser = "jasonbk";
     sessionsRoot = "${cfg.services.displayManager.sessionData.desktops}/share";
     defaultDesktopSession = cfg.gaming.defaultDesktopSession;
-    gamerDesktopDir = "/home/${gamingUser}/Desktop";
   in ''
     import configparser
 
@@ -32,7 +31,6 @@ pkgs.testers.nixosTest {
     DEV_USER = "${devUser}"
     SESSIONS_ROOT = "${sessionsRoot}"
     DEFAULT_DESKTOP_SESSION = "${defaultDesktopSession}"
-    GAMER_DESKTOP_DIR = "${gamerDesktopDir}"
 
     def read_sddm_conf():
         """Read the merged sddm config.
@@ -98,9 +96,9 @@ pkgs.testers.nixosTest {
 
     with subtest("display-manager is sddm, not plasma-login-manager or greetd"):
         # The host flipped back to SDDM for the UWSM path (#48 plan);
-        # verify display-manager.service actually execs sddm and that
-        # plasma-login-manager is fully disabled (no plasmalogin config
-        # tree).
+        # verify display-manager.service actually execs sddm. The
+        # plasma-login-manager path was removed entirely, so its config
+        # tree must never reappear (guards against accidental revival).
         dm_unit = machine.succeed(
             "systemctl cat display-manager.service"
         )
@@ -108,8 +106,8 @@ pkgs.testers.nixosTest {
             f"display-manager.service should exec sddm:\n{dm_unit}"
         status, _ = machine.execute("test -e /etc/plasmalogin.conf.d")
         assert status != 0, (
-            "plasma-login-manager should be disabled when sddm is "
-            "the active DM; /etc/plasmalogin.conf.d still exists"
+            "plasma-login-manager was removed; /etc/plasmalogin.conf.d "
+            "should not exist"
         )
 
     with subtest("autologin honours the standard displayManager contract"):
@@ -152,8 +150,8 @@ pkgs.testers.nixosTest {
 
     with subtest("session files for all entry points exist; bare hyprland is hidden"):
         # gamescope-wayland: jovian default, runs on first boot.
-        # plasma: the Switch-to-Desktop target.
-        # hyprland-uwsm: jasonbk's pick from the greeter.
+        # hyprland-uwsm: the Switch-to-Desktop target and the greeter pick
+        # for both users (DEFAULT_DESKTOP_SESSION resolves to it).
         # hyprland: the bare entry — must stay on disk (the uwsm entry's
         # `uwsm start … hyprland.desktop` resolves it, and providedSessions
         # validation needs the file) but carry NoDisplay so the greeter
@@ -251,50 +249,6 @@ pkgs.testers.nixosTest {
         # SessionManagement1 interface — without it Switch-to-Desktop
         # never even appears. Jovian writes it whenever autoStart is on.
         machine.succeed("test -e /etc/sddm.conf.d/steamos.conf")
-
-    with subtest("switch-to-big-picture: installed, surfaced, unprivileged"):
-        # Plasma's desktop shortcut lives in gamer's ~/Desktop and must
-        # resolve to a live store path. A dangling symlink (a previous
-        # closure GC'd) silently drops the icon. The .desktop entry and
-        # its referenced script are deliberately NOT in
-        # /run/current-system/sw — see big-picture.nix for the security
-        # rationale — so the gamer desktop symlink is the canonical
-        # entry point everything else has to be derived from.
-        machine.succeed(f"test -L {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop")
-        desktop_target = machine.succeed(
-            f"readlink -f {GAMER_DESKTOP_DIR}/switch-to-big-picture.desktop"
-        ).strip()
-        machine.succeed(f"test -e {desktop_target}")
-
-        # The wrapper must actually shut Steam down before relaunching —
-        # otherwise the existing window keeps the single-instance lock
-        # and `steam -gamepadui` no-ops back into the same window. Both
-        # the shutdown call and the gamepadui exec must appear in the
-        # rendered script, which the .desktop entry points to via Exec=.
-        desktop_entry = machine.succeed(f"cat {desktop_target}")
-        exec_path = next(
-            line.split("=", 1)[1].strip()
-            for line in desktop_entry.splitlines()
-            if line.startswith("Exec=")
-        )
-        bp_script = machine.succeed(f"cat {exec_path}")
-        assert "steam -shutdown" in bp_script, \
-            f"big-picture wrapper missing shutdown call:\n{bp_script}"
-        assert "steam -gamepadui" in bp_script, \
-            f"big-picture wrapper missing gamepadui launch:\n{bp_script}"
-
-        # The wrapper must NOT escalate (no sudo). Real Steam fails in
-        # the headless VM (no display, no session bus) so the wrapper's
-        # `exec steam -gamepadui` exits non-zero — that's expected and
-        # tells us we got past the in-process branches. What we're
-        # ruling out is silently routing through a privileged path.
-        status, output = machine.execute(
-            f"sudo -u {GAMING_USER} {exec_path} 2>&1"
-        )
-        assert status != 0, \
-            f"big-picture wrapper unexpectedly succeeded headless: {output!r}"
-        assert "a password is required" not in output and "sudo:" not in output, \
-            f"big-picture wrapper must not call sudo: {output!r}"
 
   '';
 }
