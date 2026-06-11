@@ -114,13 +114,32 @@ in
           machine.wait_until_succeeds(f"test -S {run_dir}/wayland-1")
           user("systemctl --user set-environment WAYLAND_DISPLAY=wayland-1")
 
-      with subtest("clipse and wl-clip-persist start and stay active"):
-          user("systemctl --user start clipse wl-clip-persist")
-          for svc in ("clipse", "wl-clip-persist"):
-              machine.wait_until_succeeds(
-                  f"su - tester -c 'export XDG_RUNTIME_DIR={run_dir}; "
-                  f"systemctl --user is-active {svc}'"
-              )
+      with subtest("clipse starts and stays active"):
+          user("systemctl --user start clipse")
+          machine.wait_until_succeeds(
+              f"su - tester -c 'export XDG_RUNTIME_DIR={run_dir}; "
+              "systemctl --user is-active clipse'"
+          )
+
+      with subtest("wl-clip-persist launches with the wayland env delivered"):
+          # Headless weston exposes no {ext,zwlr}-data-control global, so
+          # wl-clip-persist can never stay up here (under real Hyprland's
+          # wlroots protocols it does); it crash-loops into its start rate
+          # limit. Reaching the missing-protocol error proves the unit got
+          # WAYLAND_DISPLAY — failing to connect at all would mean it didn't.
+          machine.execute(
+              f"su - tester -c 'export XDG_RUNTIME_DIR={run_dir}; "
+              "systemctl --user start wl-clip-persist || true'"
+          )
+          # _UID instead of --user-unit: the user-unit match comes up empty in
+          # these test VMs (even as an explicit _SYSTEMD_USER_UNIT= field), so
+          # filter by uid and grep the syslog-identified lines.
+          machine.wait_until_succeeds(
+              f"journalctl _UID={uid} "
+              "| grep -q 'Failed to get clipboard manager'"
+          )
+          journal = machine.succeed(f"journalctl _UID={uid} | grep wl-clip-persist")
+          assert "Failed to connect to wayland server" not in journal, journal
 
       with subtest("hyprsunset is attempted with the right binary"):
           # hyprsunset speaks Hyprland-specific protocols, so under weston it
@@ -132,8 +151,11 @@ in
               f"su - tester -c 'export XDG_RUNTIME_DIR={run_dir}; "
               "systemctl --user start hyprsunset'"
           )
+          # grep for the unit name, not '.': --user-unit matches nothing in
+          # these VMs, and journalctl's literal "-- No entries --" output
+          # would satisfy a match-anything grep vacuously.
           machine.wait_until_succeeds(
-              f"journalctl --user-unit=hyprsunset _UID={uid} | grep -q ."
+              f"journalctl _UID={uid} | grep -q 'hyprsunset.service'"
           )
           state = user(
               "systemctl --user show -p ActiveState,SubState hyprsunset"
@@ -170,8 +192,15 @@ in
               "printf \"[Desktop Entry]\\nName=Hyprland (stub)\\nExec=stub-compositor\\nType=Application\\n\" "
               "> ~/.local/share/wayland-sessions/hyprland.desktop'"
           )
+          # uwsm >= 0.26 requires the login session identity (XDG_SESSION_ID/
+          # XDG_SEAT/XDG_VTNR) in `uwsm start`'s environment — production gets
+          # them from the display manager's PAM stack; without them the env
+          # preloader falls back to logind VT deduction, which has no session
+          # to find under this linger-only user manager and kills the graph.
           uwsm_user(
-              "systemd-run --user --unit=uwsm-session -- uwsm start hyprland.desktop"
+              "systemd-run --user --unit=uwsm-session "
+              "--setenv=XDG_SESSION_ID=1 --setenv=XDG_SEAT=seat0 --setenv=XDG_VTNR=1 "
+              "-- uwsm start hyprland.desktop"
           )
           machine.wait_until_succeeds(
               f"su - uwsmtester -c 'export XDG_RUNTIME_DIR={uwsm_run_dir}; "
@@ -179,29 +208,52 @@ in
               timeout=60,
           )
 
-          # The env race is the whole point: clipse and wl-clip-persist die
-          # instantly without WAYLAND_DISPLAY, so active + zero restarts
-          # means the activation environment carried the socket on the
-          # very first start. mako is the same but dbus-activated-capable.
           env = uwsm_user("systemctl --user show-environment")
           assert "WAYLAND_DISPLAY=wayland-uwsm" in env, (
               "uwsm finalize should have exported WAYLAND_DISPLAY:\n" + env
           )
-          for svc in ("clipse", "wl-clip-persist", "mako"):
+          machine.wait_until_succeeds(
+              f"su - uwsmtester -c 'export XDG_RUNTIME_DIR={uwsm_run_dir}; "
+              "systemctl --user is-active clipse'",
+              timeout=30,
+          )
+
+          # The env race is the whole point (issue #32), but headless weston
+          # can't keep the wlroots-protocol clients alive: wl-clip-persist
+          # needs a data-control global and mako needs zwlr_layer_shell_v1
+          # (both exist under real Hyprland). Each missing-protocol error
+          # still only happens once the client has already connected to
+          # WAYLAND_DISPLAY, so reaching it on the very first start — and
+          # never the connect-time error — proves the activation environment
+          # carried the socket from the start.
+          env_race_canaries = {
+              "wl-clip-persist": (
+                  "Failed to get clipboard manager",
+                  "Failed to connect to wayland server",
+              ),
+              "mako": (
+                  "compositor doesn't support zwlr_layer_shell_v1",
+                  "failed to connect to display",
+              ),
+          }
+          for svc, (protocol_err, connect_err) in env_race_canaries.items():
               machine.wait_until_succeeds(
-                  f"su - uwsmtester -c 'export XDG_RUNTIME_DIR={uwsm_run_dir}; "
-                  f"systemctl --user is-active {svc}'",
+                  f"journalctl _UID={uwsm_uid} | grep -q \"{protocol_err}\"",
                   timeout=30,
               )
-              n_restarts = uwsm_user(
-                  f"systemctl --user show -p NRestarts --value {svc}"
-              ).strip()
-              assert n_restarts == "0", (
-                  f"{svc} restarted {n_restarts} time(s) — it must come up "
-                  "first-try with WAYLAND_DISPLAY already present (issue #32)"
+              journal = machine.succeed(f"journalctl _UID={uwsm_uid} | grep {svc}")
+              assert connect_err not in journal, (
+                  f"{svc} started without WAYLAND_DISPLAY (issue #32):\n" + journal
               )
 
       with subtest("uwsm stop tears the omarchy units down with the session"):
+          # Stopping while session activation jobs are still queued is
+          # refused as a destructive transaction; let the graph settle.
+          machine.wait_until_succeeds(
+              f"su - uwsmtester -c 'export XDG_RUNTIME_DIR={uwsm_run_dir}; "
+              "systemctl --user list-jobs | grep -q \"No jobs\"'",
+              timeout=30,
+          )
           uwsm_user("uwsm stop")
           machine.wait_until_fails(
               f"su - uwsmtester -c 'export XDG_RUNTIME_DIR={uwsm_run_dir}; "
