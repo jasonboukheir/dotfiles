@@ -14,12 +14,18 @@
   cfg = config.omarchy;
 
   # System stylix cursor (the per-user stylix cursor has no consumer here —
-  # /etc/xdg is one system-scope file); guarded so hosts and tests without
-  # the stylix module still evaluate. stylix.cursor is all-or-none asserted,
-  # so name/package/size are all non-null once it is set.
-  cursor =
-    if config ? stylix && (config.stylix.cursor or null) != null
-    then config.stylix.cursor
+  # /etc/xdg is one system-scope file). The real stylix asserts cursor
+  # name/package/size all-or-none, so keying on package alone is exact there;
+  # it also keeps hosts and tests without the stylix module — or with a
+  # partial stub that only sets cursor.size (my-hyprland-config) — evaluating.
+  cursor = let
+    c =
+      if config ? stylix
+      then config.stylix.cursor or null
+      else null;
+  in
+    if c != null && (c.package or null) != null
+    then c
     else null;
 
   settingsIni = lib.generators.toINI {} {
