@@ -89,6 +89,11 @@ in {
     rg.enable = true;
     fd.enable = true;
 
+    # ghostty-bin (the upstream .app) wrapped for PATH launches; Dock launches
+    # pick the same baked config up via the Application Support symlink seeded
+    # by modules/darwin/programs/ghostty.nix.
+    ghostty.enable = true;
+
     # claude is preinstalled on the work machine; my.* installs nothing and the
     # preinstalled binary owns its own ~/.claude (the seed-and-accept carve-out).
     claude-code = {

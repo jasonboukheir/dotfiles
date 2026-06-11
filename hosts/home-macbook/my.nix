@@ -35,6 +35,11 @@
 
     rg.enable = true;
     fd.enable = true;
+
+    # ghostty-bin (the upstream .app) wrapped for PATH launches; Dock launches
+    # pick the same baked config up via the Application Support symlink seeded
+    # by modules/darwin/programs/ghostty.nix.
+    ghostty.enable = true;
   };
 
   # nvf stays at the system scope (a system-wide neovim): the per-user my.*

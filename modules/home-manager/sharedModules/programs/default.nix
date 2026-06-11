@@ -6,7 +6,6 @@
     ./_1password.nix
     ./direnv.nix
     ./fish.nix
-    ./ghostty.nix
     ./kvantum.nix
     ./zmx.nix
     ./ssh.nix

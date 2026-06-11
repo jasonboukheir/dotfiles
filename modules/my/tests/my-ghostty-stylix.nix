@@ -42,6 +42,12 @@ in
         stylix = {
           enable = true;
           inherit colors;
+          fonts = {
+            monospace.name = "Test Mono";
+            emoji.name = "Test Emoji";
+            sizes.terminal = 14;
+          };
+          opacity.terminal = 0.97;
         };
         my.stylix.enable = true;
         my.ghostty.enable = true;
@@ -68,6 +74,16 @@ in
           # base16 → ansi: slot 1 = base08 (red), slot 4 = base0D (blue).
           machine.succeed(f"grep -aq 'palette = 1=#${colors.base08}' {config}")
           machine.succeed(f"grep -aq 'palette = 4=#${colors.base0D}' {config}")
+
+      with subtest("stylix fonts and opacity land in the baked ghostty config"):
+          machine.succeed(f"grep -aq 'font-family = Test Mono' {config}")
+          machine.succeed(f"grep -aq 'font-family = Test Emoji' {config}")
+          # No 4/3 dpi scaling on Linux: the stylix size passes through.
+          machine.succeed(f"grep -aq 'font-size = 14' {config}")
+          machine.succeed(f"grep -aq 'background-opacity = 0.97' {config}")
+
+      with subtest("the def's base settings are baked below the theme"):
+          machine.succeed(f"grep -aq 'window-theme = auto' {config}")
 
       with subtest("the wrapped ghostty launches and accepts the injected theme"):
           # The wrapper prepends --config-file=<theme>, so validating with no
