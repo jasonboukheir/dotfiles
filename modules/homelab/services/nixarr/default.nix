@@ -48,6 +48,11 @@ in {
     jellyfin = lib.mkIf cfg.jellyfin.enable {
       enable = true;
       proxyPass = "http://localhost:${toString jellyfinPort}";
+      # Jellyfin 10.11's chunked direct-play delivery fetches the next chunk
+      # at the last possible moment and can go quiet in between; the 60s
+      # default proxy_read_timeout turns that pause into a killed connection
+      # mid-playback. https://github.com/jellyfin/jellyfin/issues/15237
+      proxyReadTimeout = "600s";
       # nginx buffers the response to a temp file by default and throttles
       # reads from Jellyfin while buffers drain, which stalls high-bitrate 4K
       # direct play (plays a few seconds, then freezes). Jellyfin 10.11's
