@@ -9,16 +9,15 @@
 }: {
   config = lib.mkIf config.omarchy.enable {
     my.hyprlock.enable = lib.mkDefault true;
-    my.hyprlock.settings.general = {
-      hide_cursor = lib.mkDefault true;
-      grace = lib.mkDefault 2;
-      no_fade_in = lib.mkDefault false;
-    };
+    my.hyprlock.settings.general.hide_cursor = lib.mkDefault true;
 
     my.hypridle.enable = lib.mkDefault true;
     my.hypridle.settings = {
       general = {
-        lock_cmd = lib.mkDefault "pidof hyprlock || hyprlock";
+        # hyprlock 0.9 dropped general:{grace,no_fade_in} from the config
+        # (fade-in is now on by default via animations:enabled); grace
+        # survives only as a CLI flag.
+        lock_cmd = lib.mkDefault "pidof hyprlock || hyprlock --grace 2";
         before_sleep_cmd = lib.mkDefault "loginctl lock-session";
         after_sleep_cmd = lib.mkDefault "hyprctl dispatch dpms on";
       };

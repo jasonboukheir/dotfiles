@@ -10,19 +10,33 @@
   execLocal = name: inline "hl.dsp.exec_cmd(${name})";
   dsp = expr: inline "hl.dsp.${expr}";
 
+  # Raw exec keeps the spawned app (and all its children) inside the
+  # compositor's wayland-wm@ cgroup; `uwsm app` moves each launch into its
+  # own scope so OOM kills and memory accounting stay with the app instead
+  # of the session. Use these for long-running apps, plain exec for
+  # short-lived utilities.
+  launch = cmd:
+    if config.omarchy.uwsm.enable
+    then exec "uwsm app -- ${cmd}"
+    else exec cmd;
+  launchLocal = name:
+    if config.omarchy.uwsm.enable
+    then inline ''hl.dsp.exec_cmd("uwsm app -- " .. ${name})''
+    else execLocal name;
+
   bind = keys: dispatcher: {_args = [keys dispatcher];};
   bindFlags = keys: dispatcher: flags: {_args = [keys dispatcher flags];};
 
   appLauncherBinds = [
-    (bind "ALT + C" (execLocal "calendar"))
-    (bind "ALT + R" (execLocal "reminders"))
-    (bind "ALT + return" (execLocal "terminal"))
-    (bind "ALT + F" (execLocal "fileManager"))
-    (bind "ALT + B" (execLocal "browser"))
-    (bind "ALT + M" (execLocal "music"))
-    (bind "ALT + Z" (execLocal "editor"))
-    (bind "ALT + G" (execLocal "messenger"))
-    (bind "ALT + slash" (execLocal "passwordManager"))
+    (bind "ALT + C" (launchLocal "calendar"))
+    (bind "ALT + R" (launchLocal "reminders"))
+    (bind "ALT + return" (launchLocal "terminal"))
+    (bind "ALT + F" (launchLocal "fileManager"))
+    (bind "ALT + B" (launchLocal "browser"))
+    (bind "ALT + M" (launchLocal "music"))
+    (bind "ALT + Z" (launchLocal "editor"))
+    (bind "ALT + G" (launchLocal "messenger"))
+    (bind "ALT + slash" (launchLocal "passwordManager"))
   ];
 
   workspaceBinds = builtins.concatMap (n: let
@@ -42,7 +56,9 @@ in {
       appLauncherBinds
       ++ workspaceBinds
       ++ [
-        (bind "SUPER + space" (exec "wofi --show drun --sort-order=alphabetical"))
+        # Wrapping wofi also pulls everything it launches out of the
+        # compositor cgroup (children stay in wofi's scope).
+        (bind "SUPER + space" (launch "wofi --show drun --sort-order=alphabetical"))
         (bind "CTRL + SHIFT + SPACE" (exec "pkill -SIGUSR1 waybar"))
 
         (bind "CTRL + Backspace" (dsp "window.close()"))
@@ -91,11 +107,11 @@ in {
         (bind "SUPER + SHIFT + 3" (exec "hyprshot -m output"))
         (bind "SUPER + SHIFT + 5" (exec "hyprshot -m window"))
 
-        (bind "XF86Tools" (exec "gpu-screen-recorder-gtk"))
+        (bind "XF86Tools" (launch "gpu-screen-recorder-gtk"))
 
         (bind "ALT + PRINT" (exec "hyprpicker -a"))
 
-        (bind "CTRL + ALT + V" (exec "ghostty --class clipse -e clipse"))
+        (bind "CTRL + ALT + V" (launch "ghostty --class clipse -e clipse"))
 
         # Mouse drag/resize (hyprlang bindm)
         (bindFlags "ALT + mouse:272" (dsp "window.drag()") {mouse = true;})
