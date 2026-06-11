@@ -86,6 +86,12 @@ in {
 
     rg.enable = true;
     fd.enable = true;
+    rga.enable = true;
+
+    weechat = {
+      enable = true;
+      irc.enable = true;
+    };
 
     # Linux ghostty is exec-launched, so the baked --config-file wrapper reaches
     # it (unlike a darwin GUI .app); my.ghostty's stylix target re-bakes the
@@ -124,10 +130,9 @@ in {
     };
 
     nvf.enable = true;
-  };
 
-  # rga isn't covered by my.rg (ripgrep only); keep it on jasonbk's profile.
-  users.users.jasonbk.packages = [pkgs.ripgrep-all];
+    zmx.enable = true;
+  };
 
   # Make the my.fish wrapper jasonbk's login shell, replacing the plain pkgs.fish
   # from modules/nixos/users.nix (which would otherwise also land in

@@ -88,6 +88,7 @@ in {
 
     rg.enable = true;
     fd.enable = true;
+    rga.enable = true;
 
     # ghostty-bin (the upstream .app) wrapped for PATH launches; Dock launches
     # pick the same baked config up via the Application Support symlink seeded
@@ -126,9 +127,6 @@ in {
       pluginPath = metaNvimPath;
     };
   };
-
-  # rga isn't covered by my.rg (ripgrep only); keep it on jasonbk's profile.
-  users.users.jasonbk.packages = [pkgs.ripgrep-all];
 
   # Make the my.fish wrapper jasonbk's login shell (modules/my/nix-darwin.nix
   # handles the programs.fish system integration + /etc/shells registration).

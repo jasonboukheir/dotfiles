@@ -68,6 +68,7 @@
 
     rg.enable = true;
     fd.enable = true;
+    rga.enable = true;
 
     claude-code = {
       enable = true;
@@ -98,10 +99,9 @@
     };
 
     nvf.enable = true;
-  };
 
-  # rga isn't covered by my.rg (ripgrep only); keep it on jasonbk's profile.
-  users.users.jasonbk.packages = [pkgs.ripgrep-all];
+    zmx.enable = true;
+  };
 
   # Make the my.fish wrapper jasonbk's login shell, replacing the plain pkgs.fish
   # from modules/nixos/users.nix (which would otherwise also land in

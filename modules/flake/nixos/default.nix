@@ -87,7 +87,7 @@
               thebeast-steamos-autologin = import ../../../hosts/thebeast/tests/steamos-autologin.nix {
                 inherit pkgs inputs;
               };
-              thebeast-hm-stale-kvantum = import ../../../hosts/thebeast/tests/hm-stale-kvantum.nix {
+              thebeast-helium-extensions = import ../../../hosts/thebeast/tests/helium-extensions.nix {
                 inherit pkgs inputs;
               };
               brutus-matrix = import ../../../hosts/brutus/tests/matrix.nix {

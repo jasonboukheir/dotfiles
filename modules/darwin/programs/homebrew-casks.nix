@@ -74,5 +74,12 @@ in {
       (lib.filterAttrs (_: v: v.enable))
       (lib.mapAttrsToList (_: v: v.caskName))
     ];
+
+    # The bin/ shims used to reach PATH through a home-manager forwarder
+    # (programs.<name>.package); install them system-wide instead.
+    environment.systemPackages = lib.pipe cfg [
+      (lib.filterAttrs (_: v: v.enable && v.binaries != {}))
+      (lib.mapAttrsToList (_: v: v.package))
+    ];
   };
 }

@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{lib, ...}: let
   proxyUrl = "http://[::1]:18082";
   noProxy = ".fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost";
   sshKeyPath = "~/.ssh/id_ed25519";
@@ -25,15 +21,15 @@ in {
 
   my.nvf.meta.enable = true;
 
+  my.fd.enable = true;
+  my.rg.enable = true;
+  my.rga.enable = true;
+  my.zmx.enable = true;
+
   home = {
     username = "jasonbk";
     homeDirectory = "/home/jasonbk";
     stateVersion = "25.11";
-    packages = with pkgs; [
-      fd
-      ripgrep
-      ripgrep-all
-    ];
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
@@ -59,8 +55,6 @@ in {
     };
 
     git.settings.user.signingKey = "${sshKeyPath}.pub";
-
-    zmx.enable = true;
 
     bash = {
       enable = true;
