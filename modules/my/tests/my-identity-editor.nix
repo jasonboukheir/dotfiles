@@ -4,7 +4,7 @@
   pkgs,
   inputs ? null,
 }: let
-  # Named nvim so the vim-family merge/diff tool mapping in the defs fires.
+  # Named nvim so the nvim diffview merge/diff tool mapping in the defs fires.
   editor = pkgs.writeShellScriptBin "nvim" "exit 0";
   pkgsWrapped = pkgs.extend (import ../../nixpkgs/overlays/mkWrapped.nix);
 in
@@ -43,13 +43,16 @@ in
               ).strip()
               assert got == want, f"git {key} not defaulted from identity: {got!r}"
 
-      with subtest("editor defaults git's editor and vim-family merge/diff tools"):
+      with subtest("editor defaults git's editor and the nvim diffview tools"):
           for key, want in [
               ("core.editor", "${pkgs.lib.getExe editor}"),
-              ("merge.tool", "nvimdiff"),
-              ("mergetool.nvimdiff.path", "${pkgs.lib.getExe editor}"),
-              ("diff.tool", "nvimdiff"),
-              ("difftool.nvimdiff.path", "${pkgs.lib.getExe editor}"),
+              ("merge.tool", "diffview"),
+              ("diff.tool", "diffview"),
+              (
+                  "mergetool.diffview.cmd",
+                  '${pkgs.lib.getExe editor} -n -c "DiffviewOpen" "$MERGED"',
+              ),
+              ("difftool.diffview.cmd", '${pkgs.lib.getExe editor} -n -c "DiffviewOpen"'),
           ]:
               got = machine.succeed(
                   f"su -l tester -c 'git config --global --get {key}'"
@@ -66,11 +69,12 @@ in
               got = machine.succeed(f"su -l tester -c 'jj config get {key}'").strip()
               assert got == want, f"jj {key} not defaulted from identity: {got!r}"
 
-      with subtest("editor defaults jj's editor and vim-family merge tool"):
+      with subtest("editor defaults jj's editor and the nvim diffview tools"):
           for key, want in [
               ("ui.editor", "${pkgs.lib.getExe editor}"),
-              ("ui.merge-editor", "vimdiff"),
-              ("merge-tools.vimdiff.program", "${pkgs.lib.getExe editor}"),
+              ("ui.merge-editor", "diffview"),
+              ("ui.diff-editor", "diffview"),
+              ("merge-tools.diffview.program", "${pkgs.lib.getExe editor}"),
           ]:
               got = machine.succeed(f"su -l tester -c 'jj config get {key}'").strip()
               assert got == want, f"jj {key} not defaulted from editor: {got!r}"

@@ -119,6 +119,15 @@ in {
         virtual_lines.current_line = true;
       };
       utility.oil-nvim.enable = true;
+      # No nvf option exposes diffview, so bake it in directly. The -plus fork
+      # is a drop-in for upstream (same :DiffviewOpen) that also exposes the
+      # VCS-less :DiffviewMergeFiles / :DiffviewDiffDirs commands jujutsu's
+      # external merge/diff editors drive. plenary (its dep) rides along from
+      # telescope above. git.nix and jujutsu.nix wire it for the nvim family.
+      extraPlugins.diffview-nvim = {
+        package = pkgs.vimPlugins.diffview-plus-nvim;
+        setup = "require('diffview').setup({})";
+      };
       languages =
         {
           enableFormat = true;

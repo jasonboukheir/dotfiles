@@ -51,23 +51,51 @@ in {
     })
     // (lib.optionalAttrs (editor != null) (let
       exe = lib.getExe editor;
-      # merge.tool/diff.tool take a *tool name* git resolves against its
-      # builtin table, not a command — so only the vim family maps onto a
-      # builtin tool, pointed at the editor via {merge,diff}tool.<name>.path.
-      # Program name from metadata, not baseNameOf exe: a store-path basename
-      # carries string context, which attribute names reject.
-      vimFamilyTool = {
-        nvim = "nvimdiff";
-        vim = "vimdiff";
-      }.${editor.meta.mainProgram or (lib.getName editor)} or null;
+      # merge.tool/diff.tool take a *tool name* git resolves, not a command.
+      # nvim rides diffview-plus.nvim (baked into the nvf editor build, see
+      # nvf/body.nix) wired as a cmd-based custom tool; plain vim falls back to
+      # git's builtin vimdiff table via {merge,diff}tool.<name>.path. Program
+      # name from metadata, not baseNameOf exe: a store-path basename carries
+      # string context, which attribute names reject.
+      mainProgram = editor.meta.mainProgram or (lib.getName editor);
+
+      # DiffviewOpen auto-detects an in-progress merge and opens its 3-way
+      # mergetool view; trustExitCode lets a clean exit mark the file resolved.
+      # diffview is rev-range oriented, so per-file `git difftool <rev>` would
+      # reopen the same view for every file — `git dv [rev-range]` opens it once.
+      diffviewTooling = {
+        merge.tool = "diffview";
+        mergetool = {
+          prompt = false;
+          keepBackup = false;
+          diffview = {
+            cmd = "${exe} -n -c \"DiffviewOpen\" \"$MERGED\"";
+            trustExitCode = true;
+          };
+        };
+        diff.tool = "diffview";
+        difftool = {
+          prompt = false;
+          diffview.cmd = "${exe} -n -c \"DiffviewOpen\"";
+        };
+        alias.dv = "!f() { ${exe} -c \"DiffviewOpen $*\"; }; f";
+      };
+
+      vimdiffTooling = {
+        merge.tool = "vimdiff";
+        mergetool.vimdiff.path = exe;
+        diff.tool = "vimdiff";
+        difftool.vimdiff.path = exe;
+      };
+
+      editorTooling =
+        if mainProgram == "nvim"
+        then diffviewTooling
+        else if mainProgram == "vim"
+        then vimdiffTooling
+        else {};
     in
-      {core.editor = exe;}
-      // (lib.optionalAttrs (vimFamilyTool != null) {
-        merge.tool = vimFamilyTool;
-        mergetool.${vimFamilyTool}.path = exe;
-        diff.tool = vimFamilyTool;
-        difftool.${vimFamilyTool}.path = exe;
-      })));
+      {core.editor = exe;} // editorTooling));
 
   build = {
     cfg,

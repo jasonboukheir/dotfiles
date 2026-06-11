@@ -31,17 +31,45 @@ in {
     })
     // (lib.optionalAttrs (editor != null) (let
       exe = lib.getExe editor;
-      # A command outside jj's builtin merge-tools table gets the default
-      # merge-args ($left $base $right $output) — a bare editor just opens four
-      # buffers. The vim family rides the builtin vimdiff tool (real 3-way
-      # invocation) with only its program repointed; anything else stays
-      # editor-only.
-      isVimFamily = lib.elem (editor.meta.mainProgram or (lib.getName editor)) ["nvim" "vim"];
+      # jj hands its editors on-disk paths ($left/$base/$right/$output), not
+      # revs. nvim rides diffview-plus.nvim (baked into the nvf editor build,
+      # see nvf/body.nix): :DiffviewMergeFiles for the 3-way merge editor and
+      # :DiffviewDiffDirs for the interactive diff editor, both VCS-less.
+      # Plain vim falls back to jj's builtin vimdiff tool with only its program
+      # repointed; anything else (a bare editor) stays editor-only.
+      mainProgram = editor.meta.mainProgram or (lib.getName editor);
+
+      # merge-tool-edits-conflict-markers: jj pre-fills $output with conflict
+      # markers and reparses them on exit, so a partial resolve is preserved.
+      diffviewTooling = {
+        ui = {
+          merge-editor = "diffview";
+          diff-editor = "diffview";
+        };
+        merge-tools.diffview = {
+          program = exe;
+          merge-args = ["-c" "DiffviewMergeFiles $output $base $left $right"];
+          merge-tool-edits-conflict-markers = true;
+          edit-args = ["-c" "DiffviewDiffDirs $left $right $output"];
+          diff-args = ["-c" "DiffviewDiffDirs $left $right"];
+        };
+      };
+
+      vimdiffTooling = {
+        ui.merge-editor = "vimdiff";
+        merge-tools.vimdiff.program = exe;
+      };
+
+      editorTooling =
+        if mainProgram == "nvim"
+        then diffviewTooling
+        else if mainProgram == "vim"
+        then vimdiffTooling
+        else {};
     in
       # ui assembled in one piece: a top-level `//` would replace the whole
       # `ui` attrset and silently drop ui.editor.
-      {ui = {editor = exe;} // (lib.optionalAttrs isVimFamily {merge-editor = "vimdiff";});}
-      // (lib.optionalAttrs isVimFamily {merge-tools.vimdiff.program = exe;})));
+      lib.recursiveUpdate {ui.editor = exe;} editorTooling));
 
   build = {
     cfg,
