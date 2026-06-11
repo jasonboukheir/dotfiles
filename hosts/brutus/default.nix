@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./home-manager
     ./nixarr
     ./power
     ./services
