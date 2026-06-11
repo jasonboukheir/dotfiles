@@ -263,13 +263,15 @@ in
           uwsm_user(
               "systemd-run --user --unit=uwsm-app-probe -- uwsm app -- sleep 600"
           )
-          machine.wait_until_succeeds("pgrep -u uwsmtester -fx 'sleep 600'")
-          cgroup = machine.succeed(
-              "cat /proc/$(pgrep -u uwsmtester -fx 'sleep 600')/cgroup"
-          )
+          # uwsm resolves the command through $PATH, so the spawned process is
+          # "/…/bin/sleep 600", not a bare "sleep 600"; match the path-qualified
+          # cmdline (an -fx exact match on "sleep 600" can never land).
+          probe = r"-u uwsmtester -fx '.*/sleep 600'"
+          machine.wait_until_succeeds(f"pgrep {probe}")
+          cgroup = machine.succeed(f"cat /proc/$(pgrep {probe})/cgroup")
           assert "wayland-wm@" not in cgroup, cgroup
           assert ".scope" in cgroup, cgroup
-          machine.succeed("pkill -u uwsmtester -fx 'sleep 600'")
+          machine.succeed(f"pkill {probe}")
 
       with subtest("uwsm stop tears the omarchy units down with the session"):
           # Stopping while session activation jobs are still queued is
