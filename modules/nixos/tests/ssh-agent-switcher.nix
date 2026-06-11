@@ -13,7 +13,7 @@ pkgs.testers.nixosTest {
   nodes.machine = {
     imports = [../services/ssh-agent-switcher.nix];
 
-    services.ssh-agent-switcher.enable = true;
+    services.ssh-agent-switcher.users = ["tester"];
     services.openssh.enable = true;
 
     users.users.tester.isNormalUser = true;
@@ -22,6 +22,13 @@ pkgs.testers.nixosTest {
   testScript = ''
     machine.wait_for_unit("multi-user.target")
     machine.wait_for_unit("sshd.service")
+
+    with subtest("it is a machine-lifetime system service: socket up before any login"):
+        # The instance is wanted by multi-user.target, so it is already active
+        # with its socket present before tester has ever logged in — proving the
+        # daemon is not scoped to a login session (the user-service regression).
+        machine.wait_for_unit("ssh-agent-switcher@tester.service")
+        machine.succeed("test -S /tmp/ssh-agent.tester")
 
     machine.succeed('ssh-keygen -t ed25519 -N "" -f /root/key')
     machine.succeed(
@@ -55,5 +62,15 @@ pkgs.testers.nixosTest {
         assert "ED25519" in out and "SOCK=/tmp/ssh-agent.tester" in out, (
             f"stable socket broke across reconnect: {out!r}"
         )
+
+    with subtest("the daemon self-heals on a clean kill (Restart=always)"):
+        # SIGTERM exits the daemon cleanly; only Restart=always (not on-failure)
+        # brings it back. This is the regression that left the host without an
+        # agent socket after a stray stop.
+        machine.succeed("rm -f /tmp/ssh-agent.tester")
+        machine.succeed("systemctl kill --signal=SIGTERM ssh-agent-switcher@tester.service")
+        machine.wait_until_succeeds("test -S /tmp/ssh-agent.tester")
+        out = machine.succeed(ssh + " \"bash -lc 'ssh-add -l'\"")
+        assert "ED25519" in out, f"agent unreachable after self-heal: {out!r}"
   '';
 }
