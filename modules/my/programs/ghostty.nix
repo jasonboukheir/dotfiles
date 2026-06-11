@@ -36,29 +36,48 @@
     c.base07 # 15 bright white
   ];
 
-  # TODO: only the base16 palette is mapped; wire `theme.fonts` into ghostty's
-  # font-family/font-size and `theme.opacity.terminal` into background-opacity to
-  # match HM-stylix's ghostty target.
-  # https://github.com/jasonboukheir/dotfiles/issues/44
   themedSettings = theme: let
     c = theme.colors;
-  in {
-    background = "#${c.base00}";
-    foreground = "#${c.base05}";
-    cursor-color = "#${c.base05}";
-    cursor-text = "#${c.base00}";
-    selection-background = "#${c.base02}";
-    selection-foreground = "#${c.base05}";
-    palette = lib.imap0 (i: hex: "${toString i}=#${hex}") (ansiPalette c);
-  };
+  in
+    {
+      background = "#${c.base00}";
+      foreground = "#${c.base05}";
+      cursor-color = "#${c.base05}";
+      cursor-text = "#${c.base00}";
+      selection-background = "#${c.base02}";
+      selection-foreground = "#${c.base05}";
+      palette = lib.imap0 (i: hex: "${toString i}=#${hex}") (ansiPalette c);
+    }
+    // lib.optionalAttrs (theme.fonts ? monospace) {
+      font-family =
+        [theme.fonts.monospace.name]
+        ++ lib.optional (theme.fonts ? emoji) theme.fonts.emoji.name;
+      # macOS sizes fonts against 72 dpi where Linux assumes 96; scale by 4/3
+      # so the same stylix size renders equally tall (mirrors HM-stylix).
+      font-size =
+        (theme.fonts.sizes.terminal or 12)
+        * (
+          if pkgs.stdenv.isDarwin
+          then 4.0 / 3.0
+          else 1
+        );
+    }
+    // lib.optionalAttrs (theme.opacity ? terminal) {
+      background-opacity = theme.opacity.terminal;
+    };
 in {
   name = "ghostty";
-  defaultPackage = "ghostty";
+  # The source ghostty package doesn't build on darwin; ghostty-bin is the
+  # upstream-signed Ghostty.app plus a bin/ghostty CLI wrapper.
+  defaultPackage =
+    if pkgs.stdenv.isDarwin
+    then "ghostty-bin"
+    else "ghostty";
   themeable = true;
 
   options = {
     settings = lib.mkOption {
-      type = with lib.types; attrsOf (oneOf [bool int str (listOf str)]);
+      type = with lib.types; attrsOf (oneOf [bool int float str (listOf str)]);
       default = {};
       example = {
         theme = "GruvboxDark";
@@ -66,21 +85,30 @@ in {
       };
       description = ''
         ghostty config baked into this wrapper and loaded via `--config-file`.
-        List values render as repeated `key = item` lines (e.g. `palette`). When
-        stylix theming is on, the base16 palette populates the color keys; these
-        `settings` still win on conflicts, as does the user's own
-        `~/.config/ghostty/config`.
+        List values render as repeated `key = item` lines (e.g. `palette`).
+        When stylix theming is on, the base16 palette/fonts/opacity populate
+        the matching keys below these `settings`, so explicit settings win.
+        ghostty loads CLI-passed config files after the default user files, so
+        the baked settings also win over `~/.config/ghostty/config` — leave a
+        key unset here to keep it user-tunable.
       '';
     };
   };
 
-  # The base16 palette mapped into ghostty's color keys; injected as mkDefault so
-  # the user's own `settings` win on conflicts.
+  # The base16 palette, fonts and terminal opacity mapped into ghostty's keys
+  # (what HM-stylix's ghostty target used to emit), plus the cross-host base
+  # settings the old shared home-manager module carried.
   settingsDefaults = {
     theme ? null,
     ...
   }:
-    lib.optionalAttrs (theme != null) (themedSettings theme);
+    {
+      window-theme = "auto";
+    }
+    // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      macos-option-as-alt = true;
+    }
+    // lib.optionalAttrs (theme != null) (themedSettings theme);
 
   build = {
     cfg,
@@ -94,5 +122,9 @@ in {
       pkg = cfg.package;
       name = "ghostty";
       flags = lib.optional (cfg.settings != {}) "--config-file=${configFile}";
+      # The wrapper only reaches PATH launches; consumers that must feed the
+      # fixed user config paths ghostty reads on its own (the darwin Dock
+      # seeding, fedora's GNOME-activated launches) link this same file.
+      passthru = {inherit configFile;};
     };
 }

@@ -35,7 +35,12 @@
       };
 
       flake.homeConfigurations."jasonbk@jasonbk-fedora-MZ0319NF" = inputs.home-manager-nixos.lib.homeManagerConfiguration {
-        pkgs = linuxPkgs.extend inputs.helium-flake.overlays.default;
+        pkgs = linuxPkgs.appendOverlays [
+          # my.ghostty's wrapper primitive; standalone HM doesn't apply the
+          # nixpkgs.overlays the system hosts get from modules/nixpkgs.
+          (import ../../../modules/nixpkgs/overlays/mkWrapped.nix)
+          inputs.helium-flake.overlays.default
+        ];
         extraSpecialArgs = {
           inherit inputs;
           pkgs-unstable = linuxPkgsUnstable;

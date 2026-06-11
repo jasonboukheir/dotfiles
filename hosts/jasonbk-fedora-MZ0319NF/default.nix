@@ -63,7 +63,22 @@ in {
   targets.genericLinux.enable = true;
   targets.genericLinux.nixGL.packages = nixgl;
 
-  programs.ghostty.package = nixGLWrap pkgs.ghostty;
+  my.ghostty = {
+    enable = true;
+    package = nixGLWrap pkgs.ghostty;
+  };
+
+  # GNOME activates ghostty through the D-Bus/systemd service files
+  # (DBusActivatable), which nixGLWrap points at the nixGL-wrapped binary —
+  # the my.ghostty wrapper and its baked --config-file never run for those
+  # launches. Linux ghostty reads ~/.config/ghostty/config on every launch,
+  # so link that fixed path at the same baked config the wrapper injects
+  # (loading it twice from a wrapper launch is a no-op: last-wins merge of
+  # identical content).
+  # TODO(https://github.com/jasonboukheir/dotfiles/issues/39): re-home this
+  # symlink when the standalone-HM activation story replaces home-manager.
+  xdg.configFile."ghostty/config".source = config.my.ghostty.finalPackage.configFile;
+
   programs.helium.package = nixGLWrap pkgs.helium;
   programs._1password.package = config.lib.nixGL.wrap pkgs._1password-gui;
 
