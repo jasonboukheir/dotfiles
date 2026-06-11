@@ -1,9 +1,10 @@
 {...}: {
   imports = [
     ./calendar
-    ./home-manager
     ./hyprland
+    ./btop.nix
     ./config.nix
+    ./gtk.nix
     ./packages.nix
     ./programs.nix
     ./services

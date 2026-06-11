@@ -6,7 +6,6 @@
   home.stateVersion = "25.11";
   imports = [
     ./programs
-    ./accounts.nix
   ];
 
   home.file.".cache/huggingface/token".source =

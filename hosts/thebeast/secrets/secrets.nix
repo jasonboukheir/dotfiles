@@ -3,7 +3,6 @@ let
   allKeys = [root];
 
   files = [
-    "radicale/jasonbk/password.age"
     "hf/token.age"
     "users/jasonbk/password.age"
     "users/root/password.age"

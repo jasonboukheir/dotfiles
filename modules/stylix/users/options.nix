@@ -80,11 +80,11 @@
       };
 
       # TODO: no per-user consumer yet — the session env
-      # (XCURSOR_*/HYPRCURSOR_*) is consumed from the *system* stylix cursor
-      # by the Hyprland config generator
-      # (modules/omarchy/hyprland/envs.nix, issues #40/#48); the GTK
-      # cursor-theme and installing `cursor.package` into the icon path
-      # remain open (issue #48's gtk migration).
+      # (XCURSOR_*/HYPRCURSOR_*), the GTK cursor-theme settings, and the
+      # cursor package's icon-path install are all consumed from the *system*
+      # stylix cursor (modules/omarchy/hyprland/envs.nix and
+      # modules/omarchy/gtk.nix, issues #40/#48); a per-user override needs a
+      # per-user consumer surface first.
       cursor = {
         name = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
