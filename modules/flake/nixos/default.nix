@@ -47,7 +47,6 @@
             ../../../hosts/litus
             inputs.agenix.nixosModules.default
             inputs.determinate.nixosModules.default
-            inputs.home-manager-nixos.nixosModules.home-manager
             inputs.stylix-nixos.nixosModules.stylix
           ];
         };
