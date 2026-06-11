@@ -65,6 +65,18 @@
     rg.enable = true;
     fd.enable = true;
     rga.enable = true;
+
+    # package defaults to master's claude-code (the claude-code-master overlay);
+    # theme comes from system stylix polarity. ~/.claude + CLAUDE.md stay
+    # writable runtime state (the seed-and-accept carve-out, out of my.*).
+    claude-code = {
+      enable = true;
+      settings = {
+        autoMemoryEnabled = false;
+        effortLevel = "high";
+        permissions.defaultMode = "auto";
+      };
+    };
   };
 
   # fish + nvf build at the system scope. fish becomes the system fish wrapper
@@ -96,15 +108,4 @@
   # programs.fish system integration + /etc/shells registration is wired by
   # modules/my/nixos.nix.
   users.users.jasonbk.shell = lib.mkForce config.my.fish.finalPackage;
-
-  # Old home-manager program paths, superseded by my.* above.
-  home-manager.users.jasonbk.programs = {
-    git.enable = lib.mkForce false;
-    jujutsu.enable = lib.mkForce false;
-    starship.enable = lib.mkForce false;
-    gh.enable = lib.mkForce false;
-    nushell.enable = lib.mkForce false;
-    fish.enable = lib.mkForce false;
-    direnv.enable = lib.mkForce false;
-  };
 }
