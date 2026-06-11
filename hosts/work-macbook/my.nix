@@ -1,9 +1,9 @@
 # Dogfoods the my.* wrapped-package surface (per-user scope) on work-macbook.
-# Each tool below replaces an old home-manager/system module path, which is
-# disabled in the same place so jasonbk ends up with exactly one of each. The
-# fish system integration (nix env on PATH, /etc/shells) is wired automatically
-# by modules/my/nix-darwin.nix when my.fish is enabled; only the login-shell
-# choice lives here.
+# This host is home-manager-free (#55), so the old per-user HM program paths are
+# simply gone; the only legacy path still explicitly disabled is the system git
+# module (see programs.git.enable below). The fish system integration (nix env
+# on PATH, /etc/shells) is wired automatically by modules/my/nix-darwin.nix when
+# my.fish is enabled; only the login-shell choice lives here.
 {
   config,
   lib,
@@ -14,6 +14,16 @@
   # injected into programs.git/jujutsu; my.* has no such auto-injection.
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
   opSshSign = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+
+  # Chef owns /etc/ssh/ssh_config and does not Include ssh_config.d, so the
+  # github IdentityAgent block in system/ssh.nix never loads. Scope the
+  # 1Password agent to git via core.sshCommand instead — corp ssh keeps the
+  # Chef-managed agent. The path contains a space ("Group Containers"), so it
+  # must stay quoted through three parsers: git's gitIni reader, the `sh -c`
+  # git wraps core.sshCommand in, and ssh's own `-o` config tokenizer. The
+  # single quotes survive the shell so ssh sees literal double quotes around the
+  # value (and ssh tilde-expands IdentityAgent).
+  opSshCommand = "ssh -o 'IdentityAgent=\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"'";
 
   metaNvimPath = "/Users/jasonbk/fbsource/fbcode/editor_support/nvim";
 
@@ -53,6 +63,7 @@ in {
         gpg.format = "ssh";
         commit.gpgsign = true;
         "gpg \"ssh\"".program = opSshSign;
+        core.sshCommand = opSshCommand;
       };
     };
 
@@ -89,6 +100,10 @@ in {
     rg.enable = true;
     fd.enable = true;
     rga.enable = true;
+
+    # Installs the direnv wrapper; the fish hook below is guarded on
+    # `command -q direnv`, so without this the hook silently no-ops.
+    direnv.enable = true;
 
     # ghostty-bin (the upstream .app) wrapped for PATH launches; Dock launches
     # pick the same baked config up via the Application Support symlink seeded
@@ -131,14 +146,6 @@ in {
   # Make the my.fish wrapper jasonbk's login shell (modules/my/nix-darwin.nix
   # handles the programs.fish system integration + /etc/shells registration).
   users.users.jasonbk.shell = lib.mkForce fishWrapper;
-
-  # Old per-user (home-manager) program paths, superseded by my.* above.
-  home-manager.users.jasonbk.programs = {
-    git.enable = lib.mkForce false;
-    jujutsu.enable = lib.mkForce false;
-    starship.enable = lib.mkForce false;
-    fish.enable = lib.mkForce false;
-  };
 
   # Old system program path (modules/darwin/programs/git.nix), superseded by
   # my.git above.
