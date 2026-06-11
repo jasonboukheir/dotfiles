@@ -39,7 +39,6 @@ pkgs.testers.nixosTest {
     _module.args.inputs = inputs;
     imports = [
       inputs.agenix.nixosModules.default
-      inputs.home-manager-nixos-unstable.nixosModules.home-manager
       inputs.stylix-nixos-unstable.nixosModules.stylix
       inputs.jovian.nixosModules.default
 

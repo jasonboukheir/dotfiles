@@ -16,12 +16,6 @@
     options = ["mode=0755"];
   };
 
-  # The user-level home-manager config under hosts/thebeast/home-manager
-  # dereferences osConfig.age.secrets, whose .age files are not pulled
-  # into the test path. The specialisation flip is purely system-level,
-  # so disabling per-user activation keeps the test focused and fast.
-  home-manager.users = lib.mkForce {};
-
   # testers.nixosTest injects `nixpkgs.pkgs` externally and then refuses
   # any further `nixpkgs.config.*` definitions. modules/nixpkgs sets
   # allowUnfreePredicate, so we clear it here — the test's pkgs is

@@ -140,15 +140,4 @@ in {
   # programs.fish system integration + /etc/shells registration is wired by
   # modules/my/nixos.nix.
   users.users.jasonbk.shell = lib.mkForce config.my.fish.finalPackage;
-
-  # Old home-manager program paths, superseded by my.* above.
-  home-manager.users.jasonbk.programs = {
-    git.enable = lib.mkForce false;
-    jujutsu.enable = lib.mkForce false;
-    starship.enable = lib.mkForce false;
-    gh.enable = lib.mkForce false;
-    nushell.enable = lib.mkForce false;
-    fish.enable = lib.mkForce false;
-    direnv.enable = lib.mkForce false;
-  };
 }

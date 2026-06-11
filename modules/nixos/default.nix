@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./home-manager
     ./programs
     ./services
     ./configuration.nix
