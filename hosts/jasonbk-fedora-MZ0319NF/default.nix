@@ -80,7 +80,6 @@ in {
   xdg.configFile."ghostty/config".source = config.my.ghostty.finalPackage.configFile;
 
   programs.helium.package = nixGLWrap pkgs.helium;
-  programs._1password.package = config.lib.nixGL.wrap pkgs._1password-gui;
 
   xdg.systemDirs.config = ["/etc/xdg"];
 

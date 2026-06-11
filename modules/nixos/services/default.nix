@@ -13,5 +13,6 @@
     ./openssh.nix
     ./radicale.nix
     ./speaches.nix
+    ./ssh-agent-switcher.nix
   ];
 }

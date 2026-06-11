@@ -46,6 +46,10 @@ in {
   programs = {
     ssh = {
       enable = true;
+      # The deleted shared ssh module (issue #46) used to set this; keep the
+      # rendered ~/.ssh/config to just the blocks below (the corp proxy only
+      # reaches github/ghe, so the shared home-host blocks are not inlined).
+      enableDefaultConfig = false;
       matchBlocks."github.com" = {
         proxyCommand = "ncat --proxy localhost:18082 --proxy-type http %h %p";
         identityFile = sshKeyPath;

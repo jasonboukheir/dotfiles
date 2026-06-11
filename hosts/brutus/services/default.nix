@@ -11,6 +11,7 @@
     ./storage.nix
     ./smtp.nix
     ./homelab.nix
+    ./ssh-agent-switcher.nix
     ./tailscale.nix
     ./zfs.nix
   ];
