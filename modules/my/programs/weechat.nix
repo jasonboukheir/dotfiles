@@ -1,35 +1,14 @@
+# Self-contained WeeChat: plugins, scripts, and startup commands are baked
+# with nixpkgs' weechat `configure` override, so the result needs no
+# home-manager-managed dotfiles. ~/.weechat stays WeeChat-owned runtime state.
 {
-  config,
   lib,
   pkgs,
-  ...
-}: let
-  cfg = config.programs.weechat;
+}: {
+  name = "weechat";
+  defaultPackage = "weechat";
 
-  ircInit = lib.optionalString cfg.irc.enable ''
-    /set irc.look.server_buffer independent
-    /set irc.look.color_nicks_in_names on
-    /set irc.look.smart_filter on
-  '';
-
-  init = lib.concatStringsSep "\n" (lib.filter (s: s != "") [
-    ircInit
-    cfg.extraConfig
-  ]);
-
-  weechatConfigured = cfg.package.override {
-    configure = {availablePlugins, ...}: {
-      plugins = builtins.attrValues (builtins.removeAttrs availablePlugins ["php"]);
-      inherit (cfg) scripts;
-      inherit init;
-    };
-  };
-in {
-  options.programs.weechat = {
-    enable = lib.mkEnableOption "WeeChat chat client";
-
-    package = lib.mkPackageOption pkgs "weechat" {};
-
+  options = {
     irc.enable = lib.mkEnableOption ''
       IRC look-and-feel defaults. Servers, nick, and SASL credentials are
       configured manually at runtime with /server and /secure so that no
@@ -54,7 +33,27 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [weechatConfigured];
-  };
+  build = {
+    cfg,
+    lib,
+    ...
+  }: let
+    ircInit = lib.optionalString cfg.irc.enable ''
+      /set irc.look.server_buffer independent
+      /set irc.look.color_nicks_in_names on
+      /set irc.look.smart_filter on
+    '';
+
+    init = lib.concatStringsSep "\n" (lib.filter (s: s != "") [
+      ircInit
+      cfg.extraConfig
+    ]);
+  in
+    cfg.package.override {
+      configure = {availablePlugins, ...}: {
+        plugins = builtins.attrValues (builtins.removeAttrs availablePlugins ["php"]);
+        inherit (cfg) scripts;
+        inherit init;
+      };
+    };
 }

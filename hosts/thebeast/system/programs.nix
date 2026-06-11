@@ -1,17 +1,8 @@
-{
-  config,
-  options,
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   programs = {
     _1password.enable = true;
-    _1password-gui = {
-      enable = true;
-      customAllowedBrowsers =
-        lib.optional (options.programs ? helium && config.programs.helium.enable) "helium";
-    };
+    # customAllowedBrowsers is contributed by ../helium.nix.
+    _1password-gui.enable = true;
   };
   environment.systemPackages = with pkgs; [
     vlc

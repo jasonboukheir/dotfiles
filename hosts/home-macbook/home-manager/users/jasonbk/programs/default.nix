@@ -9,9 +9,7 @@ in {
     pkgs-unstable.amp-cli
   ];
   programs = {
-    brave.enable = true;
     fish.enable = true;
-    nushell.enable = true;
 
     git.settings = {
       user.signingKey = signingKey;

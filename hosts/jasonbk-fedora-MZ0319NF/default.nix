@@ -3,7 +3,6 @@
   nixgl,
   config,
   lib,
-  inputs,
   ...
 }: let
   nixGLWrap = pkg: let
@@ -21,9 +20,9 @@
       name = "${pkg.pname or pkg.name}-nixgl-desktop";
       paths = [wrapped];
       meta = (pkg.meta or {}) // {mainProgram = pkg.meta.mainProgram or pkg.pname or pkg.name;};
-      # Keep .override propagating through the wrapper — modules that pass
-      # tunables via cfg.package.override (e.g. oxcl's programs.helium.flags)
-      # otherwise hit "attribute 'override' missing" on the symlinkJoin.
+      # Keep .override propagating through the wrapper — consumers that pass
+      # tunables via cfg.package.override otherwise hit "attribute 'override'
+      # missing" on the symlinkJoin.
       passthru = (pkg.passthru or {}) // {override = args: nixGLWrap (pkg.override args);};
       postBuild = ''
         if [ -d ${pkg}/share/applications ]; then
@@ -53,7 +52,6 @@ in {
     ../../modules/home-manager/jasonbk/programs
     ../../modules/stylix
     ./programs
-    inputs.helium-flake.homeModules.default
   ];
 
   stylix.enable = true;
@@ -79,7 +77,11 @@ in {
   # symlink when the standalone-HM activation story replaces home-manager.
   xdg.configFile."ghostty/config".source = config.my.ghostty.finalPackage.configFile;
 
-  programs.helium.package = nixGLWrap pkgs.helium;
+  my.helium.package = nixGLWrap pkgs.helium;
+
+  my.fd.enable = true;
+  my.rg.enable = true;
+  my.rga.enable = true;
 
   xdg.systemDirs.config = ["/etc/xdg"];
 
@@ -87,11 +89,6 @@ in {
     username = "jasonbk";
     homeDirectory = "/home/jasonbk";
     stateVersion = "25.11";
-    packages = with pkgs; [
-      fd
-      ripgrep
-      ripgrep-all
-    ];
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
