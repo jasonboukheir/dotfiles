@@ -8,6 +8,7 @@
     ./decky.nix
     ./steam-theme.nix
     ./roms.nix
+    ./gaming-programs.nix
     ./omarchy.nix
   ];
 
