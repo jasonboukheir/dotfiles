@@ -15,6 +15,16 @@
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
   opSshSign = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
 
+  # Chef owns /etc/ssh/ssh_config and does not Include ssh_config.d, so the
+  # github IdentityAgent block in system/ssh.nix never loads. Scope the
+  # 1Password agent to git via core.sshCommand instead — corp ssh keeps the
+  # Chef-managed agent. The path contains a space ("Group Containers"), so it
+  # must stay quoted through three parsers: git's gitIni reader, the `sh -c`
+  # git wraps core.sshCommand in, and ssh's own `-o` config tokenizer. The
+  # single quotes survive the shell so ssh sees literal double quotes around the
+  # value (and ssh tilde-expands IdentityAgent).
+  opSshCommand = "ssh -o 'IdentityAgent=\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"'";
+
   metaNvimPath = "/Users/jasonbk/fbsource/fbcode/editor_support/nvim";
 
   # FB android toolchain (fb4a); replaces the old setup_fb4a.sh fish shellInit.
@@ -53,6 +63,7 @@ in {
         gpg.format = "ssh";
         commit.gpgsign = true;
         "gpg \"ssh\"".program = opSshSign;
+        core.sshCommand = opSshCommand;
       };
     };
 
@@ -89,6 +100,10 @@ in {
     rg.enable = true;
     fd.enable = true;
     rga.enable = true;
+
+    # Installs the direnv wrapper; the fish hook below is guarded on
+    # `command -q direnv`, so without this the hook silently no-ops.
+    direnv.enable = true;
 
     # ghostty-bin (the upstream .app) wrapped for PATH launches; Dock launches
     # pick the same baked config up via the Application Support symlink seeded
