@@ -3,5 +3,4 @@
   programs = {
     zmx.enable = true;
   };
-  services.ssh-agent-switcher.enable = true;
 }

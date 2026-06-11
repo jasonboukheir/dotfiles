@@ -1,9 +1,17 @@
+# Standalone-HM host: no system /etc/ssh layer, so the shared client config
+# (modules/ssh/client-config.nix) is seeded as a real ~/.ssh/config file.
+# home.file only registers the path; the activation hook below materializes it
+# with the mode ssh's safe_path check demands (issue #46; the full
+# managed-files story for standalone hosts is issue #39).
 {
   config,
   lib,
   ...
 }: {
-  programs.ssh.enable = true;
+  home.file.".ssh/config".text = import ../../../modules/ssh/client-config.nix {
+    inherit lib;
+    identityAgent = "~/.1password/agent.sock";
+  };
 
   # Fedora's OpenSSH rejects ~/.ssh/config when it resolves into /nix/store
   # (group-writable store dir trips safe_path). Materialize it as a real
