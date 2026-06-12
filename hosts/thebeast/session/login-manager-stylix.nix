@@ -4,47 +4,56 @@
   pkgs,
   ...
 }: let
-  # The greeter's KDE *color-scheme* seeding (kdeglobals/kcminputrc +
-  # the LookAndFeelPackage entry) used to borrow the gamer user's
-  # home-manager stylix `kde` target outputs (stylix-kde-theme /
-  # stylix-kde-config). thebeast is now home-manager-free (#57) and the
-  # stylix `kde` target only exists in the HM stylix module, so that
-  # block was dropped. The greeter wallpaper below survives because it
-  # comes from system stylix (config.stylix.image), not HM.
-  # gamer no longer runs Plasma (it shares jasonbk's Hyprland session), so
-  # the only KDE surface left to theme is the greeter itself.
-  # TODO(#78): re-derive a system-stylix KDE color-scheme for the SDDM
-  # greeter, or move it to a non-KDE greeter theme.
+  # The greeter used to ship a copy of Plasma's breeze sddm theme with a
+  # stylix wallpaper overlay. When plasma6 left the closure (#78) the
+  # theme's QML imports (org.kde.breeze.components, kirigami, libplasma,
+  # ...) went with it and sddm silently fell back to its embedded theme;
+  # restoring them would mean carrying a KDE QML stack just for a login
+  # box. where-is-my-sddm-theme is plain QtQuick — wallpaper, a single
+  # password field, session/user labels — themed here from system stylix.
   wallpaper =
     if (config ? stylix) && (config.stylix.enable or false)
     then config.stylix.image or null
     else null;
+  colors = config.lib.stylix.colors.withHashtag;
+  cursor = config.stylix.cursor or null;
 
-  # SDDM's breeze theme pins `background=` to the stock Next wallpaper
-  # inside its store-path theme.conf. The supported override is a
-  # theme.conf.user next to it (what sddm-kcm's imperative "Apply Plasma
-  # Settings" writes), which the read-only store rules out — so ship a
-  # copy of the theme carrying that overlay with the stylix wallpaper.
-  # SDDM discovers it by directory name under
-  # /run/current-system/sw/share/sddm/themes (Theme.ThemeDir).
-  breezeStylixTheme = pkgs.runCommand "breeze-stylix-sddm-theme" {} ''
-    mkdir -p $out/share/sddm/themes
-    cp -r --no-preserve=mode \
-      ${pkgs.kdePackages.plasma-desktop}/share/sddm/themes/breeze \
-      $out/share/sddm/themes/breeze-stylix
-    printf '[General]\nbackground=%s\n' '${wallpaper}' \
-      > $out/share/sddm/themes/breeze-stylix/theme.conf.user
-  '';
+  greeterTheme = pkgs.where-is-my-sddm-theme.override {
+    themeConfig.General = {
+      background = "${wallpaper}";
+      # FastBlur clamps at 64; this is the full frosted-glass strength.
+      blurRadius = 64;
+      backgroundFill = colors.base00;
+      basicTextColor = colors.base05;
+      passwordTextColor = colors.base05;
+      passwordCursorColor = colors.base05;
+      font = config.stylix.fonts.monospace.name;
+      helpFont = config.stylix.fonts.monospace.name;
+      # Two-account machine: show which user the password goes to and
+      # which session it starts (gamescope vs hyprland) instead of a
+      # bare field.
+      showUsersByDefault = true;
+      showSessionsByDefault = true;
+      # gamer's password is empty (see users.nix); the theme's Enter
+      # handler refuses to submit an empty field unless this is set,
+      # which forced typing a throwaway character to log in.
+      passwordAllowEmpty = true;
+    };
+  };
 in {
   config = lib.mkIf (wallpaper != null) {
-    environment.systemPackages = [breezeStylixTheme];
+    environment.systemPackages = [greeterTheme];
     services.displayManager.sddm = {
-      theme = "breeze-stylix";
-      # The sddm module's breeze cursor defaults key off the literal
-      # theme name "breeze"; replicate them for the renamed copy.
-      settings.Theme = {
-        CursorTheme = "breeze_cursors";
-        CursorSize = 24;
+      theme = "where_is_my_sddm_theme";
+      # Qt5Compat.GraphicalEffects and QtSvg are the theme's only QML
+      # imports; the stock sddm greeter environment ships neither.
+      extraPackages = [pkgs.qt6.qt5compat pkgs.qt6.qtsvg];
+      # breeze_cursors left the closure with plasma; stylix's cursor
+      # package is installed system-wide, which is where the greeter's
+      # kwin resolves XCursor themes from.
+      settings.Theme = lib.mkIf (cursor != null) {
+        CursorTheme = cursor.name;
+        CursorSize = cursor.size;
       };
     };
   };

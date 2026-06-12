@@ -6,6 +6,13 @@
   imports = [../configuration.nix];
   nixpkgs.hostPlatform = "x86_64-linux";
 
+  # The host profile pins eno1, which no qemu NIC matches — its
+  # wait-device-timeout would stall NetworkManager-wait-online (and the
+  # display-manager ordering behind it) for the full timeout in every
+  # test. eth0 is the test driver's user-net NIC; SLIRP answers DHCP
+  # immediately, so wait-online gates on a real activation instead.
+  thebeast.network.wiredInterface = lib.mkDefault "eth0";
+
   # The real host puts /games on a dedicated ext4 partition declared in
   # hardware-configuration.nix, which the test path deliberately skips.
   # users.nix still creates /games/home/gamer via tmpfiles, so back the

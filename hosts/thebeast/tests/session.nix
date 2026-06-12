@@ -148,6 +148,25 @@ pkgs.testers.nixosTest {
             f"got {preselect!r}"
         )
 
+    with subtest("declarative greeter output config wins back over a compositor rewrite"):
+        # The greeter kwin rewrites kwinoutputconfig.json on every start
+        # (OutputConfigurationStore::save), and the rewrite includes a
+        # "setups" entry that replays itself on the next start — so the
+        # pinned mode/HDR config only holds if tmpfiles re-asserts the
+        # declarative file afterwards. `C+` silently never replaced an
+        # existing file (it landed once, then kwin's 240Hz/SDR rewrite
+        # stuck forever); `L+` must swap the symlink back in on every
+        # tmpfiles pass.
+        greeter_conf = "/var/lib/sddm/.config/kwinoutputconfig.json"
+        machine.succeed(f"test -L {greeter_conf}")
+        # Simulate the compositor's rewrite: a regular file with kwin's
+        # own (drifted) content in place of the symlink.
+        machine.succeed(f"rm {greeter_conf} && echo kwin-rewrite > {greeter_conf}")
+        machine.succeed("systemd-tmpfiles --create --prefix=/var/lib/sddm")
+        machine.succeed(f"test -L {greeter_conf}")
+        machine.succeed(f"readlink {greeter_conf} | grep -q '^/nix/store/'")
+        machine.succeed(f"grep -q edidIdentifier {greeter_conf}")
+
     with subtest("session files for all entry points exist; bare hyprland is hidden"):
         # gamescope-wayland: jovian default, runs on first boot.
         # hyprland-uwsm: the Switch-to-Desktop target and the greeter pick
@@ -252,7 +271,7 @@ pkgs.testers.nixosTest {
 
   '';
 }
-# Plymouth + boot.kernelParams live in ../boot.nix, which this
+# boot.kernelParams live in ../boot.nix, which this
 # session-scoped test deliberately does not import (the VM stubs hardware
 # and skips the host boot layer entirely). The toplevel build is the
 # assertion that those land; no separate subtest is meaningful here.

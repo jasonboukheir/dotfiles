@@ -91,6 +91,51 @@ in {
         default = 0;
         description = "Variable refresh rate (0=off, 1=on, 2=fullscreen only, 3=fullscreen+game heuristic)";
       };
+      hdr = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Apply the omarchy.hdr settings to the fallback monitor rule.
+          Disable when only specific displays (extraMonitors entries
+          with hdr = true) should be driven in HDR, so an unknown SDR
+          panel isn't handed BT2020 primaries.
+        '';
+      };
+    };
+    extraMonitors = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          output = lib.mkOption {
+            type = lib.types.str;
+            description = "Hyprland output matcher: a connector name or `desc:<make> <model> <serial>`.";
+          };
+          mode = lib.mkOption {type = lib.types.str;};
+          position = lib.mkOption {
+            type = lib.types.str;
+            default = "auto";
+          };
+          scale = lib.mkOption {
+            type = lib.types.either lib.types.int lib.types.float;
+            default = 1;
+          };
+          vrr = lib.mkOption {
+            type = lib.types.enum [0 1 2 3];
+            default = 0;
+          };
+          hdr = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Apply the omarchy.hdr settings to this rule (requires omarchy.hdr.enable).";
+          };
+        };
+      });
+      default = [];
+      description = ''
+        Display-specific monitor rules emitted after the fallback
+        omarchy.monitor rule. Hyprland resolves named/desc: matches
+        before the empty-output fallback, so these win on the displays
+        they describe.
+      '';
     };
     hdr = {
       enable = lib.mkEnableOption "HDR and 10-bit color support";

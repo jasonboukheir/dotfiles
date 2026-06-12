@@ -2,8 +2,10 @@
   imports = [
     ./jovian-steam.nix
     ./display-manager.nix
+    ./displays.nix
     ./keyring.nix
     ./login-manager-stylix.nix
+    ./steam-splash.nix
     ./decky.nix
     ./steam-theme.nix
     ./roms.nix

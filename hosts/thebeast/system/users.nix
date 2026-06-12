@@ -21,8 +21,12 @@ in {
       group = "${gameUser}";
       home = "/home/${gameUser}";
       isNormalUser = true;
-      # SteamOS parity: gamer logs in via jovian autoLogin and any
-      # Switch-User dialog should accept an empty password.
+      # SteamOS parity: gamer is a frictionless account. An empty *hash
+      # field* makes pam_unix (under nullok) skip verification entirely,
+      # so any typed password — including none, with the greeter theme's
+      # passwordAllowEmpty — logs gamer in. That permissiveness is
+      # intentional; use `mkpasswd -m yescrypt ""` here instead to
+      # accept only the empty password.
       hashedPassword = "";
     };
     users.jasonbk = {

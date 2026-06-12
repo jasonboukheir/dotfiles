@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   pkgs,
   inputs,
   ...
@@ -12,8 +14,21 @@
   };
 
   boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
-  boot.plymouth.enable = true;
-  boot.kernelParams = ["quiet" "splash"];
+  # No boot splash: plymouth is SDR-only (legacy KMS, no HDR metadata),
+  # so any splash forces a visible SDR→HDR DisplayPort retrain at the
+  # gamescope handoff. A black VT until Steam's updater screen (styled
+  # in session/steam-splash.nix, composited by gamescope in HDR) hides
+  # that one retrain entirely — black resyncs to black.
+  boot.kernelParams =
+    [
+      "quiet"
+      # Keep the VT pitch black until gamescope's first frame.
+      "vt.global_cursor_default=0"
+    ]
+    # Pin amdgpu (and with it fbcon) to each known display's
+    # chain-wide mode — see thebeast.displays for the link-retrain story.
+    ++ map (d: "video=${d.connector}:${toString d.width}x${toString d.height}@${toString d.refreshHz}")
+    (lib.filter (d: d.connector != null) config.thebeast.displays);
 
   # asus_armoury loads on this board but its power-limit DMI table
   # covers ASUS laptops only (FA*, GA*, GU*, ...); on a B650E-I it just
@@ -24,9 +39,8 @@
   # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/platform/x86/asus-armoury.c
   boot.blacklistedKernelModules = ["asus_armoury"];
 
-  # Initrd via systemd lets plymouth start before stage 2 instead of
-  # flashing the console first; also gets us the parallel device
-  # initialisation that shaves ~1s off initrd time on this host.
+  # Initrd via systemd for the parallel device initialisation that
+  # shaves ~1s off initrd time on this host.
   boot.initrd.systemd.enable = true;
 
   system.etc.overlay.enable = true;
