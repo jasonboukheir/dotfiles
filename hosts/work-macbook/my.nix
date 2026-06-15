@@ -97,6 +97,8 @@ in {
       };
     };
 
+    gh.enable = true;
+
     rg.enable = true;
     fd.enable = true;
     rga.enable = true;
