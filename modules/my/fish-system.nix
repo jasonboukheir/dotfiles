@@ -38,6 +38,22 @@
     if isDarwin
     then "__NIX_DARWIN_SET_ENVIRONMENT_DONE"
     else "__NIXOS_SET_ENVIRONMENT_DONE";
+
+  # macOS seeds /etc/paths + /etc/paths.d (Meta ships /opt/facebook/bin there,
+  # giving `arc`, `hg`, biggrep, …) via /usr/libexec/path_helper, run from
+  # /etc/zprofile for zsh — but never for a fish login shell, and setEnvironment
+  # above replaces PATH wholesale. Re-append every path_helper entry PATH lacks,
+  # appended (not prepended) so the nix profiles keep precedence over /usr/bin.
+  pathHelperMerge = lib.optionalString isDarwin ''
+    if test -x /usr/libexec/path_helper
+      set -l __ph (/usr/libexec/path_helper -s | string match -rg '^PATH="(.*)"')
+      for __d in (string split ':' -- $__ph)
+        if test -n "$__d"; and not contains -- $__d $PATH
+          set -gx PATH $PATH $__d
+        end
+      end
+    end
+  '';
 in {
   config = mkMerge [
     (mkIf (allFish != []) {
@@ -47,6 +63,7 @@ in {
         set fish_function_path ${pkgs.fishPlugins.foreign-env}/share/fish/vendor_functions.d
         if [ -z "''$${envDoneVar}" ]
           fenv source ${config.system.build.setEnvironment}
+          ${pathHelperMerge}
         end
         set -e fish_function_path
       '';
