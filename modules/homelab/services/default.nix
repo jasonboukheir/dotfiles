@@ -15,6 +15,7 @@
     ./element-call
     ./element-web
     ./ezmtls
+    ./forgejo
     ./gonic.nix
     ./headscale
     ./home-assistant

@@ -26,5 +26,16 @@
         options = ["bind"];
       };
     })
+    (lib.mkIf config.homelab.services.git.enable {
+      "${config.services.forgejo.stateDir}" = {
+        depends = [
+          "/"
+          "/ssd_pool"
+        ];
+        device = "/ssd_pool/var/lib/forgejo";
+        fsType = "none";
+        options = ["bind"];
+      };
+    })
   ];
 }

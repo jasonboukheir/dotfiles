@@ -99,6 +99,10 @@
                 pkgs = brutusPkgs;
                 inherit inputs;
               };
+              brutus-forgejo = import ../../../hosts/brutus/tests/forgejo.nix {
+                pkgs = brutusPkgs;
+                inherit inputs;
+              };
               # litus pins inputs.nixos too (same channel as brutus), so run
               # its homelab-import guard under brutusPkgs (the stable nixpkgs).
               litus-homelab-import = import ../../../hosts/litus/tests/homelab-import.nix {

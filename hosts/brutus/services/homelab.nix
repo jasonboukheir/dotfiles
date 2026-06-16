@@ -52,6 +52,7 @@ in {
     synapse.enable = true;
     cloud.enable = true;
     code.enable = true;
+    git.enable = true;
     gonic.enable = true;
     headscale.enable = true;
     home.enable = true;
