@@ -103,6 +103,42 @@ in {
         '';
       };
     };
+    headlessFallback = {
+      enable =
+        lib.mkEnableOption ''
+          a persistent headless output, created at session start, that keeps
+          the monitor count >= 1 so unplugging the last/only physical display
+          (e.g. swapping a DisplayPort cable) doesn't crash Hyprland. On
+          disconnect Hyprland migrates the workspaces to this dummy output; on
+          reconnect they move back to the real display.
+
+          A pure-Hyprland-<0.56 workaround: the internal HEADLESS-1 fallback is
+          broken in 0.55 and fixed upstream for 0.56 (hyprwm/Hyprland 0aa7a84,
+          https://github.com/hyprwm/Hyprland/pull/14547). A build-time warning
+          fires once pkgs.hyprland reaches 0.56 to drop it.
+        '';
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = "HEADLESS-2";
+        description = ''
+          Output name the headless rule matches. Hyprland reserves HEADLESS-1
+          for its own fallback, and `hyprctl output create headless` (0.55
+          takes no name argument) hands out the next free HEADLESS-N, so the
+          single output created at session start is deterministically
+          HEADLESS-2.
+        '';
+      };
+      mode = lib.mkOption {
+        type = lib.types.str;
+        default = "1920x1080@60";
+        description = "Mode for the headless fallback output.";
+      };
+      position = lib.mkOption {
+        type = lib.types.str;
+        default = "auto";
+        description = "Layout position of the headless fallback output.";
+      };
+    };
     extraMonitors = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {
         options = {

@@ -27,6 +27,11 @@
     vrr = 1;
     hdr = false;
   };
+  # The G95SC on DP-2 is the only display, so pulling its DisplayPort cable
+  # leaves Hyprland 0.55 with zero monitors and it aborts. A persistent
+  # headless output keeps the count above zero; workspaces park on it while
+  # the cable is out and return to DP-2 on replug.
+  omarchy.headlessFallback.enable = true;
   omarchy.hdr = {
     enable = true;
     colorManagement = "hdr";
