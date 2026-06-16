@@ -162,11 +162,11 @@
     "cachyos-kernel": {
       "flake": false,
       "locked": {
-        "lastModified": 1781018471,
-        "narHash": "sha256-jQHNMqg2+Iey/WnF+RNvEs+HG3HFVdCX5W/7wne3UIM=",
+        "lastModified": 1781455283,
+        "narHash": "sha256-/71qSmWc0vIyGsvtADG8/uHnC/NvXPEY6TXRoDMufeo=",
         "owner": "CachyOS",
         "repo": "linux-cachyos",
-        "rev": "39d9d125940996ed2eb32425ffec7f2de6ac7fba",
+        "rev": "3bd5b77999c4180ed01bdd0669bfabc5171b090a",
         "type": "github"
       },
       "original": {
@@ -726,11 +726,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781497404,
-        "narHash": "sha256-9GAF8sSsnkyCVCWkomXR0T+zdSxyUlfPt6neQidimdg=",
+        "lastModified": 1781557312,
+        "narHash": "sha256-QOIRYSUFSq7L5mY3dZymaVhcnne3tPgoR9riB0WocjA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "1285cd3d6882a9847f2d56ed5541b3350c8a6162",
+        "rev": "c03e4752899e55705dfa63979abd885c582a5c48",
         "type": "github"
       },
       "original": {
@@ -866,11 +866,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1781292859,
-        "narHash": "sha256-etlzg6/H1NuHGTnrxxhvdmhDYQls/AMHk1IrBbNc0WM=",
+        "lastModified": 1781463250,
+        "narHash": "sha256-gYE/0gtSedmA21UWRZ2DA+iXhySh1JGKOssuqejV7cQ=",
         "owner": "xddxdd",
         "repo": "nix-cachyos-kernel",
-        "rev": "c57a7ab46f5e9b4eb32ed74ba6e7cd5bcd3a6e64",
+        "rev": "4039d20f1495f2c521e7d12723a0c45348b118e8",
         "type": "github"
       },
       "original": {
@@ -1002,11 +1002,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1781496226,
-        "narHash": "sha256-MyJuZ9BST3Frbd1TBknYOgYQ+jhJsM5Lo/4xEpxSKO0=",
+        "lastModified": 1781568120,
+        "narHash": "sha256-ALxdaqzSC+PLU/NuHc2oD+FLvIc+rNsdzq+d66aDLks=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "760ce47cf144d6dac03a1f650ddd0f4c821f58ab",
+        "rev": "6a5e29cabb672b0f9342dc186731ccedfaab6119",
         "type": "github"
       },
       "original": {
@@ -1034,11 +1034,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1781359544,
-        "narHash": "sha256-iUuzKQcyXvopYDDzFpMK5eQKP3WIJExYny2kJtbgUcE=",
+        "lastModified": 1781454065,
+        "narHash": "sha256-d2xfDjnfRuf/xYGdu9VVRHiav/2w5hDL/5cw2TuVAXw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9f11f828c213641c2369a9f1fa31fe31557e3156",
+        "rev": "9eac87a12312b8f60dd52e1c6e1a265f6fc7f5fc",
         "type": "github"
       },
       "original": {
@@ -1064,11 +1064,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1781246015,
-        "narHash": "sha256-C3D5TBgght7LBaqm5oGNRf6CynGl5lGED4jcDw2ZOOk=",
+        "lastModified": 1781421111,
+        "narHash": "sha256-2xSTHlKBF5h/tgAeHyQPR/g48qk9ACz7dED3jc3pGKA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "7bd229cbe77d7746d64a1e8c1a6f6cc08f606fc4",
+        "rev": "7fe8f446d9475534dc54591ccb5c87c1ce6eaf8b",
         "type": "github"
       },
       "original": {
@@ -1156,11 +1156,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1781468924,
-        "narHash": "sha256-lohnpykCw/3ABFIyMw3SjKQe+Je3iiH/ZHAl/HOS00s=",
+        "lastModified": 1781534482,
+        "narHash": "sha256-d3UIqXuigQhsc7amQkZ7F+SWnaJFAxIROE2f2X+pzUs=",
         "owner": "notashelf",
         "repo": "nvf",
-        "rev": "d55e51c3f75b94f49445a9efb73aab722df1cf4d",
+        "rev": "63d8fc82d652c23419a837e2b2934dd4bead04f3",
         "type": "github"
       },
       "original": {
@@ -1182,11 +1182,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1781468924,
-        "narHash": "sha256-lohnpykCw/3ABFIyMw3SjKQe+Je3iiH/ZHAl/HOS00s=",
+        "lastModified": 1781534482,
+        "narHash": "sha256-d3UIqXuigQhsc7amQkZ7F+SWnaJFAxIROE2f2X+pzUs=",
         "owner": "notashelf",
         "repo": "nvf",
-        "rev": "d55e51c3f75b94f49445a9efb73aab722df1cf4d",
+        "rev": "63d8fc82d652c23419a837e2b2934dd4bead04f3",
         "type": "github"
       },
       "original": {
@@ -1582,11 +1582,11 @@
     "vllm-xpu-kernels-unstable-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1780701952,
-        "narHash": "sha256-tfHdELy9uv5a99fOSmsVgkuTDdK3HlC5mkx4zeMyplc=",
+        "lastModified": 1781568920,
+        "narHash": "sha256-mODD/FTWBm5FRwIqmmQEYpvNTOD8GWtnx5QuKbmZvPY=",
         "ref": "refs/heads/main",
-        "rev": "b4d1a427f48eb47acd6cee248122637e35192390",
-        "revCount": 263,
+        "rev": "63c50713578d55a349610797788c7f3da133b2ff",
+        "revCount": 276,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/jasonboukheir/vllm-xpu-kernels.git"
@@ -1610,11 +1610,11 @@
         "vllm-xpu-unstable-src": "vllm-xpu-unstable-src"
       },
       "locked": {
-        "lastModified": 1780958057,
-        "narHash": "sha256-TX2c0RO9diUsvDlqD3FGKdE28X4HagZorCCNmVFsxe0=",
+        "lastModified": 1781585383,
+        "narHash": "sha256-euh6mFWx5m+nII1SWoGVDr/syzrfxCqF9uw9oh5z4qQ=",
         "owner": "jasonboukheir",
         "repo": "vllm-xpu-nix",
-        "rev": "16d88b1fafd9c58328fd89a0b2e7a3ce87f68b29",
+        "rev": "57782d9ad555a4c0f1576325dec45e403bc5527c",
         "type": "github"
       },
       "original": {
@@ -1643,11 +1643,11 @@
     "vllm-xpu-unstable-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1780957542,
-        "narHash": "sha256-U+0sPaTw6dTjiOobsxaycuzruNf63J2dm+rVD7JWPPI=",
+        "lastModified": 1781571099,
+        "narHash": "sha256-ExGek0aaqJh3HuQe9CWx/uAYOi6vmcB9qKUeix17tYc=",
         "ref": "refs/heads/main",
-        "rev": "574621019318161ff8139ea5464f07987a3b9d2f",
-        "revCount": 17381,
+        "rev": "bfe013c75873a59becd8e4b2579d594495bc44ab",
+        "revCount": 17652,
         "type": "git",
         "url": "https://github.com/jasonboukheir/vllm.git"
       },
