@@ -24,6 +24,7 @@
     "chat"
     "cloud"
     "code"
+    "git"
     "gonic"
     "headscale"
     "home"
