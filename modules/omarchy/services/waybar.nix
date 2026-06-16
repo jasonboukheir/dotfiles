@@ -4,6 +4,18 @@
   ...
 }: let
   hasBattery = config.omarchy.waybar.hasBattery;
+
+  # waybar runs as a systemd user service with only the minimal unit PATH (the
+  # session never exports PATH into the systemd activation environment — see
+  # hyprland/autostart.nix finalizeVars), so module on-clicks must reference
+  # their tools by absolute store path rather than relying on PATH lookup.
+  bin = lib.getExe';
+  terminal = bin config.my.ghostty.finalPackage "ghostty";
+  blueman-manager = bin config.omarchy.bluetooth.package "blueman-manager";
+  pavucontrol = bin config.omarchy.audioControl.package "pavucontrol";
+  wpctl = bin config.services.pipewire.wireplumber.package "wpctl";
+  btop = bin config.my.btop.finalPackage "btop";
+  nmtui = bin config.networking.networkmanager.package "nmtui";
 in {
   config = lib.mkIf config.omarchy.enable {
     my.waybar = {
@@ -62,7 +74,7 @@ in {
           cpu = {
             interval = 5;
             format = "󰍛";
-            on-click = "ghostty -e btop";
+            on-click = "${terminal} -e ${btop}";
           };
           clock = {
             format = "{:%A %I:%M %p}";
@@ -86,7 +98,7 @@ in {
             tooltip-format-disconnected = "Disconnected";
             interval = 3;
             nospacing = 1;
-            on-click = "ghostty -e nmtui";
+            on-click = "${terminal} -e ${nmtui}";
           };
           battery = {
             interval = 5;
@@ -133,15 +145,15 @@ in {
             format-disabled = "󰂲";
             format-connected = "󰂯";
             tooltip-format = "Devices connected: {num_connections}";
-            on-click = "blueman-manager";
+            on-click = blueman-manager;
           };
           wireplumber = {
             format = "";
             format-muted = "󰝟";
             scroll-step = 5;
-            on-click = "pavucontrol";
+            on-click = pavucontrol;
             tooltip-format = "Playing at {volume}%";
-            on-click-right = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+            on-click-right = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
             max-volume = 150;
           };
           tray = {

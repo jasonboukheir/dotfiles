@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.omarchy;
@@ -185,6 +186,22 @@ in {
         type = lib.types.bool;
         default = true;
         description = "Host has a system battery — when false, the waybar battery module is omitted (avoids crashes on desktops where only peripheral HID++ batteries exist)";
+      };
+    };
+    bluetooth = {
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.blueman;
+        defaultText = lib.literalExpression "pkgs.blueman";
+        description = "Bluetooth manager package the waybar bluetooth on-click launches. Defaults to the same blueman the services.blueman module runs, so the indicator and the service stay the same store path.";
+      };
+    };
+    audioControl = {
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.pavucontrol;
+        defaultText = lib.literalExpression "pkgs.pavucontrol";
+        description = "GUI audio mixer package the waybar volume on-click launches.";
       };
     };
     defaultApps = {
