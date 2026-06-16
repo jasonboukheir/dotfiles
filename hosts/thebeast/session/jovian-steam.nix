@@ -32,11 +32,16 @@ in {
     # cm=hdr), every Steam↔desktop handoff flipped HDR signaling and the
     # monitor black-flashed while it resynced. Match the desktop with
     # always-on HDR10 PQ output — the pair SteamOS ships on the Deck
-    # OLED (Galileo).
-    jovian.steam.environment = lib.mkIf config.omarchy.hdr.enable {
-      STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
-      STEAM_GAMESCOPE_FORCE_OUTPUT_TO_HDR10PQ_DEFAULT = "1";
-    };
+    # OLED (Galileo). MESA_SHADER_CACHE_MAX_SIZE lifts Mesa's 1G default
+    # so RADV shader caches survive across launches (see the option).
+    jovian.steam.environment =
+      {
+        MESA_SHADER_CACHE_MAX_SIZE = cfg.shaderCacheMaxSize;
+      }
+      // lib.optionalAttrs config.omarchy.hdr.enable {
+        STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
+        STEAM_GAMESCOPE_FORCE_OUTPUT_TO_HDR10PQ_DEFAULT = "1";
+      };
 
     environment.systemPackages = with pkgs; [
       cmake

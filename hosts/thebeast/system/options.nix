@@ -181,6 +181,19 @@
       '';
     };
 
+    shaderCacheMaxSize = lib.mkOption {
+      type = lib.types.str;
+      default = "32G";
+      description = ''
+        MESA_SHADER_CACHE_MAX_SIZE for the Steam/gamescope session. Mesa's
+        on-disk RADV cache defaults to a hardcoded 1G *per architecture*,
+        so a library of large Proton titles evicts older games' compiled
+        pipelines and recompiles them on every launch. Raising the cap to
+        comfortably exceed the working set keeps caches warm across
+        launches. Accepts a bare number (GiB) or a K/M/G suffix.
+      '';
+    };
+
     romDir = lib.mkOption {
       type = lib.types.str;
       default = "/games/roms";
