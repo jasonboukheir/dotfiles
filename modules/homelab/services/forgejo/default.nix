@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab.services.git;
@@ -72,11 +73,23 @@ in {
 
           service = {
             # Accounts are provisioned via Pocket ID (OIDC), never the public
-            # signup form. ALLOW_ONLY_EXTERNAL_REGISTRATION keeps OIDC
-            # auto-registration working while the form stays closed.
-            DISABLE_REGISTRATION = true;
+            # signup form. ALLOW_ONLY_EXTERNAL_REGISTRATION closes local signup
+            # while leaving the external path open, but it only takes effect
+            # with DISABLE_REGISTRATION = false — setting that true would block
+            # OIDC auto-registration too and dead-end logins on the "Complete
+            # new account" form. SHOW_REGISTRATION_BUTTON defaults to the
+            # inverse of DISABLE_REGISTRATION, so hide it explicitly.
+            DISABLE_REGISTRATION = false;
             ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
             SHOW_REGISTRATION_BUTTON = false;
+          };
+
+          # Create the local account on first OIDC login instead of prompting
+          # for the registration form; link by verified email so a returning
+          # user maps to their existing account without the link-account step.
+          oauth2_client = {
+            ENABLE_AUTO_REGISTRATION = true;
+            ACCOUNT_LINKING = "auto";
           };
 
           session.COOKIE_SECURE = true;
@@ -96,7 +109,9 @@ in {
         requires = ["forgejo.service"];
         wants = ["pocket-id.service"];
         wantedBy = ["multi-user.target"];
-        path = [cfg.package];
+        # gawk: the source-id lookup below pipes `forgejo admin auth list`
+        # through awk, which isn't otherwise on the unit's PATH.
+        path = [cfg.package pkgs.gawk];
 
         environment = {
           USER = cfg.user;
