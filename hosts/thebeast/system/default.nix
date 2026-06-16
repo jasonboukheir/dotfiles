@@ -10,6 +10,8 @@
     ./programs.nix
     ./ssh.nix
     ./stylix.nix
+    ./logitechBrio.nix
+    ./usbInput.nix
     # Shared modules live here rather than the host default.nix so the
     # nixosTests under ../tests can pull the full system stack by
     # importing just this directory (plus ../session).
