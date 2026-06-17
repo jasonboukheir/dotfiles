@@ -12,9 +12,11 @@ in {
       lfs.enable = true;
       settings = lib.mkMerge [
         {
+          # TODO: deprecate this home-manager git module in favour of the my.*
+          # framework, which sources user.* from modules/jasonbk-identity.nix.
           user = {
             name = "Jason Elie Bou Kheir";
-            email = "5115126+jasonboukheir@users.noreply.github.com";
+            email = "jasonbk@sunnycareboo.com";
           };
           init.defaultBranch = "main";
           merge.tool = "nvim";

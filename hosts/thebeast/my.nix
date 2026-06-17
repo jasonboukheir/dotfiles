@@ -16,16 +16,10 @@
   signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
   opSshSign = lib.getExe' pkgs._1password-gui "op-ssh-sign";
 in {
-  # Consumed by the my.{git,gh,jujutsu} wiring (modules/my/) to default each
-  # tool's user.{name,email} and editor fields. editor pins the system nvf-built
-  # neovim by store path rather than relying on `nvim` off PATH.
-  users.users.jasonbk = {
-    identity = {
-      name = "Jason Elie Bou Kheir";
-      email = "5115126+jasonboukheir@users.noreply.github.com";
-    };
-    editor = config.my.nvf.finalPackage;
-  };
+  # editor pins the system nvf-built neovim by store path rather than relying on
+  # `nvim` off PATH; the my.{git,gh,jujutsu} wiring reads it (and the shared
+  # identity from modules/jasonbk-identity.nix) for each tool's user/editor fields.
+  users.users.jasonbk.editor = config.my.nvf.finalPackage;
 
   users.users.jasonbk.my = {
     git = {

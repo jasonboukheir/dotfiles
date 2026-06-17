@@ -11,9 +11,11 @@ in {
     (lib.mkIf cfg.enable {
       settings = lib.mkMerge [
         {
+          # TODO: deprecate this home-manager jujutsu module in favour of the my.*
+          # framework, which sources user.* from modules/jasonbk-identity.nix.
           user = {
             name = "Jason Elie Bou Kheir";
-            email = "5115126+jasonboukheir@users.noreply.github.com";
+            email = "jasonbk@sunnycareboo.com";
           };
           ui = {
             editor = "nvim";
