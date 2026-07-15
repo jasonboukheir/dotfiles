@@ -10,20 +10,17 @@
   pkgs,
   ...
 }: let
-  # Resolved 1Password ssh-signing values the old _1password home-manager module
-  # injected into programs.git/jujutsu; my.* has no such auto-injection.
-  signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGEXFObvyFbGAgq3Lob/+2SPBXfFBmguTmJDLcJlysJ";
-  opSshSign = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-
-  # Chef owns /etc/ssh/ssh_config and does not Include ssh_config.d, so the
-  # github IdentityAgent block in system/ssh.nix never loads. Scope the
-  # 1Password agent to git via core.sshCommand instead — corp ssh keeps the
-  # Chef-managed agent. The path contains a space ("Group Containers"), so it
-  # must stay quoted through three parsers: git's gitIni reader, the `sh -c`
-  # git wraps core.sshCommand in, and ssh's own `-o` config tokenizer. The
-  # single quotes survive the shell so ssh sees literal double quotes around the
-  # value (and ssh tilde-expands IdentityAgent).
-  opSshCommand = "ssh -o 'IdentityAgent=\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"'";
+  sksAgentSocket = "/Users/jasonbk/.fb-sks-agent/agent.sock";
+  sksPublicKey = "/Users/jasonbk/.fb-sks-agent/jasonbk.pub";
+  sksSshCommand = "ssh -o IdentityAgent=${sksAgentSocket} -o IdentityFile=${sksPublicKey} -o IdentitiesOnly=yes";
+  sksSshSign = pkgs.writeShellApplication {
+    name = "sks-ssh-sign";
+    runtimeInputs = [pkgs.openssh];
+    text = ''
+      export SSH_AUTH_SOCK=${lib.escapeShellArg sksAgentSocket}
+      exec ssh-keygen "$@"
+    '';
+  };
 
   metaNvimPath = "/Users/jasonbk/fbsource/fbcode/editor_support/nvim";
 
@@ -52,12 +49,12 @@ in {
       enable = true;
       ignores = [".DS_Store"];
       settings = {
-        user.signingKey = signingKey;
+        user.signingKey = sksPublicKey;
         init.defaultBranch = "main";
         gpg.format = "ssh";
         commit.gpgsign = true;
-        "gpg \"ssh\"".program = opSshSign;
-        core.sshCommand = opSshCommand;
+        "gpg \"ssh\"".program = lib.getExe sksSshSign;
+        core.sshCommand = sksSshCommand;
       };
     };
 
@@ -73,9 +70,10 @@ in {
           private-commits = "description(glob:'wip:*')";
         };
         signing = {
+          backends.ssh.program = lib.getExe sksSshSign;
           behavior = "own";
           backend = "ssh";
-          key = signingKey;
+          key = sksPublicKey;
         };
       };
     };
