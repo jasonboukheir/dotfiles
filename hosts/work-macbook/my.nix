@@ -10,14 +10,14 @@
   pkgs,
   ...
 }: let
-  sksAgentSocket = "/Users/jasonbk/.fb-sks-agent/agent.sock";
-  sksPublicKey = "/Users/jasonbk/.fb-sks-agent/jasonbk.pub";
-  sksSshCommand = "ssh -o IdentityAgent=${sksAgentSocket} -o IdentityFile=${sksPublicKey} -o IdentitiesOnly=yes";
-  sksSshSign = pkgs.writeShellApplication {
-    name = "sks-ssh-sign";
+  lowboxSksAgentSocket = "/Users/jasonbk/.fb-sks-agent-lowbox/agent.sock";
+  lowboxSksPublicKey = "/Users/jasonbk/.ssh/lowbox_signing_key.pub";
+  lowboxAllowedSignersFile = "/Users/jasonbk/.ssh/allowed_signers_lowbox";
+  lowboxSksSshSign = pkgs.writeShellApplication {
+    name = "lowbox-sks-ssh-sign";
     runtimeInputs = [pkgs.openssh];
     text = ''
-      export SSH_AUTH_SOCK=${lib.escapeShellArg sksAgentSocket}
+      export SSH_AUTH_SOCK=${lib.escapeShellArg lowboxSksAgentSocket}
       exec ssh-keygen "$@"
     '';
   };
@@ -49,12 +49,14 @@ in {
       enable = true;
       ignores = [".DS_Store"];
       settings = {
-        user.signingKey = sksPublicKey;
+        user.signingKey = lowboxSksPublicKey;
         init.defaultBranch = "main";
         gpg.format = "ssh";
         commit.gpgsign = true;
-        "gpg \"ssh\"".program = lib.getExe sksSshSign;
-        core.sshCommand = sksSshCommand;
+        "gpg \"ssh\"" = {
+          allowedSignersFile = lowboxAllowedSignersFile;
+          program = lib.getExe lowboxSksSshSign;
+        };
       };
     };
 
@@ -70,10 +72,13 @@ in {
           private-commits = "description(glob:'wip:*')";
         };
         signing = {
-          backends.ssh.program = lib.getExe sksSshSign;
+          backends.ssh = {
+            allowed-signers = lowboxAllowedSignersFile;
+            program = lib.getExe lowboxSksSshSign;
+          };
           behavior = "own";
           backend = "ssh";
-          key = sksPublicKey;
+          key = lowboxSksPublicKey;
         };
       };
     };
