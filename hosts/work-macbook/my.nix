@@ -42,21 +42,27 @@ in {
       enable = true;
       ignores = [".DS_Store"];
       ssh = {
-        agentSocket = lowboxSksAgentSocket;
-        match = "Host github.com";
+        program = "/usr/bin/ssh";
+        match = "Match host github.com user git";
         identityFiles = [
           lowboxSksCertPublicKey
           lowboxSksPublicKey
         ];
         identitiesOnly = true;
         extraOptions = {
+          IdentityAgent = "\"${lowboxSksAgentSocket}\"";
           PreferredAuthentications = "publickey";
           PubkeyAuthentication = "yes";
         };
+        extraConfigAfter = ''
+          Match all
+          Include /etc/ssh/ssh_config
+        '';
       };
       signing.ssh = {
         enable = true;
         key = lowboxSksPublicKey;
+        agentSocket = lowboxSksAgentSocket;
         allowedSignersFile = lowboxAllowedSignersFile;
       };
       settings = {
@@ -66,10 +72,10 @@ in {
 
     jujutsu = {
       enable = true;
-      ssh.agentSocket = lowboxSksAgentSocket;
       signing.ssh = {
         enable = true;
         key = lowboxSksPublicKey;
+        agentSocket = lowboxSksAgentSocket;
         allowedSignersFile = lowboxAllowedSignersFile;
       };
       settings = {

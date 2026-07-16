@@ -28,6 +28,10 @@ in
             ];
             identitiesOnly = true;
             extraOptions.PreferredAuthentications = "publickey";
+            extraConfigAfter = ''
+              Match all
+              Include /etc/ssh/ssh_config
+            '';
           };
           signing.ssh = {
             enable = true;
@@ -95,5 +99,8 @@ in
               f"cert identity not rendered: {rendered!r}"
           )
           assert "IdentitiesOnly yes" in rendered, f"identities-only not rendered: {rendered!r}"
+          assert "Match all" in rendered and "Include /etc/ssh/ssh_config" in rendered, (
+              f"extra ssh config not rendered: {rendered!r}"
+          )
     '';
   }

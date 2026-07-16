@@ -48,6 +48,14 @@ in {
 
   options = {
     ssh = {
+      program = lib.mkOption {
+        type = lib.types.str;
+        default = lib.getExe' pkgs.openssh "ssh";
+        defaultText = lib.literalExpression ''lib.getExe' pkgs.openssh "ssh"'';
+        example = "/usr/bin/ssh";
+        description = "SSH executable used by GIT_SSH_COMMAND for git transport.";
+      };
+
       agentSocket = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -86,6 +94,16 @@ in {
           PubkeyAuthentication = "yes";
         };
         description = "Extra OpenSSH options added to the generated git transport config.";
+      };
+
+      extraConfigAfter = lib.mkOption {
+        type = lib.types.lines;
+        default = "";
+        example = ''
+          Match all
+          Include /etc/ssh/ssh_config
+        '';
+        description = "Raw OpenSSH config appended after the generated git transport match block.";
       };
     };
 
@@ -240,13 +258,15 @@ in {
       != null
       || cfg.ssh.identityFiles != []
       || cfg.ssh.identitiesOnly
-      || cfg.ssh.extraOptions != {};
+      || cfg.ssh.extraOptions != {}
+      || cfg.ssh.extraConfigAfter != "";
     sshConfig = pkgs.writeText "git-ssh-config" (lib.concatLines (
       [cfg.ssh.match]
       ++ lib.optional (cfg.ssh.agentSocket != null) "  IdentityAgent \"${cfg.ssh.agentSocket}\""
       ++ map (identityFile: "  IdentityFile \"${identityFile}\"") cfg.ssh.identityFiles
       ++ lib.optional cfg.ssh.identitiesOnly "  IdentitiesOnly yes"
       ++ lib.mapAttrsToList (name: value: "  ${name} ${value}") cfg.ssh.extraOptions
+      ++ lib.optional (cfg.ssh.extraConfigAfter != "") cfg.ssh.extraConfigAfter
     ));
   in
     pkgs.mkWrapped {
@@ -258,7 +278,7 @@ in {
           GIT_CONFIG_GLOBAL = gitIniFormat.generate "gitconfig" bakedConfig;
         }
         // lib.optionalAttrs sshConfigEnabled {
-          GIT_SSH_COMMAND = "${lib.getExe' pkgs.openssh "ssh"} -F ${sshConfig}";
+          GIT_SSH_COMMAND = "${cfg.ssh.program} -F ${sshConfig}";
         }
         // lib.optionalAttrs (cfg.ssh.agentSocket != null) {
           SSH_AUTH_SOCK = cfg.ssh.agentSocket;
