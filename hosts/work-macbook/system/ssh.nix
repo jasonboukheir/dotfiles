@@ -1,5 +1,6 @@
 {lib, ...}: let
   lowboxSksAgentSocket = "/Users/jasonbk/.fb-sks-agent-lowbox/agent.sock";
+  lowboxSksCertPublicKey = "/Users/jasonbk/.fb-sks-agent-lowbox/jasonbk-lowbox-cert.pub";
   lowboxSksPublicKey = "/Users/jasonbk/.ssh/lowbox_signing_key.pub";
 in {
   # ssh_known_hosts is managed by Chef.
@@ -16,7 +17,10 @@ in {
 
       Host github.com
         IdentityAgent "${lowboxSksAgentSocket}"
+        IdentityFile ${lowboxSksCertPublicKey}
         IdentityFile ${lowboxSksPublicKey}
         IdentitiesOnly yes
+        PreferredAuthentications publickey
+        PubkeyAuthentication yes
     '';
 }

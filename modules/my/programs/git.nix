@@ -10,11 +10,87 @@
     process = "git-lfs filter-process";
     required = true;
   };
+
+  sshSigningOptions = {
+    enable = lib.mkEnableOption "SSH commit signing in the git wrapper";
+
+    key = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA...";
+      description = "Public SSH signing key, either inline or as a public-key file path.";
+    };
+
+    allowedSignersFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "/Users/me/.ssh/allowed_signers";
+      description = "Allowed signers file for verifying SSH signatures.";
+    };
+
+    program = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+      description = "SSH signing program. When unset and an agent socket is available, the wrapper generates an ssh-keygen shim for that agent.";
+    };
+
+    agentSocket = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "/Users/me/.1password/agent.sock";
+      description = "SSH agent socket used by the generated ssh-keygen signing shim. Defaults to my.git.ssh.agentSocket when unset.";
+    };
+  };
 in {
   name = "git";
   defaultPackage = "git";
 
   options = {
+    ssh = {
+      agentSocket = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "/Users/me/.1password/agent.sock";
+        description = "SSH agent socket used by git transport in this wrapper.";
+      };
+
+      match = lib.mkOption {
+        type = lib.types.str;
+        default = "Host *";
+        example = "Host github.com";
+        description = "OpenSSH config match line used for the generated git transport config.";
+      };
+
+      identityFiles = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        example = [
+          "/Users/me/.ssh/id_ed25519-cert.pub"
+          "/Users/me/.ssh/id_ed25519.pub"
+        ];
+        description = "IdentityFile entries added to the generated git transport config.";
+      };
+
+      identitiesOnly = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether the generated git transport config should set IdentitiesOnly yes.";
+      };
+
+      extraOptions = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        example = {
+          PreferredAuthentications = "publickey";
+          PubkeyAuthentication = "yes";
+        };
+        description = "Extra OpenSSH options added to the generated git transport config.";
+      };
+    };
+
+    signing.ssh = sshSigningOptions;
+
     lfs.enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -97,22 +173,95 @@ in {
     in
       {core.editor = exe;} // editorTooling));
 
+  assertions = {cfg, ...}: [
+    {
+      assertion = !cfg.signing.ssh.enable || cfg.signing.ssh.key != null;
+      message = "my.git.signing.ssh.key must be set when SSH signing is enabled.";
+    }
+    {
+      assertion = !(cfg.signing.ssh.agentSocket != null && cfg.signing.ssh.program != null);
+      message = "Set only one of my.git.signing.ssh.agentSocket or my.git.signing.ssh.program.";
+    }
+  ];
+
   build = {
     cfg,
     pkgs,
     ...
   }: let
     excludesFile = pkgs.writeText "gitignore" (lib.concatStringsSep "\n" cfg.ignores);
+    signCfg = cfg.signing.ssh;
+    signingAgentSocket =
+      if signCfg.agentSocket != null
+      then signCfg.agentSocket
+      else cfg.ssh.agentSocket;
+    generatedSigningProgram = pkgs.writeShellApplication {
+      name = "my-git-ssh-sign";
+      runtimeInputs = [pkgs.openssh];
+      text = ''
+        export SSH_AUTH_SOCK=${lib.escapeShellArg signingAgentSocket}
+        exec ssh-keygen "$@"
+      '';
+    };
+    signingProgram =
+      if signCfg.program != null
+      then signCfg.program
+      else if signingAgentSocket != null
+      then lib.getExe generatedSigningProgram
+      else null;
+    sshSigningSettings =
+      lib.optionalAttrs signCfg.enable
+      (lib.foldl' lib.recursiveUpdate {} [
+        (lib.optionalAttrs (signCfg.key != null) {
+          user.signingKey = signCfg.key;
+        })
+        {
+          gpg.format = "ssh";
+          commit.gpgsign = true;
+        }
+        (lib.optionalAttrs (signingProgram != null || signCfg.allowedSignersFile != null) {
+          "gpg \"ssh\"" =
+            (lib.optionalAttrs (signCfg.allowedSignersFile != null) {
+              allowedSignersFile = signCfg.allowedSignersFile;
+            })
+            // (lib.optionalAttrs (signingProgram != null) {
+              program = signingProgram;
+            });
+        })
+      ]);
     bakedConfig = lib.foldl' lib.recursiveUpdate {} [
       cfg.settings
+      sshSigningSettings
       (lib.optionalAttrs (cfg.ignores != []) {core.excludesFile = "${excludesFile}";})
       (lib.optionalAttrs cfg.lfs.enable {filter.lfs = lfsFilter;})
     ];
+    sshConfigEnabled =
+      cfg.ssh.agentSocket
+      != null
+      || cfg.ssh.identityFiles != []
+      || cfg.ssh.identitiesOnly
+      || cfg.ssh.extraOptions != {};
+    sshConfig = pkgs.writeText "git-ssh-config" (lib.concatLines (
+      [cfg.ssh.match]
+      ++ lib.optional (cfg.ssh.agentSocket != null) "  IdentityAgent \"${cfg.ssh.agentSocket}\""
+      ++ map (identityFile: "  IdentityFile \"${identityFile}\"") cfg.ssh.identityFiles
+      ++ lib.optional cfg.ssh.identitiesOnly "  IdentitiesOnly yes"
+      ++ lib.mapAttrsToList (name: value: "  ${name} ${value}") cfg.ssh.extraOptions
+    ));
   in
     pkgs.mkWrapped {
       pkg = cfg.package;
       name = "git";
       extraPaths = lib.optional cfg.lfs.enable pkgs.git-lfs;
-      env.GIT_CONFIG_GLOBAL = gitIniFormat.generate "gitconfig" bakedConfig;
+      env =
+        {
+          GIT_CONFIG_GLOBAL = gitIniFormat.generate "gitconfig" bakedConfig;
+        }
+        // lib.optionalAttrs sshConfigEnabled {
+          GIT_SSH_COMMAND = "${lib.getExe' pkgs.openssh "ssh"} -F ${sshConfig}";
+        }
+        // lib.optionalAttrs (cfg.ssh.agentSocket != null) {
+          SSH_AUTH_SOCK = cfg.ssh.agentSocket;
+        };
     };
 }
